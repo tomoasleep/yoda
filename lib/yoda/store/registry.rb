@@ -19,6 +19,16 @@ module Yoda
       def at(path)
         YARD::Registry.at(path)
       end
+
+      # @param code_object [String]
+      def find(path)
+        YARD::Registry.at(path)
+      end
+
+      # @param code_object [String]
+      def find_or_proxy(path)
+        YARD::Registry.at(path) || YARD::CodeObjects::Proxy.new(YARD::Registry.root, path)
+      end
     end
   end
 end

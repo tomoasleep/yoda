@@ -21,6 +21,11 @@ RSpec.describe Yoda::Store::Types do
       it { is_expected.to eq constant_type('hoge') }
     end
 
+    context 'a duck type literal is given' do
+      let(:type_string) { '#hello' }
+      it { is_expected.to eq duck_type('hello') }
+    end
+
     context 'multiple names are given' do
       let(:type_string) { 'hoge, Hoge'}
       it { is_expected.to eq union_type(constant_type('hoge'), constant_type('Hoge'))}

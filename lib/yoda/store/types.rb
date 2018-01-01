@@ -1,6 +1,7 @@
 require 'yoda/store/types/base'
 require 'yoda/store/types/any_type'
 require 'yoda/store/types/constant_type'
+require 'yoda/store/types/duck_type'
 require 'yoda/store/types/key_value_type'
 require 'yoda/store/types/sequence_type'
 require 'yoda/store/types/generic_type'
@@ -13,6 +14,7 @@ module Yoda
   module Store
     module Types
       # @param string [String]
+      # @return [Types::Base]
       def self.parse(string)
         Parsing::Generator.new.apply(Parsing::Parser.new.parse(string))
       rescue Parslet::ParseFailed => failure
@@ -20,8 +22,9 @@ module Yoda
       end
 
       # @param strings [Array<String>]
+      # @return [Types::Base]
       def self.parse_type_strings(strings)
-        parse(strings.join(', '))
+        Types::UnionType.new(strings.map { |string| parse(string) })
       end
 
       module Parsing
@@ -60,6 +63,7 @@ module Yoda
           rule(name: simple(:name), value_types: simple(:value_type)) { Types::SequenceType.new(name.to_s, [value_type]) }
           rule(name: simple(:name), type_arguments: sequence(:type_arguments)) { Types::GenericType.new(name.to_s, type_arguments) }
 
+          rule(method_name: simple(:method_name)) { Types::DuckType.new(method_name) }
           rule(key_type: simple(:key_type), value_type: simple(:value_type)) { Types::KeyValueType.new('::Hash', key_type, value_type) }
           rule(value_types: sequence(:value_types)) { Types::SequenceType.new('::Array', value_types) }
           rule(value_types: simple(:value_type)) { Types::SequenceType.new('::Array', [value_type]) }

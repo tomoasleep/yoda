@@ -9,6 +9,12 @@ module Yoda
         def hash
           [self.class.name].hash
         end
+
+        # @param namespace [YARD::CodeObjects::Base]
+        # @return [AnyType]
+        def change_root(namespace)
+          self
+        end
       end
     end
   end

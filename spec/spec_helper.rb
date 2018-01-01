@@ -18,6 +18,10 @@ module TypeHelper
     Yoda::Store::Types::ConstantType.new(value)
   end
 
+  def duck_type(method_name)
+    Yoda::Store::Types::DuckType.new(method_name)
+  end
+
   def union_type(*types)
     Yoda::Store::Types::UnionType.new(types)
   end

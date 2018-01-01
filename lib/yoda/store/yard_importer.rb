@@ -55,14 +55,13 @@ module Yoda
       private
 
       def find_new_parent_of(code_object)
-        Registry.instance.at(code_object.parent.path)
+        Registry.instance.find_or_proxy(code_object.parent.path)
       end
 
       def register_constant_object(code_object)
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::ConstantObject.new(new_parent, code_object.name)
         code_object.copy_to(new_object)
-        new_parent.children.push(new_object)
         new_object
       end
 
@@ -70,7 +69,6 @@ module Yoda
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::MacroObject.new(new_parent, code_object.name)
         code_object.copy_to(new_object)
-        new_parent.children.push(new_object)
         new_object
       end
 
@@ -78,7 +76,6 @@ module Yoda
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::MethodObject.new(new_parent, code_object.name, code_object.scope)
         code_object.copy_to(new_object)
-        new_parent.children.push(new_object)
         new_object
       end
 
@@ -86,7 +83,6 @@ module Yoda
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::ClassVariableObject.new(new_parent, code_object.name)
         code_object.copy_to(new_object)
-        new_parent.children.push(new_object)
         new_object
       end
 
@@ -94,7 +90,6 @@ module Yoda
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::ModuleObject.new(new_parent, code_object.name)
         code_object.copy_to(new_object)
-        new_parent.children.push(new_object)
         new_object
       end
 
@@ -102,11 +97,7 @@ module Yoda
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::ClassObject.new(new_parent, code_object.name)
         code_object.copy_to(new_object)
-        new_parent.children.push(new_object)
         new_object
-      end
-
-      def inherit_namespace(old, new)
       end
     end
   end
