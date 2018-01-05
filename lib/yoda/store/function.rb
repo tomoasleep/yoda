@@ -7,20 +7,20 @@ module Yoda
       end
 
       def parameter_types
-        tags = @code_object.tags(:param)
+        tags = @code_object.tags(:param) || []
         @code_object.parameters.map do |name, default_value|
-          parse_type(tags.select { |tag| tag.name == name }.map(&:types).flatten)
+          [name, parse_type(tags.select { |tag| tag.name == name }.map(&:types).flatten)]
         end
       end
 
       def return_type
-        @return_type ||= parse_type(@code_object.tags(:name).map(&:types).flatten )
+        @return_type ||= parse_type(@code_object.tags(:return).map(&:types).flatten)
       end
 
       private
 
       def parse_type(type_strings)
-        type_strings.empty? ? Types::AnyType.new : Types.parse_type_strings(type_strings)
+        (type_strings.empty? ? Types::UnknownType.new('nodoc') : Types.parse_type_strings(type_strings)).change_root(@code_object.namespace)
       end
     end
   end

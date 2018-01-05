@@ -24,6 +24,11 @@ module Yoda
         def change_root(namespace)
           self
         end
+
+        # @param registry [Registry]
+        def resolve(registry)
+          []
+        end
       end
     end
   end

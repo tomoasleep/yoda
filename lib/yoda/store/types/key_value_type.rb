@@ -30,6 +30,11 @@ module Yoda
         def change_root(namespace)
           self.class.new(Path.new(namespace, name), key_type.change_root(namespace), value_type.change_root(namespace))
         end
+
+        # @param registry [Registry]
+        def resolve(registry)
+          registry.find(name)
+        end
       end
     end
   end

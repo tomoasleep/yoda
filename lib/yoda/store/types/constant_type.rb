@@ -30,6 +30,26 @@ module Yoda
         def change_root(namespace)
           self.class.new(is_value? ? value : Path.new(namespace, value))
         end
+
+        # @param registry [Registry]
+        def resolve(registry)
+          registry.find(is_value ? value_class : value)
+        end
+
+        def value_class
+          case value
+          when 'true'
+            '::TrueClass'
+          when 'false'
+            '::FalseClass'
+          when 'nil'
+            '::NilClass'
+          when /\A\d+\Z/
+            '::Numeric'
+          else
+            nil
+          end
+        end
       end
     end
   end

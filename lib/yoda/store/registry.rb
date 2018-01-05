@@ -20,9 +20,13 @@ module Yoda
         YARD::Registry.at(path)
       end
 
-      # @param code_object [String]
+      # @param path [String, Path]
       def find(path)
-        YARD::Registry.at(path)
+        if path.is_a?(Path)
+          YARD::Registry.resolve(namespace, path)
+        else
+          at(path)
+        end
       end
 
       # @param code_object [String]

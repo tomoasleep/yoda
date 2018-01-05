@@ -1,18 +1,18 @@
-require 'yoda/store/types/base'
-require 'yoda/store/types/any_type'
-require 'yoda/store/types/constant_type'
-require 'yoda/store/types/duck_type'
-require 'yoda/store/types/key_value_type'
-require 'yoda/store/types/sequence_type'
-require 'yoda/store/types/generic_type'
-require 'yoda/store/types/union_type'
-require 'yoda/store/types/unknown_type'
-
 require 'parslet'
 
 module Yoda
   module Store
     module Types
+      require 'yoda/store/types/base'
+      require 'yoda/store/types/any_type'
+      require 'yoda/store/types/constant_type'
+      require 'yoda/store/types/duck_type'
+      require 'yoda/store/types/key_value_type'
+      require 'yoda/store/types/sequence_type'
+      require 'yoda/store/types/generic_type'
+      require 'yoda/store/types/union_type'
+      require 'yoda/store/types/unknown_type'
+
       # @param string [String]
       # @return [Types::Base]
       def self.parse(string)
