@@ -34,7 +34,7 @@ module Yoda
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
-          [registry.find(is_value? ? value_class : value)]
+          [registry.find_or_proxy(is_value? ? value_class : value)]
         end
 
         def value_class

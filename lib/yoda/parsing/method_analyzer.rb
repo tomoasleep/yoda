@@ -24,14 +24,27 @@ module Yoda
         @current_location = current_location
       end
 
+      def method_completion_worker
+        @method_completion_worker ||= SendMethodCompletion.new(self)
+      end
+
       # @return [Array<YARD::CodeObjects::Base>]
       def complete
-        SendMethodCompletion.new(self).method_candidates
+        method_completion_worker.method_candidates
+      end
+
+      def current_node_worker
+        @current_node_worker ||= CurrentNodeTypeExplain.new(self)
       end
 
       # @return [Store::Types::Base]
       def calculate_current_node_type
-        CurrentNodeTypeExplain.new(self).current_node_type
+        current_node_worker.current_node_type
+      end
+
+      # @return [Range]
+      def current_node_range
+        current_node_worker.current_node_range
       end
 
       def namespace_path
@@ -159,6 +172,11 @@ module Yoda
         # @return [Parser::AST::Node]
         def current_node
           analyzer.nodes_to_current_location.last
+        end
+
+        # @return [Range]
+        def current_node_range
+          Range.of_ast_location(current_node.location)
         end
 
         # @return [Store::Types::Base]

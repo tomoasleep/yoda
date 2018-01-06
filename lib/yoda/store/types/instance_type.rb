@@ -28,9 +28,9 @@ module Yoda
         end
 
         # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base>]
+        # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
         def resolve(registry)
-          [registry.find(name)]
+          [registry.find_or_proxy(name)]
         end
       end
     end

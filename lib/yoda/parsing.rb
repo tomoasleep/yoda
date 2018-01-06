@@ -5,5 +5,6 @@ module Yoda
     require 'yoda/parsing/source_analyzer'
     require 'yoda/parsing/method_analyzer'
     require 'yoda/parsing/location'
+    require 'yoda/parsing/range'
   end
 end

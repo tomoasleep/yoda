@@ -30,6 +30,7 @@ module Yoda
       end
 
       # @param code_object [String]
+      # @return [YARD::CodeObjects::Base, YARD::CodeObjects::Proxy]
       def find_or_proxy(path)
         YARD::Registry.at(path) || YARD::CodeObjects::Proxy.new(YARD::Registry.root, path)
       end
