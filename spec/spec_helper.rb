@@ -14,6 +14,10 @@ RSpec.configure do |config|
 end
 
 module TypeHelper
+  def instance_type(value)
+    Yoda::Store::Types::InstanceType.new(value)
+  end
+
   def constant_type(value)
     Yoda::Store::Types::ConstantType.new(value)
   end

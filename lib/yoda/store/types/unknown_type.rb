@@ -26,6 +26,7 @@ module Yoda
         end
 
         # @param registry [Registry]
+        # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
           []
         end

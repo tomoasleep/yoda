@@ -24,6 +24,16 @@ module Yoda
         @current_location = current_location
       end
 
+      # @return [Array<YARD::CodeObjects::Base>]
+      def complete
+        SendMethodCompletion.new(self).method_candidates
+      end
+
+      # @return [Store::Types::Base]
+      def calculate_current_node_type
+        CurrentNodeTypeExplain.new(self).current_node_type
+      end
+
       def namespace_path
         @namespace_path ||= @namespace_nodes.map { |node| [:class, :module].include?(node.type) ? node.children[0] : nil }.compact.reduce('', &method(:reduce_const_nodes))
       end
@@ -55,11 +65,6 @@ module Yoda
         _type, tyenv = evaluator.process(method_body_node, create_evaluation_env)
         receiver_type, _tyenv = evaluator.process(code_node, tyenv)
         receiver_type
-      end
-
-      # @return [Array<YARD::CodeObjects::Base>]
-      def complete
-        SendMethodCompletion.new(self).method_candidates
       end
 
       # @param node [::AST::Node]
@@ -112,8 +117,17 @@ module Yoda
           @nearest_send_node ||= analyzer.nodes_to_current_location.reverse.find { |node| node.type == :send }
         end
 
+        def on_selector?
+          nearest_send_node && analyzer.current_location.included?(nearest_send_node.location.selector)
+        end
+
+        # @return [String, nil]
         def index_word
-          nearest_send_node.children[1]
+          return nil unless nearest_send_node
+          @index_word ||= begin
+            offset = analyzer.current_location.offset_from_begin(nearest_send_node.location.selector)[:column]
+            nearest_send_node.children[1].to_s.slice(0..offset)
+          end
         end
 
         # @return [Parser::AST::Node, nil]
@@ -128,9 +142,28 @@ module Yoda
 
         # @return [Array<YARD::CodeObjects::MethodObject>]
         def method_candidates
-          return [] unless nearest_send_node
+          return [] if !nearest_send_node || !on_selector?
           class_candidates = analyzer.evaluation_context.find_class_candidates(receiver_type)
-          analyzer.evaluator_context.find_instance_method_candidates(class_candidates, /\A#{index_word}/)
+          analyzer.evaluation_context.find_instance_method_candidates(class_candidates, /\A#{index_word}/)
+        end
+      end
+
+      class CurrentNodeTypeExplain
+        attr_reader :analyzer
+
+        # @param analyzer [MethodAnalyzer]
+        def initialize(analyzer)
+          @analyzer = analyzer
+        end
+
+        # @return [Parser::AST::Node]
+        def current_node
+          analyzer.nodes_to_current_location.last
+        end
+
+        # @return [Store::Types::Base]
+        def current_node_type
+          @current_node_type ||= analyzer.calculate_type(current_node)
         end
       end
     end

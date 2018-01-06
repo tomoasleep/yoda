@@ -137,7 +137,7 @@ module Yoda
         when :self
           Store::Types::InstanceType.new(context.caller_object.path)
         when :true, :false, :nil
-          Store::Types::ConstantType.new(sexp_type)
+          Store::Types::ConstantType.new(sexp_type.to_s)
         when :int, :float, :complex, :rational
           Store::Types::InstanceType.new('::Numeric')
         else

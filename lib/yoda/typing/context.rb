@@ -14,7 +14,10 @@ module Yoda
         @namespace = namespace
       end
 
+      # @param objects [Array<YARD::CodeObjects::Base>]
+      # @param name    [String]
       def find_instance_method_candidates(objects, name)
+        fail ArgumentError, objects unless objects.is_a? Array
         objects.map { |klass| klass&.meths.select { |meth| meth.name.match?(name) } }.flatten
       end
 
@@ -22,6 +25,7 @@ module Yoda
         Store::Types::UnionType.new(methods.map { |method| Store::Function.new(method).return_type })
       end
 
+      # @return [Array<YARD::CodeObjects::Base>]
       def find_class_candidates(type)
         type.resolve(registry)
       end

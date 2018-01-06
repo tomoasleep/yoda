@@ -13,6 +13,13 @@ module Yoda
         def change_root(namespace)
           fail NotImplementedError
         end
+
+        # @abstract
+        # @param registry [Registry]
+        # @return [Array<YARD::CodeObjects::Base>]
+        def resolve(registry)
+          fail NotImplementedError
+        end
       end
     end
   end

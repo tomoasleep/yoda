@@ -22,7 +22,7 @@ module Yoda
         end
 
         def is_value?
-          VALUE_REGEXP.match?(value)
+          value.is_a?(String) && VALUE_REGEXP.match?(value)
         end
 
         # @param namespace [YARD::CodeObjects::Base]
@@ -32,8 +32,9 @@ module Yoda
         end
 
         # @param registry [Registry]
+        # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
-          registry.find(is_value ? value_class : value)
+          [registry.find(is_value? ? value_class : value)]
         end
 
         def value_class

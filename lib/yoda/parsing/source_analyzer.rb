@@ -12,11 +12,12 @@ module Yoda
 
       attr_reader :ast, :location
 
-      # @param ast [::Parser::AST::Node]
+      # @param ast      [::Parser::AST::Node]
+      # @param location [Location]
       # @param source [String]
       def initialize(ast, location)
         @ast = ast
-        @location = Location.new(row: row, column: column)
+        @location = location
       end
 
       # @return [Array<::Parser::AST::Node>]

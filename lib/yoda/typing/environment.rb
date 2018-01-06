@@ -7,18 +7,15 @@ module Yoda
         @binds = {}
       end
 
-      def bind(key, value)
-        @binds[key] = value
-        self
-      end
-
+      # @param key  [String, Symbol]
       def resolve(key)
-        @binds[key]
+        @binds[key.to_sym]
       end
 
-      # @param symbol [Symbol]
-      # @param type   [Symbol, Store::Types::Base]
+      # @param key  [String, Symbol]
+      # @param type [Symbol, Store::Types::Base]
       def bind(key, type)
+        key = key.to_sym
         type = (type.is_a?(Symbol) && resolve(type)) || type
         @binds.transform_values! { |value| value == key ? type : value }
         @binds[key] = type

@@ -23,7 +23,7 @@ module Yoda
       # @param path [String, Path]
       def find(path)
         if path.is_a?(Path)
-          YARD::Registry.resolve(namespace, path)
+          YARD::Registry.resolve(path.namespace, path.name)
         else
           at(path)
         end
