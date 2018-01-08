@@ -9,6 +9,7 @@ module Yoda
       # @return [SourceAnalyzer]
       def self.from_source(registry, source, location)
         source_analyzer = SourceAnalyzer.from_source(source, location)
+        fail RuntimeError, "There are no method at #{location}" unless source_analyzer.current_method_node
         new(registry, source_analyzer.current_method_node, source_analyzer.current_namespace_nodes, location)
       end
 
@@ -62,7 +63,7 @@ module Yoda
       end
 
       def method_object
-        @method ||= registry.find(method_path)
+        (@method ||= registry.find(method_path)) || fail(RuntimeError, "Not method path #{method_path}")
       end
 
       def function

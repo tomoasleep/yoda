@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "Ruby completion engine",
   "keywords": [],
-  "repository": "https://github.com/yoda/yoda",
+  "repository": "https://github.com/tomoasleep/yoda",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"

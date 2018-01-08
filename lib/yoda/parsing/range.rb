@@ -14,14 +14,14 @@ module Yoda
       def self.of_ast_location(ast_location)
         return nil unless Location.valid_location?(ast_location)
         new(
-          begin_location: Location.new(row: location.line, column: location.column),
-          end_location: Location.new(row: location.last_line, column: location.last_column),
+          Location.new(row: ast_location.line, column: ast_location.column),
+          Location.new(row: ast_location.last_line, column: ast_location.last_column),
         )
       end
 
       # @return [{Symbol => { Symbol => Integer } }]
       def to_language_server_protocol_range
-        { begin: begin_location.to_language_server_protocol_range, end: end_location.to_language_server_protocol_range }
+        { start: begin_location.to_language_server_protocol_range, end: end_location.to_language_server_protocol_range }
       end
     end
   end

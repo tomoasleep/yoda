@@ -13,7 +13,7 @@ module Yoda
       # @param character [Integer]
       # @return [Location]
       def self.of_language_server_protocol_position(line:, character:)
-        new(row: row + 1, column: column)
+        new(row: line + 1, column: character)
       end
 
       # @param location [Parser::Source::Range, Parser::Source::Map, Object]
@@ -56,6 +56,10 @@ module Yoda
       # @return [{Symbol => Integer}]
       def to_language_server_protocol_range
         { line: row - 1, character: column }
+      end
+
+      def to_s
+        "(#{row}, #{column})"
       end
     end
   end

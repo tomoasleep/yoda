@@ -18,6 +18,7 @@ module Yoda
       # @param name    [String]
       def find_instance_method_candidates(objects, name)
         fail ArgumentError, objects unless objects.is_a? Array
+        return [] if name.empty?
         objects.map { |klass| klass&.meths.select { |meth| meth.name.match?(name) } }.flatten
       end
 

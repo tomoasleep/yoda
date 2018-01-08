@@ -13,7 +13,7 @@ module Yoda
       Deserializer.new.deserialize(hash || {})
     end
 
-    attr_reader :reader, :writer, :client_info, :completion_provider
+    attr_reader :reader, :writer, :client_info, :completion_provider, :hover_provider
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
@@ -21,19 +21,31 @@ module Yoda
 
     def run
       reader.read do |request|
-        STDERR.puts request
-        if result = callback(request)
-          writer.write(id: request[:id], result: result)
+        begin
+          if result = callback(request)
+            writer.write(id: request[:id], result: result)
+          end
+        rescue StandardError => ex
+          STDERR.puts ex
+          STDERR.puts ex.backtrace
         end
       end
     end
 
     def callback(request)
-      if method_name = request_registrations[request[:method].to_sym]
+      if method_name = resolve(request_registrations, request[:method])
         send(method_name, self.class.deserialize(request[:params] || {}))
-      elsif method_name = notification_registrations[request[:method].to_sym]
+      elsif method_name = resolve(notification_registrations, request[:method])
         send(method_name, self.class.deserialize(request[:params] || {}))
         nil
+      end
+    end
+
+    # @param hash [Hash]
+    # @param key [String, Symbol]
+    def resolve(hash, key)
+      key.to_s.split('/').reduce(hash) do |scope, key|
+        (scope || {})[key.to_sym]
       end
     end
 
@@ -43,6 +55,7 @@ module Yoda
         shutdown: :handle_shutdown,
         textDocument: {
           completion: :handle_text_document_completion,
+          hover: :handle_text_document_hover,
         },
       }
     end
@@ -53,6 +66,7 @@ module Yoda
         exit: :handle_exit,
         textDocument: {
           didChange: :handle_text_document_did_change,
+          didOpen: :handle_text_document_did_open,
         },
       }
     end
@@ -95,9 +109,9 @@ module Yoda
         TriggerCharacter = 2
       end
 
-      def handle_text_document_did_change(params)
+      def handle_text_document_did_open(params)
         uri = params[:text_document][:uri]
-        text = params[:content_changes].first[:text]
+        text = params[:text_document][:text]
         client_info.file_store.store(uri, text)
       end
 

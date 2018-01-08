@@ -1,5 +1,6 @@
 const { AutoLanguageClient } = require('atom-languageclient')
 const { spawn } = require('child_process')
+const { resolve } = require('path')
 
 class YodaClient extends AutoLanguageClient {
   constructor() {
@@ -12,7 +13,8 @@ class YodaClient extends AutoLanguageClient {
   getConnectionType() { return 'stdio' }
 
   startServerProcess () {
-    const yoda = spawn('yoda', ['server']);
+    // const yoda = spawn('yoda', ['server']);
+    const yoda = spawn(resolve(__dirname, '../../exe/yoda'), ['server']);
     yoda.stderr.on('data', (data) => {
       this.logger.warn(`${data}`);
     });
