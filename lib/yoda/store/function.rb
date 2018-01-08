@@ -2,7 +2,10 @@ module Yoda
   module Store
     class Function
       attr_reader :code_object
+
+      # @param code_object [YARD::CodeObjects::Base]
       def initialize(code_object)
+        fail ArgumentError, code_object unless code_object.is_a?(YARD::CodeObjects::Base)
         @code_object = code_object
       end
 

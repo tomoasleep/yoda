@@ -9,6 +9,10 @@ module Yoda
 
     LSP = ::LanguageServer::Protocol
 
+    def self.deserialize(hash)
+      Deserializer.new.deserialize(hash || {})
+    end
+
     attr_reader :reader, :writer, :client_info, :completion_provider
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
@@ -17,11 +21,19 @@ module Yoda
 
     def run
       reader.read do |request|
-        method_name = subscriptions[request[:method].to_sym]
-        if method_name
-          result = send(method_name, Deserializer.new.deserialize(request[:params] || {}))
+        STDERR.puts request
+        if result = callback(request)
           writer.write(id: request[:id], result: result)
         end
+      end
+    end
+
+    def callback(request)
+      if method_name = request_registrations[request[:method].to_sym]
+        send(method_name, self.class.deserialize(request[:params] || {}))
+      elsif method_name = notification_registrations[request[:method].to_sym]
+        send(method_name, self.class.deserialize(request[:params] || {}))
+        nil
       end
     end
 
@@ -46,7 +58,7 @@ module Yoda
     end
 
     def handle_initialize(params)
-      @client_info = ClientInfo.new(params.root_uri)
+      @client_info = ClientInfo.new(params[:root_uri])
       @completion_provider = CompletionProvider.new(@client_info)
       @hover_provider = HoverProvider.new(@client_info)
 
@@ -67,7 +79,7 @@ module Yoda
       )
     end
 
-    def handle_initialize(_params)
+    def handle_initialized(_params)
       client_info.setup
     end
 
@@ -84,21 +96,21 @@ module Yoda
       end
 
       def handle_text_document_did_change(params)
-        uri = params.text_document_uri
-        text = params.content_changes.first.text
+        uri = params[:text_document][:uri]
+        text = params[:content_changes].first[:text]
         client_info.file_store.store(uri, text)
       end
 
       def handle_text_document_completion(params)
-        uri = params.textDocument.uri
-        position = params.position
+        uri = params[:text_document][:uri]
+        position = params[:position]
 
         completion_provider&.complete(uri, position)
       end
 
       def handle_text_document_hover(params)
-        uri = params.textDocument.uri
-        position = params.position
+        uri = params[:text_document][:uri]
+        position = params[:position]
 
         hover_provider&.request_hover(uri, position)
       end

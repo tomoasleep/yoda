@@ -15,24 +15,42 @@ module Yoda
         YARD::Registry.register(code_object)
       end
 
-      # @param code_object [String]
+      # @param code_object [Symbol, String]
       def at(path)
-        YARD::Registry.at(path)
-      end
-
-      # @param path [String, Path]
-      def find(path)
-        if path.is_a?(Path)
-          YARD::Registry.resolve(path.namespace, path.name)
+        if path.is_a?(Symbol)
+          YARD::Registry.at(path)
         else
-          at(path)
+          YARD::Registry.at(path.gsub(/\A::/, ''))
         end
       end
 
-      # @param code_object [String]
+      # @param path [String, Symbol, Path]
+      def find(path)
+        if path.is_a?(Path)
+          YARD::Registry.resolve(path.namespace, path.name.gsub(/\A::/, ''))
+        elsif path.is_a?(Symbol)
+          at(path)
+        else
+          at(path.gsub(/\A::/, ''))
+        end
+      end
+
+      # @param path [String, Symbol, Path]
+      # @return [String, Symbol]
+      def path_name_of(path)
+        if path.is_a?(Path)
+          path.name.gsub(/\A::/, '')
+        elsif path.is_a?(Symbol)
+          path
+        else
+          path.gsub(/\A::/, '')
+        end
+      end
+
+      # @param code_object [String, Path]
       # @return [YARD::CodeObjects::Base, YARD::CodeObjects::Proxy]
       def find_or_proxy(path)
-        YARD::Registry.at(path) || YARD::CodeObjects::Proxy.new(YARD::Registry.root, path)
+        find(path) || YARD::CodeObjects::Proxy.new(YARD::Registry.root, path_name_of(path))
       end
     end
   end

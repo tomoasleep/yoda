@@ -1,13 +1,26 @@
 const { AutoLanguageClient } = require('atom-languageclient')
+const { spawn } = require('child_process')
 
 class YodaClient extends AutoLanguageClient {
-  getGrammarScopes () { return [ 'source.ruby' ] }
+  constructor() {
+    super()
+    atom.config.set('core.debugLSP', true) // Debug the hell out of this
+  }
+  getGrammarScopes () { return ['source.ruby', 'source.rb', 'source.ruby.rails'] }
   getLanguageName () { return 'Ruby' }
   getServerName () { return 'Yoda' }
+  getConnectionType() { return 'stdio' }
 
   startServerProcess () {
-    return super.spawnChildNode(['yoda', 'server'])
+    const yoda = spawn('yoda', ['server']);
+    yoda.stderr.on('data', (data) => {
+      this.logger.warn(`${data}`);
+    });
+    yoda.on('close', (code) => {
+      this.logger.debug(`child process exited with code ${code}`);
+    });
+    return yoda;
   }
 }
 
-module.exports = new CSharpLanguageClient()
+module.exports = new YodaClient()

@@ -32,7 +32,7 @@ module Yoda
 
       # @return [Array<::Parser::AST::Node>]
       def current_namespace_nodes
-        nodes_to_current_location_from_root.reverse.find_all { |node| [:class, :module, :sclass].include?(node.type) }
+        nodes_to_current_location_from_root.find_all { |node| [:class, :module, :sclass].include?(node.type) }
       end
     end
   end

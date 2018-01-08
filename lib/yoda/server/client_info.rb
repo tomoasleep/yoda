@@ -9,7 +9,7 @@ module Yoda
         @root_uri = root_uri
         @file_store = FileStore.new
         @registry = Store::Registry.instance
-        @project = Store::Project.new
+        @project = Store::Project.new(root_path)
       end
 
       def root_path
@@ -51,7 +51,7 @@ module Yoda
         # @param uri_string [String]
         def path_of_uri(uri_string)
           uri = URI.parse(uri_string)
-          return nil unless uri.schema == 'file'
+          return nil unless uri.scheme == 'file'
           uri.path
         rescue URI::InvalidURIError
           nil

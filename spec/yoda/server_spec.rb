@@ -1,0 +1,40 @@
+require 'spec_helper'
+
+RSpec.describe Yoda::Server do
+  LSP = ::LanguageServer::Protocol
+  let(:server) { described_class.new }
+
+  let(:root_path) { File.absolute_path('../support/fixtures', __dir__) }
+  let(:init_param) do
+    {
+      root_uri: URI::Generic.build(host: 'scheme', path: root_path)
+    }
+  end
+
+  describe '#callback' do
+    subject { server.callback({ method: :initialize, params: init_param }) }
+
+    it 'returns capabilities' do
+      expect(subject).to be_instance_of(LSP::Interface::InitializeResult)
+    end
+  end
+
+  describe '#handle_initialize' do
+    subject { server.handle_initialize(init_param) }
+
+    it 'returns capabilities' do
+      expect(subject).to be_instance_of(LSP::Interface::InitializeResult)
+    end
+  end
+
+  describe '#handle_initialized' do
+    before { server.handle_initialize(init_param) }
+    subject { server.handle_initialized(param) }
+    let(:param) { nil }
+
+
+    it 'does setup' do
+      expect(subject).to be
+    end
+  end
+end

@@ -74,9 +74,10 @@ module Yoda
           receiver_type, env = process(receiver_node, env)
           class_candidates = context.find_class_candidates(receiver_type)
         else
+          # FIXME
           class_candidates = [context.caller_object]
         end
-        _type, env = argument_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node.children.last, env) }
+        _type, env = argument_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
         method_candidates = context.find_instance_method_candidates(class_candidates, method_name_sym.to_s)
         method_return_type = context.calc_method_return_type(method_candidates)
         [method_return_type, env]
@@ -110,9 +111,9 @@ module Yoda
       def const_name_of(node)
         paths = []
         while true
-          return '::' + paths.join('::') unless node
-          return Store::Path.new(namespace, paths.join('::')) if node.type == :cbase
-          paths.prepend(node.children[1])
+          return Store::Path.new(context.namespace, paths.join('::')) unless node
+          return '::' + paths.join('::') if node.type == :cbase
+          paths.unshift(node.children[1])
           node = node.children[0]
         end
       end

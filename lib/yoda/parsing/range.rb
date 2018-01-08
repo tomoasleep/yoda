@@ -1,6 +1,6 @@
 module Yoda
   module Parsing
-    class Location
+    class Range
       attr_reader :begin_location, :end_location
       # @param begin_location [Integer]
       # @param end_location   [Integer]

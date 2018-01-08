@@ -18,6 +18,8 @@ module Yoda
       # @param namespace_nodes  [Array<::Parser::AST::Node>]
       # @param current_location [Location]
       def initialize(registry, method_node, namespace_nodes, current_location)
+        fail ArgumentError, method_node unless method_node.is_a?(::Parser::AST::Node)
+
         @registry = registry
         @method_node = method_node
         @namespace_nodes = namespace_nodes
@@ -68,7 +70,7 @@ module Yoda
       end
 
       def evaluation_context
-        @context ||= Typing::Context.new(registry, method_object, namespace_object)
+        @context ||= Typing::Context.new(registry, namespace_object, namespace_object)
       end
 
       # @param  code_node [::Parser::AST::Node]
@@ -84,8 +86,8 @@ module Yoda
       def reduce_const_nodes(name, node)
         paths = []
         while true
-          return paths.join('::') unless node
-          return name + '::' +  paths.join('::') if node.type == :cbase
+          return name + '::' +  paths.join('::') unless node
+          return paths.join('::')  if node.type == :cbase
           paths.unshift(node.children[1])
           node = node.children[0]
         end

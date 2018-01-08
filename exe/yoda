@@ -7,12 +7,17 @@ end
 require 'yoda'
 require 'optparse'
 
-opt = OptionParser.new
-opt.banner = "Usage: yoda [options]"
+opt = OptionParser.new("Usage: yoda [options]") do |opt|
+end
 
 argv = opt.parse(ARGV)
 
-case argv
+case argv.first
+when 'setup-deps'
+  Yoda::Runner::SetupDeps.run
+when 'infer'
+  require 'pry'
+  Pry::rescue { Yoda::Runner::Infer.run(argv[1]) }
 when 'server'
   Yoda::Server.new.run
 else

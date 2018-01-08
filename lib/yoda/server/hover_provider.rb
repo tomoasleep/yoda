@@ -2,7 +2,7 @@ module Yoda
   class Server
     class HoverProvider
       attr_reader :client_info
-      
+
       def initialize(client_info)
         @client_info = client_info
       end
@@ -35,7 +35,7 @@ module Yoda
         if code_object.type == :proxy
           "#{code_object.path}"
         else
-          "#{code_object.path}: #{code_object.signature}"
+          "#{code_object.path} #{code_object.signature}"
         end
       end
     end

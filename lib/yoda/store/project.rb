@@ -19,6 +19,10 @@ module Yoda
         @root_path = root_path
       end
 
+      def registry
+        @registry ||= Registry.instance
+      end
+
       def set_yardoc_file_path(path)
         YARD::Registry.yardoc_file = path
       end
@@ -27,6 +31,16 @@ module Yoda
         return [] unless File.exist?(gemfile_lock_path)
         parser = Bundler::LockfileParser.new(File.read(gemfile_lock_path))
         parser.specs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
+      end
+
+      def create_dependency_docs
+        return unless File.exist?(gemfile_lock_path)
+        parser = Bundler::LockfileParser.new(File.read(gemfile_lock_path))
+        parser.specs.each do |gem|
+          puts "Building gem docs for #{gem.name} #{gem.version}"
+          YARD::CLI::Gems.run(gem.name, gem.version)
+          puts "Done building gem docs for #{gem.name} #{gem.version}"
+        end
       end
 
       def load_dependencies

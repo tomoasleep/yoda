@@ -2,13 +2,13 @@ require 'ostruct'
 
 module Yoda
   class Server
-    class Deserilizer
+    class Deserializer
       def initialize
       end
 
       # @param params [Hash]
       def deserialize(params)
-        OpenStruct.new(params.transform_keys(&method(:snakenize)).transform_values(&method(:deserialize_value)))
+        Hash[params.map { |key, value| [snakenize(key), deserialize_value(value)] }]
       end
 
       # @param params [any]
@@ -18,9 +18,9 @@ module Yoda
         value
       end
 
-      # @param str [String]
+      # @param str [Symbol]
       def snakenize(str)
-        str.gsub(/([A-Z])/, '_\1').downcase
+        str.to_s.gsub(/([A-Z])/, '_\1').downcase.to_sym
       end
     end
   end
