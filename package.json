@@ -1,0 +1,15 @@
+{
+  "name": "yoda",
+  "main": "./client/atom/main.js",
+  "version": "0.0.0",
+  "description": "Ruby completion engine",
+  "keywords": [],
+  "repository": "https://github.com/yoda/yoda",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+    "atom-languageclient": "^0.7.3"
+  }
+}

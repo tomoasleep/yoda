@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+if Dir.exist?(File.join(__dir__, "..", ".git"))
+  require 'bundler/setup'
+end
+
+require 'yoda'
+require 'optparse'
+
+opt = OptionParser.new
+opt.banner = "Usage: yoda [options]"
+
+argv = opt.parse(ARGV)
+
+case argv
+when 'server'
+  Yoda::Server.new.run
+else
+  puts opt.help
+  exit 1
+end

@@ -13,10 +13,9 @@ module Yoda
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
-
     end
 
-    def listen
+    def run
       reader.read do |request|
         method_name = subscriptions[request[:method].to_sym]
         if method_name

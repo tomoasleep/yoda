@@ -1,9 +1,19 @@
 require 'bundler'
+require 'tmpdir'
+require 'fileutils'
 
 module Yoda
   module Store
     class Project
       attr_reader :root_path
+
+      def self.tmpdir
+        @tmpdir ||= begin
+          dir = Dir.mktmpdir('yoda')
+          at_exit { FileUtils.remove_entry_secure(dir) }
+          dir
+        end
+      end
 
       def initialize(root_path)
         @root_path = root_path
@@ -24,10 +34,17 @@ module Yoda
       end
 
       def load_project_files
+        YARD::Registry.load(Dir.chdir(root_path) { Dir.glob("{lib,app}/**/*.rb\0ext/**/*.c") }, true)
       end
 
       def gemfile_lock_path
         File.absolute_path('Gemfile.lock', root_path)
+      end
+
+      def setup
+        set_yardoc_file_path(self.class.tmpdir)
+        load_dependencies
+        load_project_files
       end
     end
   end

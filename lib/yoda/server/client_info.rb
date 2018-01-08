@@ -3,12 +3,13 @@ require 'uri'
 module Yoda
   class Server
     class ClientInfo
-      attr_reader :root_uri, :file_store, :registry
+      attr_reader :root_uri, :file_store, :registry, :project
 
       def initialize(root_uri)
         @root_uri = root_uri
         @file_store = FileStore.new
         @registry = Store::Registry.instance
+        @project = Store::Project.new
       end
 
       def root_path
@@ -16,6 +17,7 @@ module Yoda
       end
 
       def setup
+        project.setup
       end
 
       class FileStore
