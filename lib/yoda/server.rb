@@ -67,6 +67,7 @@ module Yoda
         textDocument: {
           didChange: :handle_text_document_did_change,
           didOpen: :handle_text_document_did_open,
+          didSave: :handle_text_document_did_save,
         },
       }
     end
@@ -79,11 +80,14 @@ module Yoda
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
           text_document_sync: LSP::Interface::TextDocumentSyncOptions.new(
-            change: LSP::Constant::TextDocumentSyncKind::FULL
+            change: LSP::Constant::TextDocumentSyncKind::FULL,
+            save: LSP::Interface::SaveOptions.new(
+              include_text: true,
+            ),
           ),
           completion_provider: LSP::Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: %w(.)
+            trigger_characters: %w(.),
           ),
           hover_provider: true,
           # signature_help_provider: LSP::Interface::SignatureHelpOptions.new(
@@ -112,6 +116,18 @@ module Yoda
       def handle_text_document_did_open(params)
         uri = params[:text_document][:uri]
         text = params[:text_document][:text]
+        client_info.file_store.store(uri, text)
+      end
+
+      def handle_text_document_did_save(params)
+        uri = params[:text_document][:uri]
+
+        client_info.reparse_doc(uri)
+      end
+
+      def handle_text_document_did_change(params)
+        uri = params[:text_document][:uri]
+        text = params[:contenxt_changes].first[:text]
         client_info.file_store.store(uri, text)
       end
 

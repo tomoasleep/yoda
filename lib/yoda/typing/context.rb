@@ -14,19 +14,19 @@ module Yoda
         @namespace = namespace
       end
 
-      # @param objects [Array<YARD::CodeObjects::Base>]
-      # @param name    [String]
+      # @param objects [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
+      # @param name    [String, RegExp]
       def find_instance_method_candidates(objects, name)
         fail ArgumentError, objects unless objects.is_a? Array
-        return [] if name.empty?
-        objects.map { |klass| klass&.meths.select { |meth| meth.name.match?(name) } }.flatten
+        return [] if name.is_a?(String) && name.empty?
+        objects.reject { |klass| klass.type == :proxy }.map { |klass| klass&.meths.select { |meth| meth.name.match?(name) } }.flatten
       end
 
       def calc_method_return_type(methods)
         Store::Types::UnionType.new(methods.map { |method| Store::Function.new(method).return_type })
       end
 
-      # @return [Array<YARD::CodeObjects::Base>]
+      # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
       def find_class_candidates(type)
         type.resolve(registry)
       end

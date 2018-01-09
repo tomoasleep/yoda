@@ -11,6 +11,7 @@ module Yoda
 
       # @param node [::AST::Node]
       # @param env  [Environment]
+      # @return [[Store::Types::Base, Environment]]
       def process(node, env)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn
@@ -29,8 +30,7 @@ module Yoda
           # TODO
           node.children.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
         when :if
-          # TODO
-          node.children.slice(1..2).compact.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
+          process_branch_nodes(node.children.slice(1..2).compact, env)
         when :while, :until, :while_post, :until_post
           # TODO
           process(node.children[1], env)
@@ -44,7 +44,7 @@ module Yoda
           [type_for_sexp_type(node.type), env]
         when :return, :break, :next
           # TODO
-          process(node.children[1], env)
+          node.children[0] ? process(node.children[0], env) : [Store::Types::ConstantType.new('nil'), env]
         when :resbody
           # TODO
           process(node.children[2], env)
@@ -66,8 +66,22 @@ module Yoda
         end
       end
 
+      # @param node [Array<::AST::Node>]
+      # @param env  [Environment]
+      # @return [[Store::Types::Base, Environment]]
+      def process_branch_nodes(nodes, env)
+        # TODO: Divide env
+        types, env = nodes.reduce([[], env]) do |(types, env), node|
+          type, env = process(node, env)
+          [types + [type], env]
+        end
+
+        [Store::Types::UnionType.new(types), env]
+      end
+
       # @param node [::AST::Node]
       # @param env  [Environment]
+      # @return [[Store::Types::Base, Environment]]
       def process_send_node(node, env)
         receiver_node, method_name_sym, *argument_nodes = node.children
         if receiver_node
@@ -85,14 +99,17 @@ module Yoda
 
       # @param node [::AST::Node]
       # @param env  [Environment]
+      # @return [[Store::Types::Base, Environment]]
       def process_block_node(node, env)
         send_node, arguments_node, body_node = node.children
         # TODO
-        process(body_node, env)
+        _type, env = process(body_node, env)
+        process(send_node, env)
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
+      # @return [[Store::Types::Base, Environment]]
       def process_case_node(node, env)
         # TODO
         subject_node, *when_nodes, else_node = node.children
@@ -103,6 +120,7 @@ module Yoda
       # @param node [::AST::Node]
       # @param type [Store::Types::Base]
       # @param env  [Environment]
+      # @return [[Store::Types::Base, Environment]]
       def process_bind(symbol, type, env)
         [type, env.bind(symbol, type)]
       end

@@ -15,7 +15,9 @@ module Yoda
         end
       end
 
+      # @param root_path [String]
       def initialize(root_path)
+        fail ArgumentError, root_path unless root_path.is_a?(String)
         @root_path = root_path
       end
 
@@ -54,11 +56,16 @@ module Yoda
       end
 
       def project_files
-        Dir.chdir(root_path) { Dir.glob("{lib,app}/**/*.rb\0ext/**/*.c").map { |name| File.expand_path(name, root_path) } }.tap { |el| STDERR.puts el }
+        Dir.chdir(root_path) { Dir.glob("{lib,app}/**/*.rb\0ext/**/*.c").map { |name| File.expand_path(name, root_path) } }
+      end
+
+      # @param path [String]
+      def reparse(path)
+        YARD.parse([path])
       end
 
       def load_project_files
-        YARD::Registry.load(project_files, true)
+        YARD.parse(project_files)
       end
 
       def gemfile_lock_path
@@ -70,7 +77,6 @@ module Yoda
         set_yardoc_file_path(self.class.tmpdir)
         load_dependencies
         load_project_files
-        STDERR.puts YARD::Registry.at('Yoda')
       end
     end
   end

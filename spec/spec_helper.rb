@@ -13,6 +13,8 @@ RSpec.configure do |config|
   end
 end
 
+YARD::Logger.instance(File.open(File::Constants::NULL, 'w'))
+
 module TypeHelper
   def instance_type(value)
     Yoda::Store::Types::InstanceType.new(value)

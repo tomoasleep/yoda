@@ -5,6 +5,7 @@ module Yoda
     class ClientInfo
       attr_reader :root_uri, :file_store, :registry, :project
 
+      # @param root_uri [String] an uri expression of project root path
       def initialize(root_uri)
         @root_uri = root_uri
         @file_store = FileStore.new
@@ -13,11 +14,16 @@ module Yoda
       end
 
       def root_path
-        @root_path ||= file_store.path_of_uri(root_uri)
+        @root_path ||= FileStore.path_of_uri(root_uri)
       end
 
       def setup
         project.setup
+      end
+
+      def reparse_doc(uri)
+        path = FileStore.path_of_uri(uri)
+        project.reparse(path)
       end
 
       class FileStore
@@ -43,13 +49,13 @@ module Yoda
 
         # @param uri_string [String]
         def read(uri_string)
-          path = path_of_uri(uri_string)
+          path = self.class.path_of_uri(uri_string)
           fail ArgumentError unless path
           File.read(path)
         end
 
         # @param uri_string [String]
-        def path_of_uri(uri_string)
+        def self.path_of_uri(uri_string)
           uri = URI.parse(uri_string)
           return nil unless uri.scheme == 'file'
           uri.path

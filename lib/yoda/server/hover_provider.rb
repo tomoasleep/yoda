@@ -3,10 +3,13 @@ module Yoda
     class HoverProvider
       attr_reader :client_info
 
+      # @param client_info [ClientInfo]
       def initialize(client_info)
         @client_info = client_info
       end
 
+      # @param uri      [String]
+      # @param position [{Symbol => Integer}]
       def request_hover(uri, position)
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])

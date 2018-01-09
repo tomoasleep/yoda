@@ -102,5 +102,55 @@ RSpec.describe Yoda::Parsing::MethodAnalyzer do
         expect(subject).to eq(instance_type('String'))
       end
     end
+
+    context 'on method call' do
+      include_context 'define a class to root'
+
+      let(:location) { Yoda::Parsing::Location.new(row: 3, column: 10) }
+      let(:source) do
+        <<~EOS
+        class Hoge
+          def main
+            return unless File.exist?(gemfile_lock_path)
+            parser = Bundler::LockfileParser.new(File.read(gemfile_lock_path))
+            parser.specs.each do |gem|
+              STDERR.puts "Building gem docs for \#{gem.name} \#{gem.version}"
+              YARD::CLI::Gems.run(gem.name, gem.version)
+              STDERR.puts "Done building gem docs for \#{gem.name} \#{gem.version}"
+            end
+          end
+        end
+        EOS
+      end
+
+      it 'returns the return value type' do
+        # TODO
+        expect(subject).to be_a(Yoda::Store::Types::Base)
+      end
+    end
+
+    context 'with multiple variable assignments' do
+      include_context 'define a class to root'
+
+      let(:location) { Yoda::Parsing::Location.new(row: 3, column: 10) }
+      let(:source) do
+        <<~EOS
+        class Hoge
+          def main(node, env)
+            send_node, arguments_node, body_node = node.children
+            # TODO
+            _type, env = process(body_node, env)
+            process(send_node, env)
+          end
+        end
+        EOS
+      end
+
+      it 'returns the return value type' do
+        # TODO
+        expect(subject).to be_a(Yoda::Store::Types::Base)
+      end
+    end
+
   end
 end

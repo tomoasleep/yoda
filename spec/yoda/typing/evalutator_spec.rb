@@ -49,5 +49,67 @@ RSpec.describe Yoda::Typing::Evaluator do
         expect(subject.first).to eq(constant_type(Yoda::Store::Path.new(root, 'Hoge')))
       end
     end
+
+    context 'local variable assignment' do
+      include_context 'define a method to root'
+
+      let(:ast) do
+        s(:begin,
+          s(:if,
+            s(:send,
+              s(:const, nil, :File), :exist?,
+              s(:send, nil, :gemfile_lock_path)), nil,
+            s(:return)),
+          s(:lvasgn, :parser,
+            s(:send,
+              s(:const,
+                s(:const, nil, :Bundler), :LockfileParser), :new,
+              s(:send,
+                s(:const, nil, :File), :read,
+                s(:send, nil, :gemfile_lock_path)))),
+          s(:block,
+            s(:send,
+              s(:send,
+                s(:lvar, :parser), :specs), :each),
+            s(:args,
+              s(:arg, :gem)),
+            s(:begin,
+              s(:send,
+                s(:const, nil, :STDERR), :puts,
+                s(:dstr,
+                  s(:str, "Building gem docs for "),
+                  s(:begin,
+                    s(:send,
+                      s(:lvar, :gem), :name)),
+                  s(:str, " "),
+                  s(:begin,
+                    s(:send,
+                      s(:lvar, :gem), :version)))),
+              s(:send,
+                s(:const,
+                  s(:const,
+                    s(:const, nil, :YARD), :CLI), :Gems), :run,
+                s(:send,
+                  s(:lvar, :gem), :name),
+                s(:send,
+                  s(:lvar, :gem), :version)),
+              s(:send,
+                s(:const, nil, :STDERR), :puts,
+                s(:dstr,
+                  s(:str, "Done building gem docs for "),
+                  s(:begin,
+                    s(:send,
+                      s(:lvar, :gem), :name)),
+                  s(:str, " "),
+                  s(:begin,
+                    s(:send,
+                      s(:lvar, :gem), :version)))))))
+      end
+
+      it "returns the assigned value's type" do
+        # TODO
+        expect(subject.first).to be_a(Yoda::Store::Types::Base)
+      end
+    end
   end
 end

@@ -1,11 +1,17 @@
-# Yoda
+# Yoda (In Progress)
 
 Yoda is a static analytics tool for Ruby.
-Yoda focuses autocompletion and definition search.
+Yoda contains a language protocol server to provider autocompletion and datatips.
 
 ## Installation
 
-TBW
+This repository contains an Atom package to use Yoda.
+(This package is alpha version and it has many bugs.)
+
+```
+$ ./bin/setup
+$ apm link
+```
 
 ## Usage
 

@@ -8,13 +8,15 @@ module Yoda
         @client_info = client_info
       end
 
+      # @param uri      [String]
+      # @param position [{Symbol => Integer}]
       def complete(uri, position)
         source = client_info.file_store.get(uri)
-        location = Parsing::Location.of_language_server_protocol_position(line: position.line, character: position.character)
+        location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
         method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, source, location)
 
         code_objects = method_analyzer.complete
-        current_node_range = method_analyzer.calculate_current_node_type
+        range = method_analyzer.method_selector_range
 
         LSP::Interface::CompletionList.new(
           is_incomplete: false,
@@ -33,10 +35,10 @@ module Yoda
           kind: LSP::Constant::CompletionItemKind::METHOD,
           # detail: 'detail',
           documentation: code_object.docstring,
-          sort_text: code_object.name,
-          text_edit: LSP::Interface::TextEdit(
+          sort_text: code_object.name.to_s,
+          text_edit: LSP::Interface::TextEdit.new(
             range: LSP::Interface::Range.new(range.to_language_server_protocol_range),
-            new_text: code_object.name,
+            new_text: code_object.name.to_s,
           ),
           data: {},
         )

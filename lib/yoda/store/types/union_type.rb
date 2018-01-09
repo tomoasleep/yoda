@@ -36,7 +36,7 @@ module Yoda
         end
 
         # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base>]
+        # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
         def resolve(registry)
           types.map { |type| type.resolve(registry) }.flatten
         end

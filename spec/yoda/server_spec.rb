@@ -7,7 +7,7 @@ RSpec.describe Yoda::Server do
   let(:root_path) { File.absolute_path('../support/fixtures', __dir__) }
   let(:init_param) do
     {
-      root_uri: URI::Generic.build(host: 'scheme', path: root_path)
+      root_uri: "file://#{root_path}",
     }
   end
 
@@ -34,6 +34,7 @@ RSpec.describe Yoda::Server do
 
 
     it 'does setup' do
+      # TODO
       expect(subject).to be
     end
   end

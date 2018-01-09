@@ -36,6 +36,11 @@ module Yoda
         method_completion_worker.method_candidates
       end
 
+      # @return [Rangeg]
+      def method_selector_range
+        method_completion_worker.selector_range
+      end
+
       def current_node_worker
         @current_node_worker ||= CurrentNodeTypeExplain.new(self)
       end
@@ -149,6 +154,11 @@ module Yoda
         # @return [Parser::AST::Node, nil]
         def nearest_receiver_node
           nearest_send_node && nearest_send_node.children[0]
+        end
+
+        # @return [Range]
+        def selector_range
+          Range.of_ast_location(nearest_send_node.location.selector)
         end
 
         # @return [Store::Types::Base, nil]
