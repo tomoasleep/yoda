@@ -6,7 +6,7 @@ module Yoda
       attr_reader :store
 
       def self.import(file)
-        new.load(file).import
+        new.tap { |importer| importer.load(file) }.import
       end
 
       def initialize

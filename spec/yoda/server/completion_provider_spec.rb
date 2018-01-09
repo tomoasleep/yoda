@@ -8,6 +8,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
   end
 
   let(:client_info) { described_class.new }
+  after { client_info.project&.clean }
 
   let(:root_path) { fixture_root }
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }

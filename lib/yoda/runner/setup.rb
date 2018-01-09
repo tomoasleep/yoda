@@ -1,12 +1,12 @@
 module Yoda
   module Runner
-    class SetupDeps
+    class Setup
       def self.run
         new.run
       end
 
       def run
-        project.create_dependency_docs
+        project.prepare_database
       end
 
       def project

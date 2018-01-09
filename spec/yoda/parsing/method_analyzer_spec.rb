@@ -65,7 +65,7 @@ RSpec.describe Yoda::Parsing::MethodAnalyzer do
   describe '#calculate_current_node_type' do
     subject { described_class.from_source(registry, source, location).calculate_current_node_type }
 
-    context 'on local variable' do
+    xcontext 'on local variable' do
       include_context 'define a class to root'
 
       let(:location) { Yoda::Parsing::Location.new(row: 3, column: 4) }
@@ -84,7 +84,7 @@ RSpec.describe Yoda::Parsing::MethodAnalyzer do
       end
     end
 
-    context 'on method call' do
+    xcontext 'on method call' do
       include_context 'define a class to root'
 
       let(:location) { Yoda::Parsing::Location.new(row: 3, column: 10) }
@@ -129,7 +129,7 @@ RSpec.describe Yoda::Parsing::MethodAnalyzer do
       end
     end
 
-    context 'with multiple variable assignments' do
+    xcontext 'with multiple variable assignments' do
       include_context 'define a class to root'
 
       let(:location) { Yoda::Parsing::Location.new(row: 3, column: 10) }

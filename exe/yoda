@@ -13,8 +13,8 @@ end
 argv = opt.parse(ARGV)
 
 case argv.first
-when 'setup-deps'
-  Yoda::Runner::SetupDeps.run
+when 'setup'
+  Yoda::Runner::Setup.run
 when 'infer'
   require 'pry'
   Pry::rescue { Yoda::Runner::Infer.run(argv[1]) }

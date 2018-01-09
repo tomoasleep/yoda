@@ -1,4 +1,5 @@
 require "bundler/setup"
+require 'rspec-benchmark'
 require "yoda"
 
 RSpec.configure do |config|
@@ -7,6 +8,8 @@ RSpec.configure do |config|
 
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!
+
+  config.include RSpec::Benchmark::Matchers
 
   config.expect_with :rspec do |c|
     c.syntax = :expect

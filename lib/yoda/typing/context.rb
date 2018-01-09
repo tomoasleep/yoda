@@ -15,11 +15,12 @@ module Yoda
       end
 
       # @param objects [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
-      # @param name    [String, RegExp]
-      def find_instance_method_candidates(objects, name)
-        fail ArgumentError, objects unless objects.is_a? Array
-        return [] if name.is_a?(String) && name.empty?
-        objects.reject { |klass| klass.type == :proxy }.map { |klass| klass&.meths.select { |meth| meth.name.match?(name) } }.flatten
+      # @param pattern [String, RegExp]
+      def find_instance_method_candidates(objects, pattern)
+        fail ArgumentError, objects unless objects.is_a?(Array)
+        objects.reject { |klass| klass.type == :proxy }.map do |klass|
+          klass&.meths.select { |meth| pattern.is_a?(String) ? meth.name.to_s.start_with?(pattern) : meth.name.to_s.match?(pattern) }
+        end.flatten
       end
 
       def calc_method_return_type(methods)

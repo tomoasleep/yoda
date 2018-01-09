@@ -3,6 +3,7 @@ require 'spec_helper'
 RSpec.describe Yoda::Server do
   LSP = ::LanguageServer::Protocol
   let(:server) { described_class.new }
+  after { server&.client_info&.project&.clean }
 
   let(:root_path) { File.absolute_path('../support/fixtures', __dir__) }
   let(:init_param) do

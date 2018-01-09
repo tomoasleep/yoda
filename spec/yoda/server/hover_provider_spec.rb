@@ -8,6 +8,7 @@ RSpec.describe Yoda::Server::HoverProvider do
   end
 
   let(:client_info) { described_class.new }
+  after { client_info.project&.clean }
 
   let(:root_path) { fixture_root }
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
@@ -29,7 +30,7 @@ RSpec.describe Yoda::Server::HoverProvider do
 
       it 'returns completion for `self` variable' do
         expect(subject).to be_a(LSP::Interface::Hover)
-        expect(subject.contents).to contain_exactly('String')
+        expect(subject.contents).to contain_exactly(/\AString/)
         expect(subject.range).to have_attributes(start: { line: 7, character: 6 }, end: { line: 7, character: 9 })
       end
     end
