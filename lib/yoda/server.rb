@@ -127,7 +127,7 @@ module Yoda
 
       def handle_text_document_did_change(params)
         uri = params[:text_document][:uri]
-        text = params[:contenxt_changes].first[:text]
+        text = params[:content_changes].first[:text]
         client_info.file_store.store(uri, text)
       end
 
