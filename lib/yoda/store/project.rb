@@ -65,10 +65,16 @@ module Yoda
           save_database
         end
 
+        def gemfile_lock_parser
+          return unless File.exist?(project.gemfile_lock_path)
+          Dir.chdir(project.root_path) do
+            Bundler::LockfileParser.new(File.read(project.gemfile_lock_path))
+          end
+        end
+
         def create_dependency_docs
           return unless File.exist?(project.gemfile_lock_path)
-          parser = Bundler::LockfileParser.new(File.read(project.gemfile_lock_path))
-          parser.specs.each do |gem|
+          gemfile_lock_parser.specs.each do |gem|
             STDERR.puts "Building gem docs for #{gem.name} #{gem.version}"
             YARD::CLI::Gems.run(gem.name, gem.version)
             STDERR.puts "Done building gem docs for #{gem.name} #{gem.version}"
@@ -77,10 +83,7 @@ module Yoda
 
         def yardoc_files_of_dependencies
           return [] unless File.exist?(project.gemfile_lock_path)
-          Dir.chdir(project.root_path) do
-            parser = Bundler::LockfileParser.new(File.read(project.gemfile_lock_path))
-            parser.specs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
-          end
+          gemfile_lock_parserspecs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
         rescue Bundler::BundlerError => ex
           STDERR.puts ex
           STDERR.puts ex.backtrace
