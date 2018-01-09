@@ -59,6 +59,14 @@ module Yoda
         Dir.chdir(root_path) { Dir.glob("{lib,app}/**/*.rb\0ext/**/*.c").map { |name| File.expand_path(name, root_path) } }
       end
 
+      def core_doc_files
+        %w(core/ruby-2.5.0/.yardoc core/ruby-2.5.0/.yardoc-stdlib).map { |path| File.expand_path(path, File.expand_path('../../../', __dir__)) }.select { |path| File.exist?(path) }
+      end
+
+      def load_core
+        core_doc_files.each { |yardoc_file| YardImporter.new.tap { |importer| importer.load(yardoc_file) }.import }
+      end
+
       # @param path [String]
       def reparse(path)
         YARD.parse([path])
@@ -75,6 +83,7 @@ module Yoda
       def setup
         YARD::Logger.instance(STDERR)
         set_yardoc_file_path(self.class.tmpdir)
+        load_core
         load_dependencies
         load_project_files
       end
