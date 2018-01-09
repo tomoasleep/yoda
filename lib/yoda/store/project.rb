@@ -83,7 +83,7 @@ module Yoda
 
         def yardoc_files_of_dependencies
           return [] unless File.exist?(project.gemfile_lock_path)
-          gemfile_lock_parserspecs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
+          gemfile_lock_parser.specs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
         rescue Bundler::BundlerError => ex
           STDERR.puts ex
           STDERR.puts ex.backtrace

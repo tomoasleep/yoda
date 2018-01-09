@@ -24,16 +24,16 @@ module Yoda
         )
       end
 
-      # @param code_object [Array<YARD::CodeObjects::MethodObject>]
+      # @param code_object [YARD::CodeObjects::MethodObject]
       # @param range       [Parsing::Range]
       def create_completion_item(code_object, range)
         return nil unless range
 
         function = Store::Function.new(code_object)
         LSP::Interface::CompletionItem.new(
-          label: code_object.signature,
+          label: code_object.name.to_s,
           kind: LSP::Constant::CompletionItemKind::METHOD,
-          # detail: 'detail',
+          detail: code_object.path,
           documentation: code_object.docstring,
           sort_text: code_object.name.to_s,
           text_edit: LSP::Interface::TextEdit.new(
