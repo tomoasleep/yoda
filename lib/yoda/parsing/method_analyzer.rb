@@ -6,11 +6,18 @@ module Yoda
       # @param registry [Registry]
       # @param source   [String]
       # @param location [Location]
-      # @return [SourceAnalyzer]
+      # @return [MethodAnalyzer]
       def self.from_source(registry, source, location)
         source_analyzer = SourceAnalyzer.from_source(source, location)
-        fail RuntimeError, "There are no method at #{location}" unless source_analyzer.current_method_node
-        new(registry, source_analyzer.current_method_node, source_analyzer.current_namespace_nodes, location)
+        from_source_analyzer(registry, source_analyzer)
+      end
+
+      # @param registry [Registry]
+      # @param source_analyzer [SourceAnalyzer]
+      # @return [MethodAnalyzer]
+      def self.from_source_analyzer(registry, source_analyzer)
+        fail RuntimeError, "There are no method at #{source_analyzer.location}" unless source_analyzer.current_method_node
+        new(registry, source_analyzer.current_method_node, source_analyzer.current_namespace_nodes, source_analyzer.location)
       end
 
       attr_reader :method_node, :current_location, :registry, :namespace_nodes

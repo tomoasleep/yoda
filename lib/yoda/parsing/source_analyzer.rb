@@ -25,6 +25,11 @@ module Yoda
         @nodes_to_current_location ||= calc_nodes_to_current_location(ast, location)
       end
 
+      # @return [true, false]
+      def on_method?
+        !!current_method_node
+      end
+
       # @return [::Parser::AST::Node]
       def current_method_node
         nodes_to_current_location_from_root.reverse.find { |node| [:def, :defs].include?(node.type) }

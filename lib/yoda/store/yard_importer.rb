@@ -5,6 +5,7 @@ module Yoda
     class YardImporter
       attr_reader :store
 
+      # @param file [String]
       def self.import(file)
         new.tap { |importer| importer.load(file) }.import
       end

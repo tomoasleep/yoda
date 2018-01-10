@@ -13,7 +13,14 @@ module Yoda
       def request_hover(uri, position)
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
-        method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, source, location)
+        source_analyzer = Parsing::SourceAnalyzer.from_source(source, location)
+
+        unless source_analyzer.on_method?
+          STDERR.puts "Not on a method location #{location}"
+          return nil
+        end
+
+        method_analyzer = Parsing::MethodAnalyzer.from_source_analyzer(client_info.registry, source_analyzer)
 
         current_type = method_analyzer.calculate_current_node_type
         current_node_range = method_analyzer.current_node_range
