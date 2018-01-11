@@ -13,7 +13,8 @@ module Yoda
       def complete(uri, position)
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
-        method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, source, location)
+        cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
+        method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, cut_source, location)
 
         code_objects = method_analyzer.complete
         range = method_analyzer.method_selector_range

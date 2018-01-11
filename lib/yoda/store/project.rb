@@ -76,8 +76,16 @@ module Yoda
           return unless File.exist?(project.gemfile_lock_path)
           gemfile_lock_parser.specs.each do |gem|
             STDERR.puts "Building gem docs for #{gem.name} #{gem.version}"
-            YARD::CLI::Gems.run(gem.name, gem.version)
-            STDERR.puts "Done building gem docs for #{gem.name} #{gem.version}"
+            begin
+              Thread.new do
+                YARD::CLI::Gems.run(gem.name, gem.version)
+              end.join
+              STDERR.puts "Done building gem docs for #{gem.name} #{gem.version}"
+            rescue => ex
+              STDERR.puts ex
+              STDERR.puts ex.backtrace
+              STDERR.puts "Failed to build #{gem.name} #{gem.version}"
+            end
           end
         end
 
@@ -95,7 +103,15 @@ module Yoda
         end
 
         def load_dependencies
-          yardoc_files_of_dependencies.each { |yardoc_file| YardImporter.import(yardoc_file) }
+          yardoc_files_of_dependencies.each do |yardoc_file|
+            begin
+              YardImporter.import(yardoc_file)
+            rescue => ex
+              STDERR.puts ex
+              STDERR.puts ex.backtrace
+              STDERR.puts "Failed to load #{yardoc_file}"
+            end
+          end
         end
 
         def core_doc_files

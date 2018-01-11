@@ -9,7 +9,7 @@ module Yoda
         @end_location = end_location
       end
 
-      # @param ast_location [Parser::Source::Map]
+      # @param ast_location [Parser::Source::Map, Parser::Source::Range]
       # @return [Location, nil]
       def self.of_ast_location(ast_location)
         return nil unless Location.valid_location?(ast_location)

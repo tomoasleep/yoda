@@ -53,7 +53,8 @@ module Yoda
         when :block
           process_block_node(node, env)
         when :const
-          [Store::Types::GenericType.new('::Module', const_name_of(node)), env]
+          # [Store::Types::GenericType.new('::Module', const_name_of(node)), env]
+          [Store::Types::ConstantType.new(const_name_of(node)), env]
         when :lvar, :cvar, :ivar, :gvar
           [env.resolve(node.children.first) || unknown_type,  env]
         when :begin, :kwbegin, :block

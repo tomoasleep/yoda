@@ -38,7 +38,9 @@ module Yoda
         end
 
         # @param uri_string [String]
+        # @param text [String]
         def store(uri_string, text)
+          return unless program_file_uri?(uri_string)
           @cache[uri_string] = text
         end
 
@@ -61,6 +63,13 @@ module Yoda
           uri.path
         rescue URI::InvalidURIError
           nil
+        end
+
+        # @param uri_string [String]
+        def program_file_uri?(uri_string)
+          %w(.c .rb).include?(File.extname(URI.parse(uri_string).path))
+        rescue URI::InvalidURIError => _e
+          false
         end
       end
     end
