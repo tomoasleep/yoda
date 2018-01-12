@@ -165,7 +165,7 @@ module Yoda
               else
                 nil
               end
-            return [remained_tokens.slice(0...i), [token_to_add] + tokens_to_add] if token_to_add
+            return [remained_tokens.slice(0...i), tokens_to_add.slice(0..-2) + [token_to_add, tokens_to_add.last]] if token_to_add
           end
 
           fail CannotRecoverError, "Cannot fix inline error"
