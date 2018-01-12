@@ -3,24 +3,32 @@ require 'yard'
 module Yoda
   module Store
     class YardImporter
-      attr_reader :store
+      # @!attribute [r] store
+      #   @return ::YARD::RegistryStore
+      # @!attribute [r] yard_file
+      #   @return String
+      attr_reader :store, :yard_file
 
       # @param file [String]
       def self.import(file)
-        new.tap { |importer| importer.load(file) }.import
+        new(file).tap { |importer| importer }.import
       end
 
-      def initialize
+      # @param yard_file [String]
+      def initialize(yard_file)
+        @yard_file = yard_file
         @store = YARD::RegistryStore.new
         @registered = Set.new.add('')
       end
 
-      # @param file [String]
-      def load(file)
-        store.load(file)
+      # @return [String]
+      def project_root
+        @project_root ||= File.expand_path('..', yard_file)
       end
 
+      # @return [void]
       def import
+        store.load(yard_file)
         store.values.each do |el|
           register(el)
         end
@@ -62,6 +70,7 @@ module Yoda
       def register_constant_object(code_object)
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::ConstantObject.new(new_parent, code_object.name)
+        absolutenize_file_paths(code_object)
         code_object.copy_to(new_object)
         new_object
       end
@@ -69,6 +78,7 @@ module Yoda
       def register_macro_object(code_object)
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::MacroObject.new(new_parent, code_object.name)
+        absolutenize_file_paths(code_object)
         code_object.copy_to(new_object)
         new_object
       end
@@ -76,6 +86,7 @@ module Yoda
       def register_method_object(code_object)
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::MethodObject.new(new_parent, code_object.name, code_object.scope)
+        absolutenize_file_paths(code_object)
         code_object.copy_to(new_object)
         new_object
       end
@@ -83,6 +94,7 @@ module Yoda
       def register_class_variable_object(code_object)
         new_parent = find_new_parent_of(code_object)
         new_object = YARD::CodeObjects::ClassVariableObject.new(new_parent, code_object.name)
+        absolutenize_file_paths(code_object)
         code_object.copy_to(new_object)
         new_object
       end
@@ -109,7 +121,10 @@ module Yoda
         new_obj.class_mixins += origin_obj.class_mixins
         new_obj.instance_mixins += origin_obj.instance_mixins
         new_obj.groups += origin_obj.groups
-        new_obj.files += origin_obj.files
+        new_obj.has_comments = new_obj[:has_comments]
+        origin_obj.files.each do |file, line|
+          new_obj.add_file(File.expand_path(file, project_root), line)
+        end
         new_obj.source_type = origin_obj.source_type
         new_obj.visibility = origin_obj.visibility
         new_obj.dynamic = new_obj.dynamic? || origin_obj.dynamic?
@@ -121,6 +136,15 @@ module Yoda
 
         if new_obj.type == :class && new_obj.superclass && new_obj.superclass.type == :class && new_obj.superclass.name == :Object
           new_obj.superclass = proxynize(new_obj.superclass)
+        end
+      end
+
+      # @param obj [::YARD::CodeObjects::Base]
+      def absolutenize_file_paths(code_object)
+        files = code_object.files
+        code_object.files = []
+        files.each do |file, line|
+          code_object.add_file(File.expand_path(file, project_root), line)
         end
       end
 
