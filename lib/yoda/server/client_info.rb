@@ -29,6 +29,11 @@ module Yoda
         project.setup
       end
 
+      # @param path [String]
+      def uri_of_path(path)
+        FileStore.uri_of_path(File.expand_path(path, root_path))
+      end
+
       def reparse_doc(uri)
         path = FileStore.path_of_uri(uri)
         project.reparse(path)
@@ -62,6 +67,11 @@ module Yoda
           path = self.class.path_of_uri(uri_string)
           fail ArgumentError unless path
           File.read(path)
+        end
+
+        # @param path [String]
+        def self.uri_of_path(path)
+          "file://#{File.expand_path(path)}"
         end
 
         # @param uri_string [String]

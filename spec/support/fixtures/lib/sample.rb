@@ -13,7 +13,7 @@ module YodaFixture
     end
 
     def method3
-      0
+      self.method1(str)
     end
   end
 end

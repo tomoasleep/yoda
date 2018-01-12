@@ -30,6 +30,12 @@ module Yoda
       def move(row:, column:)
         self.class.new(begin_location.move(row: row, column: column), end_location.move(row: row, column: column))
       end
+
+      # @param location [Location]
+      # @return [true, false]
+      def include?(location)
+        begin_location <= location && location <= end_location
+      end
     end
   end
 end

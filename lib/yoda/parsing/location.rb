@@ -1,12 +1,21 @@
 module Yoda
   module Parsing
     class Location
+      include Comparable
+
       attr_reader :row, :column
       # @param row    [Integer]
       # @param column [Integer]
       def initialize(row:, column:)
         @row = row
         @column = column
+      end
+
+      # @param ast_location [Parser::Source::Map, Parser::Source::Range]
+      # @return [Location, nil]
+      def self.of_ast_location(ast_location)
+        return nil unless valid_location?(ast_location)
+        Location.new(row: ast_location.line, column: ast_location.column)
       end
 
       # @param line    [Integer]
@@ -67,6 +76,14 @@ module Yoda
 
       def to_s
         "(#{row}, #{column})"
+      end
+
+      # @param another [Location]
+      # @return Integer
+      def <=>(another)
+        return 0 if row == another.row && column == another.column
+        return 1 if (row == another.row && column >= another.column) || row > another.row
+        -1
       end
     end
   end

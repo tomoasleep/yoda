@@ -3,6 +3,7 @@ require 'language_server-protocol'
 module Yoda
   class Server
     require 'yoda/server/completion_provider'
+    require 'yoda/server/signature_provider'
     require 'yoda/server/hover_provider'
     require 'yoda/server/deserializer'
     require 'yoda/server/client_info'
@@ -13,7 +14,7 @@ module Yoda
       Deserializer.new.deserialize(hash || {})
     end
 
-    attr_reader :reader, :writer, :client_info, :completion_provider, :hover_provider
+    attr_reader :reader, :writer, :client_info, :completion_provider, :hover_provider, :signature_provider
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
@@ -56,6 +57,7 @@ module Yoda
         textDocument: {
           completion: :handle_text_document_completion,
           hover: :handle_text_document_hover,
+          signatureHelp: :handle_text_document_signature_help,
         },
       }
     end
@@ -76,6 +78,7 @@ module Yoda
       @client_info = ClientInfo.new(params[:root_uri])
       @completion_provider = CompletionProvider.new(@client_info)
       @hover_provider = HoverProvider.new(@client_info)
+      @signature_provider = SignatureProvider.new(@client_info)
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
@@ -87,12 +90,12 @@ module Yoda
           ),
           completion_provider: LSP::Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: %w(.),
+            trigger_characters: ['.'],
           ),
           hover_provider: true,
-          # signature_help_provider: LSP::Interface::SignatureHelpOptions.new(
-          #   triger_characters: [],
-          # ),
+          signature_help_provider: LSP::Interface::SignatureHelpOptions.new(
+            trigger_characters: ['(', ','],
+          ),
         ),
       )
     end
@@ -143,6 +146,13 @@ module Yoda
         position = params[:position]
 
         hover_provider&.request_hover(uri, position)
+      end
+
+      def handle_text_document_signature_help(params)
+        uri = params[:text_document][:uri]
+        position = params[:position]
+
+        signature_provider&.provide(uri, position)
       end
     end
     include TextDocument
