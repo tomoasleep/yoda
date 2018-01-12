@@ -200,9 +200,9 @@ module Yoda
               reduce(stack, tokens_to_add, :kEND)
             when :kEND
               stack.push(:kEND)
-            when :tLBRACE
+            when :tLBRACE, :tLCURLY
               reduce(stack, tokens_to_add, :tRBRACE)
-            when :tRBRACE
+            when :tRBRACE, :tRCURLY
               stack.push(:tRBRACE)
             end
           end

@@ -53,6 +53,13 @@ module Yoda
         { line: row - location.line, column: column - location.column }
       end
 
+      # @param row    [Integer]
+      # @param column [Integer]
+      # @return [Location]
+      def move(row:, column:)
+        self.class.new(row: @row + row, column: @column + column)
+      end
+
       # @return [{Symbol => Integer}]
       def to_language_server_protocol_range
         { line: row - 1, character: column }

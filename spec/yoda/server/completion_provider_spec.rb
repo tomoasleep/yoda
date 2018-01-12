@@ -39,5 +39,21 @@ RSpec.describe Yoda::Server::CompletionProvider do
         )
       end
     end
+
+    context 'request information on the dot of a send node' do
+      let(:uri) { file_uri('lib/sample.rb') }
+      let(:position) { { line: 11, character: 11 } }
+      let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 11 } } }
+
+      it 'returns infomation of `str` variable' do
+        expect(subject).to be_a(LSP::Interface::CompletionList)
+        expect(subject.is_incomplete).to be_falsy
+        expect(subject.items).to include(
+          have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
+          have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
+          have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
+        )
+      end
+    end
   end
 end

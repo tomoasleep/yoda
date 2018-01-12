@@ -17,7 +17,7 @@ module Yoda
         method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, cut_source, location)
 
         code_objects = method_analyzer.complete
-        range = method_analyzer.method_selector_range
+        range = method_analyzer.complete_substitution_range
 
         LSP::Interface::CompletionList.new(
           is_incomplete: false,

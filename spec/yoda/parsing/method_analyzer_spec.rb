@@ -60,6 +60,25 @@ RSpec.describe Yoda::Parsing::MethodAnalyzer do
         expect(subject).to contain_exactly(have_attributes(path: 'Hoge#fuga'))
       end
     end
+
+    context 'a class definition is given and cursor is on the dot' do
+      include_context 'define a class to root'
+
+      let(:location) { Yoda::Parsing::Location.new(row: 3, column: 8) }
+      let(:source) do
+        <<~EOS
+        class Hoge
+          def main(hoge)
+            hoge.fuho
+          end
+        end
+        EOS
+      end
+
+      it 'respects the current cursor and returns the matched method' do
+        expect(subject).to contain_exactly(have_attributes(path: 'Hoge#main'), have_attributes(path: 'Hoge#fuga'))
+      end
+    end
   end
 
   describe '#calculate_current_node_type' do

@@ -43,9 +43,9 @@ module Yoda
         method_completion_worker.method_candidates
       end
 
-      # @return [Rangeg]
-      def method_selector_range
-        method_completion_worker.selector_range
+      # @return [Range, nil]
+      def complete_substitution_range
+        method_completion_worker.substitution_range
       end
 
       def current_node_worker
@@ -149,12 +149,20 @@ module Yoda
           nearest_send_node && analyzer.current_location.included?(nearest_send_node.location.selector)
         end
 
+        def on_dot?
+          nearest_send_node && nearest_send_node.location.dot && analyzer.current_location.included?(nearest_send_node.location.dot)
+        end
+
         # @return [String, nil]
         def index_word
           return nil unless nearest_send_node
           @index_word ||= begin
-            offset = analyzer.current_location.offset_from_begin(nearest_send_node.location.selector)[:column]
-            nearest_send_node.children[1].to_s.slice(0..offset)
+            if on_selector?
+              offset = analyzer.current_location.offset_from_begin(nearest_send_node.location.selector)[:column]
+              nearest_send_node.children[1].to_s.slice(0..offset)
+            else
+              ''
+            end
           end
         end
 
@@ -168,6 +176,23 @@ module Yoda
           Range.of_ast_location(nearest_send_node.location.selector)
         end
 
+        # @return [Range, nil]
+        def dot_range
+          nearest_send_node.location.dot && Range.of_ast_location(nearest_send_node.location.dot)
+        end
+
+        # @return [Location, nil]
+        def next_location_to_dot
+          nearest_send_node.location.dot && Range.of_ast_location(nearest_send_node.location.dot).end_location
+        end
+
+        # @return [Range, nil]
+        def substitution_range
+          return selector_range if on_selector?
+          return Range.new(next_location_to_dot, next_location_to_dot) if on_dot?
+          nil
+        end
+
         # @return [Store::Types::Base, nil]
         def receiver_type
           @receiver_type ||= nearest_receiver_node && analyzer.calculate_type(nearest_receiver_node)
@@ -175,7 +200,7 @@ module Yoda
 
         # @return [Array<YARD::CodeObjects::MethodObject>]
         def method_candidates
-          return [] if !nearest_send_node || !on_selector?
+          return [] if !nearest_send_node || (!on_selector? && !on_dot?)
           class_candidates = analyzer.evaluation_context.find_class_candidates(receiver_type)
           analyzer.evaluation_context.find_instance_method_candidates(class_candidates, /\A#{index_word}/)
         end

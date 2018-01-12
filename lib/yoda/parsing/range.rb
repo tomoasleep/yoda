@@ -23,6 +23,13 @@ module Yoda
       def to_language_server_protocol_range
         { start: begin_location.to_language_server_protocol_range, end: end_location.to_language_server_protocol_range }
       end
+
+      # @param row    [Integer]
+      # @param column [Integer]
+      # @return [Range]
+      def move(row:, column:)
+        self.class.new(begin_location.move(row: row, column: column), end_location.move(row: row, column: column))
+      end
     end
   end
 end
