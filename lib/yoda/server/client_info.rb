@@ -3,6 +3,14 @@ require 'uri'
 module Yoda
   class Server
     class ClientInfo
+      # @!attribute [r] root_uri
+      #   @return [String]
+      # @!attribute [r] file_store
+      #   @return [FileStore]
+      # @!attribute [r] registry
+      #   @return [Store::Registry]
+      # @!attribute [r] project
+      #   @return [Store::Project]
       attr_reader :root_uri, :file_store, :registry, :project
 
       # @param root_uri [String] an uri expression of project root path
