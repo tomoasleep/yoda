@@ -6,30 +6,26 @@ module Yoda
       attr_reader :registry, :caller_object, :namespace
 
       # @param registry      [Store::Registry]
-      # @param caller_object [YARD::CodeObjects::Base] represents who is the evaluator of the code.
-      # @param namespace     [YARD::CodeObjects::Base] represents the namespace where the code is written.
-      def initialize(registry, caller_object, namespace)
+      # @param caller_object [Store::Values::Base] represents who is the evaluator of the code.
+      def initialize(registry, caller_object)
+        fail ArgumentError, registry unless registry.is_a?(Store::Registry)
+        fail ArgumentError, caller_object unless caller_object.is_a?(Store::Values::Base)
+
         @registry = registry
         @caller_object = caller_object
-        @namespace = namespace
       end
 
-      # @param objects [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
-      # @param pattern [String, RegExp]
-      def find_instance_method_candidates(objects, pattern)
-        fail ArgumentError, objects unless objects.is_a?(Array)
-        objects.reject { |klass| klass.type == :proxy }.map do |klass|
-          klass&.meths.select { |meth| pattern.is_a?(String) ? meth.name.to_s.start_with?(pattern) : meth.name.to_s.match?(pattern) }
-        end.flatten
+      # @param type [Types::Base]
+      # @return [Array<Store::Values::Base>]
+      def instanciate(type)
+        type.instanciate(registry)
       end
 
-      def calc_method_return_type(methods)
-        Store::Types::UnionType.new(methods.map { |method| Store::Function.new(method).return_type })
-      end
-
-      # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
-      def find_class_candidates(type)
-        type.resolve(registry)
+      # @param constant_name [String]
+      # @return [Store::Path]
+      def create_path(constant_name)
+        # TODO
+        Store::Path.new(caller_object.namespace, constant_name)
       end
     end
   end

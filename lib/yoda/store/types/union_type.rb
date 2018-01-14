@@ -40,6 +40,12 @@ module Yoda
         def resolve(registry)
           types.map { |type| type.resolve(registry) }.flatten
         end
+
+        # @param registry [Registry]
+        # @return [Array<Values::Base>]
+        def instanciate(registry)
+          types.map { |type| type.instanciate(registry) }
+        end
       end
     end
   end

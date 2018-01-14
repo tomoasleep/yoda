@@ -13,7 +13,7 @@ module Yoda
 
         # @param another [Object]
         def eql?(another)
-          another.is_a?(ConstantType) &&
+          another.is_a?(InstanceType) &&
           name == another.name
         end
 
@@ -30,7 +30,13 @@ module Yoda
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
         def resolve(registry)
-          [registry.find_or_proxy(name)]
+          [registry.find(name)].compact
+        end
+
+        # @param registry [Registry]
+        # @return [Array<Values::Base>]
+        def instanciate(registry)
+          resolve(registry).map { |el| Values::InstanceValue.new(registry, el) }
         end
       end
     end

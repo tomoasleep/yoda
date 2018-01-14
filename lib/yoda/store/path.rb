@@ -3,9 +3,11 @@ module Yoda
     class Path
       attr_reader :namespace, :name
 
-      # @param namespace [YARD::CodeObjects::Base]
+      # @param namespace [YARD::CodeObjects::Base, YARD::CodeObjects::Proxy]
       # @param name [String, Path]
       def initialize(namespace, name)
+        fail ArugmentError, namespace unless namespace.is_a?(YARD::CodeObjects::Base) || namespace.is_a?(YARD::CodeObjects::Proxy)
+        fail ArugmentError, name unless name.is_a?(String) || name.is_a?(Path)
         @namespace = namespace
         @name = name.is_a?(Path) ? name.name : name
       end

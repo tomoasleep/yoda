@@ -14,15 +14,15 @@ module Yoda
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
         cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
-        method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, cut_source, location)
 
-        code_objects = method_analyzer.nearest_methods
-        create_signature_help(code_objects)
+        signature_worker = Evaluation::SignatureDiscovery.new(client_info.registry, cut_source, location)
+
+        functions = signature_worker.method_candidates
+        create_signature_help(functions)
       end
 
-      # @param code_objects [Array<YARD::CodeObjects::MethodObject>]
-      def create_signature_help(code_objects)
-        functions = code_objects.map { |code_object| Store::Function.new(code_object) }
+      # @param code_objects [Array<Store::Function>]
+      def create_signature_help(functions)
         signatures = functions.map { |function| function.signatures.empty? ? [function] : function.signatures }.flatten
         LSP::Interface::SignatureHelp.new(
           signatures: signatures.map { |signature| create_signature_info(signature) },

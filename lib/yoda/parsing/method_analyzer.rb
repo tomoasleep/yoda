@@ -1,5 +1,6 @@
 module Yoda
   module Parsing
+    # @deprecated
     class MethodAnalyzer
       include AstTraversable
 
@@ -146,46 +147,7 @@ module Yoda
         env
       end
 
-      module NearestSendNodeAnalyzable
-        def nearest_send_node
-          @nearest_send_node ||= analyzer.nodes_to_current_location.reverse.find { |node| node.type == :send }
-        end
-
-        def on_selector?
-          nearest_send_node && analyzer.current_location.included?(nearest_send_node.location.selector)
-        end
-
-        def on_dot?
-          nearest_send_node && nearest_send_node.location.dot && analyzer.current_location.included?(nearest_send_node.location.dot)
-        end
-
-        # @return [Parser::AST::Node, nil]
-        def nearest_receiver_node
-          nearest_send_node && nearest_send_node.children[0]
-        end
-
-        # @return [Range]
-        def selector_range
-          Range.of_ast_location(nearest_send_node.location.selector)
-        end
-
-        # @return [Range, nil]
-        def dot_range
-          nearest_send_node.location.dot && Range.of_ast_location(nearest_send_node.location.dot)
-        end
-
-        # @return [Location, nil]
-        def next_location_to_dot
-          nearest_send_node.location.dot && Range.of_ast_location(nearest_send_node.location.dot).end_location
-        end
-
-        def name_to_send
-          nearest_send_node.children[1].to_s
-        end
-      end
-
       class SendMethodCompletion
-        include NearestSendNodeAnalyzable
         attr_reader :analyzer
 
         # @param analyzer [MethodAnalyzer]
@@ -208,9 +170,9 @@ module Yoda
 
         # @return [Range, nil]
         def substitution_range
-          return selector_range if on_selector?
-          return Range.new(next_location_to_dot, next_location_to_dot) if on_dot?
-          nil
+          return nil unless valid?
+          return Range.new(current_send.next_location_to_dot, current_send.next_location_to_dot) if current_send.on_dot?(location)
+          current_send.selector_range
         end
 
         # @return [Store::Types::Base, nil]
@@ -229,65 +191,6 @@ module Yoda
           return [] if !nearest_send_node || (!on_selector? && !on_dot?)
           class_candidates = analyzer.evaluation_context.find_class_candidates(receiver_type)
           analyzer.evaluation_context.find_instance_method_candidates(class_candidates, /\A#{index_word}/)
-        end
-      end
-
-      class SendNodeAnalyzer
-        attr_reader :send_node
-
-        # @param send_node [::Parser::AST::Node]
-        def initialize(send_node)
-          @send_node = send_node
-        end
-
-        def on_selector?(location)
-          send_node.location.dot && selector_range.include?(location)
-        end
-
-        # @param location [Location]
-        # @return [true, false]
-        def on_dot?(location)
-          send_node.location.dot && dot_range.include?(location)
-        end
-
-        # @param location [Location]
-        # @return [true, false]
-        def on_parameter?(location)
-          parameter_range.include?(location)
-        end
-
-        # @return [Range]
-        def parameter_range
-          @parameter_range ||=
-            Range.new(
-              Location.of_ast_location(send_node.location.selector.end),
-              Location.of_ast_location(send_node.location.expression.end).move(row: 0, column: -1),
-            )
-        end
-
-        # @return [Range]
-        def selector_range
-          @selector_range ||= Range.of_ast_location(send_node.location.selector)
-        end
-
-        # @return [Range, nil]
-        def dot_range
-          @dot_range ||= send_node.location.dot && Range.of_ast_location(send_node.location.dot)
-        end
-
-        # @return [Location, nil]
-        def next_location_to_dot
-          send_node.location.dot && Range.of_ast_location(send_node.location.dot).end_location
-        end
-
-        # @return [Parser::AST::Node, nil]
-        def receiver_node
-          send_node && send_node.children[0]
-        end
-
-        # @return [String]
-        def sending_name
-          send_node.children[1].to_s
         end
       end
 
@@ -363,53 +266,6 @@ module Yoda
         # @return [Store::Types::Base]
         def current_node_type
           @current_node_type ||= analyzer.calculate_type(current_node)
-        end
-      end
-
-      class CurrentMethodReferenceCalculator
-        attr_reader :analyzer
-
-        # @param analyzer [MethodAnalyzer]
-        def initialize(analyzer)
-          @analyzer = analyzer
-        end
-
-        # @return [Parser::AST::Node]
-        def current_node
-          analyzer.nodes_to_current_location.last
-        end
-
-        # @return [Store::Types::Base]
-        def current_node_type
-          @current_node_type ||= analyzer.calculate_type(current_node)
-        end
-
-        # @return [true, false]
-        def on_send_node?
-          current_node.type == :send
-        end
-
-        # @return [String, nil]
-        def index_word
-          return nil unless on_send_node?
-          @index_word ||= current_node.children[1].to_s
-        end
-
-        # @return [Parser::AST::Node, nil]
-        def current_receiver_node
-           on_send_node? ? nearest_send_node.children[0] : nil
-        end
-
-        # @return [Store::Types::Base, nil]
-        def receiver_type
-          @receiver_type ||= current_receiver_node && analyzer.calculate_type(current_receiver_node)
-        end
-
-        # @return [Array<YARD::CodeObjects::MethodObject>]
-        def method_candidates
-          return [] unless on_send_node?
-          class_candidates = analyzer.evaluation_context.find_class_candidates(receiver_type)
-          analyzer.evaluation_context.find_instance_method_candidates(class_candidates, index_word)
         end
       end
 

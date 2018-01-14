@@ -23,8 +23,12 @@ module TypeHelper
     Yoda::Store::Types::InstanceType.new(value)
   end
 
-  def constant_type(value)
-    Yoda::Store::Types::ConstantType.new(value)
+  def value_type(value)
+    Yoda::Store::Types::ValueType.new(value)
+  end
+
+  def module_type(value)
+    Yoda::Store::Types::ModuleType.new(value)
   end
 
   def duck_type(method_name)
@@ -37,10 +41,6 @@ module TypeHelper
 
   def generic_type(name, *type_arguments)
     Yoda::Store::Types::GenericType.new(name, type_arguments)
-  end
-
-  def key_value_type(name, key_type, value_type)
-    Yoda::Store::Types::KeyValueType.new(name, key_type, value_type)
   end
 
   def sequence_type(name, *types)

@@ -14,32 +14,32 @@ module Yoda
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
         cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
-        method_analyzer = Parsing::MethodAnalyzer.from_source(client_info.registry, cut_source, location)
 
-        code_objects = method_analyzer.complete
-        range = method_analyzer.complete_substitution_range
+        completion_worker = Evaluation::MethodCompletion.new(client_info.registry, cut_source, location)
+
+        functions = completion_worker.method_candidates
+        range = completion_worker.substitution_range
 
         LSP::Interface::CompletionList.new(
           is_incomplete: false,
-          items: code_objects.map { |code_object| create_completion_item(code_object, range) },
+          items: functions.map { |function| create_completion_item(function, range) },
         )
       end
 
-      # @param code_object [YARD::CodeObjects::MethodObject]
+      # @param code_object [Store::Function]
       # @param range       [Parsing::Range]
-      def create_completion_item(code_object, range)
+      def create_completion_item(function, range)
         return nil unless range
 
-        function = Store::Function.new(code_object)
         LSP::Interface::CompletionItem.new(
-          label: code_object.name.to_s,
+          label: function.code_object.name.to_s,
           kind: LSP::Constant::CompletionItemKind::METHOD,
-          detail: code_object.path,
-          documentation: code_object.docstring,
-          sort_text: code_object.name.to_s,
+          detail: function.code_object.path,
+          documentation: function.code_object.docstring,
+          sort_text: function.code_object.name.to_s,
           text_edit: LSP::Interface::TextEdit.new(
             range: LSP::Interface::Range.new(range.to_language_server_protocol_range),
-            new_text: code_object.name.to_s,
+            new_text: function.code_object.name.to_s,
           ),
           data: {},
         )

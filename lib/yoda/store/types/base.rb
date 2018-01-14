@@ -20,6 +20,13 @@ module Yoda
         def resolve(registry)
           fail NotImplementedError
         end
+
+        # @abstract
+        # @param registry [Registry]
+        # @return [Array<Values::Base>]
+        def instanciate(registry)
+          fail NotImplementedError
+        end
       end
     end
   end

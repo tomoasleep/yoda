@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Parsing::MethodAnalyzer do
+RSpec.xdescribe Yoda::Parsing::MethodAnalyzer do
   include TypeHelper
 
   let(:registry) { Yoda::Store::Registry.instance }
@@ -16,67 +16,6 @@ RSpec.describe Yoda::Parsing::MethodAnalyzer do
         YARD::CodeObjects::MethodObject.new(klass, 'fuga') do |obj|
           obj.docstring = "@return [String]"
         end
-      end
-    end
-  end
-
-  describe '#complete' do
-    subject { described_class.from_source(registry, source, location).complete }
-
-    context 'a class definition is given' do
-      include_context 'define a class to root'
-
-      let(:location) { Yoda::Parsing::Location.new(row: 3, column: 10) }
-      let(:source) do
-        <<~EOS
-        class Hoge
-          def main(hoge)
-            hoge.fu
-          end
-        end
-        EOS
-      end
-
-      it 'returns the matched method' do
-        expect(subject).to contain_exactly(have_attributes(path: 'Hoge#fuga'))
-      end
-    end
-
-    context 'a class definition is given' do
-      include_context 'define a class to root'
-
-      let(:location) { Yoda::Parsing::Location.new(row: 3, column: 10) }
-      let(:source) do
-        <<~EOS
-        class Hoge
-          def main(hoge)
-            hoge.fuho
-          end
-        end
-        EOS
-      end
-
-      it 'respects the current cursor and returns the matched method' do
-        expect(subject).to contain_exactly(have_attributes(path: 'Hoge#fuga'))
-      end
-    end
-
-    context 'a class definition is given and cursor is on the dot' do
-      include_context 'define a class to root'
-
-      let(:location) { Yoda::Parsing::Location.new(row: 3, column: 8) }
-      let(:source) do
-        <<~EOS
-        class Hoge
-          def main(hoge)
-            hoge.fuho
-          end
-        end
-        EOS
-      end
-
-      it 'respects the current cursor and returns the matched method' do
-        expect(subject).to contain_exactly(have_attributes(path: 'Hoge#main'), have_attributes(path: 'Hoge#fuga'))
       end
     end
   end

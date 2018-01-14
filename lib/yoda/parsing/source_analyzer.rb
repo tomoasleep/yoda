@@ -39,6 +39,21 @@ module Yoda
       def current_namespace_nodes
         nodes_to_current_location_from_root.find_all { |node| [:class, :module, :sclass].include?(node.type) }
       end
+
+      # @return [Namespace]
+      def namespace
+        @namespace ||= NodeObjects::Namespace.new(self.ast)
+      end
+
+      # @return [NodeObjects::Namespace, nil]
+      def current_namespace
+        @current_namespace ||= namespace.calc_current_location_namespace(location)
+      end
+
+      # @return [NodeObjects::MethodDefition, nil]
+      def current_method
+        @current_method ||= namespace.calc_current_location_method(location)
+      end
     end
   end
 end

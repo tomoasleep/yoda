@@ -1,7 +1,7 @@
 module Yoda
   module Store
     module Types
-      class ConstantType < Base
+      class ModuleType < Base
         attr_reader :value
 
         VALUE_REGEXP = /\A[0-9a-z]/
@@ -13,7 +13,7 @@ module Yoda
 
         # @param another [Object]
         def eql?(another)
-          another.is_a?(ConstantType) &&
+          another.is_a?(ModuleType) &&
           value == another.value
         end
 
@@ -34,22 +34,13 @@ module Yoda
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
-          [registry.find_or_proxy((is_value? && value_class) || value)]
+          [registry.find(value)].compact
         end
 
-        def value_class
-          case value
-          when 'true'
-            '::TrueClass'
-          when 'false'
-            '::FalseClass'
-          when 'nil'
-            '::NilClass'
-          when /\A\d+\Z/
-            '::Numeric'
-          else
-            nil
-          end
+        # @param registry [Registry]
+        # @return [Array<Values::Base>]
+        def instanciate(registry)
+          resolve(registry).map { |el| Values::ModuleValue.new(registry, el) }
         end
       end
     end

@@ -44,7 +44,7 @@ module Yoda
           [type_for_sexp_type(node.type), env]
         when :return, :break, :next
           # TODO
-          node.children[0] ? process(node.children[0], env) : [Store::Types::ConstantType.new('nil'), env]
+          node.children[0] ? process(node.children[0], env) : [Store::Types::ValueType.new('nil'), env]
         when :resbody
           # TODO
           process(node.children[2], env)
@@ -53,8 +53,7 @@ module Yoda
         when :block
           process_block_node(node, env)
         when :const
-          # [Store::Types::GenericType.new('::Module', const_name_of(node)), env]
-          [Store::Types::ConstantType.new(const_name_of(node)), env]
+          [Store::Types::ModuleType.new(context.create_path(Parsing::NodeObjects::ConstNode.new(node).to_s)), env]
         when :lvar, :cvar, :ivar, :gvar
           [env.resolve(node.children.first) || unknown_type,  env]
         when :begin, :kwbegin, :block
@@ -65,6 +64,14 @@ module Yoda
         else
           [type_for_sexp_type(node.type), env]
         end
+      end
+
+      # @param node [::AST::Node]
+      # @param env  [Environment]
+      # @return [[Array<Store::Values::Base>, env]]
+      def process_to_instanciate(node, env)
+        type, env = process(node, env)
+        [context.instanciate(type), env]
       end
 
       # @param node [Array<::AST::Node>]
@@ -86,15 +93,14 @@ module Yoda
       def process_send_node(node, env)
         receiver_node, method_name_sym, *argument_nodes = node.children
         if receiver_node
-          receiver_type, env = process(receiver_node, env)
-          class_candidates = context.find_class_candidates(receiver_type)
+          receiver_candidates, env = process_to_instanciate(receiver_node, env)
         else
-          # FIXME
-          class_candidates = [context.caller_object]
+          receiver_candidates = [context.caller_object]
         end
+
         _type, env = argument_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
-        method_candidates = context.find_instance_method_candidates(class_candidates, method_name_sym.to_s)
-        method_return_type = context.calc_method_return_type(method_candidates)
+        method_candidates = receiver_candidates.map(&:methods).flatten.select { |method| method.name.to_s == method_name_sym.to_s }
+        method_return_type = Store::Types::UnionType.new(method_candidates.map(&:return_type))
         [method_return_type, env]
       end
 
@@ -126,17 +132,6 @@ module Yoda
         [type, env.bind(symbol, type)]
       end
 
-      # @param node [::AST::Node]
-      def const_name_of(node)
-        paths = []
-        while true
-          return Store::Path.new(context.namespace, paths.join('::')) unless node
-          return '::' + paths.join('::') if node.type == :cbase
-          paths.unshift(node.children[1])
-          node = node.children[0]
-        end
-      end
-
       # @param sexp_type [::Symbol, nil]
       def type_for_sexp_type(sexp_type)
         case sexp_type
@@ -157,7 +152,7 @@ module Yoda
         when :self
           Store::Types::InstanceType.new(context.caller_object.path)
         when :true, :false, :nil
-          Store::Types::ConstantType.new(sexp_type.to_s)
+          Store::Types::ValueType.new(sexp_type.to_s)
         when :int, :float, :complex, :rational
           Store::Types::InstanceType.new('::Numeric')
         else
@@ -166,7 +161,7 @@ module Yoda
       end
 
       def boolean_type
-        Store::Types::UnionType.new(Store::Types::ConstantType.new('true'), Store::Types::ConstantType.new('false'))
+        Store::Types::UnionType.new(Store::Types::ValueType.new('true'), Store::Types::ValueType.new('false'))
       end
 
       def unknown_type

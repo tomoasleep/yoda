@@ -6,8 +6,9 @@ RSpec.describe Yoda::Typing::Evaluator do
 
   let(:registry) { Yoda::Store::Registry.instance }
   let(:root) { registry.at(:root) }
+  let(:root_value) { Yoda::Store::Values::InstanceValue.new(registry, root) }
 
-  let(:context) { Yoda::Typing::Context.new(registry, root, root) }
+  let(:context) { Yoda::Typing::Context.new(registry, root_value) }
   let(:evaluator) { described_class.new(context) }
 
   shared_context 'define a method to root' do
@@ -31,7 +32,7 @@ RSpec.describe Yoda::Typing::Evaluator do
       end
 
       it 'returns the type of the method' do
-        expect(subject.first).to eq(constant_type(Yoda::Store::Path.new(root, 'Hoge')))
+        expect(subject.first).to eq(instance_type(Yoda::Store::Path.new(root, 'Hoge')))
       end
     end
 
@@ -46,7 +47,7 @@ RSpec.describe Yoda::Typing::Evaluator do
       end
 
       it "returns the assigned value's type" do
-        expect(subject.first).to eq(constant_type(Yoda::Store::Path.new(root, 'Hoge')))
+        expect(subject.first).to eq(instance_type(Yoda::Store::Path.new(root, 'Hoge')))
       end
     end
 

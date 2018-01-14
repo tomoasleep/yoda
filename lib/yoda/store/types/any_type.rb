@@ -21,6 +21,12 @@ module Yoda
         def resolve(registry)
           []
         end
+
+        # @param registry [Registry]
+        # @return [Array<Values::Base>]
+        def instanciate(registry)
+          []
+        end
       end
     end
   end
