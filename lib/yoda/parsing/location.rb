@@ -44,6 +44,11 @@ module Yoda
       end
 
       # @param location [Parser::Source::Range, Parser::Source::Map]
+      def later_than?(location)
+        move(row: 0, column: -1).after_begin(location)
+      end
+
+      # @param location [Parser::Source::Range, Parser::Source::Map]
       def after_begin(location)
         return false unless self.class.valid_location?(location)
         (location.line == row && location.column <= column) || location.line < row

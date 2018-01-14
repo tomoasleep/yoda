@@ -22,12 +22,15 @@ module Yoda
 
       # @return [Integer]
       def current_location_token_index
-        @current_location_token_index ||= tokens_of_source.find_index { |type, (name, range)| current_location.included?(range) }
+        @current_location_token_index ||= begin
+          reverse_index = tokens_of_source.reverse_each.find_index { |type, (name, range)| current_location.later_than?(range) }
+          tokens_of_source.length - 1 - reverse_index
+        end
       end
 
       # @return [(Symbol, (String, ::Parser::Source::Range))]
       def current_location_token
-        @current_location_token ||= tokens_of_source.find { |type, (name, range)| current_location.included?(range) }
+        tokens_of_source[current_location_token_index]
       end
 
       # @return [Array<(Symbol, (String, ::Parser::Source::Range))>]
