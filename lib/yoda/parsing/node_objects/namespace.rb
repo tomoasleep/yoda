@@ -44,6 +44,11 @@ module Yoda
         end
 
         # @return [String]
+        def path
+          full_name
+        end
+
+        # @return [String]
         def full_name
           return :root if type == :root
           parent_name = parent ? parent.full_name : ''
