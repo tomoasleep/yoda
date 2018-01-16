@@ -5,7 +5,7 @@ module Yoda
     require 'yoda/server/completion_provider'
     require 'yoda/server/signature_provider'
     require 'yoda/server/hover_provider'
-    require 'yoda/server/reference_provider'
+    require 'yoda/server/definition_provider'
     require 'yoda/server/deserializer'
     require 'yoda/server/client_info'
 
@@ -15,7 +15,7 @@ module Yoda
       Deserializer.new.deserialize(hash || {})
     end
 
-    attr_reader :reader, :writer, :client_info, :completion_provider, :hover_provider, :signature_provider, :reference_provider
+    attr_reader :reader, :writer, :client_info, :completion_provider, :hover_provider, :signature_provider, :definition_provider
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
@@ -59,7 +59,7 @@ module Yoda
           completion: :handle_text_document_completion,
           hover: :handle_text_document_hover,
           signatureHelp: :handle_text_document_signature_help,
-          references: :handle_text_document_references,
+          definition: :handle_text_document_definition,
         },
       }
     end
@@ -81,7 +81,7 @@ module Yoda
       @completion_provider = CompletionProvider.new(@client_info)
       @hover_provider = HoverProvider.new(@client_info)
       @signature_provider = SignatureProvider.new(@client_info)
-      @reference_provider = ReferenceProvider.new(@client_info)
+      @definition_provider = DefinitionProvider.new(@client_info)
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
@@ -96,7 +96,7 @@ module Yoda
             trigger_characters: ['.'],
           ),
           hover_provider: true,
-          references_provider: true,
+          definition_provider: true,
           signature_help_provider: LSP::Interface::SignatureHelpOptions.new(
             trigger_characters: ['(', ','],
           ),
@@ -159,11 +159,11 @@ module Yoda
         signature_provider&.provide(uri, position)
       end
 
-      def handle_text_document_references(params)
+      def handle_text_document_definition(params)
         uri = params[:text_document][:uri]
         position = params[:position]
 
-        reference_provider&.provide(uri, position)
+        definition_provider&.provide(uri, position)
       end
     end
     include TextDocument

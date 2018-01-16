@@ -1,6 +1,6 @@
 module Yoda
   module Evaluation
-    class FindReference
+    class FindDefinition
       include NodeEvaluatable
       attr_reader :registry, :source, :location
 

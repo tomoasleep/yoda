@@ -1,6 +1,6 @@
 module Yoda
   class Server
-    class ReferenceProvider
+    class DefinitionProvider
       attr_reader :client_info
 
       # @param client_info [ClientInfo]
@@ -15,7 +15,7 @@ module Yoda
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-        reference_worker = Evaluation::FindReference.new(client_info.registry, source, location)
+        reference_worker = Evaluation::FindDefinition.new(client_info.registry, source, location)
 
         references = reference_worker.current_const_references
         references.map { |(path, line)| create_location(path, line) }
