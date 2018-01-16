@@ -14,9 +14,10 @@ module Yoda
         end
 
         # @return [Array<Function>]
-        def methods
+        def methods(visibility: nil)
           return [] if class_object.type == :proxy
-          class_object.meths(scope: :instance).map { |meth| Function.new(meth) } + object_methods
+          opts = { scope: :instance, visibility: visibility }.compact
+          class_object.meths(opts).map { |meth| Function.new(meth) } + object_methods(visibility: visibility)
         end
 
         # @return [String]
@@ -30,11 +31,12 @@ module Yoda
 
         private
 
-        def object_methods
+        def object_methods(visibility: nil)
           return [] if class_object.type == :proxy
-          method_names = Set.new(class_object.meths(scope: :instance).map(&:name))
+          opts = { scope: :instance, visibility: visibility }.compact
+          method_names = Set.new(class_object.meths(opts).map(&:name))
           if object = registry.find('::Object')
-            object.meths(scope: :instance).reject { |o| method_names.include?(o.name) }.map { |meth| Function.new(meth) }
+            object.meths(opts).reject { |o| method_names.include?(o.name) }.map { |meth| Function.new(meth) }
           else
             []
           end

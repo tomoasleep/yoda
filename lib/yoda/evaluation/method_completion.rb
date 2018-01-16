@@ -21,7 +21,7 @@ module Yoda
       # @return [Array<Store::Function>]
       def method_candidates
         return [] unless valid?
-        receiver_values.map(&:methods).flatten.select { |meth| meth.name.to_s.start_with?(index_word) }
+        receiver_values.map { |value| value.methods(visibility: method_visibility_of_send_node(current_send)) }.flatten.select { |meth| meth.name.to_s.start_with?(index_word) }
       end
 
       # @return [Range, nil]

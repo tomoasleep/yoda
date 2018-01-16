@@ -24,6 +24,16 @@ module Yoda
         receiver_values
       end
 
+      # @param send_node [Parsing::NodeObjects::SendNode]
+      # @return [Array<Symbol>]
+      def method_visibility_of_send_node(send_node)
+        if send_node.receiver_node
+          %i(public)
+        else
+          %i(public private protected)
+        end
+      end
+
       private
 
       # @param registry    [Store::Reggistry]
