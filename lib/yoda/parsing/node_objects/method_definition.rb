@@ -29,7 +29,7 @@ module Yoda
         end
 
         # @param registry [Parsing::NodeObjects::MethodDefinition]
-        # @return [Base]
+        # @return [Store::Values::Base]
         def caller_value(registry)
           code_object = registry.find_or_proxy(namespace.full_name)
           Store::Values::InstanceValue.new(registry, code_object)

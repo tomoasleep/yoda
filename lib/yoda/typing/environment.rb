@@ -21,6 +21,18 @@ module Yoda
         @binds[key] = type
         self
       end
+
+      class SendLog
+        attr_reader :node, :return_type, :context
+        # @param node        [::AST::Node]
+        # @param return_type [Store::Types::Base]
+        # @param context     [Context]
+        def initialize(node, return_type, context)
+          @node = node
+          @return_type = return_type
+          @context = context
+        end
+      end
     end
   end
 end

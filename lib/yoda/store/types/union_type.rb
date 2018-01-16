@@ -38,13 +38,13 @@ module Yoda
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
         def resolve(registry)
-          types.map { |type| type.resolve(registry) }.flatten
+          types.map { |type| type.resolve(registry) }.flatten.compact
         end
 
         # @param registry [Registry]
         # @return [Array<Values::Base>]
         def instanciate(registry)
-          types.map { |type| type.instanciate(registry) }
+          types.map { |type| type.instanciate(registry) }.flatten
         end
       end
     end

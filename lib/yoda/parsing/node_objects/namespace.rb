@@ -48,10 +48,15 @@ module Yoda
           full_name
         end
 
+        # @return [true, false]
+        def root?
+          type == :root
+        end
+
         # @return [String]
         def full_name
           return :root if type == :root
-          parent_name = parent ? parent.full_name : ''
+          parent_name = parent && !parent.root? ? parent.full_name : ''
           const_node ? ConstNode.new(const_node).to_s(parent_name) : parent_name
         end
 

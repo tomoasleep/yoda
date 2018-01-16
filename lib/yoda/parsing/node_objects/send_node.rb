@@ -10,14 +10,15 @@ module Yoda
           @node = node
         end
 
+        # @return [true, false]
         def on_selector?(location)
-          node.location.dot && selector_range.include?(location)
+          node.location.selector ? selector_range.include?(location) : false
         end
 
         # @param location [Location]
         # @return [true, false]
         def on_dot?(location)
-          node.location.dot && dot_range.include?(location)
+          node.location.dot ? dot_range.include?(location) : false
         end
 
         # @param location [Location]

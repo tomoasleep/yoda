@@ -42,13 +42,13 @@ module Yoda
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
         def resolve(registry)
-          base_type.resolve(namespace)
+          base_type.resolve(registry)
         end
 
         # @param registry [Registry]
         # @return [Array<Values::Base>]
         def instanciate(registry)
-          base_type.instanciate(namespace)
+          base_type.instanciate(registry)
         end
       end
     end

@@ -10,14 +10,14 @@ module Yoda
           @node = node
         end
 
-        # @param base [String, nil]
+        # @param base [String, Symbol, nil]
         # @return [String]
         def to_s(base = nil)
-          fail ArgumentError, base unless !base || base.is_a?(String)
+          fail ArgumentError, base unless !base || base.is_a?(String) || base.is_a?(Symbol)
           paths = []
           looking_node = node
           while true
-            return (base ? base + '::' : '') + paths.join('::') unless looking_node
+            return (base ? base.to_s + '::' : '') + paths.join('::') unless looking_node
             return '::' + paths.join('::') if looking_node.type == :cbase
             paths.unshift(looking_node.children[1])
             looking_node = looking_node.children[0]

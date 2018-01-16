@@ -19,6 +19,7 @@ module Yoda
 
         functions = completion_worker.method_candidates
         range = completion_worker.substitution_range
+        return nil unless range
 
         LSP::Interface::CompletionList.new(
           is_incomplete: false,
@@ -29,8 +30,6 @@ module Yoda
       # @param code_object [Store::Function]
       # @param range       [Parsing::Range]
       def create_completion_item(function, range)
-        return nil unless range
-
         LSP::Interface::CompletionItem.new(
           label: function.code_object.name.to_s,
           kind: LSP::Constant::CompletionItemKind::METHOD,

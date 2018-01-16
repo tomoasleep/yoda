@@ -24,7 +24,7 @@ module Yoda
         # @param namespace [YARD::CodeObjects::Base]
         # @return [ConstantType]
         def change_root(namespace)
-          self.class.new(is_value? ? value : Path.new(namespace, value))
+          self.class.new(value)
         end
 
         # @param registry [Registry]

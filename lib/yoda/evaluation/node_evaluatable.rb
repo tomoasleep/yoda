@@ -7,7 +7,7 @@ module Yoda
       # @return [Store::Types::Base]
       def calculate_type(code_node, registry, method_node)
         evaluator = create_evaluator(registry, method_node)
-        _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(method_node))
+        _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(registry, method_node))
         receiver_type, _tyenv = evaluator.process(code_node, tyenv)
         receiver_type
       end
@@ -17,9 +17,9 @@ module Yoda
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Array<Store::Values::Base>]
       def calculate_values(code_node, registry, method_node)
-        [method_node.caller_value(registry)] unless code_node
+        return [method_node.caller_value(registry)] unless code_node
         evaluator = create_evaluator(registry, method_node)
-        _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(method_node))
+        _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(registry, method_node))
         receiver_values, _tyenv = evaluator.process_to_instanciate(code_node, tyenv)
         receiver_values
       end
@@ -53,8 +53,10 @@ module Yoda
 
       # @param method_node [Parsing::NodeObjects::MethodNode]
       # @return [Typing::Environment]
-      def create_evaluation_env(method_node)
-        function = Store::Function.new(registry.find(method_node.full_name))
+      def create_evaluation_env(registry, method_node)
+        method_object = registry.find(method_node.full_name)
+        fail RuntimeError, "The function #{method_node.full_name} (#{method_node}) is not registered" unless method_object
+        function = Store::Function.new(method_object)
         env = Typing::Environment.new
         function.parameter_types.each do |name, type|
           name = name.gsub(/:\Z/, '')

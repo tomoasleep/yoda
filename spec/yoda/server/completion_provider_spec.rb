@@ -55,5 +55,23 @@ RSpec.describe Yoda::Server::CompletionProvider do
         )
       end
     end
+
+    context 'request information on send node with empty receiver' do
+      let(:uri) { file_uri('lib/sample2.rb') }
+      let(:position) { { line: 26, character: 11 } }
+      let(:text_edit_range) { { start: { line: 26, character: 6 }, end: { line: 26, character: 13 } } }
+
+      it 'returns infomation of `str` variable' do
+        expect(subject).to be_a(LSP::Interface::CompletionList)
+        expect(subject.is_incomplete).to be_falsy
+        expect(subject.items).to include(
+          have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
+          have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
+          have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
+          have_attributes(text_edit: have_attributes(new_text: "method4", range: have_attributes(text_edit_range))),
+          have_attributes(text_edit: have_attributes(new_text: "method5", range: have_attributes(text_edit_range))),
+        )
+      end
+    end
   end
 end

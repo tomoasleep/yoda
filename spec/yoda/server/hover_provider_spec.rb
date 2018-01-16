@@ -34,5 +34,17 @@ RSpec.describe Yoda::Server::HoverProvider do
         expect(subject.range).to have_attributes(start: { line: 7, character: 6 }, end: { line: 7, character: 9 })
       end
     end
+
+    context 'when the root namespace includes codes other than module definitions' do
+      let(:uri) { file_uri('lib/sample3.rb') }
+      let(:position) { { line: 13, character: 11} }
+
+      it 'returns completion for `self` variable' do
+        expect(subject).to be_a(LSP::Interface::Hover)
+        expect(subject.contents).to contain_exactly('YodaFixture::Sample3.class')
+        expect(subject.range).to have_attributes(start: { line: 13, character: 6 }, end: { line: 13, character: 13 })
+      end
+    end
+
   end
 end
