@@ -1,23 +1,17 @@
 module Yoda
-  module Store
-    module Values
+  module Evaluation
+    module Descriptions
       # @abstract
       class Base
         # @abstract
-        # @return [Array<Function>]
-        def methods
+        # @return [String]
+        def title
           fail NotImplementedError
         end
-
+        
         # @abstract
         # @return [String]
-        def path
-          fail NotImplementedError
-        end
-
-        # @abstract
-        # @return [String]
-        def docstring
+        def to_markdown
           fail NotImplementedError
         end
       end

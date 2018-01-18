@@ -13,15 +13,10 @@ module Yoda
         @location = location
       end
 
-      # @return [Range]
-      def current_node_range
-        Parsing::Range.of_ast_location(current_node.location)
-      end
-
-      # @return [Array<Store::Values::Base>]
-      def current_node_values
-        return [] unless valid?
-        @current_node_value ||= calculate_values(current_node, registry, current_method)
+      # @return [NodeSignature, nil]
+      def current_node_signature
+        return nil if !valid? || !current_node_trace
+        @current_node_signature ||= NodeSignature.new(current_node, current_node_trace)
       end
 
       # @return [true, false]
@@ -30,6 +25,12 @@ module Yoda
       end
 
       private
+
+      # @return [Typing::Trace::Send, nil]
+      def current_node_trace
+        return nil unless valid?
+        @current_node_trace ||= calculate_trace(current_node, registry, current_method)
+      end
 
       # @return [SourceAnalyzer]
       def analyzer

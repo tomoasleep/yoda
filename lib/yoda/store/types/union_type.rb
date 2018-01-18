@@ -46,6 +46,11 @@ module Yoda
         def instanciate(registry)
           types.map { |type| type.instanciate(registry) }.flatten
         end
+
+        # @return [String]
+        def to_s
+          types.map(&:to_s).join(' | ')
+        end
       end
     end
   end

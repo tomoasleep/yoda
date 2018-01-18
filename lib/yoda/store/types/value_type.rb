@@ -6,7 +6,7 @@ module Yoda
 
         VALUE_REGEXP = /\A[0-9a-z]/
 
-        # @param value [String, Path]
+        # @param value [String]
         def initialize(value)
           @value = value
         end
@@ -52,6 +52,11 @@ module Yoda
           else
             nil
           end
+        end
+
+        # @return [String]
+        def to_s
+          value
         end
       end
     end

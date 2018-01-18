@@ -16,27 +16,22 @@ module Yoda
 
         node_worker = Evaluation::CurrentNodeExplain.new(client_info.registry, source, location)
 
-        current_node_values = node_worker.current_node_values
-        current_node_range = node_worker.current_node_range
-
-        create_hover(current_node_values, current_node_range)
+        current_node_signature = node_worker.current_node_signature
+        create_hover(current_node_signature) if current_node_signature
       end
 
-      # @param values [Array<Store::Values::Base>]
-      # @param range  [Parsing::Range, nil]
-      def create_hover(values, range)
-        return nil unless range
-
+      # @param signature [Evaluation::NodeSignature]
+      def create_hover(signature)
         LSP::Interface::Hover.new(
-          contents: values.map { |value| create_hover_text(value) },
-          range: LSP::Interface::Range.new(range.to_language_server_protocol_range),
+          contents: signature.descriptions.map { |value| create_hover_text(value) },
+          range: LSP::Interface::Range.new(signature.node_range.to_language_server_protocol_range),
         )
       end
 
-      # @param code_object [Store::Values::Base]
+      # @param description [Evaluation::Descriptions::Base]
       # @return [String]
-      def create_hover_text(code_object)
-        code_object.path
+      def create_hover_text(description)
+        description.to_markdown
       end
     end
   end

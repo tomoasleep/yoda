@@ -38,6 +38,11 @@ module Yoda
         def instanciate(registry)
           resolve(registry).map { |el| Values::InstanceValue.new(registry, el) }
         end
+
+        # @return [String]
+        def to_s
+          name.is_a?(Path) ? name.name : name
+        end
       end
     end
   end

@@ -13,5 +13,9 @@ module YodaFixture
     def method1
       Sample3
     end
+
+    def method12
+      Sample3.class_method1('')
+    end
   end
 end

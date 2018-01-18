@@ -30,7 +30,7 @@ RSpec.describe Yoda::Server::HoverProvider do
 
       it 'returns completion for `self` variable' do
         expect(subject).to be_a(LSP::Interface::Hover)
-        expect(subject.contents).to contain_exactly(/\AString/)
+        expect(subject.contents).to contain_exactly(be_start_with('**String**'))
         expect(subject.range).to have_attributes(start: { line: 7, character: 6 }, end: { line: 7, character: 9 })
       end
     end
@@ -41,10 +41,20 @@ RSpec.describe Yoda::Server::HoverProvider do
 
       it 'returns completion for `self` variable' do
         expect(subject).to be_a(LSP::Interface::Hover)
-        expect(subject.contents).to contain_exactly('YodaFixture::Sample3.class')
+        expect(subject.contents).to contain_exactly(be_start_with('**YodaFixture::Sample3.class**'))
         expect(subject.range).to have_attributes(start: { line: 13, character: 6 }, end: { line: 13, character: 13 })
       end
     end
 
+    context 'request information at method send' do
+      let(:uri) { file_uri('lib/sample3.rb') }
+      let(:position) { { line: 17, character: 20} }
+
+      it 'returns the description of the calling method' do
+        expect(subject).to be_a(LSP::Interface::Hover)
+        expect(subject.contents).to contain_exactly(be_start_with('**Sample3.class_method1(str: String): any**'))
+        expect(subject.range).to have_attributes(start: { line: 17, character: 6 }, end: { line: 17, character: 31 })
+      end
+    end
   end
 end

@@ -27,6 +27,12 @@ module Yoda
         def instanciate(registry)
           fail NotImplementedError
         end
+
+        # @abstract
+        # @return [String]
+        def to_s
+          fail NotImplementedError
+        end
       end
     end
   end

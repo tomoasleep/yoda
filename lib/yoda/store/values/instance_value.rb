@@ -29,6 +29,11 @@ module Yoda
           class_object
         end
 
+        # @param [String]
+        def docstring
+          class_object.docstring
+        end
+
         private
 
         def object_methods(visibility: nil)

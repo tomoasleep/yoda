@@ -36,6 +36,11 @@ module Yoda
         def instanciate(registry)
           []
         end
+
+        # @return [String]
+        def to_s
+          "##{method_name}"
+        end
       end
     end
   end

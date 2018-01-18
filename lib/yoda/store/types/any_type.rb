@@ -27,6 +27,11 @@ module Yoda
         def instanciate(registry)
           []
         end
+
+        # @return [String]
+        def to_s
+          value
+        end
       end
     end
   end

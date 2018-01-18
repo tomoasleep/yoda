@@ -7,6 +7,7 @@ module Yoda
       require 'yoda/store/types/any_type'
       require 'yoda/store/types/value_type'
       require 'yoda/store/types/instance_type'
+      require 'yoda/store/types/function_type'
       require 'yoda/store/types/duck_type'
       require 'yoda/store/types/module_type'
       require 'yoda/store/types/sequence_type'

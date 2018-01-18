@@ -50,6 +50,11 @@ module Yoda
         def instanciate(registry)
           base_type.instanciate(registry)
         end
+
+        # @return [String]
+        def to_s
+          "#{base_type}<#{type_arguments.map(&:to_s).join(', ')}>"
+        end
       end
     end
   end

@@ -29,6 +29,11 @@ module Yoda
           namespace_object
         end
 
+        # @param [String]
+        def docstring
+          namespace.docstring
+        end
+
         private
 
         def parent_methods(visibility: nil)
