@@ -4,9 +4,9 @@ module Yoda
       include NodeEvaluatable
       attr_reader :registry, :source, :location
 
-      # @param registry [Registry]
+      # @param registry [Store::Registry]
       # @param source   [String]
-      # @param location [Location]
+      # @param location [Parsing::Location]
       def initialize(registry, source, location)
         @registry = registry
         @source = source
