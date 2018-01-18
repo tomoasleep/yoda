@@ -30,11 +30,12 @@ module Yoda
       # @param code_object [Store::Function]
       # @param range       [Parsing::Range]
       def create_completion_item(function, range)
+        description = Evaluation::Descriptions::FunctionDescription.new(function)
         LSP::Interface::CompletionItem.new(
           label: function.code_object.name.to_s,
           kind: LSP::Constant::CompletionItemKind::METHOD,
-          detail: function.code_object.path,
-          documentation: function.code_object.docstring,
+          detail: description.title,
+          documentation: description.to_markdown,
           sort_text: function.code_object.name.to_s,
           text_edit: LSP::Interface::TextEdit.new(
             range: LSP::Interface::Range.new(range.to_language_server_protocol_range),
