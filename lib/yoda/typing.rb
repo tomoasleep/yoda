@@ -4,5 +4,6 @@ module Yoda
     require 'yoda/typing/environment'
     require 'yoda/typing/evaluator'
     require 'yoda/typing/relation'
+    require 'yoda/typing/traces'
   end
 end

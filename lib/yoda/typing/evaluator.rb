@@ -7,16 +7,34 @@ module Yoda
       # @param context [Context]
       def initialize(context)
         @context = context
+        @traces = {}
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
       # @return [[Store::Types::Base, Environment]]
       def process(node, env)
+        r, env = evaluate(node, env)
+        trace, env = lift(r, env)
+        bind_trace(node, trace)
+        [trace.type, env]
+      end
+
+      # @param node  [::AST::Node]
+      # @return [Trace::Base, nil]
+      def find_trace(node)
+        @traces[node]
+      end
+
+      private
+
+      # @param node [::AST::Node]
+      # @param env  [Environment]
+      def evaluate(node, env)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn
           type, env = process(node.children[1], env)
-          process_bind(node.children[0], type, env)
+          evaluate_bind(node.children[0], type, env)
         when :casgn
           # TODO
           process(node.children.last, env)
@@ -30,7 +48,7 @@ module Yoda
           # TODO
           node.children.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
         when :if
-          process_branch_nodes(node.children.slice(1..2).compact, env)
+          evaluate_branch_nodes(node.children.slice(1..2).compact, env)
         when :while, :until, :while_post, :until_post
           # TODO
           process(node.children[1], env)
@@ -38,7 +56,7 @@ module Yoda
           # TODO
           process(node.children[2], env)
         when :case
-          process_case_node(node, env)
+          evaluate_case_node(node, env)
         when :super, :zsuper, :yield
           # TODO
           [type_for_sexp_type(node.type), env]
@@ -49,9 +67,9 @@ module Yoda
           # TODO
           process(node.children[2], env)
         when :csend, :send
-          process_send_node(node, env)
+          evaluate_send_node(node, env)
         when :block
-          process_block_node(node, env)
+          evaluate_block_node(node, env)
         when :const
           [Store::Types::ModuleType.new(context.create_path(Parsing::NodeObjects::ConstNode.new(node).to_s)), env]
         when :lvar, :cvar, :ivar, :gvar
@@ -66,18 +84,10 @@ module Yoda
         end
       end
 
-      # @param node [::AST::Node]
-      # @param env  [Environment]
-      # @return [[Array<Store::Values::Base>, env]]
-      def process_to_instanciate(node, env)
-        type, env = process(node, env)
-        [context.instanciate(type), env]
-      end
-
       # @param node [Array<::AST::Node>]
       # @param env  [Environment]
       # @return [[Store::Types::Base, Environment]]
-      def process_branch_nodes(nodes, env)
+      def evaluate_branch_nodes(nodes, env)
         # TODO: Divide env
         types, env = nodes.reduce([[], env]) do |(types, env), node|
           type, env = process(node, env)
@@ -89,8 +99,8 @@ module Yoda
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [[Store::Types::Base, Environment]]
-      def process_send_node(node, env)
+      # @return [[Traces::Base, Environment]]
+      def evaluate_send_node(node, env)
         receiver_node, method_name_sym, *argument_nodes = node.children
         if receiver_node
           receiver_candidates, env = process_to_instanciate(receiver_node, env)
@@ -100,14 +110,14 @@ module Yoda
 
         _type, env = argument_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
         method_candidates = receiver_candidates.map(&:methods).flatten.select { |method| method.name.to_s == method_name_sym.to_s }
-        method_return_type = Store::Types::UnionType.new(method_candidates.map(&:return_type))
-        [method_return_type, env]
+        trace = Traces::Send.new(context, method_candidates)
+        [trace, env]
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
       # @return [[Store::Types::Base, Environment]]
-      def process_block_node(node, env)
+      def evaluate_block_node(node, env)
         send_node, arguments_node, body_node = node.children
         # TODO
         _type, env = process(body_node, env)
@@ -117,7 +127,7 @@ module Yoda
       # @param node [::AST::Node]
       # @param env  [Environment]
       # @return [[Store::Types::Base, Environment]]
-      def process_case_node(node, env)
+      def evaluate_case_node(node, env)
         # TODO
         subject_node, *when_nodes, else_node = node.children
         _type, env = when_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node.children.last, env) }
@@ -128,7 +138,7 @@ module Yoda
       # @param type [Store::Types::Base]
       # @param env  [Environment]
       # @return [[Store::Types::Base, Environment]]
-      def process_bind(symbol, type, env)
+      def evaluate_bind(symbol, type, env)
         [type, env.bind(symbol, type)]
       end
 
@@ -166,6 +176,33 @@ module Yoda
 
       def unknown_type
         Store::Types::UnknownType.new
+      end
+
+      # @param type [Store::Types::Base, Traces::Base]
+      # @param env  [Environment]
+      # @return [(Traces::Base, Environment)]
+      def lift(type, env)
+        if type.is_a?(Traces::Base)
+          [type, env]
+        else
+          [Traces::Normal.new(context, type), env]
+        end
+      end
+
+      # @param node  [::AST::Node]
+      # @param trace [Trace::Base]
+      def bind_trace(node, trace)
+        @traces[node] = trace
+      end
+
+      # @param node [Array<::AST::Node>]
+      # @param env  [Environment]
+      # @return [(Array<Store::Values::Base>, Environment)]
+      def process_to_instanciate(node, env)
+        r, env = evaluate(node, env)
+        trace, env = lift(r, env)
+        bind_trace(node, trace)
+        [trace.values, env]
       end
     end
   end

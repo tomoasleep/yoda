@@ -4,12 +4,9 @@ module Yoda
       # @param code_node   [::Parser::AST::Node, nil]
       # @param registry    [Store::Reggistry]
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Store::Types::Base]
+      # @return [Store::Types::Base, nil]
       def calculate_type(code_node, registry, method_node)
-        evaluator = create_evaluator(registry, method_node)
-        _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(registry, method_node))
-        receiver_type, _tyenv = evaluator.process(code_node, tyenv)
-        receiver_type
+        calculate_trace(code_node, registry, method_node)&.type
       end
 
       # @param code_node   [::Parser::AST::Node, nil]
@@ -17,11 +14,22 @@ module Yoda
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Array<Store::Values::Base>]
       def calculate_values(code_node, registry, method_node)
-        return [method_node.caller_value(registry)] unless code_node
+        if code_node
+          trace = calculate_trace(code_node, registry, method_node)
+          trace ? trace.values : []
+        else
+          [method_node.caller_value(registry)]
+        end
+      end
+
+      # @param code_node   [::Parser::AST::Node, nil]
+      # @param registry    [Store::Reggistry]
+      # @param method_node [Parsing::NodeObjects::MethodDefinition]
+      # @return [Typing::Traces::Base, nil]
+      def calculate_trace(code_node, registry, method_node)
         evaluator = create_evaluator(registry, method_node)
         _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(registry, method_node))
-        receiver_values, _tyenv = evaluator.process_to_instanciate(code_node, tyenv)
-        receiver_values
+        evaluator.find_trace(code_node)
       end
 
       # @param send_node [Parsing::NodeObjects::SendNode]
