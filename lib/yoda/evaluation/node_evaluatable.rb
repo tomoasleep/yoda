@@ -2,7 +2,7 @@ module Yoda
   module Evaluation
     module NodeEvaluatable
       # @param code_node   [::Parser::AST::Node, nil]
-      # @param registry    [Store::Reggistry]
+      # @param registry    [Store::Registry]
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Store::Types::Base, nil]
       def calculate_type(code_node, registry, method_node)
@@ -10,7 +10,7 @@ module Yoda
       end
 
       # @param code_node   [::Parser::AST::Node, nil]
-      # @param registry    [Store::Reggistry]
+      # @param registry    [Store::Registry]
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Array<Store::Values::Base>]
       def calculate_values(code_node, registry, method_node)

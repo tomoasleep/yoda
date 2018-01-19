@@ -10,11 +10,13 @@ module Yoda
         end
       end
 
+      # @param path [String, Symbol, Path]
       # @param code_object [YARD::CodeObject::Base]
       def register(code_object)
         YARD::Registry.register(code_object)
       end
 
+      # @param path [String, Symbol, Path]
       # @param code_object [Symbol, String]
       def at(path)
         if path.is_a?(Symbol)
