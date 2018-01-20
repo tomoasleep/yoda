@@ -9,5 +9,6 @@ module Yoda
     require 'yoda/parsing/location'
     require 'yoda/parsing/source_cutter'
     require 'yoda/parsing/range'
+    require 'yoda/parsing/query'
   end
 end

@@ -1,5 +1,6 @@
 module Yoda
   module Parsing
+    # @deprecated
     class SourceAnalyzer
       include AstTraversable
 
@@ -14,7 +15,6 @@ module Yoda
 
       # @param ast      [::Parser::AST::Node]
       # @param location [Location]
-      # @param source [String]
       def initialize(ast, location)
         @ast = ast
         @location = location
