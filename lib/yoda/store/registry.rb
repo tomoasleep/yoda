@@ -54,6 +54,76 @@ module Yoda
       def find_or_proxy(path)
         find(path) || YARD::CodeObjects::Proxy.new(YARD::Registry.root, path_name_of(path))
       end
+
+      # @param basename [String]
+      # @param prefix [String]
+      # @return [Array<YARD::CodeObject::Base>]
+      def search_objects_with_prefix(basename, prefix)
+        prefix_path = ConstPath.new(prefix)
+        path = ConstPath.new(basename).concat(prefix_path.spacename)
+        namespace = at(path.spacename)
+        if namespace
+          namespace.children.select { |child| child.name.to_s.start_with?(prefix_path.basename) }
+        else
+          []
+        end
+      end
+
+      class ConstPath
+        attr_reader :name
+
+        # @param path [ConstPath, String]
+        # @return [ConstPath]
+        def self.of_path(path)
+          path.is_a?(ConstPath) ? path : new(path)
+        end
+
+        # @param name [String]
+        def initialize(name)
+          @name = name
+        end
+
+        def absolute?
+          name.start_with?('::')
+        end
+
+        # @return [String]
+        def basename
+          @basename ||= begin
+            if name.end_with?('::')
+              ''
+            else
+              name.split('::').last || ''
+            end
+          end
+        end
+
+        # @return [String]
+        def spacename
+          @spacename ||= begin
+            if name.end_with?('::')
+              name.gsub(/::\Z/, '')
+            else
+              name.split('::').slice(0..-2).join('::')
+            end
+          end
+        end
+
+        # @return [String]
+        def to_s
+          name
+        end
+
+        # @param another [ConstPath, String]
+        # @return [ConstPath]
+        def concat(another)
+          if absolute?
+            self
+          else
+            self.class.new([self.to_s, another.to_s].join('::'))
+          end
+        end
+      end
     end
   end
 end
