@@ -34,14 +34,23 @@ module Yoda
         end
       end
 
-      # @return [Range, nil]
+      # @return [Parsing::Range, nil]
       def substitution_range
         return nil unless valid?
 
-        current_comment_token_query.current_range.move(
-          row: current_comment_query.begin_point_of_current_comment_block.row - 1,
-          column: current_comment_query.begin_point_of_current_comment_block.column,
-        )
+        if current_comment_token_query.current_state == :type
+          range = current_comment_token_query.current_range.move(
+            row: current_comment_query.begin_point_of_current_comment_block.row - 1,
+            column: current_comment_query.begin_point_of_current_comment_block.column,
+          )
+          cut_point = current_comment_token_query.current_word == '[' ? 1 : (current_comment_token_query.current_word.rindex('::') || -2) + 2
+          Parsing::Range.new(range.begin_location.move(row: 0, column: cut_point), range.end_location)
+        else
+          current_comment_token_query.current_range.move(
+            row: current_comment_query.begin_point_of_current_comment_block.row - 1,
+            column: current_comment_query.begin_point_of_current_comment_block.column,
+          )
+        end
       end
 
       private
@@ -62,7 +71,11 @@ module Yoda
 
       # @return [String, nil]
       def index_word
-        current_comment_token_query.current_word
+        if current_comment_token_query.current_state == :type && current_comment_token_query.current_word == '['
+          ''
+        else
+          current_comment_token_query.current_word
+        end
       end
 
       # @return [CurrentCommentingNodeQuery]

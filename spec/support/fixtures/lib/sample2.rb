@@ -8,7 +8,7 @@ module YodaFixture
       str + "hoge"
     end
 
-    # @return [Sample2]
+    # @return [YodaFixture::Sample2]
     def method2
       self
     end

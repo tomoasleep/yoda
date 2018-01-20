@@ -112,14 +112,14 @@ RSpec.describe Yoda::Server::CompletionProvider do
 
         context 'request on @return of a sample function' do
           let(:uri) { file_uri('lib/sample2.rb') }
-          let(:position) { { line: 10, character: 16 } }
-          let(:text_edit_range) { { start: { line: 10, character: 15 }, end: { line: 10, character: 16 } } }
+          let(:position) { { line: 10, character: 29 } }
+          let(:text_edit_range) { { start: { line: 10, character: 28 }, end: { line: 10, character: 29 } } }
 
           it 'returns type candidates' do
             expect(subject).to be_a(LSP::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
-              have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
               have_attributes(text_edit: have_attributes(new_text: "Sample2", range: have_attributes(text_edit_range))),
             )
           end
@@ -130,6 +130,21 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:uri) { file_uri('lib/hoge/fuga.rb') }
             let(:position) { { line: 8, character: 21 } }
             let(:text_edit_range) { { start: { line: 8, character: 20 }, end: { line: 8, character: 21 } } }
+
+            it 'returns type candidates' do
+              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject.is_incomplete).to be_falsy
+              expect(subject.items).to include(
+                have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+                have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
+              )
+            end
+          end
+
+          context 'request on bracket in @param line of a sample function' do
+            let(:uri) { file_uri('lib/hoge/fuga.rb') }
+            let(:position) { { line: 8, character: 20 } }
+            let(:text_edit_range) { { start: { line: 8, character: 20 }, end: { line: 8, character: 20 } } }
 
             it 'returns type candidates' do
               expect(subject).to be_a(LSP::Interface::CompletionList)

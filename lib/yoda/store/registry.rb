@@ -61,7 +61,7 @@ module Yoda
       def search_objects_with_prefix(basename, prefix)
         prefix_path = ConstPath.new(prefix)
         path = ConstPath.new(basename).concat(prefix_path.spacename)
-        namespace = at(path.spacename)
+        namespace = at(path.to_s)
         if namespace
           namespace.children.select { |child| child.name.to_s.start_with?(prefix_path.basename) }
         else
@@ -117,10 +117,10 @@ module Yoda
         # @param another [ConstPath, String]
         # @return [ConstPath]
         def concat(another)
-          if absolute?
+          if self.class.of_path(another).absolute?
             self
           else
-            self.class.new([self.to_s, another.to_s].join('::'))
+            self.class.new([self.to_s, another.to_s].reject(&:empty?).join('::'))
           end
         end
       end
