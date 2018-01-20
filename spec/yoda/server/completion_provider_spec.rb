@@ -24,53 +24,123 @@ RSpec.describe Yoda::Server::CompletionProvider do
     end
     subject { provider.complete(uri, position) }
 
-    context 'request information in sample function' do
-      let(:uri) { file_uri('lib/sample.rb') }
-      let(:position) { { line: 11, character: 12 } }
-      let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 18 } } }
+    describe 'method completion' do
+      context 'request information in sample function' do
+        let(:uri) { file_uri('lib/sample.rb') }
+        let(:position) { { line: 11, character: 12 } }
+        let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 18 } } }
 
-      it 'returns infomation of `str` variable' do
-        expect(subject).to be_a(LSP::Interface::CompletionList)
-        expect(subject.is_incomplete).to be_falsy
-        expect(subject.items).to include(
-          have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
-        )
+        it 'returns infomation of `str` variable' do
+          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject.is_incomplete).to be_falsy
+          expect(subject.items).to include(
+            have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
+          )
+        end
+      end
+
+      context 'request information on the dot of a send node' do
+        let(:uri) { file_uri('lib/sample.rb') }
+        let(:position) { { line: 11, character: 11 } }
+        let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 11 } } }
+
+        it 'returns infomation of `str` variable' do
+          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject.is_incomplete).to be_falsy
+          expect(subject.items).to include(
+            have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
+          )
+        end
+      end
+
+      context 'request information on send node with empty receiver' do
+        let(:uri) { file_uri('lib/sample2.rb') }
+        let(:position) { { line: 26, character: 11 } }
+        let(:text_edit_range) { { start: { line: 26, character: 6 }, end: { line: 26, character: 13 } } }
+
+        it 'returns infomation of `str` variable' do
+          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject.is_incomplete).to be_falsy
+          expect(subject.items).to include(
+            have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method4", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method5", range: have_attributes(text_edit_range))),
+          )
+        end
       end
     end
 
-    context 'request information on the dot of a send node' do
-      let(:uri) { file_uri('lib/sample.rb') }
-      let(:position) { { line: 11, character: 11 } }
-      let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 11 } } }
+    describe 'comment completion' do
+      describe 'tag completion' do
+        context 'request on a sample function' do
+          let(:uri) { file_uri('lib/sample.rb') }
+          let(:position) { { line: 5, character: 8 } }
+          let(:text_edit_range) { { start: { line: 5, character: 6 }, end: { line: 5, character: 8 } } }
 
-      it 'returns infomation of `str` variable' do
-        expect(subject).to be_a(LSP::Interface::CompletionList)
-        expect(subject.is_incomplete).to be_falsy
-        expect(subject.items).to include(
-          have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
-        )
+          it 'returns @param and @private tags' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(text_edit: have_attributes(new_text: "@param", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "@private", range: have_attributes(text_edit_range))),
+            )
+          end
+        end
       end
-    end
 
-    context 'request information on send node with empty receiver' do
-      let(:uri) { file_uri('lib/sample2.rb') }
-      let(:position) { { line: 26, character: 11 } }
-      let(:text_edit_range) { { start: { line: 26, character: 6 }, end: { line: 26, character: 13 } } }
+      describe 'type completion' do
+        context 'request on @param of a sample function' do
+          let(:uri) { file_uri('lib/sample.rb') }
+          let(:position) { { line: 5, character: 19 } }
+          let(:text_edit_range) { { start: { line: 5, character: 18 }, end: { line: 5, character: 19 } } }
 
-      it 'returns infomation of `str` variable' do
-        expect(subject).to be_a(LSP::Interface::CompletionList)
-        expect(subject.is_incomplete).to be_falsy
-        expect(subject.items).to include(
-          have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method4", range: have_attributes(text_edit_range))),
-          have_attributes(text_edit: have_attributes(new_text: "method5", range: have_attributes(text_edit_range))),
-        )
+          it 'returns type candidates' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'request on @return of a sample function' do
+          let(:uri) { file_uri('lib/sample2.rb') }
+          let(:position) { { line: 10, character: 16 } }
+          let(:text_edit_range) { { start: { line: 10, character: 15 }, end: { line: 10, character: 16 } } }
+
+          it 'returns type candidates' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "Sample2", range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'in multiple namespaces and other statements' do
+          context 'request on @param of a sample function' do
+            let(:uri) { file_uri('lib/hoge/fuga.rb') }
+            let(:position) { { line: 8, character: 21 } }
+            let(:text_edit_range) { { start: { line: 8, character: 20 }, end: { line: 8, character: 21 } } }
+
+            it 'returns type candidates' do
+              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject.is_incomplete).to be_falsy
+              expect(subject.items).to include(
+                have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+                have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
+              )
+            end
+          end
+        end
       end
     end
   end

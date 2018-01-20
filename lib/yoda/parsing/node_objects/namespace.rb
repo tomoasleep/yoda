@@ -45,7 +45,8 @@ module Yoda
 
         # @return [String]
         def path
-          full_name
+          name = full_name
+          name == :root ? '' : name
         end
 
         # @return [true, false]
@@ -53,11 +54,20 @@ module Yoda
           type == :root
         end
 
-        # @return [String]
+        # @return [String, Symbol]
         def full_name
           return :root if type == :root
           parent_name = parent && !parent.root? ? parent.full_name : ''
           const_node ? ConstNode.new(const_node).to_s(parent_name) : parent_name
+        end
+
+        # @return [Array<String>]
+        def paths_from_root
+          if root?
+            [path]
+          else
+            parent ? parent.paths_from_root + [path] : ['', path]
+          end
         end
 
         # @param location [Location]

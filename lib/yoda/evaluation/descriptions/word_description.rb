@@ -1,24 +1,28 @@
 module Yoda
   module Evaluation
     module Descriptions
-      # @abstract
-      class Base
-        # @abstract
+      class WordDescription < Base
+        attr_reader :word
+        # @param function [String]
+        def initialize(word)
+          @word = word
+        end
+
         # @return [String]
         def title
-          fail NotImplementedError
+          word
         end
 
-        # @abstract
         # @return [String]
         def sort_text
-          fail NotImplementedError
+          word
         end
 
-        # @abstract
         # @return [String]
         def to_markdown
-          fail NotImplementedError
+          <<~EOS
+          word
+          EOS
         end
       end
     end

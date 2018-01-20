@@ -12,10 +12,14 @@ module Yoda
           "#{function.name_with_namespace}#{function.type_signature}"
         end
 
+        def sort_text
+          function.name.to_s
+        end
+
         def to_markdown
           <<~EOS
           **#{title}**
-          
+
           #{function.docstring}
           EOS
         end
