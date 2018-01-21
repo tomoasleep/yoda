@@ -16,6 +16,18 @@ module Yoda
         YARD::Registry.register(code_object)
       end
 
+      def clear
+        YARD::Registry.clear
+      end
+
+      def save(path)
+        YARD::Registry.save(false, path)
+      end
+
+      def load(path)
+        YARD::Registry.load_yardoc(path)
+      end
+
       # @param path [String, Symbol, Path]
       # @param code_object [Symbol, String]
       def at(path)
