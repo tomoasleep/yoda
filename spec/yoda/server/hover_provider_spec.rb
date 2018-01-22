@@ -56,5 +56,38 @@ RSpec.describe Yoda::Server::HoverProvider do
         expect(subject.range).to have_attributes(start: { line: 17, character: 6 }, end: { line: 17, character: 31 })
       end
     end
+
+    describe 'Signatures provided by @!sig comment' do
+      let(:uri) { file_uri('lib/hoge/sig.rb') }
+      let(:position) { { line: 8, character: 15} }
+
+      it 'returns the description of the calling method' do
+        expect(subject).to be_a(LSP::Interface::Hover)
+        expect(subject.contents).to contain_exactly(be_start_with('**String#piyo: Integer**'))
+        expect(subject.range).to have_attributes(start: { line: 8, character: 8 }, end: { line: 8, character: 16 })
+      end
+    end
+
+    describe 'Signatures provided by overload tags' do
+      let(:uri) { file_uri('lib/hoge/sig.rb') }
+      let(:position) { { line: 8, character: 15} }
+
+      it 'returns the description of the calling method' do
+        expect(subject).to be_a(LSP::Interface::Hover)
+        expect(subject.contents).to contain_exactly(be_start_with('**String#piyo: Integer**'))
+        expect(subject.range).to have_attributes(start: { line: 8, character: 8 }, end: { line: 8, character: 16 })
+      end
+    end
+
+    describe 'Signatures provided by overload tags' do
+      let(:uri) { file_uri('lib/hoge/sig.rb') }
+      let(:position) { { line: 9, character: 15} }
+
+      it 'returns the description of the calling method' do
+        expect(subject).to be_a(LSP::Interface::Hover)
+        expect(subject.contents).to contain_exactly(be_start_with('**String#bytesize: Integer**'))
+        expect(subject.range).to have_attributes(start: { line: 9, character: 8 }, end: { line: 9, character: 20 })
+      end
+    end
   end
 end

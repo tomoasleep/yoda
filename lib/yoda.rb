@@ -6,4 +6,5 @@ module Yoda
   require "yoda/parsing"
   require "yoda/typing"
   require "yoda/runner"
+  require "yoda/yard_extensions"
 end

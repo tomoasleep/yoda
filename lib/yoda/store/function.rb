@@ -2,14 +2,6 @@ module Yoda
   module Store
     class Function
       module TypeContainer
-        # @return [Types::FunctionType]
-        def type
-          @type ||= begin
-            params = parameters.map { |(name, default_value)| [name, type_of(name), default_value] }
-            Types::FunctionType.new(return_type: return_type, parameters: params)
-          end
-        end
-
         # @param parameter_name [String]
         def type_of(parameter_name)
           tags = parameter_tags || []
@@ -22,8 +14,14 @@ module Yoda
 
         private
 
+        def calculate_type_tag_type
+          nil unless type_tag
+          parsed_type = type_tag.parsed_type
+          parsed_type.is_a?(Types::FunctionType) ? parsed_type : Types::FunctionType.new(return_type: parsed_type)
+        end
+
         def parse_type(type_strings)
-          (type_strings.empty? ? Types::UnknownType.new('nodoc') : Types.parse_type_strings(type_strings)).change_root(@code_object.namespace)
+          (type_strings.empty? ? Types::UnknownType.new('nodoc') : Types.parse_type_strings(type_strings)).change_root(code_object.namespace)
         end
       end
 
@@ -34,6 +32,24 @@ module Yoda
       def initialize(code_object)
         fail ArgumentError, code_object unless code_object.is_a?(YARD::CodeObjects::Base)
         @code_object = code_object
+      end
+
+      # @return [Types::FunctionType]
+      def type
+        @type ||= begin
+          if type_tag
+            calculate_type_tag_type
+          elsif @code_object.tag(:overload)
+            Signature.new(@code_object.tag(:overload)).type
+          else
+            params = parameters.map { |(name, default_value)| [name, type_of(name), default_value] }
+            Types::FunctionType.new(return_type: return_type, parameters: params)
+          end
+        end
+      end
+
+      def type_tag
+        @code_object.tag(:type)
       end
 
       def parameter_types
@@ -125,14 +141,34 @@ module Yoda
           overload_tag.tags(:param)
         end
 
+        def type_tag
+          overload_tag.tag(:type)
+        end
+
+        def code_object
+          overload_tag.object
+        end
+
         def return_type
-          @return_type ||= parse_type(@code_object.tags(:return).map(&:types).flatten)
+          @return_type ||= parse_type(overload_tag.tags(:return).map(&:types).flatten)
         end
 
         def parameter_types
           tags = overload_tag.object.tags(:param) || []
           parameters.map do |name, default_value|
             [name, parse_type(tags.select { |tag| tag.name == name }.map(&:types).flatten)]
+          end
+        end
+
+        # @return [Types::FunctionType]
+        def type
+          @type ||= begin
+            if type_tag
+              calculate_type_tag_type
+            else
+              params = parameters.map { |(name, default_value)| [name, type_of(name), default_value] }
+              Types::FunctionType.new(return_type: return_type, parameters: params)
+            end
           end
         end
       end
