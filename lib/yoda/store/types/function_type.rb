@@ -2,8 +2,9 @@ module Yoda
   module Store
     module Types
       class FunctionType < Base
-        attr_reader :parameters, :rest_parameter, :post_parameters, :keyword_parameters, :keyword_rest_parameter, :block_parameter, :return_type
+        attr_reader :context, :parameters, :rest_parameter, :post_parameters, :keyword_parameters, :keyword_rest_parameter, :block_parameter, :return_type
 
+        # @param context [Base, nil]
         # @param parameters [Array<(String, Base, String)>]
         # @param rest_parameter [(String, Base), nil]
         # @param post_parameters [Array<(String, Base)>]
@@ -11,7 +12,8 @@ module Yoda
         # @param keyword_rest_parameter [(String, Base), nil]
         # @param block_parameter [(String, Base), nil]
         # @param return_type [Base]
-        def initialize(return_type:, parameters: [], rest_parameter: nil, post_parameters: [], keyword_parameters: [], keyword_rest_parameter: nil, block_parameter: nil)
+        def initialize(context: nil, return_type:, parameters: [], rest_parameter: nil, post_parameters: [], keyword_parameters: [], keyword_rest_parameter: nil, block_parameter: nil)
+          @context = context
           @parameters = parameters
           @keyword_parameters = keyword_parameters
           @rest_parameter = rest_parameter
@@ -23,9 +25,12 @@ module Yoda
 
         def eql?(another)
           another.is_a?(FunctionType) &&
+          context == another.context &&
           parameters == another.parameters &&
           keyword_parameters == another.keyword_parameters &&
+          keyword_rest_parameter == another.keyword_rest_parameter &&
           rest_parameter == another.rest_parameter &&
+          post_parameters == another.post_parameters &&
           block_parameter == another.block_parameter &&
           return_type == another.return_type
         end
