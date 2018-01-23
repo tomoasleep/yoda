@@ -82,6 +82,7 @@ module Yoda
       @hover_provider = HoverProvider.new(@client_info)
       @signature_provider = SignatureProvider.new(@client_info)
       @definition_provider = DefinitionProvider.new(@client_info)
+      client_info.setup
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
@@ -105,7 +106,6 @@ module Yoda
     end
 
     def handle_initialized(_params)
-      client_info.setup
     end
 
     def handle_shutdown(_params)

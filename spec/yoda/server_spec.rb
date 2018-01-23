@@ -27,16 +27,4 @@ RSpec.describe Yoda::Server do
       expect(subject).to be_instance_of(LSP::Interface::InitializeResult)
     end
   end
-
-  describe '#handle_initialized' do
-    before { server.handle_initialize(init_param) }
-    subject { server.handle_initialized(param) }
-    let(:param) { nil }
-
-
-    it 'does setup' do
-      # TODO
-      expect(subject).to be
-    end
-  end
 end

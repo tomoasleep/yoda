@@ -32,6 +32,13 @@
       "versions": {
         "0.1.0": "consumeSignatureHelp"
       }
+    },
+    "consumedServices": {
+      "atom-ide-busy-signal": {
+        "versions": {
+          "0.1.0": "consumeBusySignal"
+        }
+      }
     }
   },
   "providedServices": {
