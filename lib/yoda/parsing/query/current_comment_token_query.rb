@@ -37,6 +37,11 @@ module Yoda
           Range.new(Location.new(row: location_in_comment.row, column: start), Location.new(row: location_in_comment.row, column: last))
         end
 
+        # @return [true, false]
+        def at_sign?
+          inputting_line.at_sign?
+        end
+
         private
 
         # @return [CommentTokenizer::Sequence, nil]
@@ -87,8 +92,8 @@ module Yoda
           # @return [Symbol]
           def current_state
             @current_state ||= begin
-              if !token_sequence
-                :none
+              if tag && %w(@type @!sig).include?(tag.to_s) && !on_tag?
+                :type_tag_type
               elsif tag && token_sequence.parameter_tokens.empty?
                 :tag
               elsif in_bracket?
@@ -101,7 +106,19 @@ module Yoda
             end
           end
 
+          # @return [true, false]
+          def at_sign?
+            current_token &&
+            current_token.to_s.match?(/\A[{}.&\]\[\(\)<>]/) &&
+            column == current_token.offset + current_token.size
+          end
+
           private
+
+          # @return [Boolean]
+          def on_tag?
+            tag && tag.offset <= column && column <= tag.offset + tag.size
+          end
 
           # @return [Boolean]
           def at_parameter_name?
@@ -109,7 +126,7 @@ module Yoda
             when 0
               line_to_current_position.end_with?(/\s/)
             when 1
-              tag && %w(param).include?(tag)
+              tag && %w(@param).include?(tag.to_s)
             else
               false
             end

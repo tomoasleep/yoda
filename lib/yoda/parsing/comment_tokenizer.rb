@@ -15,8 +15,8 @@ module Yoda
         rule(:comment_begin) { str('#') }
         rule(:tag) { str('@') >> (str('!').maybe >> match('[a-zA-Z0-9_-]').repeat) }
 
-        rule(:name) { match['[:graph:]'].repeat(1) }
-        rule(:sign) { match['\[\]<>,{}'] }
+        rule(:name) { (sign.absent? >> match['[:graph:]']).repeat(1) }
+        rule(:sign) { match['\[\]<>,{}\(\)'] }
 
         rule(:comment_token) { sign | name }
 

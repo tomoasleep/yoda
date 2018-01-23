@@ -29,6 +29,8 @@ module Yoda
           param_candidates
         when :type
           const_candidates
+        when :type_tag_type
+          const_candidates
         else
           []
         end
@@ -38,13 +40,17 @@ module Yoda
       def substitution_range
         return nil unless valid?
 
-        if current_comment_token_query.current_state == :type
-          range = current_comment_token_query.current_range.move(
-            row: current_comment_query.begin_point_of_current_comment_block.row - 1,
-            column: current_comment_query.begin_point_of_current_comment_block.column,
-          )
-          cut_point = current_comment_token_query.current_word == '[' ? 1 : (current_comment_token_query.current_word.rindex('::') || -2) + 2
-          Parsing::Range.new(range.begin_location.move(row: 0, column: cut_point), range.end_location)
+        if %i(type type_tag_type).include?(current_comment_token_query.current_state)
+          if current_comment_token_query.current_range
+            range = current_comment_token_query.current_range.move(
+              row: current_comment_query.begin_point_of_current_comment_block.row - 1,
+              column: current_comment_query.begin_point_of_current_comment_block.column,
+            )
+            cut_point = current_comment_token_query.at_sign? ? 1 : (current_comment_token_query.current_word.rindex('::') || -2) + 2
+            Parsing::Range.new(range.begin_location.move(row: 0, column: cut_point), range.end_location)
+          else
+            Parsing::Range.new(location, location)
+          end
         else
           current_comment_token_query.current_range.move(
             row: current_comment_query.begin_point_of_current_comment_block.row - 1,
@@ -69,12 +75,12 @@ module Yoda
         @current_comment_query ||= Parsing::Query::CurrentCommentQuery.new(comments, location)
       end
 
-      # @return [String, nil]
+      # @return [String]
       def index_word
-        if current_comment_token_query.current_state == :type && current_comment_token_query.current_word == '['
+         if %i(type type_tag_type).include?(current_comment_token_query.current_state) && (current_comment_token_query.at_sign?)
           ''
         else
-          current_comment_token_query.current_word
+          current_comment_token_query.current_word || ''
         end
       end
 

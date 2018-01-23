@@ -94,7 +94,7 @@ module Yoda
           ),
           completion_provider: LSP::Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: ['.', '@', '[', ':'],
+            trigger_characters: ['.', '@', '[', ':', '!', '<'],
           ),
           hover_provider: true,
           definition_provider: true,

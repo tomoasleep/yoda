@@ -173,6 +173,51 @@ RSpec.describe Yoda::Server::CompletionProvider do
             end
           end
         end
+
+        context 'request after @type of a sample function' do
+          let(:uri) { file_uri('lib/hoge/type_tag.rb') }
+          let(:position) { { line: 3, character: 14 } }
+          let(:text_edit_range) { { start: { line: 3, character: 14 }, end: { line: 3, character: 14 } } }
+
+          it 'returns type candidates' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "TypeTag", range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'request on type content of @type' do
+          let(:uri) { file_uri('lib/hoge/type_tag.rb') }
+          let(:position) { { line: 3, character: 15 } }
+          let(:text_edit_range) { { start: { line: 3, character: 14 }, end: { line: 3, character: 15 } } }
+
+          it 'returns type candidates' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'request on type content of @type and after "<"' do
+          let(:uri) { file_uri('lib/hoge/type_tag.rb') }
+          let(:position) { { line: 6, character: 20 } }
+          let(:text_edit_range) { { start: { line: 6, character: 20 }, end: { line: 6, character: 20 } } }
+
+          it 'returns type candidates' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
+              have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
+            )
+          end
+        end
       end
     end
   end
