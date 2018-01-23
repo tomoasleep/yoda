@@ -32,7 +32,7 @@ RSpec.describe Yoda::Server::SignatureProvider do
         expect(subject).to be_a(LSP::Interface::SignatureHelp)
         expect(subject.signatures).to include(
           have_attributes(
-            label: include('method1(str: String)'),
+            label: include('method1(String str)'),
             parameters: contain_exactly(
               have_attributes(label: 'str'),
             ),

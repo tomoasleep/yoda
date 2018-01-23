@@ -60,7 +60,7 @@ module Yoda
       # @param range       [Parsing::Range]
       def create_completion_item(description, range)
         LSP::Interface::CompletionItem.new(
-          label: description.sort_text,
+          label: description.is_a?(Evaluation::Descriptions::FunctionDescription) ? description.signature : description.sort_text,
           kind: LSP::Constant::CompletionItemKind::METHOD,
           detail: description.title,
           documentation: description.to_markdown,

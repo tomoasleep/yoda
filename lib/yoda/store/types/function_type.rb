@@ -73,7 +73,7 @@ module Yoda
         # @param type [Base]
         # @param default_value [String, nil]
         def triple_to_s(name, type, default_value = nil)
-          "#{name}: #{type}" + (default_value ? " = #{ default_value }" : '')
+          "#{type} #{name}" + (default_value ? " = #{ default_value }" : '')
         end
 
         def all_parameters_to_s

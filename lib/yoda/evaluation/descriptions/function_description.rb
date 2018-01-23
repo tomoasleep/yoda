@@ -14,6 +14,10 @@ module Yoda
           "#{function.name_signature}#{function.type_signature}"
         end
 
+        def signature
+          "#{function.name}#{function.type_signature}"
+        end
+
         def sort_text
           function.name.to_s
         end
