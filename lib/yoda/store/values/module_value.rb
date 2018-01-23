@@ -13,11 +13,16 @@ module Yoda
           @namespace_object = namespace_object
         end
 
-        # @return [Array<Function>]
+        # @return [Array<Functions::Base>]
         def methods(visibility: nil)
           return [] if namespace_object.type == :proxy
-          opts = { scope: :class, visibility: visibility }.compact
-          namespace_object.meths(opts).map { |meth| Function.new(meth) } + parent_methods(visibility: visibility).reject { |ko| }
+          @methods ||= begin
+            opts = { scope: :class, visibility: visibility }.compact
+            class_methods = namespace_object.meths(opts).map { |meth| Functions::Method.new(meth) } + constructors
+            class_method_names = Set.new(class_methods.map(&:name))
+            parent_meths = parent_methods(visibility: visibility).reject { |m| class_method_names.include?(m.name) }
+            class_methods + parent_meths
+          end
         end
 
         # @return [String]
@@ -36,14 +41,22 @@ module Yoda
 
         private
 
+        # @return [Array<Functions::Constructor>]
+        def constructors
+          [] unless namespace_object.type == :class
+          [] if namespace.child(name: :new, scope: :class)
+          [namespace.child(name: :initialize, scope: :instance)].map do |method_object|
+            Functions::Constructor.new(method_object)
+          end
+        end
+
+        # @return [Array<Functions::Base>]
         def parent_methods(visibility: nil)
           case namespace_object.type
           when :class
-            method_names = Set.new(namespace_object.meths(scope: :class).map(&:name))
-            InstanceValue.new(registry, registry.find_or_proxy('::Class')).methods(visibility: visibility).reject { |m| method_names.include?(m.name) }
+            InstanceValue.new(registry, registry.find_or_proxy('::Class')).methods(visibility: visibility)
           when :module
-            method_names = Set.new(namespace_object.meths(scope: :class).map(&:name))
-            InstanceValue.new(registry, registry.find_or_proxy('::Module')).methods(visibility: visibility).reject { |m| method_names.include?(m.name) }
+            InstanceValue.new(registry, registry.find_or_proxy('::Module')).methods(visibility: visibility)
           else
             []
           end

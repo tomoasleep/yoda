@@ -26,5 +26,10 @@ module YodaFixture
     def method5
       method2
     end
+
+    # @return [Sample2]
+    def method6
+      Sample2.new
+    end
   end
 end

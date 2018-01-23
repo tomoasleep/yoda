@@ -13,11 +13,11 @@ module Yoda
           @class_object = class_object
         end
 
-        # @return [Array<Function>]
+        # @return [Array<Functions::Base>]
         def methods(visibility: nil)
           return [] if class_object.type == :proxy
           opts = { scope: :instance, visibility: visibility }.compact
-          class_object.meths(opts).map { |meth| Function.new(meth) } + object_methods(visibility: visibility)
+          class_object.meths(opts).map { |meth| Functions::Method.new(meth) } + object_methods(visibility: visibility)
         end
 
         # @return [String]
@@ -36,12 +36,16 @@ module Yoda
 
         private
 
+        # @return [Array<Functions::Base>]
         def object_methods(visibility: nil)
           return [] if class_object.type == :proxy
           opts = { scope: :instance, visibility: visibility }.compact
           method_names = Set.new(class_object.meths(opts).map(&:name))
           if object = registry.find('::Object')
-            object.meths(opts).reject { |o| method_names.include?(o.name) }.map { |meth| Function.new(meth) }
+            object.meths(opts)
+              .reject { |o| ![visibility].flatten.include?(:private) && o.namespace.name == :Kernel }
+              .reject { |o| method_names.include?(o.name) }
+              .map { |meth| Functions::Method.new(meth) }
           else
             []
           end

@@ -74,6 +74,23 @@ RSpec.describe Yoda::Server::CompletionProvider do
           )
         end
       end
+
+      context 'request constructor information' do
+        let(:uri) { file_uri('lib/sample2.rb') }
+        let(:position) { { line: 31, character: 16 } }
+        let(:text_edit_range) { { start: { line: 31, character: 14 }, end: { line: 31, character: 17 } } }
+
+        it 'returns infomation of `str` variable' do
+          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject.is_incomplete).to be_falsy
+          expect(subject.items).to contain_exactly(
+            have_attributes(
+              detail: 'Sample2.new: Sample2',
+              text_edit: have_attributes(new_text: 'new', range: have_attributes(text_edit_range)),
+            ),
+          )
+        end
+      end
     end
 
     describe 'comment completion' do

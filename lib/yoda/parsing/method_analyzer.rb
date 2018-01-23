@@ -93,7 +93,7 @@ module Yoda
       end
 
       def function
-        @function ||= Store::Function.new(method_object)
+        @function ||= Store::Functions::Method.new(method_object)
       end
 
       def evaluation_context

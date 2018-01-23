@@ -4,7 +4,7 @@ module Yoda
       # @abstract
       class Base
         # @abstract
-        # @return [Array<Function>]
+        # @return [Array<Functions::Base>]
         def methods
           fail NotImplementedError
         end

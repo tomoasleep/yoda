@@ -64,9 +64,9 @@ module Yoda
       def create_evaluation_env(registry, method_node)
         method_object = registry.find(method_node.full_name)
         fail RuntimeError, "The function #{method_node.full_name} (#{method_node}) is not registered" unless method_object
-        function = Store::Function.new(method_object)
+        function = Store::Functions::Method.new(method_object)
         env = Typing::Environment.new
-        function.parameter_types.each do |name, type|
+        function.type.parameters.each do |name, type, _default|
           name = name.gsub(/:\Z/, '')
           env.bind(name, type)
         end

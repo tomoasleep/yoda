@@ -12,7 +12,7 @@ module Yoda
         end
 
         def type
-          @type ||= Store::Types::UnionType.new(functions.map(&:return_type))
+          @type ||= Store::Types::UnionType.new(functions.map(&:type).map(&:return_type))
         end
 
         def values

@@ -1,5 +1,6 @@
 module Yoda
   module Store
+    # @deprecated
     class Function
       module TypeContainer
         # @param parameter_name [String]
