@@ -31,6 +31,7 @@ module Yoda
       end
 
       class Sequence
+        # @type Parslet::Slice | nil
         attr_reader :tag
 
         # @param tag [Parslet::Slice, nil]

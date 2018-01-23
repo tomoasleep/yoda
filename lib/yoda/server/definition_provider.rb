@@ -1,6 +1,7 @@
 module Yoda
   class Server
     class DefinitionProvider
+      # @type ClientInfo
       attr_reader :client_info
 
       # @param client_info [ClientInfo]

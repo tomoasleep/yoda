@@ -6,6 +6,7 @@ module Yoda
         include ReturnTagContainer
         include TypeTagContainer
 
+        # @type YARD::CodeObjects::MethodObject
         attr_reader :method_object
 
         # @param method_object [YARD::CodeObjects::MethodObject]

@@ -1,7 +1,17 @@
 module Yoda
   module Evaluation
     class CommentCompletion
-      attr_reader :registry, :ast, :comments, :location
+      # @type Store::Registry
+      attr_reader :registry
+
+      # @type ::Parser::AST::Node
+      attr_reader :ast
+
+      # @type Array<::Parser::Source::Comment>
+      attr_reader :comments
+
+      # @type Location
+      attr_reader :location
 
       # @param registry [Store::Registry]
       # @param ast      [::Parser::AST::Node]

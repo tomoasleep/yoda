@@ -15,7 +15,27 @@ module Yoda
       Deserializer.new.deserialize(hash || {})
     end
 
-    attr_reader :reader, :writer, :client_info, :completion_provider, :hover_provider, :signature_provider, :definition_provider
+    # @type ::LanguageServer::Protocol::Transport::Stdio::Reader
+    attr_reader :reader
+
+    # @type ::LanguageServer::Protocol::Transport::Stdio::Writer
+    attr_reader :writer
+
+    # @type ClientInfo
+    attr_reader :client_info
+
+    # @type CompletionProvider
+    attr_reader :completion_provider
+
+    # @type HoverProvider
+    attr_reader :hover_provider
+
+    # @type SignatureProvider
+    attr_reader :signature_provider
+
+    # @type DefinitionProvider
+    attr_reader :definition_provider
+
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
@@ -116,8 +136,8 @@ module Yoda
 
     module TextDocument
       module CompletionTrigggerKind
-        Invoked = 1
-        TriggerCharacter = 2
+        INVOKED = 1
+        TRIGGER_CHARACTER = 2
       end
 
       def handle_text_document_did_open(params)

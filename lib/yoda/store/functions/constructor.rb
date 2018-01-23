@@ -2,6 +2,7 @@ module Yoda
   module Store
     module Functions
       class Constructor < Base
+        # @type YARD::CodeObjects::MethodObject
         attr_reader :constructor_object
 
         # @param overload_tag [YARD::CodeObjects::MethodObject]
@@ -9,6 +10,7 @@ module Yoda
           @constructor_object = constructor_object
         end
 
+        # @return 
         def types
           base_method.types
         end

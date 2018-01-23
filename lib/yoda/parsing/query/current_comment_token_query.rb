@@ -64,7 +64,11 @@ module Yoda
         end
 
         class InputtingLine
-          attr_reader :token_sequence, :column
+          # @type CommentTokenizer::Sequence
+          attr_reader :token_sequence
+
+          # @type Integer
+          attr_reader :column
 
           # @param token_sequence [CommentTokenizer::Sequence]
           # @param column   [Integer]
@@ -73,7 +77,7 @@ module Yoda
             @column = column
           end
 
-          # @return [String, nil]
+          # @return [Parslet::Slice, nil]
           def tag
             token_sequence.tag
           end
@@ -84,7 +88,7 @@ module Yoda
             [current_token.offset, current_token.offset + current_token.size]
           end
 
-          # @return [Parslet::Slice]
+          # @return [Parslet::Slice, nil]
           def current_token
             @current_token ||= token_sequence.all_tokens.find { |token| token.offset <= column && column <= token.offset + token.size }
           end

@@ -6,7 +6,11 @@ require 'digest'
 module Yoda
   module Store
     class Project
-      attr_reader :root_path, :registry
+      # @type String
+      attr_reader :root_path
+
+      # @type Registry
+      attr_reader :registry
 
       # @param root_path [String]
       def initialize(root_path)
