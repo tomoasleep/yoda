@@ -1,7 +1,41 @@
 # Yoda (In Progress)
 
-Yoda is a static analytics tool for Ruby.
-Yoda contains a language protocol server to provider autocompletion and datatips.
+Yoda is a static analytics tool for Ruby to provide autocompletion, go-to-definition, documentation on hover and so on.
+Yoda is designed to provide these features for multiple editors by using language server protocol (https://microsoft.github.io/language-server-protocol/).
+
+## Language Server
+
+`yoda server` provides many features such as autocompletion and hovering datatips over language server protocol (https://microsoft.github.io/language-server-protocol/).
+
+### Supporting Features
+
+- autocompletion
+  - [x] method completion
+    - Supported in method bodies only
+  - [ ] constant completion
+  - [ ] (local, class, instance) variable completion
+  - :small_red_triangle: comment completion
+    - [x] YARD tag completion
+    - [x] YARD type literal completion
+    - [ ] parameter completion
+- :small_red_triangle: jump to definition
+  - Supported in method bodies only
+- :small_red_triangle: hover
+  - Supported in method bodies only
+- :small_red_triangle: signature help
+  - Supported in method bodies only
+- [ ] find references
+- [ ] workspace symbols
+- [ ] diagnostics
+
+## Internal
+
+Yoda analyzes your program structure without executing your code by using ruby parser and YARD.
+Yoda figures program structures of your dependencies from YARD index files and
+figures one of your project codes by parsing your project codes.
+
+Yoda internally uses YARD for program analysis so Yoda can understand type hints written in your comments such as `@return` tags and `@param` tags.
+Yoda utilizes these type hints for completion features.
 
 ## Installation
 
