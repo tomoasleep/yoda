@@ -43,6 +43,10 @@ module Yoda
         rule(:function_type_inner_with_context) { context.maybe.as(:context) >> space? >> function_type_inner }
         rule(:function_type) { generic_abs.maybe.as(:generic_abs) >> space? >> (function_type_inner | function_type_inner_with_context).as(:generic_abs_body) }
 
+        rule(:self_instance_type) { str('self') >> space? >> str('.') >> space? >> str('instance') }
+        rule(:self_class_type) { str('self') >> space? >> str('.') >> space? >> str('class') }
+        rule(:self_type) { str('self') }
+
         rule(:instance_type) { constant_full_name.as(:instance_type) }
         rule(:module_type) { constant_full_name.as(:module_type) >> space? >> str('.') >> space? >> (str('class') | str('module')) }
         rule(:value_type) { special_value.as(:value_type) }
