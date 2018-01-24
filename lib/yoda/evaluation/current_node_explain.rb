@@ -24,6 +24,19 @@ module Yoda
         !!(current_method && current_node)
       end
 
+      # @return [Array<[String, Integer]>]
+      def defined_files
+        return [] if !valid? || !current_node_trace
+        case current_node.type
+        when :send
+          current_node_trace.functions.map { |function| function.defined_files.first }.compact
+        when :const
+          current_node_trace.values.map { |value| value.defined_files.first }.compact
+        else
+          []
+        end
+      end
+
       private
 
       # @return [Typing::Trace::Send, nil]

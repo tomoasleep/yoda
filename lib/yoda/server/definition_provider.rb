@@ -16,9 +16,8 @@ module Yoda
         source = client_info.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-        reference_worker = Evaluation::FindDefinition.new(client_info.registry, source, location)
-
-        references = reference_worker.current_const_references
+        node_worker = Evaluation::CurrentNodeExplain.new(client_info.registry, source, location)
+        references = node_worker.defined_files
         references.map { |(path, line)| create_location(path, line) }
       end
 

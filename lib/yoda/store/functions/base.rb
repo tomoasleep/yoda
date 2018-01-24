@@ -45,6 +45,12 @@ module Yoda
         end
 
         # @abstract
+        # @return [Array<[String, Integer]>]
+        def defined_files
+          fail NotImplementedError
+        end
+
+        # @abstract
         # @return [String]
         def name_signature
           fail NotImplementedError

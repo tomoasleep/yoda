@@ -39,6 +39,11 @@ module Yoda
           namespace.docstring
         end
 
+        # @return [Array<[String, Integer]>]
+        def defined_files
+          namespace.files
+        end
+
         private
 
         # @return [Array<Functions::Constructor>]

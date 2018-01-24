@@ -24,7 +24,7 @@ RSpec.describe Yoda::Server::DefinitionProvider do
     end
     subject { provider.provide(uri, position) }
 
-    context 'request information in sample function' do
+    context 'request information on constant node in sample function' do
       let(:uri) { file_uri('lib/sample2.rb') }
       let(:position) { { line: 22, character: 10 } }
 
@@ -34,6 +34,21 @@ RSpec.describe Yoda::Server::DefinitionProvider do
           have_attributes(
             uri: uri,
             range: have_attributes(start: { line: 0, character: 0 }, end: { line: 0, character: 0 })
+          ),
+        )
+      end
+    end
+
+    context 'request information on send node in sample function' do
+      let(:uri) { file_uri('lib/sample2.rb') }
+      let(:position) { { line: 26, character: 10 } }
+
+      it 'returns infomation of method1' do
+        expect(subject).to contain_exactly(be_a(LSP::Interface::Location))
+        expect(subject).to contain_exactly(
+          have_attributes(
+            uri: uri,
+            range: have_attributes(start: { line: 10, character: 0 }, end: { line: 10, character: 0 })
           ),
         )
       end

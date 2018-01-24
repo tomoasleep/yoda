@@ -60,6 +60,11 @@ module Yoda
           parent_method.namespace
         end
 
+        # @return [Array<[String, Integer]>]
+        def defined_files
+          parent_method.files
+        end
+
         private
 
         def type_tags

@@ -20,6 +20,12 @@ module Yoda
         def docstring
           fail NotImplementedError
         end
+
+        # @abstract
+        # @return [Array<[String, Integer]>]
+        def defined_files
+          fail NotImplementedError
+        end
       end
     end
   end

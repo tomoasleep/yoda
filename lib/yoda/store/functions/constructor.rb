@@ -10,7 +10,6 @@ module Yoda
           @constructor_object = constructor_object
         end
 
-        # @return 
         def types
           base_method.types
         end
@@ -43,6 +42,11 @@ module Yoda
 
         def namespace
           base_method.namespace
+        end
+
+        # @return [Array<[String, Integer]>]
+        def defined_files
+          base_method.files
         end
 
         private

@@ -1,5 +1,6 @@
 module Yoda
   module Evaluation
+    # @deprecated
     class FindDefinition
       include NodeEvaluatable
       attr_reader :registry, :source, :location

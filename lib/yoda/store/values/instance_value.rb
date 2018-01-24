@@ -2,7 +2,11 @@ module Yoda
   module Store
     module Values
       class InstanceValue < Base
-        attr_reader :registry, :class_object
+        # @type Registry
+        attr_reader :registry
+
+        # @type ::YARD::CodeObjects::ClassObject | ::YARD::CodeObjects::Proxy
+        attr_reader :class_object
 
         # @param registry [Registry]
         # @param class_object [::YARD::CodeObjects::ClassObject, ::YARD::CodeObjects::Proxy]
@@ -32,6 +36,11 @@ module Yoda
         # @param [String]
         def docstring
           class_object.docstring
+        end
+
+        # @return [Array<[String, Integer]>]
+        def defined_files
+          namespace.files
         end
 
         private

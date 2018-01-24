@@ -2,6 +2,7 @@ module Yoda
   module Evaluation
     module Descriptions
       class FunctionDescription < Base
+        # @type Store::Functions::Base
         attr_reader :function
         # @!sig function Store::Functions::Base
 
