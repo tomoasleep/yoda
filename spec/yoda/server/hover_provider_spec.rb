@@ -89,5 +89,16 @@ RSpec.describe Yoda::Server::HoverProvider do
         expect(subject.range).to have_attributes(start: { line: 9, character: 8 }, end: { line: 9, character: 20 })
       end
     end
+
+    context 'when the constant begin with cbase' do
+      let(:uri) { file_uri('lib/namespace1/string.rb') }
+      let(:position) { { line: 13, character: 13} }
+
+      it 'returns the description of the calling method' do
+        expect(subject).to be_a(LSP::Interface::Hover)
+        expect(subject.contents).to contain_exactly(be_start_with('**String.class**'))
+        expect(subject.range).to have_attributes(start: { line: 13, character: 8 }, end: { line: 13, character: 16 })
+      end
+    end
   end
 end
