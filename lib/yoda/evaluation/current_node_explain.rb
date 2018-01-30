@@ -39,7 +39,7 @@ module Yoda
 
       private
 
-      # @return [Typing::Trace::Send, nil]
+      # @return [Typing::Traces::Base, nil]
       def current_node_trace
         return nil unless valid?
         @current_node_trace ||= calculate_trace(current_node, registry, current_method)
