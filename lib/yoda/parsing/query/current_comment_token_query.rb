@@ -128,7 +128,8 @@ module Yoda
           def at_parameter_name?
             case token_sequence.parameter_tokens.length
             when 0
-              line_to_current_position.end_with?(/\s/)
+              # TODO
+              false
             when 1
               tag && %w(@param).include?(tag.to_s)
             else
