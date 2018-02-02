@@ -10,6 +10,7 @@ module Yoda
     require 'yoda/store/registry'
     require 'yoda/store/types'
     require 'yoda/store/values'
+    require 'yoda/store/objects'
     require 'yoda/store/yard_importer'
   end
 end
