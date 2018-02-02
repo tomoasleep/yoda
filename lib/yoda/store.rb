@@ -2,6 +2,7 @@ require 'yard'
 
 module Yoda
   module Store
+    require 'yoda/store/adapters'
     require 'yoda/store/code_objects'
     require 'yoda/store/function'
     require 'yoda/store/functions'

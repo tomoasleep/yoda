@@ -15,7 +15,7 @@ module Yoda
         # @param instance_method_paths [Array<String>]
         # @param child_addresses [Array<String>]
         # @param instance_mixin_addresses [Array<String>]
-        def initialize(path: path, instance_method_paths: [], instance_mixin_addresses: [], child_addresses: [], **kwargs)
+        def initialize(path:, instance_method_paths: [], instance_mixin_addresses: [], child_addresses: [], **kwargs)
           super
 
           @instance_method_paths = instance_method_paths

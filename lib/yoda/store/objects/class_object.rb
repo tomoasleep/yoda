@@ -7,7 +7,7 @@ module Yoda
 
         # @param path [String]
         # @param superclass_address [String, nil]
-        def initialize(path: path, superclass_address: nil, **kwargs)
+        def initialize(path:, superclass_address: nil, **kwargs)
           super
 
           @superclass_address = superclass_address

@@ -25,6 +25,17 @@ module Yoda
         def find(address)
           @registry[address.to_sym]
         end
+
+        # @param address [String, Symbol]
+        # @return [true, false]
+        def has_key?(address)
+          @registry.has_key?(address.to_sym)
+        end
+
+        # @return [Array<Symbol>]
+        def keys
+          @registry.keys
+        end
       end
     end
   end

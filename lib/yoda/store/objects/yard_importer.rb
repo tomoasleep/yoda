@@ -18,17 +18,12 @@ module Yoda
           new(file).tap { |importer| importer }.import
         end
 
-        # @param yard_file [String]
+        # @param root_path [String]
         def initialize(yard_file)
           @yard_file = yard_file
           @store = YARD::RegistryStore.new
           @patch = Patch.new(yard_file)
           @registered = Set.new
-        end
-
-        # @return [String]
-        def project_root
-          @project_root ||= File.expand_path('..', yard_file)
         end
 
         # @return [self]

@@ -13,7 +13,7 @@ module Yoda
         # @param tag_list [TagList, nil]
         # @param visibility [Symbol]
         # @param parameters [Array<(String, String)>, nil]
-        def initialize(path: path, parameters: [], visibility: :public, **kwargs)
+        def initialize(path:, parameters: [], visibility: :public, **kwargs)
           super
           fail ArgumentError, visibility unless %i(public private protected)
           @visibility = visibility

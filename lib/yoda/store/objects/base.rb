@@ -23,7 +23,7 @@ module Yoda
         # @param tag_list [TagList, nil]
         # @param sources [Array<(String, Integer, Integer)>]
         # @param primary_source [(String, Integer, Integer), nil]
-        def initialize(path: path, document: nil, tag_list: nil, sources: [], primary_source: nil, **kwargs)
+        def initialize(path:, document: nil, tag_list: nil, sources: [], primary_source: nil, **kwargs)
           @path = path
           @document = document
           @tag_list = tag_list

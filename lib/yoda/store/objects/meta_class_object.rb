@@ -7,7 +7,7 @@ module Yoda
         # @param tag_list [TagList, nil]
         # @param instance_method_paths [Array<String>]
         # @param instance_mixin_paths [Array<String>]
-        def initialize(path: path, **kwargs)
+        def initialize(path:, **kwargs)
           super
         end
 
