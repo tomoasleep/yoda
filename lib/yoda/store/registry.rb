@@ -3,6 +3,46 @@ require 'yard'
 module Yoda
   module Store
     class Registry
+      class InternalDB
+        # @return [Adapters::LeveldbAdapter]
+        attr_reader :adapter
+
+        # @return [Objects::PatchSet]
+        attr_reader :patch_set
+
+        # @param path [String]
+        def initailize(path)
+          @adapter = Adapters::LeveldbAdapter.new(path)
+          @patch_set = Objects::PatchSet.new
+        end
+
+        def find(path)
+          if adapter.exists?(path)
+            patch_set.patch(adapter.get(path))
+          else
+            patch_set.find(path)
+          end
+        end
+
+        def has_key?(path)
+          adapter.exists?(path) || patch_set.has_key?(path)
+        end
+
+        def dump
+          keys.each do |key|
+            adapter.put(key, find(key))
+          end
+        end
+
+        def keys
+          Set.new(adapter.keys.map(&:to_s)).union(patch_set.keys)
+        end
+
+        def load_source(source_path)
+          source_path
+        end
+      end
+
       class << self
         # @return [Yoda::Store::Registory]
         def instance
