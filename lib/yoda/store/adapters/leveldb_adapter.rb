@@ -1,26 +1,36 @@
 require 'leveldb'
+require 'json'
 
 module Yoda
   module Store
     module Adapters
       class LeveldbAdapter
+        class << self
+          def for(path)
+            @pool ||= {}
+            @pool[path] || (@pool[path] = new(path))
+          end
+        end
+
         # @param path [String] represents the path to store db.
         def initialize(path)
           @path = path
           @db = LevelDB::DB.new(path, compression: true)
+
+          at_exit { @db.closed? || @db.close }
         end
 
         # @param address [String]
         # @return [any]
         def get(address)
-          @db.get(address.to_s)
+          JSON.load(@db.get(address.to_s), symbolize_names: true)
         end
 
         # @param address [String]
         # @param object [Object]
         # @return [void]
         def put(address, object)
-          @db.put(address.to_s, object)
+          @db.put(address.to_s, object.to_json)
         end
 
         # @param address [String]
@@ -32,7 +42,7 @@ module Yoda
         # @param address [String]
         # @return [true, false]
         def exist?(address)
-          @db.exist?(address.to_s)
+          @db.exists?(address.to_s)
         end
 
         # @param range_begin [String]
@@ -49,6 +59,18 @@ module Yoda
 
         def stats
           @db.stats
+        end
+
+        def clear
+          @db.destroy!
+        end
+
+        private
+
+        # @param hsh [Hash]
+        # @return [Hash]
+        def symbolize_keys(hsh)
+          hsh.map { |key, value| [key.to_sym, value] }.to_hash
         end
       end
     end
