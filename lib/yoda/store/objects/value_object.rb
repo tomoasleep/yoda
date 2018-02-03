@@ -7,9 +7,8 @@ module Yoda
 
         # @param path [String]
         # @param value [String]
-        def initialize(path:, value: nil, **kwargs)
-          super
-
+        def initialize(value: nil, **kwargs)
+          super(kwargs)
           @value = value
         end
 

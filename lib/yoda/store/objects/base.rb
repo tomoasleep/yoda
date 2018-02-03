@@ -34,7 +34,7 @@ module Yoda
         # @param tag_list [TagList, nil]
         # @param sources [Array<(String, Integer, Integer)>]
         # @param primary_source [(String, Integer, Integer), nil]
-        def initialize(path:, document: '', tag_list: [], sources: [], primary_source: nil, **kwargs)
+        def initialize(path:, document: '', tag_list: [], sources: [], primary_source: nil, json_class: nil, type: nil)
           @path = path
           @document = document
           @tag_list = tag_list
@@ -59,7 +59,14 @@ module Yoda
 
         # @return [Hash]
         def to_h
-          { path: path, document: document, tag_list: tag_list.map(&:to_h), sources: sources, primary_source: primary_source }
+          {
+            type: type,
+            path: path,
+            document: document,
+            tag_list: tag_list.map(&:to_h),
+            sources: sources,
+            primary_source: primary_source
+          }
         end
 
         # @return [String]

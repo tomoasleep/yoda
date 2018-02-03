@@ -7,23 +7,22 @@ module Yoda
         attr_reader :instance_method_addresses
 
         # @type (Array<String>) -> Array<String>
-        attr_reader :instance_mixin_addresses
+        attr_reader :mixin_addresses
 
         # @type (Array<String>) -> Array<String>
-        attr_reader :child_addresses
+        attr_reader :constant_addresses
 
         # @param path [String]
         # @param document [Document, nil]
         # @param tag_list [TagList, nil]
         # @param instance_method_paths [Array<String>]
-        # @param child_addresses [Array<String>]
-        # @param instance_mixin_addresses [Array<String>]
-        def initialize(path:, instance_method_addresses: [], instance_mixin_addresses: [], child_addresses: [], **kwargs)
-          super
-
+        # @param constant_addresses [Array<String>]
+        # @param mixin_addresses [Array<String>]
+        def initialize(instance_method_addresses: [], mixin_addresses: [], constant_addresses: [], **kwargs)
+          super(kwargs)
           @instance_method_addresses = instance_method_addresses
-          @instance_mixin_addresses = instance_mixin_addresses
-          @child_addresses = child_addresses
+          @mixin_addresses = mixin_addresses
+          @constant_addresses = constant_addresses
         end
 
         # @return [String]
@@ -34,8 +33,8 @@ module Yoda
         def to_h
           super.merge(
             instance_method_addresses: instance_method_addresses,
-            instance_mixin_addresses: instance_mixin_addresses,
-            child_addresses: child_addresses,
+            mixin_addresses: mixin_addresses,
+            constant_addresses: constant_addresses,
           )
         end
 
@@ -46,8 +45,8 @@ module Yoda
         def merge_attributes(another)
           super.merge(
             instance_method_addresses: (instance_method_addresses + another.instance_method_addresses).uniq,
-            instance_mixin_addresses: (instance_mixin_addresses + another.instance_mixin_addresses).uniq,
-            child_addresses: (child_addresses + another.child_addresses).uniq,
+            mixin_addresses: (mixin_addresses + another.mixin_addresses).uniq,
+            constant_addresses: (constant_addresses + another.constant_addresses).uniq,
           )
         end
       end

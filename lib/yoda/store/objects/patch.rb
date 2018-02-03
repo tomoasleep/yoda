@@ -17,7 +17,11 @@ module Yoda
         # @param addressable [Addressable]
         # @return [void]
         def register(addressable)
-          @registry[addressable.address.to_sym] = addressable
+          if el = @registry[addressable.address.to_sym]
+            @registry[addressable.address.to_sym] = el.merge(addressable)
+          else
+            @registry[addressable.address.to_sym] = addressable
+          end
         end
 
         # @param address [String, Symbol]

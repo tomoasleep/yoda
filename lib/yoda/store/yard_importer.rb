@@ -40,30 +40,49 @@ module Yoda
         @registered.add(code_object.path)
         register(code_object.parent) if code_object.parent && !code_object.parent.root?
 
-        new_objects =
-          case code_object
-          when YARD::CodeObjects::ClassObject
+        new_objects = begin
+          case code_object.type
+          when :root
+            convert_root_object(code_object)
+          when :class
             convert_class_object(code_object)
-          when YARD::CodeObjects::ModuleObject
+          when :module
             convert_module_object(code_object)
-          when YARD::CodeObjects::ClassVariableObject
+          when :classvariable
             # convert_class_variable_object(code_object)
-          when YARD::CodeObjects::MethodObject
+          when :method
             convert_method_object(code_object)
-          when YARD::CodeObjects::MacroObject
+          when :macro
             # convert_macro_object(code_object)
-          when YARD::CodeObjects::ConstantObject
+          when :constant
             convert_constant_object(code_object)
-          when YARD::CodeObjects::Proxy
+          when :proxy
             nil
           else
             fail ArgumentError, 'Unsupported type code object'
           end
+        end
 
         [new_objects].flatten.compact.each { |new_object| patch.register(new_object) }
       end
 
       private
+
+      # @param code_object [::YARD::CodeObjects::NamespaceObject]
+      # @return [Objects::ClassObject]
+      def convert_root_object(code_object)
+        # @todo Add meta class for main object.
+        Objects::ClassObject.new(
+          path: 'Object',
+          document: code_object.docstring.to_s,
+          tag_list: code_object.tags.map(&method(:convert_tag)),
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
+        )
+      end
 
       # @param code_object [::YARD::CodeObjects::ConstantObject]
       # @return [Objects::ValueObject]
@@ -102,8 +121,8 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
-          instance_mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
-          child_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
         )
 
         meta_class_object = Objects::MetaClassObject.new(
@@ -111,7 +130,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
-          instance_mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
         )
 
         [module_object, meta_class_object]
@@ -127,9 +146,9 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
-          instance_mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
-          child_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
-          superclass: code_object.superclass.path,
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
+          superclass_address: code_object.superclass&.path,
         )
 
         meta_class_object = Objects::MetaClassObject.new(
@@ -137,7 +156,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
-          instance_mixin_addresses: code_object.class_mixins.map { |mixin| mixin.path },
+          mixin_addresses: code_object.class_mixins.map { |mixin| mixin.path },
         )
 
         [class_object, meta_class_object]
