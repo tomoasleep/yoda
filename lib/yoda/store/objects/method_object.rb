@@ -35,7 +35,10 @@ module Yoda
         end
 
         def to_h
-          super.merge(parameters: parameters, visibility: visibility)
+          super.merge(
+            parameters: parameters,
+            visibility: visibility,
+          )
         end
 
         private

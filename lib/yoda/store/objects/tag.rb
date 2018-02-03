@@ -2,6 +2,17 @@ module Yoda
   module Store
     module Objects
       class Tag
+        class << self
+          def json_creatable?
+            true
+          end
+
+          # @param params [Hash]
+          def json_create(params)
+            new(params.map { |k, v| [k.to_sym, v] }.select { |(k, v)| %i(tag_name name yard_types text).include?(k) }.to_h)
+          end
+        end
+
         # @return [String]
         attr_reader :tag_name
 
@@ -23,8 +34,13 @@ module Yoda
         end
 
         # @return [Hash]
-        def to_hash
+        def to_h
           { name: name, tag_name: tag_name, yard_types: yard_types, text: text }
+        end
+
+        # @return [String]
+        def to_json
+          to_h.merge(json_class: self.class.name).to_json
         end
       end
     end

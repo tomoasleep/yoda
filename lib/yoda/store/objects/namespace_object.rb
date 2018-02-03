@@ -4,10 +4,13 @@ module Yoda
       # @abstract
       class NamespaceObject < Base
         # @return [Array<String>]
-        attr_reader :instance_method_paths
+        attr_reader :instance_method_addresses
 
         # @type (Array<String>) -> Array<String>
-        attr_writer :instance_method_paths
+        attr_reader :instance_mixin_addresses
+
+        # @type (Array<String>) -> Array<String>
+        attr_reader :child_addresses
 
         # @param path [String]
         # @param document [Document, nil]
@@ -15,10 +18,10 @@ module Yoda
         # @param instance_method_paths [Array<String>]
         # @param child_addresses [Array<String>]
         # @param instance_mixin_addresses [Array<String>]
-        def initialize(path:, instance_method_paths: [], instance_mixin_addresses: [], child_addresses: [], **kwargs)
+        def initialize(path:, instance_method_addresses: [], instance_mixin_addresses: [], child_addresses: [], **kwargs)
           super
 
-          @instance_method_paths = instance_method_paths
+          @instance_method_addresses = instance_method_addresses
           @instance_mixin_addresses = instance_mixin_addresses
           @child_addresses = child_addresses
         end
@@ -29,7 +32,11 @@ module Yoda
         end
 
         def to_h
-          super.merge(instance_method_paths: instance_method_paths, instance_mixin_paths: instance_mixin_paths, child_addresses: child_addresses)
+          super.merge(
+            instance_method_addresses: instance_method_addresses,
+            instance_mixin_addresses: instance_mixin_addresses,
+            child_addresses: child_addresses,
+          )
         end
 
         private
@@ -38,8 +45,8 @@ module Yoda
         # @return [Hash]
         def merge_attributes(another)
           super.merge(
-            instance_method_paths: (instance_method_paths + another.instance_method_paths).uniq,
-            instance_mixin_addresses: (instance_method_addresses + another.instance_method_addresses).uniq,
+            instance_method_addresses: (instance_method_addresses + another.instance_method_addresses).uniq,
+            instance_mixin_addresses: (instance_mixin_addresses + another.instance_mixin_addresses).uniq,
             child_addresses: (child_addresses + another.child_addresses).uniq,
           )
         end

@@ -9,7 +9,6 @@ module Yoda
         # @param superclass_address [String, nil]
         def initialize(path:, superclass_address: nil, **kwargs)
           super
-
           @superclass_address = superclass_address
         end
 
@@ -34,7 +33,7 @@ module Yoda
         # @param another [String]
         # @return [String]
         def select_superclass(another)
-          if %w(Object Exception).include?(another.superclass_address)
+          if %w(Object Exception).include?(another)
             superclass_address || another
           else
             another || superclass_address

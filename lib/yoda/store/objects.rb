@@ -5,9 +5,6 @@ module Yoda
       METHOD_PATTERN = /(.|#)(\w+)$/
       MODULE_TAIL_PATTERN = /(?:::(\w+)|^(\w+))$/
 
-      class << self
-      end
-
       require 'yoda/store/objects/base'
       require 'yoda/store/objects/namespace_object'
       require 'yoda/store/objects/class_object'
@@ -20,7 +17,25 @@ module Yoda
       require 'yoda/store/objects/patch_set'
       require 'yoda/store/objects/tag'
       require 'yoda/store/objects/tag_list'
-      require 'yoda/store/objects/yard_importer'
+
+      class << self
+        # @param hsh [Hash]
+        # @param [Addressable, nil]
+        def deserialize(hsh)
+          case hsh[:type].to_sym
+          when :class
+            ClassObject.new(hsh)
+          when :module
+            ModuleObject.new(hsh)
+          when :meta_class
+            MetaClassObject.new(hsh)
+          when :value
+            ValueObject.new(hsh)
+          when :method
+            MethodObject.new(hsh)
+          end
+        end
+      end
     end
   end
 end

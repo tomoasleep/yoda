@@ -4,15 +4,13 @@ module Yoda
       # PatchSet manages patch updates and patch outdates.
       # Besides, this class provides api to modify objects by using owning patches.
       class PatchSet
-        # @return [{ Symbol => ::Set<Symbol> }]
+        # @return [{ Symbol => Array<Symbol> }]
         attr_reader :address_index
 
         # @return [{ Symbol => Patch }]
         attr_reader :patches
 
-        # @param id [String]
-        def initialize(id)
-          @id = id
+        def initialize
           @patches = Hash.new
           @address_index = Hash.new
         end
@@ -42,10 +40,11 @@ module Yoda
         # @return [Addressable, nil]
         def find(address)
           check_outdated_index(address.to_sym)
-          if patch_id = address_index[address.to_sym]
-            patches[patch_id].find(address.to_sym)
-          else
+          if (patch_ids = address_index[address.to_sym]).empty?
             nil
+          else
+            objects = patch_ids.map { |id| patches[id].find(address.to_sym) }
+            objects.reduce { |obj1, obj2| obj1.merge(obj2) }
           end
         end
 
@@ -67,17 +66,14 @@ module Yoda
         # @return [void]
         def register_to_index(patch)
           patch.keys.each do |key|
-            address_index[key.to_sym] ||= Set.new
-            address_index[key.to_sym].add(patch.id.to_sym)
+            address_index[key.to_sym] ||= []
+            address_index[key.to_sym].push(patch.id.to_sym)
           end
         end
 
         # @param address [Symbol]
         def check_outdated_index(address)
-          id_set = address_index[address]
-          id_set.to_a.each do |patch_id|
-            id_set.delete(patch_id) unless patches[patch_id].has_key?(address)
-          end
+          address_index[address].select! { |patch_id| patches[patch_id].has_key?(address) }
         end
       end
     end

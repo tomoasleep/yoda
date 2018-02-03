@@ -23,10 +23,6 @@ module Yoda
         def address
           "#{path}.class"
         end
-
-        def to_h
-          super.merge(orignal_type: orignal_type)
-        end
       end
     end
   end

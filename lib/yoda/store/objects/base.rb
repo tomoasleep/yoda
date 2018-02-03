@@ -3,13 +3,24 @@ module Yoda
     module Objects
       # @abstract
       class Base
+        class << self
+          def json_creatable?
+            true
+          end
+
+          # @param params [Hash]
+          def json_create(params)
+            new(params.map { |k, v| [k.to_sym, v] }.to_h)
+          end
+        end
+
         # @return [String]
         attr_reader :path
 
-        # @return [Document, nil]
+        # @return [String]
         attr_reader :document
 
-        # @return [TagList]
+        # @return [Array<Tag>]
         attr_reader :tag_list
 
         # @return [Array<(String, Integer, Integer)>]
@@ -19,11 +30,11 @@ module Yoda
         attr_reader :primary_source
 
         # @param path [String]
-        # @param document [Document, nil]
+        # @param document [String]
         # @param tag_list [TagList, nil]
         # @param sources [Array<(String, Integer, Integer)>]
         # @param primary_source [(String, Integer, Integer), nil]
-        def initialize(path:, document: nil, tag_list: nil, sources: [], primary_source: nil, **kwargs)
+        def initialize(path:, document: '', tag_list: [], sources: [], primary_source: nil, **kwargs)
           @path = path
           @document = document
           @tag_list = tag_list
@@ -47,8 +58,13 @@ module Yoda
         end
 
         # @return [Hash]
-        def to_hash
-          { path: path, document: document.to_hash, tag_list: tag_list.to_a, sources: sources, primary_source: primary_source }
+        def to_h
+          { path: path, document: document, tag_list: tag_list.map(&:to_h), sources: sources, primary_source: primary_source }
+        end
+
+        # @return [String]
+        def to_json
+          to_h.merge(json_class: self.class.name).to_json
         end
 
         # @param another [self]
