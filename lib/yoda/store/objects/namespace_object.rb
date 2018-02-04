@@ -6,11 +6,17 @@ module Yoda
         # @return [Array<String>]
         attr_reader :instance_method_addresses
 
-        # @type (Array<String>) -> Array<String>
+        # @type Array<String>
         attr_reader :mixin_addresses
 
-        # @type (Array<String>) -> Array<String>
+        # @type Array<String>
         attr_reader :constant_addresses
+
+        # @return [Enumerable<NamespaceObject>]
+        attr_accessor :ancestors
+
+        # @return [Enumerable<MethodObject>]
+        attr_accessor :methods
 
         # @param path [String]
         # @param document [Document, nil]
@@ -23,6 +29,7 @@ module Yoda
           @instance_method_addresses = instance_method_addresses
           @mixin_addresses = mixin_addresses
           @constant_addresses = constant_addresses
+          @ancestors ||= []
         end
 
         # @return [String]

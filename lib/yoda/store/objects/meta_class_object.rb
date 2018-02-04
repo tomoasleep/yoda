@@ -3,6 +3,12 @@ module Yoda
     module Objects
       class MetaClassObject < NamespaceObject
         # @param path [String]
+        # @return [String]
+        def self.address_of(path)
+          "#{path}%class"
+        end
+
+        # @param path [String]
         # @param document [Document, nil]
         # @param tag_list [TagList, nil]
         # @param instance_method_paths [Array<String>]
@@ -21,7 +27,7 @@ module Yoda
         end
 
         def address
-          "#{path}%class"
+          MetaClassObject.address_of(path)
         end
       end
     end

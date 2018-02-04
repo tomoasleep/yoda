@@ -10,6 +10,7 @@ module Yoda
       require 'yoda/store/objects/class_object'
       require 'yoda/store/objects/value_object'
       require 'yoda/store/objects/document'
+      require 'yoda/store/objects/overload'
       require 'yoda/store/objects/meta_class_object'
       require 'yoda/store/objects/method_object'
       require 'yoda/store/objects/module_object'

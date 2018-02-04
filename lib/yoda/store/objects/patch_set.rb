@@ -31,8 +31,8 @@ module Yoda
         # @return [Addressable]
         def patch(object)
           check_outdated_index(object.address.to_sym)
-          (address_index[address.to_sym] || []).reduce(object) do |obj, patch_id|
-            obj.merge(patches[patch_id].find(address.to_sym))
+          (address_index[object.address.to_sym] || []).reduce(object) do |obj, patch_id|
+            obj.merge(patches[patch_id].find(object.address.to_sym))
           end
         end
 
@@ -40,7 +40,7 @@ module Yoda
         # @return [Addressable, nil]
         def find(address)
           check_outdated_index(address.to_sym)
-          if (patch_ids = address_index[address.to_sym]).empty?
+          if (patch_ids = address_index[address.to_sym] || []).empty?
             nil
           else
             objects = patch_ids.map { |id| patches[id].find(address.to_sym) }
@@ -73,7 +73,7 @@ module Yoda
 
         # @param address [Symbol]
         def check_outdated_index(address)
-          address_index[address].select! { |patch_id| patches[patch_id].has_key?(address) }
+          (address_index[address] || []).select! { |patch_id| patches[patch_id].has_key?(address) }
         end
       end
     end
