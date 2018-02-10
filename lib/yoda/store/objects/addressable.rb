@@ -4,7 +4,7 @@ module Yoda
       module Addressable
         # @abstract
         # @return [Symbol]
-        def type
+        def kind
           fail NotImplementedError
         end
 

@@ -2,7 +2,7 @@ module Yoda
   module Store
     module Objects
       class ModuleObject < NamespaceObject
-        def type
+        def kind
           :module
         end
       end

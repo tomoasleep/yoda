@@ -14,10 +14,10 @@ module Yoda
       require 'yoda/store/objects/meta_class_object'
       require 'yoda/store/objects/method_object'
       require 'yoda/store/objects/module_object'
+      require 'yoda/store/objects/parameter_list'
       require 'yoda/store/objects/patch'
       require 'yoda/store/objects/patch_set'
       require 'yoda/store/objects/tag'
-      require 'yoda/store/objects/tag_list'
 
       class << self
         # @param hsh [Hash]

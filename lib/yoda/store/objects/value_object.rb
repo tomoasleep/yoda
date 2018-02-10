@@ -17,7 +17,7 @@ module Yoda
           @name ||= path.match(MODULE_TAIL_PATTERN) { |md| md[1] || md[2] }
         end
 
-        def type
+        def kind
           :value
         end
 

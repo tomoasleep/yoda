@@ -48,7 +48,7 @@ module Yoda
         end
 
         # @return [Symbol]
-        def type
+        def kind
           fail NotImplementedError
         end
 
@@ -60,7 +60,7 @@ module Yoda
         # @return [Hash]
         def to_h
           {
-            type: type,
+            kind: kind,
             path: path,
             document: document,
             tag_list: tag_list.map(&:to_h),

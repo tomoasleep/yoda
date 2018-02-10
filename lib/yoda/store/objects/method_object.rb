@@ -2,7 +2,7 @@ module Yoda
   module Store
     module Objects
       class MethodObject < Base
-        # @return [Array<(String, String)>, nil]
+        # @return [ParameterList]
         attr_reader :parameters
 
         # @return [Symbol]
@@ -27,7 +27,7 @@ module Yoda
           super(kwargs)
           fail ArgumentError, visibility unless %i(public private protected)
           @visibility = visibility
-          @parameters = parameters
+          @parameters = ParameterList.new(parameters.to_a)
           @overloads = overloads
         end
 
@@ -41,25 +41,44 @@ module Yoda
           @sep ||= path.match(METHOD_PATTERN) { |md| md[0] }
         end
 
-        def type
+        def kind
           :method
         end
 
         def to_h
           super.merge(
-            parameters: parameters,
+            parameters: parameters.to_a,
             visibility: visibility,
+            overloads: overloads,
           )
         end
 
+        def type
+          @type ||= function_type_builder.type
+        end
+
+        def parameter_type_of(param)
+          @type ||= function_type_builder.type_of(param)
+        end
+
+        def to_s
+          @to_s ||= Model::FunctionSignature.new(self).to_s
+        end
+
         private
+
+        # @return [Model::FunctionTypeBuilder]
+        def function_type_builder
+          @function_type_builder ||= Model::FunctionTypeBuilder.new(parameters, tag_list)
+        end
 
         # @param another [self]
         # @return [Hash]
         def merge_attributes(another)
           super.merge(
             visibility: another.visibility,
-            parameters: another.parameters,
+            parameters: another.parameters.to_a,
+            overloads: another.overloads,
           )
         end
       end

@@ -12,7 +12,7 @@ module Yoda
           @superclass_address = superclass_address
         end
 
-        def type
+        def kind
           :class
         end
 
