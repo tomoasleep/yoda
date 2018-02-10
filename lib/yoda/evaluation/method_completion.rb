@@ -2,7 +2,15 @@ module Yoda
   module Evaluation
     class MethodCompletion
       include NodeEvaluatable
-      attr_reader :registry, :source, :location
+      
+      # @return [Store::Registry]
+      attr_reader :registry
+
+      # @return [String]
+      attr_reader :source
+
+      # @return [Parsing::Location]
+      attr_reader :location
 
       # @param registry [Store::Registry]
       # @param source   [String]

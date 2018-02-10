@@ -9,7 +9,7 @@ module Yoda
           fail NotImplementedError
         end
 
-        # @return [Store::Types::Base]
+        # @return [Model::Types::Base]
         def type
           fail NotImplementedError
         end

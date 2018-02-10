@@ -3,12 +3,12 @@ require 'parslet'
 module Yoda
   module Parsing
     class TypeParser
-      # @return [Store::Types::Base]
+      # @return [Model::Types::Base]
       def parse(str)
         Generator.new.apply(Parser.new.parse(str))
       end
 
-      # @return [Store::Types::Base, nil]
+      # @return [Model::Types::Base, nil]
       def safe_parse(str)
         parse(str)
       rescue Parslet::ParseFailed => failure
@@ -80,20 +80,20 @@ module Yoda
         rule(params: sequence(:param_types), return_type: simple(:return_type)) { Generator.create_function_type(nil, param_types, return_type) }
         rule(params: simple(:param_type), return_type: simple(:return_type)) { Generator.create_function_type(nil, [param_type], return_type) }
 
-        rule(instance_type: simple(:class_name)) { Store::Types::InstanceType.new(class_name.to_s) }
-        rule(module_type: simple(:module_name)) { Store::Types::ModuleType.new(module_name.to_s) }
-        rule(value_type: simple(:value_name)) { Store::Types::ValueType.new(value_name.to_s) }
-        rule(any_type: simple(:any)) { Store::Types::AnyType.new }
+        rule(instance_type: simple(:class_name)) { Model::Types::InstanceType.new(class_name.to_s) }
+        rule(module_type: simple(:module_name)) { Model::Types::ModuleType.new(module_name.to_s) }
+        rule(value_type: simple(:value_name)) { Model::Types::ValueType.new(value_name.to_s) }
+        rule(any_type: simple(:any)) { Model::Types::AnyType.new }
 
-        rule(sequence_type: simple(:type)) { Store::Types::SequenceType.new(Store::Types::InstanceType.new('::Array'), [type]) }
-        rule(sequence_type: sequence(:types)) { Store::Types::SequenceType.new(Store::Types::InstanceType.new('::Array'), types) }
+        rule(sequence_type: simple(:type)) { Model::Types::SequenceType.new(Model::Types::InstanceType.new('::Array'), [type]) }
+        rule(sequence_type: sequence(:types)) { Model::Types::SequenceType.new(Model::Types::InstanceType.new('::Array'), types) }
 
         rule(generic_abs: simple(:generic_abs), generic_abs_body: simple(:type)) { type }
 
         rule(base_type: simple(:base_type)) { base_type }
-        rule(base_type: simple(:base_type), generic_type_params: simple(:type_param)) { Store::Types::GenericType.new(base_type, [type_param]) }
-        rule(base_type: simple(:base_type), generic_type_params: sequence(:type_params)) { Store::Types::GenericType.new(base_type, type_params) }
-        rule(union_type: sequence(:types)) { Store::Types::UnionType.new(types) }
+        rule(base_type: simple(:base_type), generic_type_params: simple(:type_param)) { Model::Types::GenericType.new(base_type, [type_param]) }
+        rule(base_type: simple(:base_type), generic_type_params: sequence(:type_params)) { Model::Types::GenericType.new(base_type, type_params) }
+        rule(union_type: sequence(:types)) { Model::Types::UnionType.new(types) }
 
         def self.create_function_type(context, param_types, return_type)
           func_options = param_types.each_with_object({ context: context, return_type: return_type }).with_index do |(param, func_options), index|
@@ -124,7 +124,7 @@ module Yoda
             end
           end
 
-          Store::Types::FunctionType.new(func_options)
+          Model::Types::FunctionType.new(func_options)
         end
 
         class Param

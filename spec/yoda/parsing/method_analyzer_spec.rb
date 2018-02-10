@@ -83,7 +83,7 @@ RSpec.xdescribe Yoda::Parsing::MethodAnalyzer do
 
       it 'returns the return value type' do
         # TODO
-        expect(subject).to be_a(Yoda::Store::Types::Base)
+        expect(subject).to be_a(Yoda::Model::Types::Base)
       end
     end
 
@@ -106,7 +106,7 @@ RSpec.xdescribe Yoda::Parsing::MethodAnalyzer do
 
       it 'returns the return value type' do
         # TODO
-        expect(subject).to be_a(Yoda::Store::Types::Base)
+        expect(subject).to be_a(Yoda::Model::Types::Base)
       end
     end
 

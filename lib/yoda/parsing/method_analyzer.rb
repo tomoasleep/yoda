@@ -66,7 +66,7 @@ module Yoda
         nearest_method_worker.method_candidates
       end
 
-      # @return [Store::Types::Base]
+      # @return [Model::Types::Base]
       def calculate_current_node_type
         current_node_worker.current_node_type
       end
@@ -175,13 +175,13 @@ module Yoda
           current_send.selector_range
         end
 
-        # @return [Store::Types::Base, nil]
+        # @return [Model::Types::Base, nil]
         def receiver_type
           @receiver_type ||= begin
             if nearest_receiver_node
               analyzer.calculate_type(nearest_receiver_node)
             else
-              Store::Types::InstanceType.new(analyzer.namespace_object.path)
+              Model::Types::InstanceType.new(analyzer.namespace_object.path)
             end
           end
         end
@@ -226,13 +226,13 @@ module Yoda
           nil
         end
 
-        # @return [Store::Types::Base]
+        # @return [Model::Types::Base]
         def receiver_type
           @receiver_type ||= begin
             if nearest_send_node
               analyzer.calculate_type(send_node_analyzer.receiver_node)
             else
-              Store::Types::InstanceType.new(analyzer.namespace_object.path)
+              Model::Types::InstanceType.new(analyzer.namespace_object.path)
             end
           end
         end
@@ -263,7 +263,7 @@ module Yoda
           Range.of_ast_location(current_node.location)
         end
 
-        # @return [Store::Types::Base]
+        # @return [Model::Types::Base]
         def current_node_type
           @current_node_type ||= analyzer.calculate_type(current_node)
         end
@@ -282,7 +282,7 @@ module Yoda
           analyzer.nodes_to_current_location.last
         end
 
-        # @return [Store::Types::Base]
+        # @return [Model::Types::Base]
         def current_node_type
           @current_node_type ||= analyzer.calculate_type(current_node)
         end
@@ -303,7 +303,7 @@ module Yoda
            on_send_node? ? nearest_send_node.children[0] : nil
         end
 
-        # @return [Store::Types::Base, nil]
+        # @return [Model::Types::Base, nil]
         def receiver_type
           @receiver_type ||= current_receiver_node && analyzer.calculate_type(current_receiver_node)
         end

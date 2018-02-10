@@ -2,7 +2,15 @@ module Yoda
   module Evaluation
     class CurrentNodeExplain
       include NodeEvaluatable
-      attr_reader :registry, :source, :location
+
+      # @return [Store::Registry]
+      attr_reader :registry
+
+      # @return [String]
+      attr_reader :source
+
+      # @return [Parsing::Location]
+      attr_reader :location
 
       # @param registry [Store::Registry]
       # @param source   [String]
@@ -16,7 +24,7 @@ module Yoda
       # @return [NodeSignature, nil]
       def current_node_signature
         return nil if !valid? || !current_node_trace
-        @current_node_signature ||= NodeSignature.new(current_node, current_node_trace)
+        @current_node_signature ||= Models::NodeSignature.new(current_node, current_node_trace)
       end
 
       # @return [true, false]

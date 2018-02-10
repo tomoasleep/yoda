@@ -4,7 +4,7 @@ module Yoda
       # @param code_node   [::Parser::AST::Node, nil]
       # @param registry    [Store::Registry]
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Store::Types::Base, nil]
+      # @return [Model::Types::Base, nil]
       def calculate_type(code_node, registry, method_node)
         calculate_trace(code_node, registry, method_node)&.type
       end

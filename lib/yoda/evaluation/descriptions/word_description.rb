@@ -2,7 +2,9 @@ module Yoda
   module Evaluation
     module Descriptions
       class WordDescription < Base
+        # @return [String]
         attr_reader :word
+
         # @param function [String]
         def initialize(word)
           @word = word

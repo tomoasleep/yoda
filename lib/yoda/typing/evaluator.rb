@@ -2,6 +2,7 @@ module Yoda
   module Typing
     # Evaluator interpret codes abstractly and assumes types of terms.
     class Evaluator
+      # @return [Context]
       attr_reader :context
 
       # @param context [Context]
@@ -11,13 +12,9 @@ module Yoda
       end
 
       # @param node [::AST::Node]
-      # @param env  [Environment]
-      # @return [[Store::Types::Base, Environment]]
-      def process(node, env)
-        r, env = evaluate(node, env)
-        trace, env = lift(r, env)
-        bind_trace(node, trace)
-        [trace.type, env]
+      # @return [Model::Types::Base]
+      def process(node)
+        evaluate(node).tap { |type| bind_trace(node, Traces::Normal.new(context, type)) unless find_trace(node) }
       end
 
       # @param node  [::AST::Node]
@@ -29,164 +26,149 @@ module Yoda
       private
 
       # @param node [::AST::Node]
-      # @param env  [Environment]
-      def evaluate(node, env)
+      # @return [Model::Types::Base]
+      def evaluate(node)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn
-          type, env = process(node.children[1], env)
-          evaluate_bind(node.children[0], type, env)
+          evaluate_bind(node.children[0], process(node.children[1]))
         when :casgn
           # TODO
-          process(node.children.last, env)
+          process(node.children.last)
         when :masgn
           # TODO
-          process(node.children.last, env)
+          process(node.children.last)
         when :op_asgn, :or_asgn, :and_asgn
           # TODO
-          process(node.children.last, env)
+          process(node.children.last)
         when :and, :or, :not
           # TODO
-          node.children.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
+          node.children.reduce(unknown_type) { |_type, node| process(node) }
         when :if
-          evaluate_branch_nodes(node.children.slice(1..2).compact, env)
+          evaluate_branch_nodes(node.children.slice(1..2).compact)
         when :while, :until, :while_post, :until_post
           # TODO
-          process(node.children[1], env)
+          process(node.children[1])
         when :for
           # TODO
-          process(node.children[2], env)
+          process(node.children[2])
         when :case
-          evaluate_case_node(node, env)
+          evaluate_case_node(node)
         when :super, :zsuper, :yield
           # TODO
-          [type_for_sexp_type(node.type), env]
+          type_for_sexp_type(node.type)
         when :return, :break, :next
           # TODO
-          node.children[0] ? process(node.children[0], env) : [Store::Types::ValueType.new('nil'), env]
+          node.children[0] ? process(node.children[0]) : Model::Types::ValueType.new('nil')
         when :resbody
           # TODO
-          process(node.children[2], env)
+          process(node.children[2])
         when :csend, :send
-          evaluate_send_node(node, env)
+          evaluate_send_node(node)
         when :block
-          evaluate_block_node(node, env)
+          evaluate_block_node(node)
         when :const
-          [Store::Types::ModuleType.new(context.create_path(Parsing::NodeObjects::ConstNode.new(node).to_s)), env]
+          const_node = Parsing::NodeObjects::ConstNode.new(node)
+          Model::Types::ModuleType.new(context.create_path(const_node.to_s))
         when :lvar, :cvar, :ivar, :gvar
-          [env.resolve(node.children.first) || unknown_type,  env]
+          env.resolve(node.children.first) || unknown_type
         when :begin, :kwbegin, :block
-          node.children.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
+          node.children.reduce(unknown_type) { |_type, node| process(node) }
         when :dstr, :dsym, :xstr
-          _type, env = node.children.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
-          [type_for_sexp_type(node.type), env]
+          node.children.map { |node| process(node) }
+          type_for_sexp_type(node.type)
         else
-          [type_for_sexp_type(node.type), env]
+          type_for_sexp_type(node.type)
         end
       end
 
       # @param node [Array<::AST::Node>]
-      # @param env  [Environment]
-      # @return [[Store::Types::Base, Environment]]
-      def evaluate_branch_nodes(nodes, env)
-        # TODO: Divide env
-        types, env = nodes.reduce([[], env]) do |(types, env), node|
-          type, env = process(node, env)
-          [types + [type], env]
-        end
-
-        [Store::Types::UnionType.new(types), env]
+      # @return [Model::Types::Base]
+      def evaluate_branch_nodes(nodes)
+        Model::Types::UnionType.new(nodes.map { |node| process(node) })
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [[Traces::Base, Environment]]
-      def evaluate_send_node(node, env)
+      # @return [Model::Types::Base]
+      def evaluate_send_node(node)
         receiver_node, method_name_sym, *argument_nodes = node.children
         if receiver_node
-          receiver_candidates, env = process_to_instanciate(receiver_node, env)
+          receiver_type = process(receiver_node)
+          receiver_candidates = receiver_type.resolve(context.registry)
         else
           receiver_candidates = [context.caller_object]
         end
 
-        _type, env = argument_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node, env) }
-        method_candidates = receiver_candidates.map(&:methods).flatten.select { |method| method.name.to_s == method_name_sym.to_s }
+        _type = argument_nodes.reduce([unknown_type]) { |(_type), node| process(node) }
+        method_candidates = receiver_candidates.map { |receiver| Store::Query::FindMethod.new(context.registry).find(receiver, method_name_sym.to_s) }.compact
         trace = Traces::Send.new(context, method_candidates)
-        [trace, env]
+        bind_trace(node, trace)
+        trace.type
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [[Store::Types::Base, Environment]]
-      def evaluate_block_node(node, env)
+      # @return [[Model::Types::Baseironment]]
+      def evaluate_block_node(node)
         send_node, arguments_node, body_node = node.children
         # TODO
-        _type, env = process(body_node, env)
-        process(send_node, env)
+        _type = process(body_node)
+        process(send_node)
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [[Store::Types::Base, Environment]]
-      def evaluate_case_node(node, env)
+      # @return [[Model::Types::Baseironment]]
+      def evaluate_case_node(node)
         # TODO
         subject_node, *when_nodes, else_node = node.children
-        _type, env = when_nodes.reduce([unknown_type, env]) { |(_type, env), node| process(node.children.last, env) }
-        process(else_node, env)
+        _type = when_nodes.reduce([unknown_type]) { |(_type), node| process(node.children.last) }
+        process(else_node)
       end
 
       # @param node [::AST::Node]
-      # @param type [Store::Types::Base]
+      # @param type [Model::Types::Base]
       # @param env  [Environment]
-      # @return [[Store::Types::Base, Environment]]
-      def evaluate_bind(symbol, type, env)
-        [type, env.bind(symbol, type)]
+      # @return [Model::Types::Base]
+      def evaluate_bind(symbol, type)
+        env.bind(symbol, type)
+        type
       end
 
       # @param sexp_type [::Symbol, nil]
       def type_for_sexp_type(sexp_type)
         case sexp_type
         when :dstr, :str, :xstr, :string
-          Store::Types::InstanceType.new('::String')
+          Model::Types::InstanceType.new('::String')
         when :dsym, :sym
-          Store::Types::InstanceType.new('::Symbol')
+          Model::Types::InstanceType.new('::Symbol')
         when :array, :splat
-          Store::Types::InstanceType.new('::Array')
+          Model::Types::InstanceType.new('::Array')
         when :hash
-          Store::Types::InstanceType.new('::Hash')
+          Model::Types::InstanceType.new('::Hash')
         when :irange, :erange
-          Store::Types::InstanceType.new('::Range')
+          Model::Types::InstanceType.new('::Range')
         when :regexp
-          Store::Types::InstanceType.new('::RegExp')
+          Model::Types::InstanceType.new('::RegExp')
         when :defined
           boolean_type
         when :self
-          Store::Types::InstanceType.new(context.caller_object.path)
+          Model::Types::InstanceType.new(context.caller_object.path)
         when :true, :false, :nil
-          Store::Types::ValueType.new(sexp_type.to_s)
+          Model::Types::ValueType.new(sexp_type.to_s)
         when :int, :float, :complex, :rational
-          Store::Types::InstanceType.new('::Numeric')
+          Model::Types::InstanceType.new('::Numeric')
         else
-          Store::Types::UnknownType.new(sexp_type)
+          Model::Types::UnknownType.new(sexp_type)
         end
       end
 
       def boolean_type
-        Store::Types::UnionType.new(Store::Types::ValueType.new('true'), Store::Types::ValueType.new('false'))
+        Model::Types::UnionType.new(Model::Types::ValueType.new('true'), Model::Types::ValueType.new('false'))
       end
 
       def unknown_type
-        Store::Types::UnknownType.new
-      end
-
-      # @param type [Store::Types::Base, Traces::Base]
-      # @param env  [Environment]
-      # @return [(Traces::Base, Environment)]
-      def lift(type, env)
-        if type.is_a?(Traces::Base)
-          [type, env]
-        else
-          [Traces::Normal.new(context, type), env]
-        end
+        Model::Types::UnknownType.new
       end
 
       # @param node  [::AST::Node]
@@ -195,14 +177,19 @@ module Yoda
         @traces[node] = trace
       end
 
+      # @return [Environment]
+      def env
+        context.env
+      end
+
       # @param node [Array<::AST::Node>]
       # @param env  [Environment]
-      # @return [(Array<Store::Values::Base>, Environment)]
-      def process_to_instanciate(node, env)
-        r, env = evaluate(node, env)
-        trace, env = lift(r, env)
+      # @return [Array<Model::Values::Base>]
+      def process_to_instanciate(node)
+        r = evaluate(node)
+        trace = lift(r)
         bind_trace(node, trace)
-        [trace.values, env]
+        trace.values
       end
     end
   end

@@ -4,35 +4,49 @@ RSpec.describe Yoda::Typing::Evaluator do
   include TypeHelper
   include AST::Sexp
 
-  let(:registry) { Yoda::Store::Registry.instance }
-  let(:root) { registry.at(:root) }
-  let(:root_value) { Yoda::Store::Values::InstanceValue.new(registry, root) }
+  before do
+    patch.register(root)
+    instance_methods.each { |method| patch.register(method) }
+    registry.add_patch(patch)
+  end
 
-  let(:context) { Yoda::Typing::Context.new(registry, root_value) }
+  let(:registry) { Yoda::Store::Registry.new }
+  let(:root) { Yoda::Store::Objects::ClassObject.new(path: 'Objects', instance_method_addresses: instance_methods.map(&:address)) }
+  let(:patch) { Yoda::Store::Objects::Patch.new('test') }
+
+  let(:instance_methods) { [] }
+
+  let(:context) { Yoda::Typing::Context.new(registry, root, ['Object']) }
   let(:evaluator) { described_class.new(context) }
 
   shared_context 'define a method to root' do
-    let(:method_name) { 'hoge' }
-    let!(:method_object) do
-      YARD::CodeObjects::MethodObject.new(root, method_name) do |obj|
-        obj.docstring = "@return [Hoge]"
-      end
+    let(:instance_methods) do
+      [
+        Yoda::Store::Objects::MethodObject.new(
+          path: 'Object#hoge',
+          tag_list: [
+            Yoda::Store::Objects::Tag.new(
+              tag_name: 'return',
+              yard_types: ['Hoge'],
+            )
+          ],
+        )
+      ]
     end
   end
 
   describe '#process' do
-    subject { evaluator.process(ast, env) }
-    let(:env) { Yoda::Typing::Environment.new }
+    subject { evaluator.process(ast) }
 
     context 'only an method send' do
       include_context 'define a method to root'
 
       let(:ast) do
-        s(:send, nil, method_name.to_sym)
+        s(:send, nil, :hoge)
       end
 
       it 'returns the type of the method' do
-        expect(subject.first).to eq(instance_type(Yoda::Store::Path.new(root, 'Hoge')))
+        expect(subject).to eq(instance_type(Yoda::Model::ScopedPath.new(['Object'], 'Hoge')))
       end
     end
 
@@ -41,13 +55,13 @@ RSpec.describe Yoda::Typing::Evaluator do
 
       let(:ast) do
         s(:begin,
-          s(:lvasgn, :var, s(:send, nil, method_name.to_sym)),
+          s(:lvasgn, :var, s(:send, nil, :hoge)),
           s(:lvar, :var),
         )
       end
 
       it "returns the assigned value's type" do
-        expect(subject.first).to eq(instance_type(Yoda::Store::Path.new(root, 'Hoge')))
+        expect(subject).to eq(instance_type(Yoda::Model::ScopedPath.new(['Object'], 'Hoge')))
       end
     end
 
@@ -109,7 +123,7 @@ RSpec.describe Yoda::Typing::Evaluator do
 
       it "returns the assigned value's type" do
         # TODO
-        expect(subject.first).to be_a(Yoda::Store::Types::Base)
+        expect(subject).to be_a(Yoda::Model::Types::Base)
       end
     end
   end

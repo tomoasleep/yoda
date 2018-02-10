@@ -44,7 +44,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with a param is given' do
       let(:type_string) { '(Integer) -> String'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [['arg0', instance_type('Integer'), nil]],
           return_type: instance_type('String'),
         )
@@ -54,7 +54,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with params is given' do
       let(:type_string) { '(Integer, Float) -> String'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [
             ['arg0', instance_type('Integer'), nil],
             ['arg1', instance_type('Float'), nil],
@@ -67,7 +67,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with params including generic types is given' do
       let(:type_string) { '(Integer, Array<Float>) -> String'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [
             ['arg0', instance_type('Integer'), nil],
             ['arg1', generic_type(instance_type('Array'), instance_type('Float')), nil],
@@ -80,7 +80,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with params including generic types is given' do
       let(:type_string) { '(Integer, Array<Float>) -> Array<String>'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [
             ['arg0', instance_type('Integer'), nil],
             ['arg1', generic_type(instance_type('Array'), instance_type('Float')), nil],
@@ -93,11 +93,11 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with params including block parameter is given' do
       let(:type_string) { '(Integer, &(Object) -> Float) -> String'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [['arg0', instance_type('Integer'), nil]],
           block_parameter:
             [
-              'arg1', Yoda::Store::Types::FunctionType.new(
+              'arg1', Yoda::Model::Types::FunctionType.new(
                 parameters: [['arg0', instance_type('Object'), nil]],
                 return_type: instance_type('Float'),
               )
@@ -110,7 +110,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with params including block parameter is given' do
       let(:type_string) { '(Integer, ?Numeric) -> String'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [
             ['arg0', instance_type('Integer'), nil],
             ['arg1', instance_type('Numeric'), 'default'],
@@ -123,7 +123,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
     context 'function type with params including block parameter is given' do
       let(:type_string) { '(Integer, *Array<Numeric>, Float, **Hash<Symbol, Object>) -> String'}
       it do
-        is_expected.to eq Yoda::Store::Types::FunctionType.new(
+        is_expected.to eq Yoda::Model::Types::FunctionType.new(
           parameters: [['arg0', instance_type('Integer'), nil]],
           rest_parameter: ['arg1', generic_type(instance_type('Array'), instance_type('Numeric'))],
           post_parameters: [['arg2', instance_type('Float')]],

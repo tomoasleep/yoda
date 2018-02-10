@@ -2,7 +2,9 @@ module Yoda
   module Evaluation
     module Descriptions
       class ValueDescription < Base
+        # @return [Model::Values::Base]
         attr_reader :value
+
         # @param value [Store::Values::Base]
         def initialize(value)
           @value = value

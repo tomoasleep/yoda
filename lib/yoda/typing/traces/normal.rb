@@ -6,15 +6,15 @@ module Yoda
         attr_reader :context, :type
 
         # @param context [Context]
-        # @param type    [Store::Types::Base]
+        # @param type    [Model::Types::Base]
         def initialize(context, type)
-          fail ArgumentError, type unless type.is_a?(Store::Types::Base)
+          fail ArgumentError, type unless type.is_a?(Model::Types::Base)
           @context = context
           @type = type
         end
 
         def values
-          @values ||= context.instanciate(type)
+          fail NotImplementedError
         end
       end
     end
