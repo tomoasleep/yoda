@@ -17,6 +17,8 @@ module Yoda
         @adapter = adapter
       end
 
+      # @param path [String]
+      # @return [Objects::Base, nil]
       def find(path)
         if adapter&.exist?(path)
           patch_set.patch(adapter.get(path))
@@ -25,10 +27,13 @@ module Yoda
         end
       end
 
+      # @param patch [Patch]
       def add_patch(patch)
         patch_set.register(patch)
       end
 
+      # @param path [String]
+      # @return [true, false]
       def has_key?(path)
         adapter&.exists?(path) || patch_set.has_key?(path)
       end

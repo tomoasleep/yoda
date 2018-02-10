@@ -1,19 +1,19 @@
 require 'parslet'
 
 module Yoda
-  module Store
+  module Model
     module Types
-      require 'yoda/store/types/base'
-      require 'yoda/store/types/any_type'
-      require 'yoda/store/types/value_type'
-      require 'yoda/store/types/instance_type'
-      require 'yoda/store/types/function_type'
-      require 'yoda/store/types/duck_type'
-      require 'yoda/store/types/module_type'
-      require 'yoda/store/types/sequence_type'
-      require 'yoda/store/types/generic_type'
-      require 'yoda/store/types/union_type'
-      require 'yoda/store/types/unknown_type'
+      require 'yoda/model/types/base'
+      require 'yoda/model/types/any_type'
+      require 'yoda/model/types/value_type'
+      require 'yoda/model/types/instance_type'
+      require 'yoda/model/types/function_type'
+      require 'yoda/model/types/duck_type'
+      require 'yoda/model/types/module_type'
+      require 'yoda/model/types/sequence_type'
+      require 'yoda/model/types/generic_type'
+      require 'yoda/model/types/union_type'
+      require 'yoda/model/types/unknown_type'
 
       # @param string [String]
       # @return [Types::Base]

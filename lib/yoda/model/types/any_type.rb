@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Types
       class AnyType < Base
         def eql?(another)
@@ -10,21 +10,15 @@ module Yoda
           [self.class.name].hash
         end
 
-        # @param namespace [YARD::CodeObjects::Base]
-        # @return [AnyType]
-        def change_root(namespace)
+        # @param paths [Array<Paths>]
+        # @return [self]
+        def change_root(paths)
           self
         end
 
         # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base>]
+        # @return [Array<Store::Objects::Base>]
         def resolve(registry)
-          []
-        end
-
-        # @param registry [Registry]
-        # @return [Array<Values::Base>]
-        def instanciate(registry)
           []
         end
 

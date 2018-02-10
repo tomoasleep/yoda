@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Types
       # @abstract
       class Base
@@ -8,23 +8,16 @@ module Yoda
         end
 
         # @abstract
-        # @param namespace [YARD::CodeObjects::Base]
+        # @param paths [Array<Path>]
         # @return [Base]
-        def change_root(namespace)
+        def change_root(paths)
           fail NotImplementedError
         end
 
         # @abstract
         # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base>]
+        # @return [Array<Store::Objects::Base>]
         def resolve(registry)
-          fail NotImplementedError
-        end
-
-        # @abstract
-        # @param registry [Registry]
-        # @return [Array<Values::Base>]
-        def instanciate(registry)
           fail NotImplementedError
         end
 

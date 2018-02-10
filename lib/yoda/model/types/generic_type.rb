@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Types
       class GenericType < Base
         attr_reader :base_type, :type_arguments
@@ -9,6 +9,12 @@ module Yoda
         # @param value_type [Base]
         def self.from_key_value(base_type, key_type, value_type)
           new(base_type, [key_type, value_type])
+        end
+
+        # @param paths [Array<Path>]
+        # @return [self]
+        def change_root(paths)
+          self.class.new(base_type.change_root(paths), type_arguments.map { |type| type.change_root(paths) })
         end
 
         # @param base_type      [Types::Base]
@@ -43,12 +49,6 @@ module Yoda
         # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
         def resolve(registry)
           base_type.resolve(registry)
-        end
-
-        # @param registry [Registry]
-        # @return [Array<Values::Base>]
-        def instanciate(registry)
-          base_type.instanciate(registry)
         end
 
         # @return [String]

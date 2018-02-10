@@ -1,7 +1,7 @@
 require 'set'
 
 module Yoda
-  module Store
+  module Model
     module Types
       class UnionType < Base
         attr_reader :types
@@ -29,22 +29,16 @@ module Yoda
           [self.class.name, Set.new(types)].hash
         end
 
-        # @param namespace [YARD::CodeObjects::Base]
-        # @return [UnionType]
-        def change_root(namespace)
-          self.class.new(types.map { |type| type.change_root(namespace) })
+        # @param paths [Array<Path>]
+        # @return [self]
+        def change_root(paths)
+          self.class.new(types.map { |type| type.change_root(paths) })
         end
 
         # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
+        # @return [Array<Store::Objects::Base>]
         def resolve(registry)
           types.map { |type| type.resolve(registry) }.flatten.compact
-        end
-
-        # @param registry [Registry]
-        # @return [Array<Values::Base>]
-        def instanciate(registry)
-          types.map { |type| type.instanciate(registry) }.flatten
         end
 
         # @return [String]

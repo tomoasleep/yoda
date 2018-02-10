@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Types
       class ValueType < Base
         attr_reader :value
@@ -21,22 +21,16 @@ module Yoda
           [self.class.name, value].hash
         end
 
-        # @param namespace [YARD::CodeObjects::Base]
-        # @return [ConstantType]
-        def change_root(namespace)
-          self.class.new(value)
+        # @param paths [Array<Path>]
+        # @return [self]
+        def change_root(paths)
+          self
         end
 
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
-          [registry.find(value_class)].compact
-        end
-
-        # @param registry [Registry]
-        # @return [Array<Values::Base>]
-        def instanciate(registry)
-          resolve(registry).map { |el| Values::InstanceValue.new(registry, el) }
+          [Store::Query::FindConstant.new(registry).find(value_class)].compact
         end
 
         def value_class

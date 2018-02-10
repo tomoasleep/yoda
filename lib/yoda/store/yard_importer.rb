@@ -75,7 +75,7 @@ module Yoda
         Objects::ClassObject.new(
           path: 'Object',
           document: code_object.docstring.to_s,
-          tag_list: code_object.tags.map(&method(:convert_tag)),
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, '') },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
@@ -90,7 +90,7 @@ module Yoda
         Objects::ValueObject.new(
           path: code_object.path,
           document: code_object.docstring.to_s,
-          tag_list: code_object.tags.map(&method(:convert_tag)),
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           value: code_object.value,
@@ -98,17 +98,36 @@ module Yoda
       end
 
       # @param code_object [::YARD::CodeObjects::MethodObject]
-      # @return [Objects::MethodObject]
+      # @return [Objects::MethodObject, (Objects::MethodObject, Object::ClassObject)]
       def convert_method_object(code_object)
-        Objects::MethodObject.new(
-          path: code_object.path,
-          document: code_object.docstring.to_s,
-          tag_list: code_object.tags.map(&method(:convert_tag)),
-          sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
-          parameters: code_object.parameters,
-          visibility: code_object.visibility,
-        )
+        if code_object.namespace.root?
+          # @todo Remove root oriented method path from Object namespace
+          method_object = Objects::MethodObject.new(
+            path: "Object#{code_object.sep}#{code_object.name}",
+            document: code_object.docstring.to_s,
+            tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
+            overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, code_object.namespace.path) },
+            sources: code_object.files.map(&method(:convert_source)),
+            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+            parameters: code_object.parameters,
+            visibility: :private,
+          )
+          object_object = Objects::ClassObject.new(
+            path: 'Object',
+            instance_method_addresses: ["Object#{code_object.sep}#{code_object.name}"],
+          )
+          [method_object, object_object]
+        else
+          Objects::MethodObject.new(
+            path: code_object.path,
+            document: code_object.docstring.to_s,
+            tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
+            sources: code_object.files.map(&method(:convert_source)),
+            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+            parameters: code_object.parameters,
+            visibility: code_object.visibility,
+          )
+        end
       end
 
       # @param code_object [::YARD::CodeObjects::ModuleObject]
@@ -117,7 +136,7 @@ module Yoda
         module_object = Objects::ModuleObject.new(
           path: code_object.path,
           document: code_object.docstring.to_s,
-          tag_list: code_object.tags.map(&method(:convert_tag)),
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.path) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
@@ -142,7 +161,7 @@ module Yoda
         class_object = Objects::ClassObject.new(
           path: code_object.path,
           document: code_object.docstring.to_s,
-          tag_list: code_object.tags.map(&method(:convert_tag)),
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.path) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
@@ -163,9 +182,24 @@ module Yoda
       end
 
       # @param tag [::YARD::Tags::Tag]
+      # @param namespace [String]
       # @return [Objects::Tag]
-      def convert_tag(tag)
-        Objects::Tag.new(tag_name: tag.tag_name, name: tag.name, yard_types: tag.types, text: tag.text)
+      def convert_tag(tag, namespace)
+        Objects::Tag.new(tag_name: tag.tag_name, name: tag.name, yard_types: tag.types, text: tag.text, lexical_scope: convert_to_lexical_scope(namespace))
+      end
+
+      # @param tag [::YARD::Tags::OverloadTag]
+      # @param namespace [String]
+      # @return [Objects::Tag]
+      def convert_overload_tag(tag, namespace)
+        Objects::Overload.new(tag_list: tag.tags.map { |tag| convert_tag(tag, namespace) }, document: tag.docstring.to_s, parameters: tag.parameters)
+      end
+
+      # @param namespace [String]
+      # @return [Array<String>]
+      def convert_to_lexical_scope(namespace)
+        path = Model::Path.new(namespace)
+        ((path.to_s.empty? ? [] : [path]) + path.parent_paths).map(&:to_s)
       end
 
       # @param symbol [Symbol]

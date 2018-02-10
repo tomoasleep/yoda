@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Values
       # @abstract
       class Base

@@ -28,6 +28,7 @@ module Yoda
         make_dir
         cache.setup
         load_project_files
+        self
       end
 
       def rebuild_cache

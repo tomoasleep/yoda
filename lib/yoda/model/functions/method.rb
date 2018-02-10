@@ -6,12 +6,12 @@ module Yoda
         include ReturnTagContainer
         include TypeTagContainer
 
-        # @type YARD::CodeObjects::MethodObject
+        # @type Store::Objects::MethodObject
         attr_reader :method_object
 
-        # @param method_object [YARD::CodeObjects::MethodObject]
+        # @param method_object [Store::Objects::MethodObject]
         def initialize(method_object)
-          fail ArgumentError, method_object unless method_object.is_a?(YARD::CodeObjects::MethodObject)
+          fail ArgumentError, method_object unless method_object.is_a?(Store::Objects::MethodObject)
           @method_object = method_object
         end
 
@@ -56,7 +56,7 @@ module Yoda
 
         # @return [Overload]
         def overloads
-          @overloads ||= method_object.tags(:overload).map { |overload_tag| Overload.new(overload_tag) }
+          @overloads ||= method_object.overloads.map { |overload_tag| Overload.new(method_object, overload_tag) }
         end
 
         def namespace

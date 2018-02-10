@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Types
       class UnknownType < Base
         attr_reader :name
@@ -11,29 +11,22 @@ module Yoda
 
         # @param another [Object]
         def eql?(another)
-          another.is_a?(UnknownType) &&
-          name == another.name
+          another.is_a?(UnknownType)
         end
 
         def hash
           [self.class.name, name].hash
         end
 
-        # @param namespace [YARD::CodeObjects::Base]
-        # @return [UnknownType]
-        def change_root(namespace)
+        # @param path [Path]
+        # @return [self]
+        def change_root(path)
           self
         end
 
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
-          []
-        end
-
-        # @param registry [Registry]
-        # @return [Array<Values::Base>]
-        def instanciate(registry)
           []
         end
 

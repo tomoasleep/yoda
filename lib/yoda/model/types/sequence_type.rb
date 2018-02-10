@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Types
       class SequenceType < Base
         attr_reader :base_type, :types
@@ -26,22 +26,16 @@ module Yoda
           [self.class.name, name, types].hash
         end
 
-        # @param namespace [YARD::CodeObjects::Base]
-        # @return [SequenceType]
-        def change_root(namespace)
-          self.class.new(base_type.change_root(namespace), types.map { |type| type.change_root(namespace) })
+        # @param paths [Array<Path>]
+        # @return [self]
+        def change_root(paths)
+          self.class.new(base_type.change_root(paths), types.map { |type| type.change_root(paths) })
         end
 
         # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
+        # @return [Array<Store::Objects::Base>]
         def resolve(registry)
           base_type.resolve(registry)
-        end
-
-        # @param registry [Registry]
-        # @return [Array<YARD::CodeObjects::Base, YARD::CodeObjects::Proxy>]
-        def instanciate(registry)
-          base_type.instanciate(registry)
         end
 
         # @return [String]

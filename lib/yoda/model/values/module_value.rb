@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module Values
       class ModuleValue < Base
         attr_reader :registry, :namespace_object
