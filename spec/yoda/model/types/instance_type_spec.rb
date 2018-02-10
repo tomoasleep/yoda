@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Store::Types::InstanceType do
+RSpec.describe Yoda::Model::Types::InstanceType do
   include TypeHelper
 
   describe 'equality' do

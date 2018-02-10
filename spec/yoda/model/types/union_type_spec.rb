@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Store::Types::UnionType do
+RSpec.describe Yoda::Model::Types::UnionType do
   include TypeHelper
 
   describe 'equality' do
