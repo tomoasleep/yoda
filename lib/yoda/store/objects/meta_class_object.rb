@@ -26,8 +26,14 @@ module Yoda
           :meta_class
         end
 
+        # @return [String]
         def address
           MetaClassObject.address_of(path)
+        end
+
+        # @return [String]
+        def base_class_address
+          path
         end
       end
     end

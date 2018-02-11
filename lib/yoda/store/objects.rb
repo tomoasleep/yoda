@@ -36,6 +36,12 @@ module Yoda
             MethodObject.new(hsh)
           end
         end
+
+        # @param path [Model::Path, String]
+        # @return [Array<Path>]
+        def lexical_scopes_of(path)
+          Model::Path.build(path).parent_paths.map { |name| Model::Path.build(name) } + [Model::Path.new('Object')]
+        end
       end
     end
   end

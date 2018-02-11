@@ -15,49 +15,60 @@ module Yoda
           def associate(obj)
             if obj.is_a?(Objects::NamespaceObject)
               obj.ancestors = Enumerator.new do |yielder|
-                process(obj, yielder)
+                process(obj).each { |klass| yielder << klass }
               end
             end
           end
 
           private
 
-          # @param obj [Object::NamespaceObject]
-          def process(scope, yielder)
-            if scope.is_a?(Objects::NamespaceObject)
-              yielder << scope
-              associate_mixins(scope, yielder)
+          # @param scope [Object::NamespaceObject]
+          # @return [Enumerator<Object::NamespaceObject>]
+          def process(scope)
+            Enumerator.new do |yielder|
+              if scope.is_a?(Objects::NamespaceObject)
+                yielder << scope
+                find_mixins(scope).each { |mixin| yielder << mixin }
 
-              if scope.is_a?(Objects::MetaClassObject)
-                associate_metaclass_superclass(scope, yielder)
-              elsif scope.is_a?(Objects::ClassObject)
-                associate_superclass(scope, yielder)
+                if scope.is_a?(Objects::MetaClassObject)
+                  find_metaclass_superclass_ancestors(scope).each { |obj| yielder << obj }
+                elsif scope.is_a?(Objects::ClassObject)
+                  find_superclass_ancestors(scope).each { |obj| yielder << obj }
+                end
               end
             end
           end
 
           # @param obj [Object::NamespaceObject]
-          def associate_mixins(obj, yielder)
-            obj.mixin_addresses.each do |address|
-              if el = FindConstant.new(registry).find(address)
-                yielder << el
+          # @return [Enumerator<Object::NamespaceObject>]
+          def find_mixins(obj)
+            Enumerator.new do |yielder|
+              obj.mixin_addresses.each do |address|
+                if el = registry.find(address.to_s)
+                  yielder << el
+                end
               end
             end
           end
 
           # @param obj [Object::ClassObject]
-          def associate_superclass(obj, yielder)
-            super_class = FindConstant.new(registry).find(obj.superclass_address)
-            if super_class
-              process(super_class, yielder)
+          # @return [Enumerator<Object::NamespaceObject>]
+          def find_superclass_ancestors(obj)
+            if super_class = FindConstant.new(registry).find(obj.superclass_path)
+              process(super_class)
+            else
+              []
             end
           end
 
           # @param obj [Object::MetaClassObject]
-          def associate_metaclass_superclass(obj, yielder)
-            base_class = FindConstant.new(registry).find(obj.path)
-            if base_class && meta_class = registry.find("#{base_class.superclass_address}%class")
-              process(meta_class, yielder)
+          # @return [Enumerator<Object::NamespaceObject>]
+          def find_metaclass_superclass_ancestors(obj)
+            base_class = registry.find(obj.base_class_address)
+            if base_class && meta_class = FindMetaClass.new(registry).find(base_class.superclass_path || 'Object')
+              process(meta_class)
+            else
+              []
             end
           end
         end

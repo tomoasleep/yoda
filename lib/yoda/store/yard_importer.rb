@@ -80,7 +80,7 @@ module Yoda
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
-          constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
+          constant_addresses: (code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path } + ['Object']).uniq,
         )
       end
 
@@ -167,7 +167,7 @@ module Yoda
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
-          superclass_address: code_object.superclass&.path,
+          superclass_path: code_object.superclass&.path,
         )
 
         meta_class_object = Objects::MetaClassObject.new(
