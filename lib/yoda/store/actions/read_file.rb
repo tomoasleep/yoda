@@ -1,12 +1,12 @@
 module Yoda
   module Store
     module Actions
-      class ReadProjectFile
+      class ReadFile
         # @return [Registry]
         attr_reader :registry
 
         # @return [String]
-        attr_reader :root_path
+        attr_reader :file
 
         # @param registry [Registry]
         # @param file [String]
@@ -25,8 +25,8 @@ module Yoda
         # @return [void]
         def run
           YARD::Registry.clear
-          YARD.parse([source_path])
-          patch = YardImporter.new(source_path).import(YARD::Registry.all + [YARD::Registry.root]).patch
+          YARD.parse([file])
+          patch = YardImporter.new(file).import(YARD::Registry.all + [YARD::Registry.root]).patch
           registry.add_patch(patch)
         end
       end

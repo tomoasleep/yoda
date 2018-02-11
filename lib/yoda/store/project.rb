@@ -52,7 +52,7 @@ module Yoda
       end
 
       def load_project_files
-        Actions::ReadProjectFiles.new(registry, root_path)
+        Actions::ReadProjectFiles.new(registry, root_path).run
       end
 
       def cache

@@ -18,7 +18,7 @@ module Yoda
       # @param registry       [Store::Registry]
       # @param caller_object  [Store::Objects::Base] represents who is the evaluator of the code.
       # @param lexical_scopes [Array<Path>] represents where the code presents.
-      def initialize(registry, caller_object, lexical_scopes)
+      def initialize(registry, caller_object, lexical_scopes, env = Environment.new)
         fail ArgumentError, registry unless registry.is_a?(Store::Registry)
         fail ArgumentError, caller_object unless caller_object.is_a?(Store::Objects::Base)
         fail ArgumentError, lexical_scopes unless lexical_scopes.is_a?(Array)
@@ -26,7 +26,7 @@ module Yoda
         @registry = registry
         @caller_object = caller_object
         @lexical_scopes = lexical_scopes
-        @env = Environment.new
+        @env = env
       end
 
       # @param constant_name [String]

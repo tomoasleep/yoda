@@ -39,8 +39,14 @@ module Yoda
         # @param path [Path]
         # @return [Objects::Base, nil]
         def resolve_from_scope(scope, path)
-          obj_path = Path.new(current_scope.path).concat(path)
-          registry.find(obj_path.to_s)
+          path.split.reduce(scope) do |scope, const_name|
+            if scope && scope.is_a?(Objects::NamespaceObject)
+              next_path = scope.constant_addresses.find { |name| Model::Path.new(name).basename == const_name }
+              next_path && registry.find(next_path)
+            else
+              nil
+            end
+          end
         end
 
         # @param path [String, Model::Path, Model::ScopedPath]
@@ -50,7 +56,11 @@ module Yoda
           when Model::Path
             ['Object']
           when Model::ScopedPath
-            path.scopes.map { |scope| scope.to_s.gsub(/\A::/, '') }
+            if path.path.absolute?
+              ['Object']
+            else
+              path.scopes.map { |scope| scope.to_s.gsub(/\A::/, '') }
+            end
           else
             ['Object']
           end

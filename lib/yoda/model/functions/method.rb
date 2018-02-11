@@ -71,11 +71,11 @@ module Yoda
         private
 
         def type_tags
-          method_object.tags(:type)
+          method_object.tag_list(:type)
         end
 
         def param_tags
-          method_object.tags(:param)
+          method_object.tag_list(:param)
         end
 
         # @return [Array<(String, String)>]
@@ -84,7 +84,7 @@ module Yoda
         end
 
         def return_tags
-          method_object.tags(:return)
+          method_object.tag_list(:return)
         end
       end
     end

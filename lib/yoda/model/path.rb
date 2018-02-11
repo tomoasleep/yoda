@@ -45,6 +45,10 @@ module Yoda
         name
       end
 
+      def split
+        name.gsub(/\A::/, '').split('::')
+      end
+
       # @param another [Path, String]
       # @return [Path]
       def concat(another)

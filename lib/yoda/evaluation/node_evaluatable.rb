@@ -28,7 +28,7 @@ module Yoda
       # @return [Typing::Traces::Base, nil]
       def calculate_trace(code_node, registry, method_node)
         evaluator = create_evaluator(registry, method_node)
-        _type, tyenv = evaluator.process(current_method.body_node, create_evaluation_env(registry, method_node))
+        _type, tyenv = evaluator.process(current_method.body_node)
         evaluator.find_trace(code_node)
       end
 
@@ -52,25 +52,29 @@ module Yoda
       end
 
       # @param registry  [Store::Registry]
-      # @param method_node [Parsing::NodeObjects::MethodNode]
+      # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Typing::Context]
       def create_evaluation_context(registry, method_node)
-        value = method_node.caller_value(registry)
-        Typing::Context.new(registry, value)
+        namespace = find_namespace(registry, method_node)
+        fail RuntimeError, "The namespace #{mehtod_node.namespace_name} (#{method_node}) is not registered" unless namespace
+        Typing::Context.new(registry, namespace, method_node.namespace.paths_from_root, create_evaluation_env(registry, method_node))
       end
 
       # @param method_node [Parsing::NodeObjects::MethodNode]
       # @return [Typing::Environment]
       def create_evaluation_env(registry, method_node)
-        method_object = registry.find(method_node.full_name)
+        method_object = find_method(registry, method_node)
         fail RuntimeError, "The function #{method_node.full_name} (#{method_node}) is not registered" unless method_object
-        function = Store::Functions::Method.new(method_object)
-        env = Typing::Environment.new
-        function.type.parameters.each do |name, type, _default|
-          name = name.gsub(/:\Z/, '')
-          env.bind(name, type)
-        end
-        env
+        method_object.parameters.parameter_names.each_with_object(Typing::Environment.new) { |name, env| env.bind(name.gsub(/:\Z/, ''), method_object.parameter_type_of(name)) }
+      end
+
+      def find_namespace(registry, method_node)
+        Store::Query::FindConstant.new(registry).find(method_node.namespace_name)
+      end
+
+      def find_method(registry, method_node)
+        namespace = find_namespace(registry, method_node)
+        namespace && Store::Query::FindMethod.new(registry).find(namespace, method_node.name)
       end
     end
   end
