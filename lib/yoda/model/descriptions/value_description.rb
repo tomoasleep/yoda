@@ -1,11 +1,11 @@
 module Yoda
-  module Evaluation
+  module Model
     module Descriptions
       class ValueDescription < Base
-        # @return [Model::Values::Base]
+        # @return [Store::Objects::Base]
         attr_reader :value
 
-        # @param value [Store::Values::Base]
+        # @param value [Store::Objects::Base]
         def initialize(value)
           @value = value
         end
@@ -24,7 +24,7 @@ module Yoda
           <<~EOS
           **#{title}**
 
-          #{value.docstring}
+          #{value.document}
           EOS
         end
       end

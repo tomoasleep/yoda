@@ -1,22 +1,22 @@
 module Yoda
-  module Evaluation
+  module Model
     module Descriptions
       class FunctionDescription < Base
-        # @type Store::Functions::Base
+        # @type Store::Objects::MethodObject
         attr_reader :function
-        # @!sig function Store::Functions::Base
 
-        # @param function [Store::Functions::Base]
+        # @param function [Store::Objects::MethodObject]
         def initialize(function)
+          fail ArgumentError, function unless function.is_a?(Store::Objects::MethodObject)
           @function = function
         end
 
         def title
-          "#{function.name_signature}#{function.type_signature}"
+          "#{function.path}#{function.sep}#{function.to_s}"
         end
 
         def signature
-          "#{function.name}#{function.type_signature}"
+          "#{function.name}#{function.to_s}"
         end
 
         def sort_text
@@ -31,7 +31,7 @@ module Yoda
           <<~EOS
           **#{title}**
 
-          #{function.docstring}
+          #{function.document}
           EOS
         end
       end

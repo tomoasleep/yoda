@@ -17,7 +17,7 @@ module Yoda
 
       def function_signature
         params = all_parameters
-        (params.empty? ? ': ' : "(#{params.join(', ')}): ") + "#{return_type}"
+        (params.empty? ? ': ' : "(#{params.join(', ')}): ") + "#{method_object.type.return_type}"
       end
 
       def all_parameters
@@ -46,11 +46,11 @@ module Yoda
       end
 
       def required_keyword_parameters
-        method_object.parameters.required_keyword_parameters.map { |param| "#{type_of(param))} #{param}:" }
+        method_object.parameters.required_keyword_parameters.map { |param| "#{type_of(param)} #{param}:" }
       end
 
       def optional_keyword_parameters
-        method_object.parameters.required_keyword_parameters.map { |(param, value)| "#{type_of(param))} #{param}: #{value}" }
+        method_object.parameters.required_keyword_parameters.map { |(param, value)| "#{type_of(param)} #{param}: #{value}" }
       end
 
       def rest_parameter

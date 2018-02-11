@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Model
     module Descriptions
       # @abstract
       class Base

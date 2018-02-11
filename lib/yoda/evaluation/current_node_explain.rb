@@ -21,10 +21,10 @@ module Yoda
         @location = location
       end
 
-      # @return [NodeSignature, nil]
+      # @return [Model::NodeSignature, nil]
       def current_node_signature
         return nil if !valid? || !current_node_trace
-        @current_node_signature ||= Models::NodeSignature.new(current_node, current_node_trace)
+        @current_node_signature ||= Model::NodeSignature.new(current_node, current_node_trace)
       end
 
       # @return [true, false]

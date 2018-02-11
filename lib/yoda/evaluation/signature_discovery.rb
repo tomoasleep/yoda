@@ -50,7 +50,7 @@ module Yoda
         end
       end
 
-      # @return [Array<Store::Functions::Base>]
+      # @return [Array<Store::Objects::MethodObject>]
       def method_candidates
         return [] unless valid?
         receiver_values
