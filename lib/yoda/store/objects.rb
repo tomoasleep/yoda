@@ -2,7 +2,7 @@ module Yoda
   module Store
     module Objects
       VALUE_REGEXP = /\A[0-9a-z]/
-      METHOD_PATTERN = /(.|#)(\w+)$/
+      METHOD_PATTERN = /(?<separator>.|#)(?<name>\w+)$/
       MODULE_TAIL_PATTERN = /(?:::(\w+)|^(\w+))$/
 
       require 'yoda/store/objects/base'

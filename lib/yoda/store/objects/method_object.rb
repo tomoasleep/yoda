@@ -14,7 +14,7 @@ module Yoda
         # @param path [String]
         # @return [String]
         def self.name_of_path(path)
-          path.match(METHOD_PATTERN) { |md| md[1] }
+          path.match(METHOD_PATTERN) { |md| md[:name] }
         end
 
         # @param path [String]
