@@ -6,45 +6,91 @@ module Yoda
         # @return [Objects::Base, nil]
         def find(path)
           lexical_scope_paths = lexical_scopes_of(path)
-          base_path = base_path_of(path)
+          base_name, *constant_names = path_of(path).split
 
-          lexical_scope_paths.each do |path|
-            scope = registry.find(path.to_s) || next
-            obj = resolve_from_scope(scope, base_path)
-            return obj if obj
+          base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
+          constant_names.reduce(base_namespace) do |scope, name|
+            if scope
+              select_constants_from_ancestors(scope, name).first
+            else
+              return nil
+            end
           end
+        end
 
-          if lexical_scope_paths.first && current_scope = registry.find(lexical_scope_paths.first) && current_scope.is_a?(Objects::NamespaceObject)
-            find_from_ancestors(current_scope, base_path)
+        # @param path [String, Model::Path, Model::ScopedPath]
+        # @return [Array<Objects::Base>]
+        def select_with_prefix(path)
+          lexical_scope_paths = lexical_scopes_of(path)
+          base_name, *constant_names, bottom_name = path_of(path).split
+
+          if constant_names.empty? && !bottom_name
+            select_base_namespace(/\A#{Regexp.escape(base_name)}/, lexical_scope_paths).to_a
           else
-            nil
+            base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
+            scope = constant_names.reduce(base_namespace) do |scope, name|
+              if scope
+                select_constants_from_ancestors(scope, name).first
+              else
+                return []
+              end
+            end
+            select_from_ancestors(scope, /\A#{bottom_name}/).to_a
           end
         end
 
         private
 
+        # @param base_name [String, Regexp]
+        # @param lexical_scope_paths [Array<String>]
+        # @return [Enumerator<Objects::Base>]
+        def select_base_namespace(base_name, lexical_scope_paths)
+          Enumerator.new do |yielder|
+            lexical_scope_paths.each do |path|
+              scope = registry.find(path.to_s)
+              next if !scope || !scope.is_a?(Objects::NamespaceObject)
+              select_child_constants(scope, base_name).each do |obj|
+                yielder << obj
+              end
+            end
+
+            nearest_scope_path = lexical_scope_paths.first
+            if nearest_scope_path && nearest_scope = registry.find(nearest_scope_path) && nearest_scope.is_a?(Objects::NamespaceObject)
+              select_from_ancestors(nearest_scope, base_name).each do |obj|
+                yielder << obj
+              end
+            end
+          end
+        end
+
         # @param scope [Objects::NamespaceObject]
-        # @param path [Path]
-        # @return [Objects::Base, nil]
-        def find_from_ancestors(scope, path)
-          Associators::AssociateAncestors.new(registry).associate(scope)
-          scope.ancestors.each do |ancestor|
-            obj_path = Path.new(ancestor.path).concat(path)
-            obj = registry.find(obj_path.to_s)
-            return obj if obj
+        # @param name [String, Regexp]
+        # @return [Enumerator<Objects::Base>]
+        def select_constants_from_ancestors(scope, name)
+          Enumerator.new do |yielder|
+            met = Set.new
+
+            Associators::AssociateAncestors.new(registry).associate(scope)
+            scope.ancestors.each do |ancestor|
+              select_child_constants(ancestor, name).each do |obj|
+                next if met.include?(obj.name)
+                met.add(obj.name)
+                yielder << obj
+              end
+            end
           end
         end
 
         # @param scope [Objects::Base]
-        # @param path [Path]
-        # @return [Objects::Base, nil]
-        def resolve_from_scope(scope, path)
-          path.split.reduce(scope) do |scope, const_name|
-            if scope && scope.is_a?(Objects::NamespaceObject)
-              next_path = scope.constant_addresses.find { |name| Model::Path.new(name).basename == const_name }
-              next_path && registry.find(next_path)
-            else
-              nil
+        # @param name [String, Regexp]
+        # @return [Enumerator<Objects::Base>]
+        def select_child_constants(scope, name)
+          Enumerator.new do |yielder|
+            if scope.is_a?(Objects::NamespaceObject)
+              scope.constant_addresses.select { |address| match_name?(Model::Path.new(address).basename, name) }.each do |address|
+                obj = registry.find(address)
+                yielder << obj if obj
+              end
             end
           end
         end
@@ -68,7 +114,7 @@ module Yoda
 
         # @param path [String, Model::Path, Model::ScopedPath]
         # @return [Model::Path]
-        def base_path_of(path)
+        def path_of(path)
           case path
           when Model::Path
             path
@@ -76,6 +122,17 @@ module Yoda
             path.path
           else
             Model::Path.new(path.gsub(/\A::/, ''))
+          end
+        end
+
+        # @param name [String]
+        # @param expected_name_or_pattern [String, Regexp]
+        # @return [true, false]
+        def match_name?(name, expected_name_or_pattern)
+          if expected_name_or_pattern.is_a?(String)
+            name == expected_name_or_pattern
+          else
+            name.match?(expected_name_or_pattern)
           end
         end
       end
