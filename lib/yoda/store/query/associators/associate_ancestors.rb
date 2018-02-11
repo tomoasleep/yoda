@@ -54,7 +54,7 @@ module Yoda
           # @param obj [Object::ClassObject]
           # @return [Enumerator<Object::NamespaceObject>]
           def find_superclass_ancestors(obj)
-            if super_class = FindConstant.new(registry).find(obj.superclass_path)
+            if obj.superclass_path && super_class = FindConstant.new(registry).find(obj.superclass_path)
               process(super_class)
             else
               []
@@ -65,8 +65,10 @@ module Yoda
           # @return [Enumerator<Object::NamespaceObject>]
           def find_metaclass_superclass_ancestors(obj)
             base_class = registry.find(obj.base_class_address)
-            if base_class && meta_class = FindMetaClass.new(registry).find(base_class.superclass_path || 'Object')
-              process(meta_class)
+            if base_class && base_class.superclass_path
+              (meta_class = FindMetaClass.new(registry).find(base_class.superclass_path || 'Object')) ? process(meta_class) : []
+            elsif base_class
+              (class_object = registry.find('Class')) ? process(class_object) : []
             else
               []
             end

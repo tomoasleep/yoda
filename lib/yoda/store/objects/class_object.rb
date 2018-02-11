@@ -18,7 +18,7 @@ module Yoda
         end
 
         def to_h
-          super.merge(superclass_path: superclass_path&.path)
+          super.merge(superclass_path: superclass_path&.path&.to_s)
         end
 
         private
@@ -27,7 +27,7 @@ module Yoda
         # @return [Hash]
         def merge_attributes(another)
           super.merge(
-            superclass_path: select_superclass(another.superclass_path),
+            superclass_path: select_superclass(another.superclass_path)&.path&.to_s,
           )
         end
 

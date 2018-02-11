@@ -167,7 +167,7 @@ module Yoda
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
-          superclass_path: code_object.superclass&.path,
+          superclass_path: code_object.superclass&.path == 'Qnil' ? nil : code_object.superclass&.path,
         )
 
         meta_class_object = Objects::MetaClassObject.new(

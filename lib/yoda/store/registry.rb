@@ -43,6 +43,7 @@ module Yoda
         keys.each do |key|
           adapter.put(key, find(key))
         end
+        STDERR.puts "saved #{adapter.keys.length} keys."
         @patch_set = Objects::PatchSet.new
       end
 

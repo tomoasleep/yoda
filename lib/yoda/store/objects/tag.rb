@@ -41,7 +41,7 @@ module Yoda
         end
 
         # @return [String]
-        def to_json
+        def to_json(_state = nil)
           to_h.merge(json_class: self.class.name).to_json
         end
       end

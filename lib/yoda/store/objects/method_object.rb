@@ -11,10 +11,18 @@ module Yoda
         # @return [Array<Overload>]
         attr_reader :overloads
 
-        # @param path [String]
-        # @return [String]
-        def self.name_of_path(path)
-          path.match(METHOD_PATTERN) { |md| md[:name] }
+        class << self
+          # @param path [String]
+          # @return [String]
+          def name_of_path(path)
+            path.slice((path.rindex(/[#.]/) || -1) + 1, path.length)
+          end
+
+          # @param path [String]
+          # @return [String]
+          def sep_of_path(path)
+            path.slice(path.rindex(/[#.]/))
+          end
         end
 
         # @param path [String]
@@ -38,7 +46,7 @@ module Yoda
 
         # @return [String]
         def sep
-          @sep ||= path.match(METHOD_PATTERN) { |md| md[:separator] }
+          @sep ||= MethodObject.sep_of_path(path)
         end
 
         def kind
@@ -58,7 +66,7 @@ module Yoda
         end
 
         def parameter_type_of(param)
-          @type ||= function_type_builder.type_of(param)
+          function_type_builder.type_of(param)
         end
 
         def to_s

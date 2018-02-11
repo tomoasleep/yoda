@@ -59,10 +59,15 @@ module Yoda
         # @param expected_name_or_pattern [String, Regexp]
         # @return [true, false]
         def match_name?(name, expected_name_or_pattern)
-          if expected_name_or_pattern.is_a?(String)
+          case expected_name_or_pattern
+          when String
             name == expected_name_or_pattern
-          else
+          when Regexp
+            require 'pry'; binding.pry unless name
             name.match?(expected_name_or_pattern)
+          else
+            require 'pry'; binding.pry;
+            fail ArgumentError, expected_name_or_pattern
           end
         end
       end
