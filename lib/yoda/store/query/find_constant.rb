@@ -25,7 +25,7 @@ module Yoda
           base_name, *constant_names, bottom_name = path_of(path).split
 
           if constant_names.empty? && !bottom_name
-            select_base_namespace(/\A#{Regexp.escape(base_name)}/, lexical_scope_paths).to_a
+            select_base_namespace(/\A#{Regexp.escape(base_name || '')}/, lexical_scope_paths).to_a
           else
             base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
             scope = constant_names.reduce(base_namespace) do |scope, name|
@@ -56,7 +56,7 @@ module Yoda
 
             nearest_scope_path = lexical_scope_paths.first
             if nearest_scope_path && nearest_scope = registry.find(nearest_scope_path) && nearest_scope.is_a?(Objects::NamespaceObject)
-              select_from_ancestors(nearest_scope, base_name).each do |obj|
+              select_constants_from_ancestors(nearest_scope, base_name).each do |obj|
                 yielder << obj
               end
             end

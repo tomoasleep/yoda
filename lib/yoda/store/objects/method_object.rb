@@ -38,7 +38,7 @@ module Yoda
 
         # @return [String]
         def sep
-          @sep ||= path.match(METHOD_PATTERN) { |md| md[0] }
+          @sep ||= path.match(METHOD_PATTERN) { |md| md[:separator] }
         end
 
         def kind

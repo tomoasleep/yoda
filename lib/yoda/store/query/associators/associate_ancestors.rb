@@ -49,7 +49,7 @@ module Yoda
           def associate_superclass(obj, yielder)
             super_class = FindConstant.new(registry).find(obj.superclass_address)
             if super_class
-              process(base_class, yielder)
+              process(super_class, yielder)
             end
           end
 

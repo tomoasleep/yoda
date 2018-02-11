@@ -10,7 +10,7 @@ module Yoda
       # @param path [Path]
       # @return [ScopedPath]
       def self.build(path)
-        path.is_a?(ScopedPath) ? path : ScopedPath.new([], Path.build(path))
+        path.is_a?(ScopedPath) ? path : ScopedPath.new(['Object'], Path.build(path))
       end
 
       # @param scopes [Array<Path>]

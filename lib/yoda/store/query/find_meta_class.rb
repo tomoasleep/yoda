@@ -6,7 +6,7 @@ module Yoda
         # @return [Objects::NamespaceObject, nil]
         def find(path)
           constant = FindConstant.new(registry).find(path)
-          if constant && meta_class = registry.find(Objects::MetaClassObject.address_of(path))
+          if constant && meta_class = registry.find(Objects::MetaClassObject.address_of(constant.path))
             meta_class
           else
             nil

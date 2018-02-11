@@ -71,7 +71,7 @@ module Yoda
 
         # @return [String]
         def to_json
-          to_h.merge(json_class: self.class.name).to_json
+          to_h.merge(tag_list: tag_list.map(&:to_json), json_class: self.class.name).to_json
         end
 
         # @param another [self]

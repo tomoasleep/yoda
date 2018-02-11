@@ -4,24 +4,28 @@ module Yoda
       class FindMethod < Base
         # @param namespace [Objects::Namespace]
         # @param method_name [String, Regexp]
+        # @param visibility [Array<Symbol>, nil]
         # @return [Objects::MethodObject, nil]
-        def find(namespace, method_name)
-          lazy_select(namespace, method_name).first
+        def find(namespace, method_name, visibility: nil)
+          lazy_select(namespace, method_name, visibility: visibility).first
         end
 
         # @param namespace [Objects::Namespace]
         # @param method_name [String, Regexp]
+        # @param visibility [Array<Symbol>, nil]
         # @return [Array<Objects::MethodObject>]
-        def select(namespace, method_name)
-          lazy_select(namespace, method_name).to_a
+        def select(namespace, method_name, visibility: nil)
+          lazy_select(namespace, method_name, visibility: nil).to_a
         end
 
         private
 
         # @param namespace [Objects::Namespace]
         # @param expected [String, Regexp]
+        # @param visibility [Array<Symbol>, nil]
         # @return [Enumerator<Objects::MethodObject>]
-        def lazy_select(namespace, expected)
+        def lazy_select(namespace, expected, visibility: nil)
+          visibility ||=  %i(public private protected)
           Enumerator.new do |yielder|
             met = Set.new
 
@@ -31,7 +35,7 @@ module Yoda
                 next if met.include?(name)
                 if el = registry.find(address)
                   met.add(name)
-                  yielder << el
+                  yielder << el if visibility.include?(el.visibility)
                 end
               end
             end
