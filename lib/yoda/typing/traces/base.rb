@@ -4,13 +4,20 @@ module Yoda
       # Store evaluation result for each ast node.
       # @abstract
       class Base
-        # @return [Array<Store::Values::Base>]
+        # @return [Array<Store::Objects::Base>]
         def values
+          type.resolve(context.registry)
+        end
+
+        # @abstract
+        # @return [Model::Types::Base]
+        def type
           fail NotImplementedError
         end
 
-        # @return [Model::Types::Base]
-        def type
+        # @abstract
+        # @return [Context]
+        def context
           fail NotImplementedError
         end
       end

@@ -14,7 +14,7 @@ module Yoda
         end
 
         def values
-          fail NotImplementedError
+          type.resolve(context.registry)
         end
       end
     end

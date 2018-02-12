@@ -113,15 +113,21 @@ module Yoda
 
       # @group methods for const completion
 
-      # @return [NodeObjects::Namespace, nil]
+      # @return [Parsing::NodeObjects::Namespace, nil]
       def namespace
         current_commenting_node_query.current_namespace
       end
 
       # @return [Array<Model::Descriptions::ValueDescription>]
       def const_candidates
-        scoped_path = Model::ScopedPath.new(namespace.paths_from_root, index_word)
+        scoped_path = Model::ScopedPath.new(lexical_scope(namespace), index_word)
         Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path).map { |obj| Model::Descriptions::ValueDescription.new(obj) }
+      end
+
+      # @param namespace [Parsing::NodeObjects::Namespace]
+      # @return [Array<Path>]
+      def lexical_scope(namespace)
+        namespace.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
       end
     end
   end

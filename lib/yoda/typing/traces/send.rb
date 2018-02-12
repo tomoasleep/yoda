@@ -14,10 +14,6 @@ module Yoda
         def type
           @type ||= Model::Types::UnionType.new(functions.map(&:type).map(&:return_type))
         end
-
-        def values
-          fail NotImplementedError
-        end
       end
     end
   end

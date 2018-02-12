@@ -19,7 +19,8 @@ module Yoda
       def type
         @type ||= begin
           if !type_tags.empty?
-            parse_type_tag(type_tags.first)
+            parsed_type = parse_type_tag(type_tags.first)
+            parsed_type.is_a?(Types::FunctionType) ? parsed_type : Types::FunctionType.new(return_type: parsed_type)
           else
             Types::FunctionType.new(return_type: return_types.first || Types::UnknownType.new('nodoc'), **parameter_options)
           end

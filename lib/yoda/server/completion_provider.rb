@@ -53,15 +53,15 @@ module Yoda
 
         LSP::Interface::CompletionList.new(
           is_incomplete: false,
-          items: functions.map { |function| create_completion_item(Evaluation::Descriptions::FunctionDescription.new(function), range) },
+          items: functions.map { |function| create_completion_item(Model::Descriptions::FunctionDescription.new(function), range) },
         )
       end
 
-      # @param description [Evaluation::Descriptions::Base]
+      # @param description [Model::Descriptions::Base]
       # @param range       [Parsing::Range]
       def create_completion_item(description, range)
         LSP::Interface::CompletionItem.new(
-          label: description.is_a?(Evaluation::Descriptions::FunctionDescription) ? description.signature : description.sort_text,
+          label: description.is_a?(Model::Descriptions::FunctionDescription) ? description.signature : description.sort_text,
           kind: LSP::Constant::CompletionItemKind::METHOD,
           detail: description.title,
           documentation: description.to_markdown,
