@@ -35,7 +35,7 @@ module Yoda
                 return []
               end
             end
-            select_from_ancestors(scope, /\A#{bottom_name}/).to_a
+            select_constants_from_ancestors(scope, /\A#{bottom_name}/).to_a
           end
         end
 

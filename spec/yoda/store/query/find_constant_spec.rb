@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Store::Query::FindConstant do
-  before { Yoda::Store::Actions::ReadProjectFiles.new(registry, root_path).run }
-
-  let(:registry) { Yoda::Store::Registry.new }
+  before { project.setup }
+  let(:project) { Yoda::Store::Project.new(root_path) }
+  let(:registry) { project.registry }
   let(:root_path) { File.expand_path('../../../support/fixtures', __dir__) }
 
   describe '#find' do
