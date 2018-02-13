@@ -12,7 +12,7 @@ module Yoda
 
         # @return [String]
         def title
-          value.path.to_s
+          "#{value.path}#{value.is_a?(Store::Objects::MetaClassObject) ? '.class' : ''}"
         end
 
         # @return [String]

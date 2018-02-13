@@ -18,13 +18,14 @@ module Yoda
 
         node_worker = Evaluation::CurrentNodeExplain.new(client_info.registry, source, location)
         references = node_worker.defined_files
-        references.map { |(path, line)| create_location(path, line) }
+        references.map { |(path, line, column)| create_location(path, line, column) }
       end
 
       # @param path [String]
       # @param line [Integer]
-      def create_location(path, line)
-        location = Parsing::Location.new(row: line - 1, column: 0)
+      # @param column [Integer]
+      def create_location(path, line, column)
+        location = Parsing::Location.new(row: line - 1, column: column)
         LSP::Interface::Location.new(
           uri: client_info.uri_of_path(path),
           range: LSP::Interface::Range.new(Parsing::Range.new(location, location).to_language_server_protocol_range),

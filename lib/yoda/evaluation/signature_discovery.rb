@@ -54,9 +54,8 @@ module Yoda
       def method_candidates
         return [] unless valid?
         receiver_values
-          .map(&:methods)
+          .map { |value| Store::Query::FindMethod.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(nearest_send_node)) }
           .flatten
-          .select { |meth| meth.name.to_s.start_with?(index_word) }
       end
 
       private

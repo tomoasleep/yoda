@@ -27,7 +27,7 @@ module Yoda
           functions
             .map { |function| function.overloads.empty? ? [function] : function.overloads }
             .flatten
-            .map { |func| Evaluation::Descriptions::FunctionDescription.new(func) }
+            .map { |func| Model::Descriptions::FunctionDescription.new(func) }
         LSP::Interface::SignatureHelp.new(
           signatures: signatures.map { |signature| create_signature_info(signature) },
         )

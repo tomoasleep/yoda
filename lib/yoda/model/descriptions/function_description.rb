@@ -12,7 +12,7 @@ module Yoda
         end
 
         def title
-          "#{function.path}#{function.sep}#{function.to_s}"
+          "#{function.namespace_path}#{function.sep}#{function.to_s}"
         end
 
         def signature
@@ -24,7 +24,7 @@ module Yoda
         end
 
         def parameter_names
-          function.type.parameters.map(&:first)
+          function.parameters.parameter_names
         end
 
         def to_markdown

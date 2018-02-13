@@ -32,14 +32,14 @@ module Yoda
         !!(current_method && current_node)
       end
 
-      # @return [Array<[String, Integer]>]
+      # @return [Array<(String, Integer, Integer)>]
       def defined_files
         return [] if !valid? || !current_node_trace
         case current_node.type
         when :send
-          current_node_trace.functions.map { |function| function.defined_files.first }.compact
+          current_node_trace.functions.map { |function| function.primary_source }.compact
         when :const
-          current_node_trace.values.map { |value| value.defined_files.first }.compact
+          current_node_trace.values.map { |value| value.primary_source || value.sources.first }.compact
         else
           []
         end
