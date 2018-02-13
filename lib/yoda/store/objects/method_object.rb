@@ -14,6 +14,12 @@ module Yoda
         class << self
           # @param path [String]
           # @return [String]
+          def namespace_of_path(path)
+            path.slice(0, (path.rindex(/[#.]/) || 0))
+          end
+
+          # @param path [String]
+          # @return [String]
           def name_of_path(path)
             path.slice((path.rindex(/[#.]/) || -1) + 1, path.length)
           end
@@ -34,7 +40,7 @@ module Yoda
         def initialize(parameters: [], visibility: :public, overloads: [], **kwargs)
           super(kwargs)
           fail ArgumentError, visibility unless %i(public private protected)
-          @visibility = visibility
+          @visibility = visibility.to_sym
           @parameters = ParameterList.new(parameters.to_a)
           @overloads = overloads
         end
@@ -47,6 +53,11 @@ module Yoda
         # @return [String]
         def sep
           @sep ||= MethodObject.sep_of_path(path)
+        end
+
+        # @return [String]
+        def namespace_path
+          @namespace_path ||= MethodObject.namespace_of_path(path)
         end
 
         def kind

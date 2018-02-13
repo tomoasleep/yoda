@@ -63,10 +63,8 @@ module Yoda
           when String
             name == expected_name_or_pattern
           when Regexp
-            require 'pry'; binding.pry unless name
             name.match?(expected_name_or_pattern)
           else
-            require 'pry'; binding.pry;
             fail ArgumentError, expected_name_or_pattern
           end
         end

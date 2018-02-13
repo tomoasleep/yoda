@@ -77,7 +77,7 @@ module Yoda
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, '') },
           sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
           constant_addresses: (code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path } + ['Object']).uniq,
@@ -92,7 +92,7 @@ module Yoda
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
           sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           value: code_object.value,
         )
       end
@@ -108,7 +108,7 @@ module Yoda
             tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
             overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, code_object.namespace.path) },
             sources: code_object.files.map(&method(:convert_source)),
-            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
             parameters: code_object.parameters,
             visibility: :private,
           )
@@ -123,7 +123,7 @@ module Yoda
             document: code_object.docstring.to_s,
             tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
             sources: code_object.files.map(&method(:convert_source)),
-            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
             parameters: code_object.parameters,
             visibility: code_object.visibility,
           )
@@ -138,7 +138,7 @@ module Yoda
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.path) },
           sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
@@ -147,7 +147,7 @@ module Yoda
         meta_class_object = Objects::MetaClassObject.new(
           path: code_object.path,
           sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
         )
@@ -163,7 +163,7 @@ module Yoda
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.path) },
           sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
           mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
@@ -173,7 +173,7 @@ module Yoda
         meta_class_object = Objects::MetaClassObject.new(
           path: code_object.path,
           sources: code_object.files.map(&method(:convert_source)),
-          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.file) : nil,
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
           mixin_addresses: code_object.class_mixins.map { |mixin| mixin.path },
         )
@@ -217,7 +217,7 @@ module Yoda
       # @return [(String, Integer, Integer)]
       def convert_source(source)
         file, line = source
-        [root_path ? File.expand_path(file, root_path) : nil, line, 0]
+        [root_path ? File.expand_path(file, root_path) : file, line, 0]
       end
     end
   end

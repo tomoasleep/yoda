@@ -11,15 +11,16 @@ module Yoda
         # @param registry [Registry]
         # @param file [String]
         # @return [void]
-        def self.run(registry, file)
-          self.new(registry, file).run
+        def self.run(registry, file, root_path: nil)
+          self.new(registry, file, root_path: root_path).run
         end
 
         # @param registry [Registry]
         # @param file [String]
-        def initialize(registry, file)
+        def initialize(registry, file, root_path: nil)
           @registry = registry
           @file = file
+          @root_path = root_path
         end
 
         # @return [void]
