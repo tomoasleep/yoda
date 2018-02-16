@@ -41,7 +41,7 @@ module Yoda
           super(kwargs)
           fail ArgumentError, visibility unless %i(public private protected)
           @visibility = visibility.to_sym
-          @parameters = ParameterList.new(parameters.to_a)
+          @parameters = Model::FunctionSignatures::ParameterList.new(parameters.to_a)
           @overloads = overloads
         end
 
@@ -80,15 +80,22 @@ module Yoda
           function_type_builder.type_of(param)
         end
 
+        # @deprecated Use Function signatures
         def to_s
-          @to_s ||= Model::FunctionSignature.new(self).to_s
+          @to_s ||= Model::FunctionSignatures::Formatter.new(self).to_s
+        end
+
+        # @return [Model::FunctionSignatures::Formatter]
+        def signatures
+          @signatures ||= Model::FunctionSignatures.build(self)
         end
 
         private
 
-        # @return [Model::FunctionTypeBuilder]
+        # @deprecated Use Function signatures
+        # @return [Model::FunctionSignatures::TypeBuilder]
         def function_type_builder
-          @function_type_builder ||= Model::FunctionTypeBuilder.new(parameters, tag_list)
+          @function_type_builder ||= Model::FunctionSignatures::TypeBuilder.new(parameters, tag_list)
         end
 
         # @param another [self]

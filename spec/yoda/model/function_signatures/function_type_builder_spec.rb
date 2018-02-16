@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Model::FunctionTypeBuilder do
+RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
   include TypeHelper
 
   let(:builder) { described_class.new(parameter_list, tag_list) }
-  let(:parameter_list) { Yoda::Store::Objects::ParameterList.new(parameters) }
+  let(:parameter_list) { Yoda::Model::FunctionSignatures::ParameterList.new(parameters) }
   let(:tag_list) { [] }
   let(:parameters) { [] }
 

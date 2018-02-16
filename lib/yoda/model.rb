@@ -1,7 +1,6 @@
 module Yoda
   module Model
-    require 'yoda/model/function_type_builder'
-    require 'yoda/model/function_signature'
+    require 'yoda/model/function_signatures'
     require 'yoda/model/descriptions'
     require 'yoda/model/node_signature'
     require 'yoda/model/path'

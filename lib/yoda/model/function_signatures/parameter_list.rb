@@ -1,6 +1,6 @@
 module Yoda
-  module Store
-    module Objects
+  module Model
+    module FunctionSignatures
       class ParameterList
         # @return [Array<(String, String)>]
         attr_reader :parameters
