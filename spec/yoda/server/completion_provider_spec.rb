@@ -85,7 +85,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to contain_exactly(
             have_attributes(
-              detail: 'Sample2.new: Sample2',
+              detail: 'YodaFixture::Sample2.new: Sample2',
               text_edit: have_attributes(new_text: 'new', range: have_attributes(text_edit_range)),
             ),
           )

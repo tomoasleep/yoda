@@ -6,8 +6,10 @@ module Yoda
         # @type Store::Objects::MethodObject
         attr_reader :initialize_method
 
+        # @param namespace [Store::Objects::NamespaceObject]
         # @param initialize_method [Store::Objects::MethodObject]
-        def initialize(constructor_object)
+        def initialize(namespace, initialize_method)
+          @namespace = namespace
           @initialize_method = initialize_method
         end
 
@@ -43,14 +45,14 @@ module Yoda
 
         # @return [ParameterList]
         def parameters
-          @parameters ||= ParameterList.new(method_object.parameters)
+          @parameters ||= ParameterList.new(initialize_method.parameters)
         end
 
         private
 
         # @return [TypeBuilder]
         def type_builder
-          @type_builder ||= TypeBuilder.new(method_object.parameters, method_object.tag_list)
+          @type_builder ||= TypeBuilder.new(parameters, initialize_method.tag_list)
         end
       end
     end
