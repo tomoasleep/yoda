@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module FunctionSignatures
       # Constructor provides a signature of `YourClass.new` from `initialize` method of the class.
       class Constructor < Base

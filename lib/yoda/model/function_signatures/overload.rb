@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module FunctionSignatures
       class Overload < Base
         # @return [Store::Objects::MethodObject]

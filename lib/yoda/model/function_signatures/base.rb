@@ -1,5 +1,5 @@
 module Yoda
-  module Store
+  module Model
     module FunctionSignatures
       # @abstract
       class Base
