@@ -6,7 +6,7 @@ RSpec.describe Yoda::Store::Project do
 
   after { project.clean }
 
-  describe '#rebuild_cache' do
+  describe '#rebuild_cache', heavy: true do
     subject { project.rebuild_cache }
 
     it 'completes' do
