@@ -122,6 +122,7 @@ module Yoda
             path: code_object.path,
             document: code_object.docstring.to_s,
             tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
+            overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, code_object.namespace.path) },
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
             parameters: code_object.parameters,
@@ -192,7 +193,7 @@ module Yoda
       # @param namespace [String]
       # @return [Objects::Tag]
       def convert_overload_tag(tag, namespace)
-        Objects::Overload.new(tag_list: tag.tags.map { |tag| convert_tag(tag, namespace) }, document: tag.docstring.to_s, parameters: tag.parameters)
+        Objects::Overload.new(name: tag.name.to_s, tag_list: tag.tags.map { |tag| convert_tag(tag, namespace) }, document: tag.docstring.to_s, parameters: tag.parameters)
       end
 
       # @param namespace [String]

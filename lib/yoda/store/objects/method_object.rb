@@ -104,7 +104,7 @@ module Yoda
           super.merge(
             visibility: another.visibility,
             parameters: another.parameters.to_a,
-            overloads: another.overloads,
+            overloads: overloads + another.overloads,
           )
         end
       end
