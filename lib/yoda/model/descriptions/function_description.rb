@@ -16,7 +16,7 @@ module Yoda
         end
 
         def signature
-          "#{function.name}#{function.to_s}"
+          "#{function.to_s}"
         end
 
         def sort_text

@@ -30,6 +30,16 @@ RSpec.describe Yoda::Server::CompletionProvider do
         let(:position) { { line: 11, character: 12 } }
         let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 18 } } }
 
+        it 'returns infomation including appropriate labels' do
+          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject.is_incomplete).to be_falsy
+          expect(subject.items).to include(
+            have_attributes(label: 'method1(String str): any'),
+            have_attributes(label: 'method2: any'),
+            have_attributes(label: 'method3: any'),
+          )
+        end
+
         it 'returns infomation of `str` variable' do
           expect(subject).to be_a(LSP::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
