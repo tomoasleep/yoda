@@ -73,6 +73,10 @@ module Yoda
         end
       end
 
+      def hash
+        [self.class.name, name].hash
+      end
+
       def ==(another)
         eql?(another)
       end

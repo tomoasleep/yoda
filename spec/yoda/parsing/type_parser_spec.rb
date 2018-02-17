@@ -45,7 +45,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer) -> String'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [['arg0', instance_type('Integer'), nil]],
+          required_parameters: [instance_type('Integer')],
           return_type: instance_type('String'),
         )
       end
@@ -55,10 +55,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer, Float) -> String'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [
-            ['arg0', instance_type('Integer'), nil],
-            ['arg1', instance_type('Float'), nil],
-          ],
+          required_parameters: [instance_type('Integer'), instance_type('Float')],
           return_type: instance_type('String'),
         )
       end
@@ -68,10 +65,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer, Array<Float>) -> String'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [
-            ['arg0', instance_type('Integer'), nil],
-            ['arg1', generic_type(instance_type('Array'), instance_type('Float')), nil],
-          ],
+          required_parameters: [instance_type('Integer'), generic_type(instance_type('Array'), instance_type('Float'))],
           return_type: instance_type('String'),
         )
       end
@@ -81,10 +75,7 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer, Array<Float>) -> Array<String>'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [
-            ['arg0', instance_type('Integer'), nil],
-            ['arg1', generic_type(instance_type('Array'), instance_type('Float')), nil],
-          ],
+          required_parameters: [instance_type('Integer'), generic_type(instance_type('Array'), instance_type('Float'))],
           return_type: generic_type(instance_type('Array'), instance_type('String')),
         )
       end
@@ -94,14 +85,13 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer, &(Object) -> Float) -> String'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [['arg0', instance_type('Integer'), nil]],
+          required_parameters: [instance_type('Integer')],
+          optional_parameters: [],
           block_parameter:
-            [
-              'arg1', Yoda::Model::Types::FunctionType.new(
-                parameters: [['arg0', instance_type('Object'), nil]],
-                return_type: instance_type('Float'),
-              )
-            ],
+            Yoda::Model::Types::FunctionType.new(
+              required_parameters: [instance_type('Object')],
+              return_type: instance_type('Float'),
+            ),
           return_type: instance_type('String'),
         )
       end
@@ -111,10 +101,8 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer, ?Numeric) -> String'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [
-            ['arg0', instance_type('Integer'), nil],
-            ['arg1', instance_type('Numeric'), 'default'],
-          ],
+          required_parameters: [instance_type('Integer')],
+          optional_parameters: [instance_type('Numeric')],
           return_type: instance_type('String'),
         )
       end
@@ -124,10 +112,10 @@ RSpec.describe Yoda::Parsing::TypeParser do
       let(:type_string) { '(Integer, *Array<Numeric>, Float, **Hash<Symbol, Object>) -> String'}
       it do
         is_expected.to eq Yoda::Model::Types::FunctionType.new(
-          parameters: [['arg0', instance_type('Integer'), nil]],
-          rest_parameter: ['arg1', generic_type(instance_type('Array'), instance_type('Numeric'))],
-          post_parameters: [['arg2', instance_type('Float')]],
-          keyword_rest_parameter: ['arg3', generic_type(instance_type('Hash'), instance_type('Symbol'), instance_type('Object'))],
+          required_parameters: [instance_type('Integer')],
+          rest_parameter: generic_type(instance_type('Array'), instance_type('Numeric')),
+          post_parameters: [instance_type('Float')],
+          keyword_rest_parameter: generic_type(instance_type('Hash'), instance_type('Symbol'), instance_type('Object')),
           return_type: instance_type('String'),
         )
       end

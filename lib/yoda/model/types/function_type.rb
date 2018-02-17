@@ -47,8 +47,8 @@ module Yoda
           context == another.context &&
           required_parameters == another.required_parameters &&
           optional_parameters == another.optional_parameters &&
-          required_keyword_parameters == another.required_keyword_parameters &&
-          optional_keyword_parameters == another.optional_keyword_parameters &&
+          required_keyword_parameters.to_set == another.required_keyword_parameters.to_set &&
+          optional_keyword_parameters.to_set == another.optional_keyword_parameters.to_set &&
           keyword_rest_parameter == another.keyword_rest_parameter &&
           rest_parameter == another.rest_parameter &&
           post_parameters == another.post_parameters &&

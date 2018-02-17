@@ -26,6 +26,10 @@ module Yoda
         self.class.new(paths, path)
       end
 
+      def hash
+        [self.class.name, scopes, path].hash
+      end
+
       def ==(another)
         eql?(another)
       end

@@ -101,26 +101,26 @@ module Yoda
             when :required
               if func_options[:rest_parameter]
                 func_options[:post_parameters] ||= []
-                func_options[:post_parameters].push(["arg#{index}", param.type])
+                func_options[:post_parameters].push(param.type)
               else
-                func_options[:parameters] ||= []
-                func_options[:parameters].push(["arg#{index}", param.type, nil])
+                func_options[:required_parameters] ||= []
+                func_options[:required_parameters].push(param.type)
               end
             when :optional
-              func_options[:parameters] ||= []
-              func_options[:parameters].push(["arg#{index}", param.type, 'default'])
+              func_options[:optional_parameters] ||= []
+              func_options[:optional_parameters].push(param.type)
             when :rest
-              func_options[:rest_parameter] = ["arg#{index}", param.type]
+              func_options[:rest_parameter] = param.type
             when :required_keyword
-              func_options[:keyword_parameters] ||= []
-              func_options[:keyword_parameters].push([param.keyword, param.type, 'default'])
+              func_options[:required_keyword_parameters] ||= []
+              func_options[:required_keyword_parameters].push(param.keyword, param.type)
             when :optional_keyword
-              func_options[:keyword_parameters] ||= []
-              func_options[:keyword_parameters].push([param.keyword, param.type, nil])
+              func_options[:optional_keyword_parameters] ||= []
+              func_options[:optional_keyword_parameters].push(param.keyword, param.type)
             when :keyword_rest
-              func_options[:keyword_rest_parameter] = ["arg#{index}", param.type]
+              func_options[:keyword_rest_parameter] = param.type
             when :block
-              func_options[:block_parameter] = ["arg#{index}", param.type]
+              func_options[:block_parameter] = param.type
             end
           end
 
