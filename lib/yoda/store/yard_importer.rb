@@ -3,181 +3,222 @@ require 'yard'
 module Yoda
   module Store
     class YardImporter
-      # @!attribute [r] store
-      #   @return ::YARD::RegistryStore
-      # @!attribute [r] yard_file
-      #   @return String
-      attr_reader :store, :yard_file
+      # @return [Objects::Patch]
+      attr_reader :patch
+
+      # @return [String, nil]
+      attr_reader :root_path
 
       # @param file [String]
+      # @return [Objects::Patch]
       def self.import(file)
-        new(file).tap { |importer| importer }.import
+        store = YARD::RegistryStore.new
+        store.load(file)
+        root_path = File.expand_path('..', file)
+        new(file, root_path: root_path).import(store.values).patch
       end
 
-      # @param yard_file [String]
-      def initialize(yard_file)
-        @yard_file = yard_file
-        @store = YARD::RegistryStore.new
-        @registered = Set.new.add('')
+      # @param id [String]
+      def initialize(id, root_path: nil)
+        @patch = Objects::Patch.new(id)
+        @root_path = root_path
+        @registered = Set.new
       end
 
-      # @return [String]
-      def project_root
-        @project_root ||= File.expand_path('..', yard_file)
-      end
-
-      # @return [void]
-      def import
-        store.load(yard_file)
-        store.values.each do |el|
+      # @param values [Array<YARD::CodeObjects::Base>]
+      # @return [self]
+      def import(values)
+        values.each do |el|
           register(el)
         end
+        self
       end
 
-      # @fixme Use our own code objects instead of yard code objects.
+      # @param code_object [YARD::CodeObjects::Base]
       def register(code_object)
         return if @registered.member?(code_object.path)
         @registered.add(code_object.path)
-        register(code_object.parent) unless code_object.parent.root?
+        register(code_object.parent) if code_object.parent && !code_object.parent.root?
 
-        new_object =
-          case code_object
-          when YARD::CodeObjects::ClassObject
-            register_class_object(code_object)
-          when YARD::CodeObjects::ModuleObject
-            register_module_object(code_object)
-          when YARD::CodeObjects::ClassVariableObject
-            register_class_variable_object(code_object)
-          when YARD::CodeObjects::MethodObject
-            register_method_object(code_object)
-          when YARD::CodeObjects::MacroObject
-            register_macro_object(code_object)
-          when YARD::CodeObjects::ConstantObject
-            register_constant_object(code_object)
-          when YARD::CodeObjects::Proxy
+        new_objects = begin
+          case code_object.type
+          when :root
+            convert_root_object(code_object)
+          when :class
+            convert_class_object(code_object)
+          when :module
+            convert_module_object(code_object)
+          when :classvariable
+            # convert_class_variable_object(code_object)
+          when :method
+            convert_method_object(code_object)
+          when :macro
+            # convert_macro_object(code_object)
+          when :constant
+            convert_constant_object(code_object)
+          when :proxy
             nil
           else
             fail ArgumentError, 'Unsupported type code object'
           end
+        end
+
+        [new_objects].flatten.compact.each { |new_object| patch.register(new_object) }
       end
 
       private
 
-      def find_new_parent_of(code_object)
-        Registry.instance.find_or_proxy(code_object.parent.path)
+      # @param code_object [::YARD::CodeObjects::NamespaceObject]
+      # @return [Objects::ClassObject]
+      def convert_root_object(code_object)
+        # @todo Add meta class for main object.
+        Objects::ClassObject.new(
+          path: 'Object',
+          document: code_object.docstring.to_s,
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, '') },
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          constant_addresses: (code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path } + ['Object']).uniq,
+        )
       end
 
-      def register_constant_object(code_object)
-        new_parent = find_new_parent_of(code_object)
-        new_object = YARD::CodeObjects::ConstantObject.new(new_parent, code_object.name)
-        absolutenize_file_paths(code_object)
-        code_object.copy_to(new_object)
-        new_object
+      # @param code_object [::YARD::CodeObjects::ConstantObject]
+      # @return [Objects::ValueObject]
+      def convert_constant_object(code_object)
+        Objects::ValueObject.new(
+          path: code_object.path,
+          document: code_object.docstring.to_s,
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+          value: code_object.value,
+        )
       end
 
-      def register_macro_object(code_object)
-        new_parent = find_new_parent_of(code_object)
-        new_object = YARD::CodeObjects::MacroObject.new(new_parent, code_object.name)
-        absolutenize_file_paths(code_object)
-        code_object.copy_to(new_object)
-        new_object
-      end
-
-      def register_method_object(code_object)
-        new_parent = find_new_parent_of(code_object)
-        new_object = YARD::CodeObjects::MethodObject.new(new_parent, code_object.name, code_object.scope)
-        absolutenize_file_paths(code_object)
-        code_object.copy_to(new_object)
-        new_object
-      end
-
-      def register_class_variable_object(code_object)
-        new_parent = find_new_parent_of(code_object)
-        new_object = YARD::CodeObjects::ClassVariableObject.new(new_parent, code_object.name)
-        absolutenize_file_paths(code_object)
-        code_object.copy_to(new_object)
-        new_object
-      end
-
-      def register_module_object(code_object)
-        new_parent = find_new_parent_of(code_object)
-        new_object = YARD::CodeObjects::ModuleObject.new(new_parent, code_object.name)
-
-        copy_namespace(code_object, new_object)
-        new_object
-      end
-
-      def register_class_object(code_object)
-        new_parent = find_new_parent_of(code_object)
-        new_object = YARD::CodeObjects::ClassObject.new(new_parent, code_object.name)
-
-        copy_namespace(code_object, new_object)
-        new_object
-      end
-
-      # @param origin_obj [::YARD::CodeObjects::NamespaceObject]
-      # @param new_obj    [::YARD::CodeObjects::NamespaceObject]
-      def copy_namespace(origin_obj, new_obj)
-        new_obj.class_mixins += origin_obj.class_mixins
-        new_obj.instance_mixins += origin_obj.instance_mixins
-        new_obj.groups += origin_obj.groups
-        new_obj.has_comments = new_obj[:has_comments]
-        origin_obj.files.each do |file, line|
-          new_obj.add_file(File.expand_path(file, project_root), line)
-        end
-        new_obj.source_type = origin_obj.source_type
-        new_obj.visibility = origin_obj.visibility
-        new_obj.dynamic = new_obj.dynamic? || origin_obj.dynamic?
-
-        new_obj.attributes = deep_merge(new_obj.attributes, transform_values_proxynize(origin_obj.attributes))
-        new_obj.aliases = deep_merge(new_obj.aliases, transform_values_proxynize(origin_obj.aliases))
-
-        new_obj.docstring = new_obj.base_docstring + origin_obj.base_docstring
-
-        if new_obj.type == :class && new_obj.superclass && new_obj.superclass.type == :class && new_obj.superclass.name == :Object
-          new_obj.superclass = proxynize(new_obj.superclass)
+      # @param code_object [::YARD::CodeObjects::MethodObject]
+      # @return [Objects::MethodObject, (Objects::MethodObject, Object::ClassObject)]
+      def convert_method_object(code_object)
+        if code_object.namespace.root?
+          # @todo Remove root oriented method path from Object namespace
+          method_object = Objects::MethodObject.new(
+            path: "Object#{code_object.sep}#{code_object.name}",
+            document: code_object.docstring.to_s,
+            tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
+            overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, code_object.namespace.path) },
+            sources: code_object.files.map(&method(:convert_source)),
+            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+            parameters: code_object.parameters,
+            visibility: :private,
+          )
+          object_object = Objects::ClassObject.new(
+            path: 'Object',
+            instance_method_addresses: ["Object#{code_object.sep}#{code_object.name}"],
+          )
+          [method_object, object_object]
+        else
+          Objects::MethodObject.new(
+            path: code_object.path,
+            document: code_object.docstring.to_s,
+            tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.namespace.path) },
+            overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, code_object.namespace.path) },
+            sources: code_object.files.map(&method(:convert_source)),
+            primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+            parameters: code_object.parameters,
+            visibility: code_object.visibility,
+          )
         end
       end
 
-      # @param obj [::YARD::CodeObjects::Base]
-      def absolutenize_file_paths(code_object)
-        files = code_object.files
-        code_object.files = []
-        files.each do |file, line|
-          code_object.add_file(File.expand_path(file, project_root), line)
+      # @param code_object [::YARD::CodeObjects::ModuleObject]
+      # @return [Array<Objects::ModuleObject, Objects::MetaClassObject>]
+      def convert_module_object(code_object)
+        module_object = Objects::ModuleObject.new(
+          path: code_object.path,
+          document: code_object.docstring.to_s,
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.path) },
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
+        )
+
+        meta_class_object = Objects::MetaClassObject.new(
+          path: code_object.path,
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+          instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+        )
+
+        [module_object, meta_class_object]
+      end
+
+      # @param code_object [::YARD::CodeObjects::ClassObject]
+      # @return [Array<Objects::ClassObject, Objects::MetaClassObject>]
+      def convert_class_object(code_object)
+        class_object = Objects::ClassObject.new(
+          path: code_object.path,
+          document: code_object.docstring.to_s,
+          tag_list: code_object.tags.map { |tag| convert_tag(tag, code_object.path) },
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          mixin_addresses: code_object.instance_mixins.map { |mixin| mixin.path },
+          constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
+          superclass_path: code_object.superclass&.path == 'Qnil' ? nil : code_object.superclass&.path,
+        )
+
+        meta_class_object = Objects::MetaClassObject.new(
+          path: code_object.path,
+          sources: code_object.files.map(&method(:convert_source)),
+          primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
+          instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
+          mixin_addresses: code_object.class_mixins.map { |mixin| mixin.path },
+        )
+
+        [class_object, meta_class_object]
+      end
+
+      # @param tag [::YARD::Tags::Tag]
+      # @param namespace [String]
+      # @return [Objects::Tag]
+      def convert_tag(tag, namespace)
+        Objects::Tag.new(tag_name: tag.tag_name, name: tag.name, yard_types: tag.types, text: tag.text, lexical_scope: convert_to_lexical_scope(namespace))
+      end
+
+      # @param tag [::YARD::Tags::OverloadTag]
+      # @param namespace [String]
+      # @return [Objects::Tag]
+      def convert_overload_tag(tag, namespace)
+        Objects::Overload.new(name: tag.name.to_s, tag_list: tag.tags.map { |tag| convert_tag(tag, namespace) }, document: tag.docstring.to_s, parameters: tag.parameters)
+      end
+
+      # @param namespace [String]
+      # @return [Array<String>]
+      def convert_to_lexical_scope(namespace)
+        path = Model::Path.new(namespace)
+        ((path.to_s.empty? ? [] : [path]) + path.parent_paths).map(&:to_s)
+      end
+
+      # @param symbol [Symbol]
+      # @return [Symbol]
+      def convert_yard_object_type(type)
+        case type
+        when :constant
+          :value
+        else
+          type
         end
       end
 
-      # @param obj [::YARD::CodeObjects::Base, ::YARD::CodeObjects::Proxy]
-      def proxynize(obj)
-        return obj unless obj.type == :proxy
-        YARD::CodeObjects::Proxy.new(:root, obj.path)
-      end
-
-      # @param hash [Hash]
-      # @return [Hash]
-      def transform_values_proxynize(hash)
-        hash.transform_values do |value|
-          if value.is_a?(Hash)
-            transform_values_proxynize(value)
-          elsif value.is_a?(YARD::CodeObjects::Base)
-            proxynize(value)
-          elsif value.is_a?(YARD::CodeObjects::Proxy)
-            proxynize(value)
-          else
-            value
-          end
-        end
-      end
-
-      def deep_merge(hash1, hash2)
-        hash1.merge(hash2) do |key, value1, value2|
-          if value1.is_a?(Hash) && value2.is_a?(Hash)
-            deep_merge(value1, value2)
-          else
-            value1
-          end
-        end
+      # @param source [(String, Integer)]
+      # @return [(String, Integer, Integer)]
+      def convert_source(source)
+        file, line = source
+        [root_path ? File.expand_path(file, root_path) : file, line, 0]
       end
     end
   end

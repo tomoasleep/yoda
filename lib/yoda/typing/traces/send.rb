@@ -5,18 +5,14 @@ module Yoda
       class Send < Base
         attr_reader :context, :functions
         # @param context [Context]
-        # @param methods [Array<Store::Function>]
+        # @param functions [Array<Store::Objects::MethodObject>]
         def initialize(context, functions)
           @context = context
           @functions = functions
         end
 
         def type
-          @type ||= Store::Types::UnionType.new(functions.map(&:type).map(&:return_type))
-        end
-
-        def values
-          @values ||= context.instanciate(type)
+          @type ||= Model::Types::UnionType.new(functions.map(&:type).map(&:return_type))
         end
       end
     end

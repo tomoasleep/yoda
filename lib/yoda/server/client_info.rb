@@ -3,26 +3,29 @@ require 'uri'
 module Yoda
   class Server
     class ClientInfo
-      # @!attribute [r] root_uri
-      #   @return [String]
-      # @!attribute [r] file_store
-      #   @return [FileStore]
-      # @!attribute [r] registry
-      #   @return [Store::Registry]
-      # @!attribute [r] project
-      #   @return [Store::Project]
-      attr_reader :root_uri, :file_store, :registry, :project
+      # @return [String]
+      attr_reader :root_uri
+      
+      # @return [FileStore]
+      attr_reader :file_store
+
+      # @return [Store::Project]
+      attr_reader :project
 
       # @param root_uri [String] an uri expression of project root path
       def initialize(root_uri)
         @root_uri = root_uri
         @file_store = FileStore.new
-        @registry = Store::Registry.instance
         @project = Store::Project.new(root_path)
       end
 
       def root_path
         @root_path ||= FileStore.path_of_uri(root_uri)
+      end
+
+      # @return [Store::Registry]
+      def registry
+        project.registry
       end
 
       def setup

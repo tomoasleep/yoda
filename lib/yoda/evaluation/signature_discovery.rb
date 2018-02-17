@@ -2,7 +2,15 @@ module Yoda
   module Evaluation
     class SignatureDiscovery
       include NodeEvaluatable
-      attr_reader :registry, :source, :location
+
+      # @return [Store::Registry]
+      attr_reader :registry
+
+      # @return [String]
+      attr_reader :source
+
+      # @return [Parsing::Location]
+      attr_reader :location
 
       # @param registry [Store::Registry]
       # @param source   [String]
@@ -32,23 +40,22 @@ module Yoda
         nearest_send_node&.selector_name
       end
 
-      # @return [Store::Types::Base]
+      # @return [Model::Types::Base]
       def receiver_type
         @receiver_type ||=
         if nearest_send_node
           analyzer.calculate_type(nearest_send_node.receiver_node)
         else
-          Store::Types::InstanceType.new(analyzer.namespace_object.path)
+          Model::Types::InstanceType.new(analyzer.namespace_object.path)
         end
       end
 
-      # @return [Array<Store::Functions::Base>]
+      # @return [Array<Store::Objects::MethodObject>]
       def method_candidates
         return [] unless valid?
         receiver_values
-          .map(&:methods)
+          .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(nearest_send_node)) }
           .flatten
-          .select { |meth| meth.name.to_s.start_with?(index_word) }
       end
 
       private

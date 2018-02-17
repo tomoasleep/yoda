@@ -2,7 +2,15 @@ module Yoda
   module Evaluation
     class MethodCompletion
       include NodeEvaluatable
-      attr_reader :registry, :source, :location
+
+      # @return [Store::Registry]
+      attr_reader :registry
+
+      # @return [String]
+      attr_reader :source
+
+      # @return [Parsing::Location]
+      attr_reader :location
 
       # @param registry [Store::Registry]
       # @param source   [String]
@@ -18,13 +26,12 @@ module Yoda
         !!(current_method && current_send)
       end
 
-      # @return [Array<Store::Functions::Base>]
+      # @return [Array<Store::Objects::Method>]
       def method_candidates
         return [] unless valid?
         receiver_values
-          .map { |value| value.methods(visibility: method_visibility_of_send_node(current_send)) }
+          .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(current_send)) }
           .flatten
-          .select { |meth| meth.name.to_s.start_with?(index_word) }
       end
 
       # @return [Range, nil]
@@ -37,9 +44,15 @@ module Yoda
 
       private
 
-      # @return [Array<Store::Values::Base>]
+      # @return [Array<Store::Objects::Base>]
       def receiver_values
-        @receiver_values ||= self.calculate_values(current_receiver_node, registry, current_method)
+        @receiver_values ||= begin
+          if current_receiver_node
+            calculate_values(current_receiver_node, registry, current_method)
+          else
+            [find_context_object(registry, current_method)].compact
+          end
+        end
       end
 
       # @return [Parsing::NodeObjects::MethodDefition, nil]

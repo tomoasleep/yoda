@@ -29,7 +29,7 @@ module Yoda
         !!(current_comment_query.current_comment && current_comment_token_query.current_word)
       end
 
-      # @return [Array<Descriptions::Base>]
+      # @return [Array<Model::Descriptions::Base>]
       def candidates
         return [] unless valid?
         case current_comment_token_query.current_state
@@ -106,22 +106,28 @@ module Yoda
         @tagnames ||= YARD::Tags::Library.labels.map { |tag_symbol, label| "@#{tag_symbol}" }
       end
 
-      # @return [Array<Descriptions::WordDescription>]
+      # @return [Array<Model::Descriptions::WordDescription>]
       def tag_candidates
-        tagnames.select { |tagname| tagname.start_with?(index_word) }.map { |obj| Descriptions::WordDescription.new(obj) }
+        tagnames.select { |tagname| tagname.start_with?(index_word) }.map { |obj| Model::Descriptions::WordDescription.new(obj) }
       end
 
       # @group methods for const completion
 
-      # @return [NodeObjects::Namespace, nil]
+      # @return [Parsing::NodeObjects::Namespace, nil]
       def namespace
         current_commenting_node_query.current_namespace
       end
 
-      # @return [Array<Descriptions::ValueDescription>]
+      # @return [Array<Model::Descriptions::ValueDescription>]
       def const_candidates
-        paths = namespace ? namespace.paths_from_root : ['']
-        paths.map { |path| registry.search_objects_with_prefix(path, index_word) }.flatten.map { |obj| Descriptions::ValueDescription.new(obj) }
+        scoped_path = Model::ScopedPath.new(lexical_scope(namespace), index_word)
+        Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path).map { |obj| Model::Descriptions::ValueDescription.new(obj) }
+      end
+
+      # @param namespace [Parsing::NodeObjects::Namespace]
+      # @return [Array<Path>]
+      def lexical_scope(namespace)
+        namespace.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
       end
     end
   end

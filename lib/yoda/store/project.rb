@@ -17,131 +17,115 @@ module Yoda
         fail ArgumentError, root_path unless root_path.is_a?(String)
 
         @root_path = File.absolute_path(root_path)
-        @registry = Registry.instance
+        @registry = Registry.new
       end
 
       def clean
-        registry.clear
-      end
-
-      # @param path [String]
-      def reparse(path)
-        YARD.parse([path])
-      end
-
-      def load_project_files
-        YARD.parse(project_files)
       end
 
       def setup
         YARD::Logger.instance(STDERR)
-        prepare_database unless cache_store.has_cache?
-        cache_store.load
+        make_dir
+        cache.setup
         load_project_files
+        self
       end
 
-      def prepare_database
-        STDERR.puts 'Constructing database for the current project.'
-        YARD::Logger.instance(STDERR)
-        database_builder.build
-        cache_store.save
-        STDERR.puts 'Finished to construct database for the current project.'
+      def rebuild_cache
+        make_dir
+        cache.build
       end
 
-      def cache_store
-        @cache_store ||= YodaCacheStore.new(self)
-      end
-
-      def database_builder
-        @database_builder ||= DatabaseBuilder.new(self)
-      end
-
-      def project_files
-        Dir.chdir(root_path) { Dir.glob("{lib,app}/**/*.rb\0ext/**/*.c\0.yoda/*.rb").map { |name| File.expand_path(name, root_path) } }
+      # @param source_path [String]
+      def read_source(source_path)
+        Actions::ReadFile.run(registry, source_path)
       end
 
       def yoda_dir
         File.expand_path('.yoda', root_path)
       end
 
+      private
+
       def make_dir
         File.exist?(yoda_dir) || FileUtils.mkdir(yoda_dir)
       end
 
-      def gemfile_lock_path
-        File.absolute_path('Gemfile.lock', root_path)
+      def load_project_files
+        Actions::ReadProjectFiles.new(registry, root_path).run
       end
 
-      class DatabaseBuilder
+      def cache
+        @cache ||= Cache.new(self)
+      end
+
+      class Cache
+        class Builder
+          # @return [Registry]
+          attr_reader :registry
+
+          # @return [String]
+          attr_reader :root_path
+
+          # @return [String]
+          attr_reader :gemfile_lock_path
+
+          def initialize(registry, root_path, gemfile_lock_path)
+            @registry = registry
+            @root_path = root_path
+            @gemfile_lock_path = gemfile_lock_path
+          end
+
+          def run
+            Actions::ImportCoreLibrary.new(registry).run
+            if File.exist?(gemfile_lock_path)
+              Actions::ImportGems.new(registry, gemfile_lock_parser.specs).run
+            end
+            registry.compress_and_save
+          end
+
+          def gemfile_lock_parser
+            Dir.chdir(root_path) do
+              Bundler::LockfileParser.new(File.read(gemfile_lock_path))
+            end
+          end
+        end
+
+        # @return [Project]
         attr_reader :project
+
         def initialize(project)
           @project = project
         end
 
         def build
-          create_dependency_docs
-          load_core
-          load_dependencies
+          STDERR.puts 'Constructing database for the current project.'
+          YARD::Logger.instance(STDERR)
+          make_cache_dir
+          register_adapter
+          project.registry.adapter.clear
+          Builder.new(project.registry, project.root_path, gemfile_lock_path).run
+          STDERR.puts 'Finished to construct database for the current project.'
         end
 
-        def gemfile_lock_parser
-          return unless File.exist?(project.gemfile_lock_path)
-          Dir.chdir(project.root_path) do
-            Bundler::LockfileParser.new(File.read(project.gemfile_lock_path))
+        def setup
+          if present?
+            register_adapter
+          else
+            build
           end
         end
 
-        def create_dependency_docs
-          return unless File.exist?(project.gemfile_lock_path)
-          gemfile_lock_parser.specs.each do |gem|
-            STDERR.puts "Building gem docs for #{gem.name} #{gem.version}"
-            begin
-              Thread.new do
-                YARD::CLI::Gems.run(gem.name, gem.version)
-              end.join
-              STDERR.puts "Done building gem docs for #{gem.name} #{gem.version}"
-            rescue => ex
-              STDERR.puts ex
-              STDERR.puts ex.backtrace
-              STDERR.puts "Failed to build #{gem.name} #{gem.version}"
-            end
-          end
+        private
+
+        # @return [true, false]
+        def present?
+          File.exist?(cache_path)
         end
 
-        def yardoc_files_of_dependencies
-          return [] unless File.exist?(project.gemfile_lock_path)
-          gemfile_lock_parser.specs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
-        rescue Bundler::BundlerError => ex
-          STDERR.puts ex
-          STDERR.puts ex.backtrace
-          []
-        end
-
-        def load_core
-          core_doc_files.each { |yardoc_file| YardImporter.import(yardoc_file) }
-        end
-
-        def load_dependencies
-          yardoc_files_of_dependencies.each do |yardoc_file|
-            begin
-              YardImporter.import(yardoc_file)
-            rescue => ex
-              STDERR.puts ex
-              STDERR.puts ex.backtrace
-              STDERR.puts "Failed to load #{yardoc_file}"
-            end
-          end
-        end
-
-        def core_doc_files
-          %w(core/ruby-2.5.0/.yardoc core/ruby-2.5.0/.yardoc-stdlib).map { |path| File.expand_path(path, File.expand_path('../../../', __dir__)) }.select { |path| File.exist?(path) }
-        end
-      end
-
-      class YodaCacheStore
-        attr_reader :project
-        def initialize(project)
-          @project = project
+        def register_adapter
+          return if project.registry.adapter
+          project.registry.adapter = Adapters::LeveldbAdapter.for(cache_path)
         end
 
         def cache_dir
@@ -149,30 +133,24 @@ module Yoda
         end
 
         def cache_name
-          @cache_path ||= File.exist?(project.gemfile_lock_path) ? Digest::SHA256.file(project.gemfile_lock_path).hexdigest : 'core'
+          @cache_path ||= begin
+            digest = Digest::SHA256.new
+            digest.file(gemfile_lock_path) if File.exist?(gemfile_lock_path)
+            digest.update(Yoda::VERSION)
+            digest.hexdigest
+          end
         end
 
         def cache_path
           File.expand_path(cache_name, cache_dir)
         end
 
-        def has_cache?
-          File.exist?(cache_path)
-        end
-
-        def save
-          make_cache_dir
-          project.registry.save(cache_path)
-        end
-
-        def load
-          return unless has_cache?
-          project.registry.load(cache_path)
-        end
-
         def make_cache_dir
-          project.make_dir
-          File.exist?(cache_dir) || FileUtils.mkdir(cache_dir)
+          File.exist?(cache_dir) || FileUtils.mkdir_p(cache_dir)
+        end
+
+        def gemfile_lock_path
+          File.absolute_path('Gemfile.lock', project.root_path)
         end
       end
     end

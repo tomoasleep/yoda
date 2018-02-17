@@ -2,7 +2,13 @@ module Yoda
   module Parsing
     module NodeObjects
       class MethodDefinition
-        attr_reader :node, :namespace
+
+        # @return [::Parser::AST::Node]
+        attr_reader :node
+
+        # @return [Namespace]
+        attr_reader :namespace
+
         # @param node [::Parser::AST::Node]
         # @param namespace [Namespace]
         def initialize(node, namespace)
@@ -12,6 +18,7 @@ module Yoda
           @namespace = namespace
         end
 
+        # @return [Symbol]
         def name
           node.children[-3]
         end
@@ -24,15 +31,14 @@ module Yoda
           node.children[-1]
         end
 
+        # @return [String]
         def full_name
           "#{namespace.full_name}##{name}"
         end
 
-        # @param registry [Parsing::NodeObjects::MethodDefinition]
-        # @return [Store::Values::Base]
-        def caller_value(registry)
-          code_object = registry.find_or_proxy(namespace.full_name)
-          Store::Values::InstanceValue.new(registry, code_object)
+        # @return [String]
+        def namespace_name
+          namespace.full_name
         end
       end
     end

@@ -13,7 +13,7 @@ module Yoda
       end
 
       # @param key  [String, Symbol]
-      # @param type [Symbol, Store::Types::Base]
+      # @param type [Symbol, Model::Types::Base]
       def bind(key, type)
         key = key.to_sym
         type = (type.is_a?(Symbol) && resolve(type)) || type

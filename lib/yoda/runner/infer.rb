@@ -35,7 +35,7 @@ module Yoda
         end
       end
 
-      # @param current_type [Store::Types::Base]
+      # @param current_type [Model::Types::Base]
       # @param range        [Parsing::Range, nil]
       def create_signature_help(type)
         type.resolve(project.registry).map { |code_object| create_hover_text(code_object) }

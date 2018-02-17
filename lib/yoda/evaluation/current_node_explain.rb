@@ -2,7 +2,15 @@ module Yoda
   module Evaluation
     class CurrentNodeExplain
       include NodeEvaluatable
-      attr_reader :registry, :source, :location
+
+      # @return [Store::Registry]
+      attr_reader :registry
+
+      # @return [String]
+      attr_reader :source
+
+      # @return [Parsing::Location]
+      attr_reader :location
 
       # @param registry [Store::Registry]
       # @param source   [String]
@@ -13,10 +21,10 @@ module Yoda
         @location = location
       end
 
-      # @return [NodeSignature, nil]
+      # @return [Model::NodeSignature, nil]
       def current_node_signature
         return nil if !valid? || !current_node_trace
-        @current_node_signature ||= NodeSignature.new(current_node, current_node_trace)
+        @current_node_signature ||= Model::NodeSignature.new(current_node, current_node_trace)
       end
 
       # @return [true, false]
@@ -24,14 +32,14 @@ module Yoda
         !!(current_method && current_node)
       end
 
-      # @return [Array<[String, Integer]>]
+      # @return [Array<(String, Integer, Integer)>]
       def defined_files
         return [] if !valid? || !current_node_trace
         case current_node.type
         when :send
-          current_node_trace.functions.map { |function| function.defined_files.first }.compact
+          current_node_trace.functions.map { |function| function.primary_source }.compact
         when :const
-          current_node_trace.values.map { |value| value.defined_files.first }.compact
+          current_node_trace.values.map { |value| value.primary_source || value.sources.first }.compact
         else
           []
         end
