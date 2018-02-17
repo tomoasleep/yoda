@@ -30,7 +30,7 @@ module Yoda
       def method_candidates
         return [] unless valid?
         receiver_values
-          .map { |value| Store::Query::FindMethod.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(current_send)) }
+          .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(current_send)) }
           .flatten
       end
 

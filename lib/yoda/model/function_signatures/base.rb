@@ -23,6 +23,12 @@ module Yoda
 
         # @abstract
         # @return [String]
+        def namespace_path
+          fail NotImplementedError
+        end
+
+        # @abstract
+        # @return [String]
         def document
           fail NotImplementedError
         end
@@ -34,9 +40,27 @@ module Yoda
         end
 
         # @abstract
-        # @return [Array<[String, Integer]>]
+        # @return [Array<(String, Integer, Integer)>]
         def sources
           fail NotImplementedError
+        end
+
+        # @return [String]
+        def to_s
+          formatter.to_s
+        end
+
+        # @abstract
+        # @return [Types::Base, nil]
+        def parameter_type_of(param)
+          fail NotImplementedError
+        end
+
+        private
+
+        # @return [Formatter]
+        def formatter
+          @formatter ||= Formatter.new(self)
         end
       end
     end

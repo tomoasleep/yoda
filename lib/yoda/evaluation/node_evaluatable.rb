@@ -80,10 +80,10 @@ module Yoda
 
       # @param registry  [Store::Registry]
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Store::Objects::Method, nil]
+      # @return [Model::FunctionSignatures::Base, nil]
       def find_method(registry, method_node)
         namespace = find_namespace(registry, method_node)
-        namespace && Store::Query::FindMethod.new(registry).find(namespace, method_node.name.to_s)
+        namespace && Store::Query::FindSignature.new(registry).select(namespace, method_node.name.to_s).first
       end
 
       # @param method_node [Parsing::NodeObjects::MethodDefinition]

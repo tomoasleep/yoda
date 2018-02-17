@@ -2,7 +2,7 @@ module Yoda
   module Store
     module Objects
       class MethodObject < Base
-        # @return [ParameterList]
+        # @return [Array<(String, String)>]
         attr_reader :parameters
 
         # @return [Symbol]
@@ -41,7 +41,7 @@ module Yoda
           super(kwargs)
           fail ArgumentError, visibility unless %i(public private protected)
           @visibility = visibility.to_sym
-          @parameters = Model::FunctionSignatures::ParameterList.new(parameters.to_a)
+          @parameters = parameters
           @overloads = overloads
         end
 
@@ -72,31 +72,12 @@ module Yoda
           )
         end
 
-        def type
-          @type ||= function_type_builder.type
-        end
-
-        def parameter_type_of(param)
-          function_type_builder.type_of(param)
-        end
-
-        # @deprecated Use Function signatures
-        def to_s
-          @to_s ||= Model::FunctionSignatures::Formatter.new(self).to_s
-        end
-
         # @return [Model::FunctionSignatures::Formatter]
         def signatures
           @signatures ||= Model::FunctionSignatures.build(self)
         end
 
         private
-
-        # @deprecated Use Function signatures
-        # @return [Model::FunctionSignatures::TypeBuilder]
-        def function_type_builder
-          @function_type_builder ||= Model::FunctionSignatures::TypeBuilder.new(parameters, tag_list)
-        end
 
         # @param another [self]
         # @return [Hash]

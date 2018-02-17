@@ -100,7 +100,7 @@ module Yoda
         end
 
         _type = argument_nodes.reduce([unknown_type]) { |(_type), node| process(node) }
-        method_candidates = receiver_candidates.map { |receiver| Store::Query::FindMethod.new(context.registry).find(receiver, method_name_sym.to_s) }.compact
+        method_candidates = receiver_candidates.map { |receiver| Store::Query::FindSignature.new(context.registry).select(receiver, method_name_sym.to_s) }.flatten
         trace = Traces::Send.new(context, method_candidates)
         bind_trace(node, trace)
         trace.type

@@ -5,9 +5,9 @@ module Yoda
         # @type Store::Objects::MethodObject
         attr_reader :function
 
-        # @param function [Store::Objects::MethodObject]
+        # @param function [FunctionSignatures::Base]
         def initialize(function)
-          fail ArgumentError, function unless function.is_a?(Store::Objects::MethodObject)
+          fail ArgumentError, function unless function.is_a?(FunctionSignatures::Base)
           @function = function
         end
 

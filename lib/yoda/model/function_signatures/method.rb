@@ -27,8 +27,8 @@ module Yoda
         end
 
         # @return [String]
-        def docstring
-          @method_object.docstring
+        def document
+          @method_object.document
         end
 
         # @return [Types::FunctionType]
@@ -51,11 +51,15 @@ module Yoda
           @parameters ||= ParameterList.new(method_object.parameters)
         end
 
+        def parameter_type_of(param)
+          type_builder.type_of(param)
+        end
+
         private
 
         # @return [TypeBuilder]
         def type_builder
-          @type_builder ||= TypeBuilder.new(method_object.parameters, method_object.tag_list)
+          @type_builder ||= TypeBuilder.new(parameters, method_object.tag_list)
         end
       end
     end

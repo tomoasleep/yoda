@@ -21,13 +21,9 @@ module Yoda
         create_signature_help(functions)
       end
 
-      # @param code_objects [Array<Store::Functions::Base>]
+      # @param code_objects [Array<Model::FunctionSignatures::Base>]
       def create_signature_help(functions)
-        signatures =
-          functions
-            .map { |function| function.overloads.empty? ? [function] : function.overloads }
-            .flatten
-            .map { |func| Model::Descriptions::FunctionDescription.new(func) }
+        signatures = functions.map { |func| Model::Descriptions::FunctionDescription.new(func) }
         LSP::Interface::SignatureHelp.new(
           signatures: signatures.map { |signature| create_signature_info(signature) },
         )
