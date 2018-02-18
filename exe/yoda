@@ -15,7 +15,7 @@ argv = opt.parse(ARGV)
 case argv.first
 when 'setup'
   require 'pry'
-  Pry::rescue { Yoda::Runner::Setup.run }
+  Pry::rescue { Yoda::Runner::Setup.run(argv[1]) }
 when 'infer'
   require 'pry'
   Pry::rescue { Yoda::Runner::Infer.run(argv[1]) }

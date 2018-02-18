@@ -1,8 +1,17 @@
 module Yoda
   module Runner
     class Setup
-      def self.run
-        new.run
+      # @return [String]
+      attr_reader :dir
+
+      # @param dir [String]
+      def initialize(dir = nil)
+        @dir = dir || Dir.pwd
+      end
+
+      # @param dir [String]
+      def self.run(dir = nil)
+        new(dir).run
       end
 
       def run
@@ -10,7 +19,7 @@ module Yoda
       end
 
       def project
-        @project ||= Store::Project.new(Dir.pwd)
+        @project ||= Store::Project.new(dir)
       end
     end
   end
