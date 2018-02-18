@@ -5,7 +5,7 @@ module Yoda
     class ClientInfo
       # @return [String]
       attr_reader :root_uri
-      
+
       # @return [FileStore]
       attr_reader :file_store
 
@@ -39,7 +39,7 @@ module Yoda
 
       def reparse_doc(uri)
         path = FileStore.path_of_uri(uri)
-        project.reparse(path)
+        project.read_source(path)
       end
 
       class FileStore
