@@ -6,7 +6,7 @@ module Yoda
       end
 
       def run
-        project.prepare_database
+        project.rebuild_cache
       end
 
       def project
