@@ -125,7 +125,7 @@ module Yoda
 
         def register_adapter
           return if project.registry.adapter
-          project.registry.adapter = Adapters::LeveldbAdapter.for(cache_path)
+          project.registry.adapter = Adapters.default_adapter_class.for(cache_path)
         end
 
         def cache_dir
@@ -137,6 +137,7 @@ module Yoda
             digest = Digest::SHA256.new
             digest.file(gemfile_lock_path) if File.exist?(gemfile_lock_path)
             digest.update(Yoda::VERSION)
+            digest.update(Adapters.default_adapter_class.type.to_s)
             digest.hexdigest
           end
         end

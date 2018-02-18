@@ -3,10 +3,10 @@ require 'yard'
 module Yoda
   module Store
     class Registry
-      # @return [Adapters::LeveldbAdapter, nil]
+      # @return [Adapters::LmdbAdapter, nil]
       attr_reader :adapter
 
-      # @param adapter [Adapters::LeveldbAdapter]
+      # @param adapter [Adapters::LmdbAdapter]
       attr_writer :adapter
 
       # @return [Objects::PatchSet]
@@ -40,10 +40,12 @@ module Yoda
 
       def compress_and_save
         return unless adapter
-        keys.each do |key|
+        el_keys = keys
+        el_keys.each do |key|
           adapter.put(key, find(key))
         end
-        STDERR.puts "saved #{adapter.keys.length} keys."
+        adapter.sync
+        STDERR.puts "saved #{el_keys.length} keys."
         @patch_set = Objects::PatchSet.new
       end
 

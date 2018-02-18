@@ -1,10 +1,10 @@
-require 'leveldb'
+require 'lmdb'
 require 'json'
 
 module Yoda
   module Store
     module Adapters
-      class LeveldbAdapter < Base
+      class LmdbAdapter < Base
         class << self
           def for(path)
             @pool ||= {}
@@ -12,16 +12,18 @@ module Yoda
           end
 
           def type
-            :leveldb
+            :lmdb
           end
         end
 
         # @param path [String] represents the path to store db.
         def initialize(path)
+          Dir.mkdir(path) unless Dir.exist?(path)
           @path = path
-          @db = LevelDB::DB.new(path, compression: true)
+          @env = LMDB.new(path)
+          @db = @env.database('main', create: true)
 
-          at_exit { @db.closed? || @db.close }
+          at_exit { @env.close }
         end
 
         # @param address [String]
@@ -34,7 +36,7 @@ module Yoda
         # @param object [Object]
         # @return [void]
         def put(address, object)
-          @db.put(address.to_s, object.to_json)
+          do_put(address.to_s, object.to_json)
         end
 
         # @param address [String]
@@ -46,24 +48,44 @@ module Yoda
         # @param address [String]
         # @return [true, false]
         def exist?(address)
-          @db.exists?(address.to_s)
+          !!@db.get(address.to_s)
         end
 
         # @return [Array<String>]
         def keys
-          @db.keys
+          Enumerator.new do |yielder|
+            @db.each { |(k, v)| yielder << k }
+          end.to_a
         end
 
         def stats
-          @db.stats
+          @db.stat
         end
 
         def clear
-          @db.destroy!
+          @db.clear
         end
 
         def sync
-          # nop
+          # @env.sync(force: true)
+        end
+
+        private
+
+        # @param address [String]
+        # @param value [String]
+        # @return [void]
+        def do_put(address, value)
+          LMDB.new(@path, mapsize: @env.info[:mapsize]) do |env|
+            db = env.database('main', create: true)
+            db.put(address, value)
+          end
+        rescue LMDB::Error::MAP_FULL => _ex
+          @env.mapsize = @env.info[:mapsize] * 2
+          LMDB.new(@path, mapsize: @env.info[:mapsize]) do |env|
+            db = env.database('main', create: true)
+            db.put(address, value)
+          end
         end
       end
     end
