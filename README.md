@@ -1,4 +1,4 @@
-# Yoda (In Progress)
+# Yoda (In Progress) [![Build Status](https://travis-ci.org/tomoasleep/yoda.svg?branch=master)](https://travis-ci.org/tomoasleep/yoda)
 
 Yoda is a static analytics tool for Ruby to provide autocompletion, go-to-definition, documentation on hover and so on.
 Yoda is designed to provide these features for multiple editors by using language server protocol (https://microsoft.github.io/language-server-protocol/).
