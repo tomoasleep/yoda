@@ -18,6 +18,11 @@ module Yoda
         # @return [Enumerable<MethodObject>]
         attr_accessor :methods
 
+        # @return [Array<Symbol>]
+        def self.attr_names
+          super + %i(instance_method_addresses mixin_addresses constant_addresses)
+        end
+
         # @param path [String]
         # @param document [Document, nil]
         # @param tag_list [TagList, nil]

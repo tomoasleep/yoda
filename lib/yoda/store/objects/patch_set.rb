@@ -31,9 +31,8 @@ module Yoda
         # @return [Addressable]
         def patch(object)
           check_outdated_index(object.address.to_sym)
-          (address_index[object.address.to_sym] || []).reduce(object) do |obj, patch_id|
-            obj.merge(patches[patch_id].find(object.address.to_sym))
-          end
+          objects_in_patch = (address_index[object.address.to_sym] || []).map { |patch_id| patches[patch_id].find(object.address.to_sym) }
+          Merger.new([object, *objects_in_patch]).merged_instance
         end
 
         # @param address [String, Symbol]

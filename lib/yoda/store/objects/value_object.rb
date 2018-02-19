@@ -5,6 +5,11 @@ module Yoda
         # @return [String]
         attr_reader :value
 
+        # @return [Array<Symbol>]
+        def self.attr_names
+          super + %i(value)
+        end
+
         # @param path [String]
         # @param value [String]
         def initialize(value: nil, **kwargs)

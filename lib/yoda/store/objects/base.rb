@@ -12,6 +12,11 @@ module Yoda
           def json_create(params)
             new(params.map { |k, v| [k.to_sym, v] }.to_h)
           end
+
+          # @return [Array<Symbol>]
+          def attr_names
+            %i(path document tag_list sources primary_source)
+          end
         end
 
         # @return [String]

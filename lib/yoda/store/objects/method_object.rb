@@ -29,6 +29,11 @@ module Yoda
           def sep_of_path(path)
             path.slice(path.rindex(/[#.]/))
           end
+
+          # @return [Array<Symbol>]
+          def attr_names
+            super + %i(parameters visibility overloads)
+          end
         end
 
         # @param path [String]

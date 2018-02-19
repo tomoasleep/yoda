@@ -5,6 +5,11 @@ module Yoda
         # @return [ScopedPath, nil]
         attr_reader :superclass_path
 
+        # @return [Array<Symbol>]
+        def self.attr_names
+          super + %i(superclass_path)
+        end
+
         # @param path [String]
         # @param superclass_path [String, nil]
         def initialize(superclass_path: nil, **kwargs)

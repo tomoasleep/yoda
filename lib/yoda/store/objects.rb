@@ -12,6 +12,7 @@ module Yoda
       require 'yoda/store/objects/overload'
       require 'yoda/store/objects/meta_class_object'
       require 'yoda/store/objects/method_object'
+      require 'yoda/store/objects/merger'
       require 'yoda/store/objects/module_object'
       require 'yoda/store/objects/patch'
       require 'yoda/store/objects/patch_set'
