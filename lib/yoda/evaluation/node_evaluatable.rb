@@ -59,7 +59,7 @@ module Yoda
       # @return [Typing::Context]
       def create_evaluation_context(registry, method_node)
         namespace = find_context_object(registry, method_node)
-        fail RuntimeError, "The namespace #{mehtod_node.namespace_name} (#{method_node}) is not registered" unless namespace
+        fail RuntimeError, "The namespace #{method_node.namespace_name} (#{method_node}) is not registered" unless namespace
         Typing::Context.new(registry, namespace, lexical_scope(method_node), create_evaluation_env(registry, method_node))
       end
 
