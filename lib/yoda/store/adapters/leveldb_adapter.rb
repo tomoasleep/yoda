@@ -37,6 +37,15 @@ module Yoda
           @db.put(address.to_s, object.to_json)
         end
 
+        # @param data [Enumerator<(String, Object)>]
+        # @param bar [ProgressBar, nil]
+        def batch_write(data, bar)
+          data.each do |(k, v)|
+            @db.put(k, v)
+            bar&.increment
+          end
+        end
+
         # @param address [String]
         # @return [void]
         def delete(address)

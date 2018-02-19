@@ -39,15 +39,19 @@ module Yoda
         adapter&.exists?(path) || patch_set.has_key?(path)
       end
 
+      # Store patch set data to the database.
+      # old data in the database are discarded.
       # @param progress [true, false]
       def compress_and_save(progress: false)
         return unless adapter
-        el_keys = keys
+        el_keys = patch_set.keys
         bar = ProgressBar.create(format: " %c/%C |%w>%i| %e ", total: el_keys.length) if progress
-        el_keys.each do |key|
-          adapter.put(key, find(key))
-          bar.increment if progress
+
+        data = Enumerator.new do |yielder|
+          el_keys.each { |key| yielder << [key, patch_set.find(key)] }
         end
+
+        adapter.batch_write(data, bar)
         adapter.sync
         STDERR.puts "saved #{el_keys.length} keys."
         @patch_set = Objects::PatchSet.new

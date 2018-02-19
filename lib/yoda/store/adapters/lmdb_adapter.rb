@@ -32,6 +32,26 @@ module Yoda
           JSON.load(@db.get(address.to_s), symbolize_names: true)
         end
 
+        # @param data [Enumerator<(String, Object)>]
+        # @param bar [ProgressBar, nil]
+        def batch_write(data, bar)
+          env = LMDB.new(@path, mapsize: @env.info[:mapsize], writemap: true, mapasync: true, nosync: true)
+          db = env.database('main', create: true)
+          data.each do |(k, v)|
+            begin
+              db.put(k.to_s, v.to_json)
+            rescue LMDB::Error::MAP_FULL => _ex
+              @env.mapsize = @env.info[:mapsize] * 2
+              env.close
+              env = LMDB.new(@path, mapsize: @env.info[:mapsize], writemap: true, mapasync: true, nosync: true)
+              db = env.database('main', create: true)
+              db.put(k.to_s, v.to_json)
+            end
+            bar&.increment
+          end
+          env.close
+        end
+
         # @param address [String]
         # @param object [Object]
         # @return [void]
