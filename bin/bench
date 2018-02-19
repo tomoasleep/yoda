@@ -5,8 +5,8 @@ if Dir.exist?(File.join(__dir__, "..", ".git"))
 end
 
 require 'yoda'
-require 'stackprof'
+require 'benchmark'
 
-StackProf.run(mode: :cpu, raw: true, out: 'tmp/stackprof-yoda.dump') do
-  Yoda::Store::Project.new(Dir.pwd).load_core
+Benchmark.bm do |b|
+  b.report { Yoda::Runner::Setup.run(File.expand_path('../spec/support/fixtures', __dir__)) }
 end
