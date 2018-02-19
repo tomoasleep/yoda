@@ -85,6 +85,18 @@ module Yoda
           self.class.new(merge_attributes(another))
         end
 
+        def hash
+          ([self.class.name] + to_h.to_a).hash
+        end
+
+        def eql?(another)
+          self.class == another.class && to_h == another.to_h
+        end
+
+        def ==(another)
+          eql?(another)
+        end
+
         private
 
         # @param another [self]
