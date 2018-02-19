@@ -43,7 +43,7 @@ module Yoda
             nil
           else
             objects = patch_ids.map { |id| patches[id].find(address.to_sym) }
-            objects.reduce { |obj1, obj2| obj1.merge(obj2) }
+            Merger.new(objects).merged_instance
           end
         end
 
