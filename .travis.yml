@@ -2,7 +2,6 @@ sudo: false
 language: ruby
 rvm:
   - 2.4.1
-before_install: gem install bundler -v 1.16.0
 before_script: ./scripts/build_core_index.sh
 script:
   - ./bin/bench
