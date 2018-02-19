@@ -15,7 +15,7 @@ module Yoda
       end
 
       def run
-        project.rebuild_cache
+        project.rebuild_cache(progress: true)
       end
 
       def project

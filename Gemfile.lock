@@ -7,6 +7,7 @@ PATH
       lmdb (~> 0.4.8)
       parser (~> 2.0)
       parslet (~> 1.8)
+      ruby-progressbar
       yard (~> 0.9.11)
 
 GEM
@@ -55,6 +56,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.0)
+    ruby-progressbar (1.9.0)
     stackprof (0.2.10)
     yard (0.9.12)
 

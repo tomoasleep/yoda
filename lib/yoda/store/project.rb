@@ -31,9 +31,9 @@ module Yoda
         self
       end
 
-      def rebuild_cache
+      def rebuild_cache(progress: false)
         make_dir
-        cache.build
+        cache.build(progress: progress)
       end
 
       # @param source_path [String]
@@ -76,12 +76,12 @@ module Yoda
             @gemfile_lock_path = gemfile_lock_path
           end
 
-          def run
+          def run(progress: false)
             Actions::ImportCoreLibrary.new(registry).run
             if File.exist?(gemfile_lock_path)
               Actions::ImportGems.new(registry, gemfile_lock_parser.specs).run
             end
-            registry.compress_and_save
+            registry.compress_and_save(progress: progress)
           end
 
           def gemfile_lock_parser
@@ -98,13 +98,13 @@ module Yoda
           @project = project
         end
 
-        def build
+        def build(progress: false)
           STDERR.puts 'Constructing database for the current project.'
           YARD::Logger.instance(STDERR)
           make_cache_dir
           register_adapter
           project.registry.adapter.clear
-          Builder.new(project.registry, project.root_path, gemfile_lock_path).run
+          Builder.new(project.registry, project.root_path, gemfile_lock_path).run(progress: progress)
           STDERR.puts 'Finished to construct database for the current project.'
         end
 

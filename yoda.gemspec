@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'language_server-protocol', '~> 0.5'
   spec.add_dependency 'leveldb', '~> 0.1.9'
   spec.add_dependency 'lmdb', '~> 0.4.8'
+  spec.add_dependency 'ruby-progressbar'
 
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
