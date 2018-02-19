@@ -13,8 +13,7 @@ class YodaClient extends AutoLanguageClient {
   getConnectionType() { return 'stdio' }
 
   startServerProcess () {
-    // const yoda = spawn('yoda', ['server']);
-    const yoda = spawn(resolve(__dirname, '../../exe/yoda'), ['server']);
+    const yoda = atom.inDevMode() ? spawn(resolve(__dirname, '../../exe/yoda'), ['server']) : spawn('yoda', ['server']);
     yoda.stderr.on('data', (data) => {
       this.logger.warn(`${data}`);
     });
