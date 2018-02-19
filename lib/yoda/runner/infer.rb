@@ -3,21 +3,32 @@ module Yoda
     class Infer
       attr_reader :filename_with_position
 
+      # @param filename_with_position [String]
       def self.run(filename_with_position)
         new(filename_with_position).run
       end
 
+      # @param filename_with_position [String]
       def initialize(filename_with_position)
         @filename_with_position = filename_with_position
       end
 
       def run
         project.setup
-        puts create_signature_help(method_analyzer.calculate_current_node_type)
+        puts create_signature_help(worker.current_node_signature)
       end
 
-      def method_analyzer
-        @method_analyzer ||= Parsing::MethodAnalyzer.from_source(project.registry, File.read(filename), position)
+      private
+
+      # @param signature [Model::NodeSignature, nil]
+      # @return [String, nil]
+      def create_signature_help(signature)
+        return nil unless signature
+        signature.descriptions.map(&:title).join("\n")
+      end
+
+      def worker
+        @worker ||= Evaluation::CurrentNodeExplain.new(project.registry, File.read(filename), position)
       end
 
       def project
@@ -32,22 +43,6 @@ module Yoda
         @position ||= begin
           row, column = filename_with_position.split(':').slice(1..2)
           Parsing::Location.new(row: row.to_i, column: column.to_i)
-        end
-      end
-
-      # @param current_type [Model::Types::Base]
-      # @param range        [Parsing::Range, nil]
-      def create_signature_help(type)
-        type.resolve(project.registry).map { |code_object| create_hover_text(code_object) }
-      end
-
-      # @param code_object [YARD::CodeObjects::Base, YARD::CodeObjects::Proxy]
-      # @return [String]
-      def create_hover_text(code_object)
-        if code_object.type == :proxy
-          "#{code_object.path}"
-        else
-          "#{code_object.path} #{code_object.signature}"
         end
       end
     end
