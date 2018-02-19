@@ -1,9 +1,3 @@
-#!/usr/bin/env ruby
-
-if Dir.exist?(File.join(__dir__, "..", ".git"))
-  $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
-end
-
 require 'yoda'
 require 'benchmark'
 

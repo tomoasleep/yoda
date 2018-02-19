@@ -4,5 +4,5 @@ rvm:
   - 2.4.1
 before_script: ./scripts/build_core_index.sh
 script:
-  - ./bin/bench
+  - bundle exec ruby scripts/benchmark.rb
   - bundle exec rake
