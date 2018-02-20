@@ -9,7 +9,7 @@ module Yoda
         # @param types [Array<Base>]
         # @return [Base]
         def self.new(types)
-          reduced_types = types.reject { |type| type.is_a?(AnyType) || type.is_a?(UnknownType) }
+          reduced_types = types.reject { |type| type.is_a?(AnyType) || type.is_a?(UnknownType) }.uniq
           return (types.first || AnyType.new) if reduced_types.length == 0
           return reduced_types.first if reduced_types.length == 1
           super(reduced_types)
