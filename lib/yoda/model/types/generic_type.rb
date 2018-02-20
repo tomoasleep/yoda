@@ -2,7 +2,11 @@ module Yoda
   module Model
     module Types
       class GenericType < Base
-        attr_reader :base_type, :type_arguments
+        # @return [Base]
+        attr_reader :base_type
+
+        # @return [Array<Base>]
+        attr_reader :type_arguments
 
         # @param base_type  [Base]
         # @param key_type   [Base]
@@ -31,12 +35,8 @@ module Yoda
           type_arguments == another.type_arguments
         end
 
-        def name
-          base_type.name
-        end
-
         def hash
-          [self.class.name, name, type_arguments].hash
+          [self.class.name, base_type, type_arguments].hash
         end
 
         # @param namespace [YARD::CodeObjects::Base]
