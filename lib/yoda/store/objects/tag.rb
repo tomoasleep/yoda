@@ -40,6 +40,18 @@ module Yoda
           { name: name, tag_name: tag_name, yard_types: yard_types, text: text, lexical_scope: lexical_scope }
         end
 
+        def hash
+          ([self.class.name] + to_h.to_a).hash
+        end
+
+        def eql?(another)
+          self.class == another.class && to_h == another.to_h
+        end
+
+        def ==(another)
+          eql?(another)
+        end
+
         # @return [String]
         def to_json(_state = nil)
           to_h.merge(json_class: self.class.name).to_json
