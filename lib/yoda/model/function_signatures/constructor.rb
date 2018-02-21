@@ -48,6 +48,11 @@ module Yoda
           @parameters ||= ParameterList.new(initialize_method.parameters)
         end
 
+        # @return [(String, Integer, Integer), nil]
+        def primary_source
+          initialize_method.primary_source
+        end
+
         # @return [Types::Base, nil]
         def parameter_type_of(param)
           type_builder.type_of(param)
