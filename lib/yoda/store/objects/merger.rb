@@ -52,7 +52,7 @@ module Yoda
             mixin_addresses: one[:mixin_addresses] + another[:mixin_addresses],
             constant_addresses: one[:constant_addresses] + another[:constant_addresses],
             visibility: one[:visibility] || another[:visibility],
-            parameters: one[:parameters] + another[:parameters],
+            parameters: one[:parameters].empty? ? another[:parameters] : one[:parameters], 
             overloads: one[:overloads] + another[:overloads],
             superclass_path: select_superclass(one, another),
             value: one[:value] || another[:value],
