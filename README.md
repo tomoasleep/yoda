@@ -39,13 +39,32 @@ Yoda utilizes these type hints for completion features.
 
 ## Installation
 
+### Install cli command
+
+```
+$ bundle exec rake install
+$ ./scripts/build_core_index.sh # Download Ruby source code and build index of ruby core and stdlib.
+```
+
+You can infer the type of the specified code.
+
+```
+$ yoda setup # Build index for your project
+$ yoda infer <YOUR_FILE_TO_INSPECT>:<LINE_NUMBER>:<COLUMN_NUMBER> 
+```
+
+### Install Atom Package
+
 This repository contains an Atom package to use Yoda.
 (This package is alpha version and it has many bugs.)
+
+This package requires cli
 
 ```
 $ ./bin/setup
 $ apm link
 ```
+
 
 ## Usage
 
