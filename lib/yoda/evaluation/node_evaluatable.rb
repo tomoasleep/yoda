@@ -2,30 +2,25 @@ module Yoda
   module Evaluation
     module NodeEvaluatable
       # @param code_node   [::Parser::AST::Node]
-      # @param registry    [Store::Registry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Model::Types::Base, nil]
-      def calculate_type(code_node, registry, method_node)
-        calculate_trace(code_node, registry, method_node)&.type
+      def calculate_type(code_node)
+        calculate_trace(code_node)&.type
       end
 
       # @param code_node   [::Parser::AST::Node]
-      # @param registry    [Store::Registry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Array<Store::Values::Base>]
-      def calculate_values(code_node, registry, method_node)
-        trace = calculate_trace(code_node, registry, method_node)
+      def calculate_values(code_node)
+        trace = calculate_trace(code_node)
         trace ? trace.values : []
       end
 
       # @param code_node   [::Parser::AST::Node, nil]
-      # @param registry    [Store::Reggistry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Typing::Traces::Base, nil]
-      def calculate_trace(code_node, registry, method_node)
-        evaluator = create_evaluator(registry, method_node)
-        _type, tyenv = evaluator.process(current_method.body_node)
-        code_node && evaluator.find_trace(code_node)
+      def calculate_trace(code_node)
+        return nil unless code_node
+        evaluator = scope_builder.create_evaluator
+        evaluator.process(scope_builder.body_node)
+        evaluator.find_trace(code_node)
       end
 
       # @param send_node [Parsing::NodeObjects::SendNode]
@@ -42,54 +37,88 @@ module Yoda
       # @param method_node [Parsing::NodeObjects::MethodDefinition]
       # @return [Store::Objects::Base, nil]
       def find_context_object(registry, method_node)
-        find_namespace(registry, method_node)
+        scope_builder.namespace
       end
 
       private
 
-      # @param registry    [Store::Reggistry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Typing::Evaluator]
-      def create_evaluator(registry, method_node)
-        Typing::Evaluator.new(create_evaluation_context(registry, method_node))
+      # @abstract
+      # @return [Parsing::NodeObjects::MethodDefinition, Parsing::NodeObjects::Namespace]
+      def current_scope
+        fail NotImplementedError
       end
 
-      # @param registry  [Store::Registry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Typing::Context]
-      def create_evaluation_context(registry, method_node)
-        namespace = find_context_object(registry, method_node)
-        fail RuntimeError, "The namespace #{method_node.namespace_name} (#{method_node}) is not registered" unless namespace
-        Typing::Context.new(registry, namespace, lexical_scope(method_node), create_evaluation_env(registry, method_node))
+      # @abstract
+      # @return [Store::Registry]
+      def registry
+        fail NotImplementedError
       end
 
-      # @param method_node [Parsing::NodeObjects::MethodNode]
-      # @return [Typing::Environment]
-      def create_evaluation_env(registry, method_node)
-        method_object = find_method(registry, method_node)
-        fail RuntimeError, "The function #{method_node.full_name} (#{method_node}) is not registered" unless method_object
-        method_object.parameters.parameter_names.each_with_object(Typing::Environment.new) { |name, env| env.bind(name.gsub(/:\Z/, ''), method_object.parameter_type_of(name)) }
+      # @return [ScopeBuilder]
+      def scope_builder
+        @scope_builder ||= ScopeBuilder.new(registry, current_scope)
       end
 
-      # @param registry  [Store::Registry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Store::Objects::Base, nil]
-      def find_namespace(registry, method_node)
-        Store::Query::FindConstant.new(registry).find(method_node.namespace_name)
-      end
+      class ScopeBulder
+        # @return [Parsing::NodeObjects::MethodDefinition, Parsing::NodeObjects::Namespace]
+        attr_reader :scope
 
-      # @param registry  [Store::Registry]
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Model::FunctionSignatures::Base, nil]
-      def find_method(registry, method_node)
-        namespace = find_namespace(registry, method_node)
-        namespace && Store::Query::FindSignature.new(registry).select(namespace, method_node.name.to_s).first
-      end
+        # @return [Store::Registry]
+        attr_reader :registry
 
-      # @param method_node [Parsing::NodeObjects::MethodDefinition]
-      # @return [Array<Path>]
-      def lexical_scope(method_node)
-        method_node.namespace.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
+        # @param registry [Store::Registry]
+        # @param scope    [Parsing::NodeObjects::MethodDefinition, Parsing::NodeObjects::Namespace]
+        def initialize(registry, scope)
+          @registry = registry
+          @scope = scope
+        end
+
+        # @return [AST::Node]
+        def body_node
+          scope.body
+        end
+
+        # @return [Typing::Evaluator]
+        def create_evaluator
+          Typing::Evaluator.new(create_evaluation_context(registry, scope))
+        end
+
+        # @return [Typing::Context]
+        def create_evaluation_context
+          fail RuntimeError, "The namespace #{scope.namespace_name} (#{scope}) is not registered" unless namespace
+          Typing::Context.new(registry, namespace, lexical_scope, create_evaluation_env)
+        end
+
+        # @return [Typing::Environment]
+        def create_evaluation_env
+          if signature
+            method_object.parameters.parameter_names.each_with_object(Typing::Environment.new) { |name, env| env.bind(name.gsub(/:\Z/, ''), method_object.parameter_type_of(name)) }
+          else
+            Typing::Environment.new
+          end
+        end
+
+        private
+
+        # @return [Model::FunctionSignatures::Base, nil]
+        def signature
+          @signature ||= namespace && scope.is_a?(Parsing::NodeObjects::MethodDefinition) && Store::Query::FindSignature.new(registry).select(namespace, scope.name.to_s).first
+        end
+
+        # @return [Array<Path>]
+        def lexical_scope
+          @lexical_scope ||= namespace_scope.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
+        end
+
+        # @return [Store::Objects::Base, nil]
+        def namespace
+          @namespace ||= Store::Query::FindConstant.new(registry).find(namespace_scope.full_name)
+        end
+
+        # @return [Parsing::NodeObjects::Namespace]
+        def namespace_scope
+          scope.is_a?(Parsing::NodeObjects::MethodDefinition) ? scope.namespace : scope
+        end
       end
     end
   end
