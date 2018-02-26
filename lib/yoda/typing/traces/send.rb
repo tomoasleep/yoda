@@ -3,9 +3,14 @@ module Yoda
     module Traces
       # Store evaluation result for each ast node.
       class Send < Base
-        attr_reader :context, :functions
+        # @return [Context]
+        attr_reader :context
+
+        # @return [Array<Model::FunctionSignatures::Base>]
+        attr_reader :functions
+
         # @param context [Context]
-        # @param functions [Array<Store::Objects::MethodObject>]
+        # @param functions [Array<Model::FunctionSignatures::Base>]
         def initialize(context, functions)
           @context = context
           @functions = functions
