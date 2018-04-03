@@ -1,8 +1,6 @@
 module Yoda
   module Evaluation
     class SignatureDiscovery
-      include NodeEvaluatable
-
       # @return [Store::Registry]
       attr_reader :registry
 
@@ -32,7 +30,11 @@ module Yoda
 
       # @return [Array<Parsing::NodeObjects::SendNode>]
       def send_nodes_to_current_location
-        @send_nodes_to_current_location ||= analyzer.nodes_to_current_location_from_root.map { |node| node.type == :send ? Parsing::NodeObjects::SendNode.new(node) : nil }.compact
+        @send_nodes_to_current_location ||= begin
+          analyzer.nodes_to_current_location_from_root.map do |node|
+            node.type == :send ? Parsing::NodeObjects::SendNode.new(node) : nil
+          end.compact
+        end
       end
 
       # @return [String, nil]
@@ -42,11 +44,12 @@ module Yoda
 
       # @return [Model::Types::Base]
       def receiver_type
-        @receiver_type ||=
-        if nearest_send_node
-          analyzer.calculate_type(nearest_send_node.receiver_node)
-        else
-          Model::Types::InstanceType.new(analyzer.namespace_object.path)
+        @receiver_type ||= begin
+          if nearest_send_node
+            evaluator.calculate_type(nearest_send_node.receiver_node)
+          else
+            Model::Types::InstanceType.new(analyzer.namespace_object.path)
+          end
         end
       end
 
@@ -54,7 +57,7 @@ module Yoda
       def method_candidates
         return [] unless valid?
         receiver_values
-          .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(nearest_send_node)) }
+          .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/) }
           .flatten
       end
 
@@ -63,17 +66,17 @@ module Yoda
       # @return [Array<Store::Values::Base>]
       def receiver_values
         return [] unless valid?
-        @receiver_values ||= self.calculate_values(nearest_send_node.receiver_node, registry, current_method)
-      end
-
-      # @return [Parsing::NodeObjects::MethodDefition, nil]
-      def current_method
-        analyzer.current_method
+        @receiver_values ||= evaluator.calculate_values(nearest_send_node.receiver_node)
       end
 
       # @return [SourceAnalyzer]
       def analyzer
         @analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
+      end
+
+      # @return [Evaluator]
+      def evaluator
+        @evaluator ||= Evaluator.from_ast(registry, analyzer.ast, location)
       end
     end
   end

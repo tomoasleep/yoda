@@ -1,8 +1,6 @@
 module Yoda
   module Evaluation
     class MethodCompletion
-      include NodeEvaluatable
-
       # @return [Store::Registry]
       attr_reader :registry
 
@@ -23,7 +21,7 @@ module Yoda
 
       # @return [true, false]
       def valid?
-        !!(current_method && current_send)
+        !!(current_send)
       end
 
       # @return [Array<Store::Objects::Method>]
@@ -44,20 +42,26 @@ module Yoda
 
       private
 
+      # @param send_node [Parsing::NodeObjects::SendNode]
+      # @return [Array<Symbol>]
+      def method_visibility_of_send_node(send_node)
+        if send_node.receiver_node
+          %i(public)
+        else
+          %i(public private protected)
+        end
+      end
+
       # @return [Array<Store::Objects::Base>]
       def receiver_values
         @receiver_values ||= begin
           if current_receiver_node
-            calculate_values(current_receiver_node, registry, current_method)
+            evaluator.calculate_values(current_receiver_node)
           else
-            [find_context_object(registry, current_method)].compact
+            # implicit call for self
+            [evaluator.scope_constant]
           end
         end
-      end
-
-      # @return [Parsing::NodeObjects::MethodDefition, nil]
-      def current_method
-        analyzer.current_method
       end
 
       # @return [Parsing::NodeObjects::SendNode, nil]
@@ -83,6 +87,11 @@ module Yoda
       def index_word
         return nil unless valid?
         @index_word ||= current_send.on_selector?(location) ? current_send.selector_name.slice(0..current_send.offset_in_selector(location)) : ''
+      end
+
+      # @return [Evaluator]
+      def evaluator
+        @evaluator ||= Evaluator.from_ast(registry, analyzer.ast, location)
       end
     end
   end
