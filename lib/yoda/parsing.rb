@@ -7,6 +7,7 @@ module Yoda
     require 'yoda/parsing/method_analyzer'
     require 'yoda/parsing/node_objects'
     require 'yoda/parsing/location'
+    require 'yoda/parsing/scopes'
     require 'yoda/parsing/source_cutter'
     require 'yoda/parsing/range'
     require 'yoda/parsing/query'

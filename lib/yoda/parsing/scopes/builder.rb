@@ -6,61 +6,52 @@ module Yoda
         attr_reader :node
 
         # @param node [AST::Node]
-        def initailize(node)
+        def initialize(node)
           @node = node
-          @root_scope = Root.new
+          @root_scope = Root.new(node)
+        end
+
+        # @return [Scope]
+        def root_scope
+          unless @did_build
+            @did_build = true
+            build(node, @root_scope)
+          end
+          @root_scope
         end
 
         # @param node [AST::Node]
         # @param scope [Base]
+        # @return [void]
         def build(node, scope)
+          return if !node || !node.is_a?(AST::Node)
           case node.type
-          when :lvasgn, :ivasgn, :cvasgn, :gvasgn
-            evaluate_bind(node.children[0], process(node.children[1]))
-          when :casgn
-            # TODO
-            process(node.children.last)
-          when :masgn
-            # TODO
-            process(node.children.last)
-          when :op_asgn, :or_asgn, :and_asgn
-            # TODO
-            process(node.children.last)
-          when :and, :or, :not
-            node.children.reduce(unknown_type) { |_type, node| process(node) }
-          when :if
-            evaluate_branch_nodes(node.children.slice(1..2).compact)
-          when :while, :until, :while_post, :until_post
-            # TODO
-            process(node.children[1])
-          when :for
-            # TODO
-            process(node.children[2])
-          when :case
-            evaluate_case_node(node)
-          when :super, :zsuper, :yield
-            # TODO
-            type_for_sexp_type(node.type)
-          when :return, :break, :next
-            # TODO
-            node.children[0] ? process(node.children[0]) : Model::Types::ValueType.new('nil')
-          when :resbody
-            # TODO
-            process(node.children[2])
-          when :csend, :send
-            evaluate_send_node(node)
-          when :block
-            evaluate_block_node(node)
-          when :const
-            const_node = Parsing::NodeObjects::ConstNode.new(node)
-            Model::Types::ModuleType.new(context.create_path(const_node.to_s))
-          when :lvar, :cvar, :ivar, :gvar
-            env.resolve(node.children.first) || unknown_type
+          when :def
+            mscope = MethodDefinition.new(node, scope)
+            scope.method_definitions << mscope
+            mscope.body_nodes.each { |node| build(node, mscope)}
+          when :defs
+            mscope = SingletonMethodDefinition.new(node, scope)
+            scope.method_definitions << mscope
+            mscope.body_nodes.each { |node| build(node, mscope)}
+          when :class
+            cscope = ClassDefinition.new(node, scope)
+            scope.child_scopes << cscope
+            cscope.body_nodes.each { |node| build(node, cscope)}
+          when :sclass
+            cscope = SingletonClassDefinition.new(node, scope)
+            scope.child_scopes << cscope
+            cscope.body_nodes.each { |node| build(node, cscope)}
+          when :module
+            mscope = ModuleDefinition.new(node, scope)
+            scope.child_scopes << mscope
+            mscope.body_nodes.each { |node| build(node, mscope)}
           when :begin, :kwbegin, :block
-            node.children.reduce(unknown_type) { |_type, node| process(node) }
-          when :dstr, :dsym, :xstr
-            node.children.map { |node| process(node) }
-            type_for_sexp_type(node.type)
+            node.children.each { |node| build(node, scope) }
+          else
+            if node.respond_to?(:children)
+              node.children.map { |node| build(node, scope) }
+            end
           end
         end
       end
