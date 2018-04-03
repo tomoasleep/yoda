@@ -7,15 +7,9 @@ module Yoda
         def find(path)
           lexical_scope_paths = lexical_scopes_of(path)
           base_name, *constant_names = path_of(path).split
-
           base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
-          constant_names.reduce(base_namespace) do |scope, name|
-            if scope
-              select_constants_from_ancestors(scope, name).first
-            else
-              return nil
-            end
-          end
+
+          find_constant(constant_names.join('::'), base_namespace)
         end
 
         # @param path [String, Model::Path, Model::ScopedPath]
@@ -28,26 +22,23 @@ module Yoda
             select_base_namespace(/\A#{Regexp.escape(base_name || '')}/, lexical_scope_paths).to_a
           else
             base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
-            scope = constant_names.reduce(base_namespace) do |scope, name|
-              if scope
-                select_constants_from_ancestors(scope, name).first
-              else
-                return []
-              end
-            end
+            scope = find_constant(constant_names.join('::'), base_namespace)
+            return [] unless scope
             select_constants_from_ancestors(scope, /\A#{bottom_name}/).to_a
           end
         end
 
         private
 
-        # @param base_name [String, Regexp]
+        # Find namespaces which matches with the lexical scopes and the unnested constant name.
+        #
+        # @param base_name [String, Regexp] is an unnested constant name or a pattern of unnested constant name.
         # @param lexical_scope_paths [Array<String>]
         # @return [Enumerator<Objects::Base>]
         def select_base_namespace(base_name, lexical_scope_paths)
           Enumerator.new do |yielder|
             lexical_scope_paths.each do |path|
-              scope = registry.find(path.to_s)
+              scope = find_constant(path.to_s)
               next if !scope || !scope.is_a?(Objects::NamespaceObject)
               select_child_constants(scope, base_name).each do |obj|
                 yielder << obj
@@ -55,10 +46,25 @@ module Yoda
             end
 
             nearest_scope_path = lexical_scope_paths.first
-            if nearest_scope_path && nearest_scope = registry.find(nearest_scope_path) && nearest_scope.is_a?(Objects::NamespaceObject)
+            if nearest_scope_path && nearest_scope = find_constant(nearest_scope_path) && nearest_scope.is_a?(Objects::NamespaceObject)
               select_constants_from_ancestors(nearest_scope, base_name).each do |obj|
                 yielder << obj
               end
+            end
+          end
+        end
+
+        # @param name [String, Model::Path]
+        # @param namespace [Objects::Base, nil]
+        # @return [Objects::Base, nil]
+        def find_constant(name, namespace = nil)
+          constant_names = path_of(name).split
+          namespace = registry.find('Object') unless namespace
+          constant_names.reduce(namespace) do |namespace, name|
+            if namespace
+              select_constants_from_ancestors(namespace, name).first
+            else
+              return nil
             end
           end
         end
