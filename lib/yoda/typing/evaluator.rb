@@ -8,7 +8,6 @@ module Yoda
       # @param context [Context]
       def initialize(context)
         @context = context
-        @traces = {}
       end
 
       # @param node [::AST::Node]
@@ -18,9 +17,15 @@ module Yoda
       end
 
       # @param node  [::AST::Node]
+      # @param trace [Trace::Base]
+      def bind_trace(node, trace)
+        context.bind_trace(node, trace)
+      end
+
+      # @param node  [::AST::Node]
       # @return [Trace::Base, nil]
       def find_trace(node)
-        @traces[node]
+        context.find_trace(node)
       end
 
       private
@@ -68,7 +73,11 @@ module Yoda
           evaluate_block_node(node)
         when :const
           const_node = Parsing::NodeObjects::ConstNode.new(node)
-          Model::Types::ModuleType.new(context.create_path(const_node.to_s))
+          if const = context.lexical_scope.find_constant(context.registry, const_node.to_s)
+            Model::Types::ModuleType.new(const.path)
+          else
+            unknown_type
+          end
         when :lvar, :cvar, :ivar, :gvar
           env.resolve(node.children.first) || unknown_type
         when :begin, :kwbegin, :block
@@ -76,6 +85,10 @@ module Yoda
         when :dstr, :dsym, :xstr
           node.children.map { |node| process(node) }
           type_for_sexp_type(node.type)
+        when :def
+          evaluate_method_definition(node)
+        when :defs
+          evaluate_smethod_definition(node)
         else
           type_for_sexp_type(node.type)
         end
@@ -163,18 +176,33 @@ module Yoda
         end
       end
 
+      # @param node [::AST::Node]
+      # @return [Model::Types::Base]
+      def evaluate_method_definition(node)
+        new_caller_object = context.lexical_scope.namespace
+        method_object = Store::Query::FindSignature.new(context.registry).select(new_caller_object, node.children[-3].to_s).first
+        new_context = context.derive(caller_object: new_caller_object)
+        new_context.env.bind_method_parameters(method_object)
+        self.class.new(new_context).process(node.children[-1])
+      end
+
+      # @param node [::AST::Node]
+      # @return [Model::Types::Base]
+      def evaluate_smethod_definition(node)
+        type = process(node.children[-4])
+        new_caller_object = type.resolve(context.registry).first
+        method_object = Store::Query::FindSignature.new(context.registry).select(new_caller_object, node.children[-3].to_s).first
+        new_context = context.derive(caller_object: new_caller_object)
+        new_context.env.bind_method_parameters(method_object)
+        self.class.new(new_context).process(node.children[-1])
+      end
+
       def boolean_type
         Model::Types::UnionType.new(Model::Types::ValueType.new('true'), Model::Types::ValueType.new('false'))
       end
 
       def unknown_type
         Model::Types::UnknownType.new
-      end
-
-      # @param node  [::AST::Node]
-      # @param trace [Trace::Base]
-      def bind_trace(node, trace)
-        @traces[node] = trace
       end
 
       # @return [Environment]
@@ -186,9 +214,8 @@ module Yoda
       # @param env  [Environment]
       # @return [Array<Model::Values::Base>]
       def process_to_instanciate(node)
-        r = evaluate(node)
-        trace = lift(r)
-        bind_trace(node, trace)
+        type = evaluate(node)
+        bind_trace(node, Traces::Normal.new(context, type)) unless find_trace(node)
         trace.values
       end
     end

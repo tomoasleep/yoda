@@ -9,31 +9,66 @@ module Yoda
       # @return [Store::Objects::Base]
       attr_reader :caller_object
 
-      # @return [Array<Path>]
-      attr_reader :lexical_scopes
+      # @return [LexicalScope]
+      attr_reader :lexical_scope
 
       # @return [Environment]
       attr_reader :env
 
+      # @return [TraceStore]
+      attr_reader :trace_store
+
       # @param registry       [Store::Registry]
       # @param caller_object  [Store::Objects::Base] represents who is the evaluator of the code.
-      # @param lexical_scopes [Array<Path>] represents where the code presents.
-      def initialize(registry, caller_object, lexical_scopes, env = Environment.new)
+      # @param lexical_scope [Array<Path>] represents where the code presents.
+      def initialize(registry:, caller_object:, lexical_scope:, env: Environment.new, parent: nil, trace_store: TraceStore.new)
         fail ArgumentError, registry unless registry.is_a?(Store::Registry)
         fail ArgumentError, caller_object unless caller_object.is_a?(Store::Objects::Base)
-        fail ArgumentError, lexical_scopes unless lexical_scopes.is_a?(Array)
+        fail ArgumentError, lexical_scope unless lexical_scope.is_a?(LexicalScope)
 
         @registry = registry
         @caller_object = caller_object
-        @lexical_scopes = lexical_scopes
+        @lexical_scope = lexical_scope
         @env = env
+        @trace_store = trace_store
       end
 
-      # @param constant_name [String]
-      # @return [Model::ScopedPath]
-      def create_path(constant_name)
-        # TODO
-        Model::ScopedPath.new(lexical_scopes, constant_name)
+      # @param registry       [Store::Registry]
+      # @param caller_object  [Store::Objects::Base] represents who is the evaluator of the code.
+      # @param lexical_scope [Array<Path>] represents where the code presents.
+      # @return [self]
+      def derive(caller_object: self.caller_object, lexical_scope: self.lexical_scope)
+        self.class.new(registry: registry, caller_object: caller_object, lexical_scope: lexical_scope, parent: self, trace_store: trace_store)
+      end
+
+      # @param node  [::AST::Node]
+      # @return [Trace::Base, nil]
+      def find_trace(node)
+        trace_store.find_trace(node)
+      end
+
+      # @param node  [::AST::Node]
+      # @param trace [Trace::Base]
+      def bind_trace(node, trace)
+        trace_store.bind_trace(node, trace)
+      end
+
+      class TraceStore
+        def initialize
+          @traces = {}
+        end
+
+        # @param node  [::AST::Node]
+        # @return [Trace::Base, nil]
+        def find_trace(node)
+          @traces[node]
+        end
+
+        # @param node  [::AST::Node]
+        # @param trace [Trace::Base]
+        def bind_trace(node, trace)
+          @traces[node] = trace
+        end
       end
     end
   end

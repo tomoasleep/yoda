@@ -16,7 +16,8 @@ RSpec.describe Yoda::Typing::Evaluator do
 
   let(:instance_methods) { [] }
 
-  let(:context) { Yoda::Typing::Context.new(registry, root, ['Object']) }
+  let(:lexical_scope) { Yoda::Typing::LexicalScope.new(root, ['Object']) }
+  let(:context) { Yoda::Typing::Context.new(registry: registry, caller_object: root, lexical_scope: lexical_scope) }
   let(:evaluator) { described_class.new(context) }
 
   shared_context 'define a method to root' do

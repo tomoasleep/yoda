@@ -5,5 +5,6 @@ module Yoda
     require 'yoda/typing/evaluator'
     require 'yoda/typing/relation'
     require 'yoda/typing/traces'
+    require 'yoda/typing/lexical_scope'
   end
 end
