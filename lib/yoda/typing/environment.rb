@@ -21,6 +21,15 @@ module Yoda
         @binds[key] = type
         self
       end
+
+      # @param signature [Model::FunctionSignatures::Base]
+      # @return [self]
+      def bind_method_parameters(signature)
+        parameter_names = signature.parameters.parameter_names
+        parameter_names.each do |name|
+          bind(name.gsub(/:\Z/, ''), signature.parameter_type_of(name))
+        end
+      end
     end
   end
 end

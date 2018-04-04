@@ -36,7 +36,7 @@ module Yoda
 
         # @param tag [Parslet::Slice, nil]
         # @param tokens [Array<Parslet::Slice>]
-        def initialize(tag: nil, tokens: tokens)
+        def initialize(tag: nil, tokens: [])
           fail ArgumentError, tag if tag && !tag.is_a?(Parslet::Slice)
           fail ArgumentError, tokens unless tokens.all? { |token| token.is_a?(Parslet::Slice) }
 

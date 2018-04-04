@@ -3,7 +3,12 @@ module Yoda
     module NodeObjects
       class Namespace
         include AstTraversable
-        attr_reader :node, :parent
+
+        # @return [::Parser::AST::Node]
+        attr_reader :node
+
+        # @return [Namespace, nil]
+        attr_reader :parent
 
         # @param node [::Parser::AST::Node]
         # @param parent [Namespace, nil]

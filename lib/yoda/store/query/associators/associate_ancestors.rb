@@ -87,7 +87,7 @@ module Yoda
             # @return [Enumerator<Objects::NamespaceObject>]
             def find_metaclass_superclass_ancestors(obj)
               base_class = registry.find(obj.base_class_address)
-              if base_class && base_class.superclass_path
+              if base_class && base_class.is_a?(Objects::ClassObject) && base_class.superclass_path
                 (meta_class = FindMetaClass.new(registry).find(base_class.superclass_path || 'Object')) ? process(meta_class) : []
               elsif base_class
                 (class_object = registry.find('Class')) ? process(class_object) : []

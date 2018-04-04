@@ -1,8 +1,6 @@
 module Yoda
   module Evaluation
     class CurrentNodeExplain
-      include NodeEvaluatable
-
       # @return [Store::Registry]
       attr_reader :registry
 
@@ -29,7 +27,7 @@ module Yoda
 
       # @return [true, false]
       def valid?
-        !!(current_method && current_node)
+        !!(current_node)
       end
 
       # @return [Array<(String, Integer, Integer)>]
@@ -50,12 +48,7 @@ module Yoda
       # @return [Typing::Traces::Base, nil]
       def current_node_trace
         return nil unless valid?
-        @current_node_trace ||= calculate_trace(current_node, registry, current_method)
-      end
-
-      # @return [SourceAnalyzer]
-      def analyzer
-        @analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
+        @current_node_trace ||= evaluator.calculate_trace(current_node)
       end
 
       # @return [Parser::AST::Node]
@@ -63,9 +56,14 @@ module Yoda
         analyzer.nodes_to_current_location_from_root.last
       end
 
-      # @return [Parsing::NodeObjects::MethodDefition, nil]
-      def current_method
-        analyzer.current_method
+      # @return [Evaluator]
+      def evaluator
+        @evaluator ||= Evaluator.from_ast(registry, analyzer.ast, location)
+      end
+
+      # @return [SourceAnalyzer]
+      def analyzer
+        @analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
       end
     end
   end

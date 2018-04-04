@@ -77,11 +77,6 @@ module Yoda
           )
         end
 
-        # @return [Model::FunctionSignatures::Formatter]
-        def signatures
-          @signatures ||= Model::FunctionSignatures.build(self)
-        end
-
         private
 
         # @param another [self]

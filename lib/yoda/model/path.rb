@@ -11,6 +11,7 @@ module Yoda
 
       # @param name [String]
       def initialize(name)
+        fail ArgumentError, name unless name.is_a?(String)
         @name = name
       end
 
