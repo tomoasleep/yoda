@@ -193,7 +193,9 @@ module Yoda
         new_caller_object = type.resolve(context.registry).first
         method_object = Store::Query::FindSignature.new(context.registry).select(new_caller_object, node.children[-3].to_s).first
         new_context = context.derive(caller_object: new_caller_object)
-        new_context.env.bind_method_parameters(method_object)
+        if method_object
+          new_context.env.bind_method_parameters(method_object)
+        end
         self.class.new(new_context).process(node.children[-1])
       end
 
