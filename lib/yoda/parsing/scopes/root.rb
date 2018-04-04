@@ -7,6 +7,10 @@ module Yoda
           [node.children.last]
         end
 
+        def body_node
+          body_nodes.first
+        end
+
         def kind
           :root
         end
