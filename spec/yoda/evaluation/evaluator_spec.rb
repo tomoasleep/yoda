@@ -40,5 +40,19 @@ RSpec.describe Yoda::Evaluation::Evaluator do
         )
       end
     end
+
+    context 'when in a block' do
+      context 'and on a constant node' do
+        let(:path) { 'lib/dsl.rb' }
+        let(:location) { Yoda::Parsing::Location.new(row: 9, column: 10) }
+
+        it 'returns evaluation result of send node' do
+          expect(subject).to be_a(Yoda::Typing::Traces::Base)
+          expect(subject).to have_attributes(
+            type: Yoda::Model::Types::ModuleType.new('YodaFixture'),
+          )
+        end
+      end
+    end
   end
 end
