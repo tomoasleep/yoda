@@ -61,13 +61,34 @@ module Yoda
         # @param node  [::AST::Node]
         # @return [Trace::Base, nil]
         def find_trace(node)
-          @traces[node]
+          @traces[node.is_a?(::Parser::AST::Node) ? ParserNodeWrapper.new(node) : node]
         end
 
         # @param node  [::AST::Node]
         # @param trace [Trace::Base]
         def bind_trace(node, trace)
-          @traces[node] = trace
+          @traces[node.is_a?(::Parser::AST::Node) ? ParserNodeWrapper.new(node) : node] = trace
+        end
+
+        class ParserNodeWrapper
+          # @return [::Parser::AST::Node]
+          attr_reader :node
+
+          # @param node [::Parser::AST::Node]
+          def initialize(node)
+            @node = node
+          end
+
+          # @param another [Object]
+          def eql?(another)
+            another.is_a?(ParserNodeWrapper) &&
+              node == another.node &&
+              node.location == another.node.location
+          end
+
+          def hash
+            [node, node.location].hash
+          end
         end
       end
     end
