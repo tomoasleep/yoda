@@ -46,11 +46,52 @@ RSpec.describe Yoda::Evaluation::Evaluator do
         let(:path) { 'lib/dsl.rb' }
         let(:location) { Yoda::Parsing::Location.new(row: 9, column: 10) }
 
-        it 'returns evaluation result of send node' do
+        it 'contains constant type' do
           expect(subject).to be_a(Yoda::Typing::Traces::Base)
           expect(subject).to have_attributes(
             type: Yoda::Model::Types::ModuleType.new('YodaFixture'),
           )
+        end
+      end
+    end
+
+    context 'when in a class definition' do
+      let(:path) { 'lib/evaluator_spec_fixture.rb' }
+
+      context 'and on a symbol node' do
+        let(:location) { Yoda::Parsing::Location.new(row: 4, column: 20) }
+
+        it 'contains symbol type' do
+          expect(subject).to be_a(Yoda::Typing::Traces::Base)
+          expect(subject).to have_attributes(
+            type: Yoda::Model::Types::InstanceType.new('::Symbol'),
+          )
+        end
+      end
+
+      context 'and in a singleton method definition' do
+        context 'and on a self node' do
+          let(:location) { Yoda::Parsing::Location.new(row: 31, column: 9) }
+
+          it 'contains type of self' do
+            expect(subject).to be_a(Yoda::Typing::Traces::Base)
+            expect(subject).to have_attributes(
+              type: Yoda::Model::Types::ModuleType.new('YodaFixture::EvaluatorSpecFixture'),
+            )
+          end
+        end
+
+        context 'and on a variable node' do
+          let(:location) { Yoda::Parsing::Location.new(row: 31, column: 20) }
+
+          it 'contains type of the variable' do
+            expect(subject).to be_a(Yoda::Typing::Traces::Base)
+            expect(subject).to have_attributes(
+              type: Yoda::Model::Types::InstanceType.new(
+                Yoda::Model::ScopedPath.new(['YodaFixture::EvaluatorSpecFixture', 'YodaFixture', 'Object'], 'String'),
+              ),
+            )
+          end
         end
       end
     end
