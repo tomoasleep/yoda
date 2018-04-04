@@ -15,7 +15,7 @@ GEM
   specs:
     ast (2.4.0)
     benchmark-perf (0.2.1)
-    binding_of_caller (0.7.3)
+    binding_of_caller (0.8.0)
       debug_inspector (>= 0.0.1)
     coderay (1.1.2)
     debug_inspector (0.0.3)
@@ -27,7 +27,7 @@ GEM
       fiddler-rb (~> 0.1.1)
     lmdb (0.4.8)
     method_source (0.9.0)
-    parser (2.5.0.0)
+    parser (2.5.0.5)
       ast (~> 2.4.0)
     parslet (1.8.2)
     pry (0.11.3)
@@ -47,7 +47,7 @@ GEM
     rspec-benchmark (0.3.0)
       benchmark-perf (~> 0.2.0)
       rspec (>= 3.0.0, < 4.0.0)
-    rspec-core (3.7.0)
+    rspec-core (3.7.1)
       rspec-support (~> 3.7.0)
     rspec-expectations (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
@@ -55,9 +55,9 @@ GEM
     rspec-mocks (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
-    rspec-support (3.7.0)
+    rspec-support (3.7.1)
     ruby-progressbar (1.9.0)
-    stackprof (0.2.10)
+    stackprof (0.2.11)
     yard (0.9.12)
 
 PLATFORMS
@@ -75,4 +75,4 @@ DEPENDENCIES
   yoda!
 
 BUNDLED WITH
-   1.16.0
+   1.16.1
