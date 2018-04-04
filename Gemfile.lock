@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    yoda (0.1.0)
+    yoda (0.2.0)
       language_server-protocol (~> 0.5)
       leveldb (~> 0.1.9)
       lmdb (~> 0.4.8)
