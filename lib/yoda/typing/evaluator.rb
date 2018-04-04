@@ -166,7 +166,7 @@ module Yoda
         when :defined
           boolean_type
         when :self
-          Model::Types::InstanceType.new(context.caller_object.path)
+          type_of_class(context.caller_object)
         when :true, :false, :nil
           Model::Types::ValueType.new(sexp_type.to_s)
         when :int, :float, :complex, :rational
@@ -197,6 +197,19 @@ module Yoda
           new_context.env.bind_method_parameters(method_object)
         end
         self.class.new(new_context).process(node.children[-1])
+      end
+
+      # @param object [Store::Objects::Base]
+      # @return [Model::Types::Base]
+      def type_of_class(object)
+        case object
+        when Store::Objects::ClassObject, Store::Objects::ModuleObject
+          Model::Types::InstanceType.new(object.path)
+        when Store::Objects::MetaClassObject
+          Model::Types::ModuleType.new(object.path)
+        else
+          Model::Types::UnknownType.new
+        end
       end
 
       def boolean_type
