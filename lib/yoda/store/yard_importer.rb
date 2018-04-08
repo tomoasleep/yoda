@@ -10,11 +10,12 @@ module Yoda
       attr_reader :root_path
 
       # @param file [String]
+      # @param root_path [String, nil]
       # @return [Objects::Patch]
-      def self.import(file)
+      def self.import(file, root_path: nil)
         store = YARD::RegistryStore.new
         store.load(file)
-        root_path = File.expand_path('..', file)
+        root_path ||= File.expand_path('..', file)
         new(file, root_path: root_path).import(store.values).patch
       end
 

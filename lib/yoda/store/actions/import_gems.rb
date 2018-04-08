@@ -5,19 +5,24 @@ module Yoda
         # @return [Registry]
         attr_reader :registry
 
-        # @return [Array<Bundler::Gem::Specification>]
+        # @return [Array<Bundler::LazySpecification>]
         attr_reader :gem_specs
 
+        # @param registry [Registry]
+        # @param gem_specs [Array<Bundler::LazySpecification>]
         def initialize(registry, gem_specs)
           @registry = registry
           @gem_specs = gem_specs
         end
 
+        # @return [void]
         def run
           create_dependency_docs
-          yardoc_files_of_dependencies.map do |yardoc_file|
-            if patch = load_yardoc(yardoc_file)
-              registry.add_patch(patch)
+          gem_specs.map do |gem|
+            if yardoc_file = yardoc_file_for_gem(gem)
+              if patch = load_yardoc(yardoc_file, gem_path_for(gem))
+                registry.add_patch(patch)
+              end
             end
           end
         end
@@ -40,22 +45,35 @@ module Yoda
           end
         end
 
-        def yardoc_files_of_dependencies
-          gem_specs.map { |gem| YARD::Registry.yardoc_file_for_gem(gem.name, gem.version) }.compact
+        # @param gem [Bundler::LazySpecification]
+        # @return [String, nil]
+        def yardoc_file_for_gem(gem)
+          YARD::Registry.yardoc_file_for_gem(gem.name, gem.version)
         rescue Bundler::BundlerError => ex
           STDERR.puts ex
           STDERR.puts ex.backtrace
-          []
+          nil
         end
 
-        def load_yardoc(yardoc_file)
+        # @param yardoc_file [String]
+        # @param gem_source_path [String]
+        # @return [Objects::Patch, nil]
+        def load_yardoc(yardoc_file, gem_source_path)
           begin
-            YardImporter.import(yardoc_file)
+            YardImporter.import(yardoc_file, root_path: gem_source_path)
           rescue => ex
             STDERR.puts ex
             STDERR.puts ex.backtrace
             STDERR.puts "Failed to load #{yardoc_file}"
             nil
+          end
+        end
+
+        # @param gem [Bundler::LazySpecification]
+        # @return [String, nil]
+        def gem_path_for(gem)
+          if spec = Gem.source_index.find_name(gem.name).first
+            spec.full_gem_path
           end
         end
       end
