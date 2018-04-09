@@ -45,6 +45,11 @@ module Yoda
         def to_s
           types.map(&:to_s).join(' | ')
         end
+
+        # @return [self]
+        def map(&block)
+          self.class.new(types.map(&block))
+        end
       end
     end
   end

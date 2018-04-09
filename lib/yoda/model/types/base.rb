@@ -26,6 +26,11 @@ module Yoda
         def to_s
           fail NotImplementedError
         end
+
+        # @return [Base]
+        def map
+          yield self
+        end
       end
     end
   end

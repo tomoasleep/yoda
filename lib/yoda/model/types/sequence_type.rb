@@ -23,7 +23,7 @@ module Yoda
         end
 
         def hash
-          [self.class.name, name, types].hash
+          [self.class.name, base_type, types].hash
         end
 
         # @param paths [Array<Path>]
@@ -41,6 +41,11 @@ module Yoda
         # @return [String]
         def to_s
           "#{base_type}(#{types.map(&:to_s).join(', ')})"
+        end
+
+        # @return [self]
+        def map(&block)
+          self.class.new(base_type.map(&block), types.map(&block))
         end
       end
     end

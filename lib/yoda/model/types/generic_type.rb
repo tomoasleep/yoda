@@ -55,6 +55,11 @@ module Yoda
         def to_s
           "#{base_type}<#{type_arguments.map(&:to_s).join(', ')}>"
         end
+
+        # @return [self]
+        def map(&block)
+          self.class.new(base_type.map(&block), type_arguments.map(&block))
+        end
       end
     end
   end

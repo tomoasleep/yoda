@@ -105,6 +105,22 @@ module Yoda
           (params_str.empty? ? '' : "(#{params_str}) -> ") + "#{return_type}"
         end
 
+        # @return [self]
+        def map(&block)
+          self.class.new(
+            context: context&.map(&block),
+            return_type: return_type.map(&block),
+            required_parameters: required_parameters.map { |param| param.map(&block) },
+            optional_parameters: optional_parameters.map { |param| param.map(&block) },
+            rest_parameter: rest_parameter&.map(&block),
+            post_parameters: post_parameters.map { |param| param.map(&block) },
+            required_keyword_parameters: required_keyword_parameters.map { |name, param| [name, param.map(&block)] },
+            optional_keyword_parameters: required_keyword_parameters.map { |name, param| [name, param.map(&block)] },
+            keyword_rest_parameter: keyword_rest_parameter&.map(&block),
+            block_parameter: block_parameter&.map(&block),
+          )
+        end
+
         private
 
         def all_parameters_to_s
