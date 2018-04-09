@@ -139,7 +139,7 @@ module Yoda
       def evaluate_case_node(node)
         # TODO
         subject_node, *when_nodes, else_node = node.children
-        _type = when_nodes.reduce([unknown_type]) { |(_type), node| process(node.children.last) }
+        _when_types = when_nodes.map { |node| node.children.last && process(node.children.last) }.compact
         process(else_node)
       end
 
