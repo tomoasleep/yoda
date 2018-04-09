@@ -109,12 +109,14 @@ module Yoda
           receiver_type = process(receiver_node)
           receiver_candidates = receiver_type.resolve(context.registry)
         else
+          receiver_type = type_of_class(context.caller_object)
           receiver_candidates = [context.caller_object]
         end
 
         _type = argument_nodes.reduce([unknown_type]) { |(_type), node| process(node) }
         method_candidates = receiver_candidates.map { |receiver| Store::Query::FindSignature.new(context.registry).select(receiver, method_name_sym.to_s) }.flatten
-        trace = Traces::Send.new(context, method_candidates)
+        return_type = Model::Types::UnionType.new(method_candidates.map(&:type).map(&:return_type))
+        trace = Traces::Send.new(context, method_candidates, return_type)
         bind_trace(node, trace)
         trace.type
       end

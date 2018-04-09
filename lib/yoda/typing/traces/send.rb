@@ -9,15 +9,16 @@ module Yoda
         # @return [Array<Model::FunctionSignatures::Base>]
         attr_reader :functions
 
+        # @return [Model::Types::Base]
+        attr_reader :type
+
         # @param context [Context]
         # @param functions [Array<Model::FunctionSignatures::Base>]
-        def initialize(context, functions)
+        # @param type [Array<Model::Types::Base>]
+        def initialize(context, functions, type)
           @context = context
           @functions = functions
-        end
-
-        def type
-          @type ||= Model::Types::UnionType.new(functions.map(&:type).map(&:return_type))
+          @type = type
         end
       end
     end
