@@ -1,3 +1,5 @@
+require 'open3'
+
 module Yoda
   module Store
     module Actions
@@ -31,12 +33,19 @@ module Yoda
 
         def create_dependency_docs
           gem_specs.each do |gem|
+            if yardoc_file_for_gem(gem)
+              STDERR.puts "Gem docs for #{gem.name} #{gem.version} already exist"
+              next
+            end
             STDERR.puts "Building gem docs for #{gem.name} #{gem.version}"
             begin
-              Thread.new do
-                YARD::CLI::Gems.run(gem.name, gem.version)
-              end.join
-              STDERR.puts "Done building gem docs for #{gem.name} #{gem.version}"
+              o, e = Open3.capture2e("yard gems #{gem.name} #{gem.version}")
+              STDERR.puts o unless o.empty?
+              if e.success?
+                STDERR.puts "Done building gem docs for #{gem.name} #{gem.version}"
+              else
+                STDERR.puts "Failed to build #{gem.name} #{gem.version}"
+              end
             rescue => ex
               STDERR.puts ex
               STDERR.puts ex.backtrace
