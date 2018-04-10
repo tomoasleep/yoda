@@ -89,6 +89,8 @@ module Yoda
           evaluate_method_definition(node)
         when :defs
           evaluate_smethod_definition(node)
+        when :hash
+          evaluate_hash_node(node)
         else
           type_for_sexp_type(node.type)
         end
@@ -121,6 +123,20 @@ module Yoda
         trace = Traces::Send.new(context, method_candidates, return_type)
         bind_trace(node, trace)
         trace.type
+      end
+
+      # @param node [Array<::AST::Node>]
+      # @return [Model::Types::Base]
+      def evaluate_hash_node(node)
+        node.children.each do |node|
+          case node.type
+          when :pair
+            node.children.each(&method(:process))
+          when :kwsplat
+            node.children.each(&method(:process))
+          end
+        end
+        Model::Types::InstanceType.new('::Hash')
       end
 
       # @param node [::AST::Node]
@@ -161,8 +177,6 @@ module Yoda
           Model::Types::InstanceType.new('::Symbol')
         when :array, :splat
           Model::Types::InstanceType.new('::Array')
-        when :hash
-          Model::Types::InstanceType.new('::Hash')
         when :irange, :erange
           Model::Types::InstanceType.new('::Range')
         when :regexp

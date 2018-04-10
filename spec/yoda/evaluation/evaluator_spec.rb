@@ -41,6 +41,20 @@ RSpec.describe Yoda::Evaluation::Evaluator do
           )
         end
       end
+
+      context 'and on argument of keyword parameter' do
+        let(:path) { 'lib/evaluator_spec_fixture.rb' }
+        let(:location) { Yoda::Parsing::Location.new(row: 43, column: 56) }
+
+        it 'returns evaluation result of send node' do
+          expect(subject).to be_a(Yoda::Typing::Traces::Send)
+          expect(subject).to have_attributes(
+            type: Yoda::Model::Types::InstanceType.new(
+              Yoda::Model::ScopedPath.new(['YodaFixture::EvaluatorSpecFixture', 'YodaFixture', 'Object'], 'String'),
+            ),
+          )
+        end
+      end
     end
 
     context 'when in a block' do

@@ -30,5 +30,17 @@ module YodaFixture
     def self.smethod1(param)
       self.new(param)
     end
+
+    # @param key1 [Integer]
+    # @param key2 [String]
+    # @return [Integer]
+    def method4(key1:, key2:)
+      key1 + key2.to_i
+    end
+
+    # @return [Integer]
+    def method5
+      method4(key1: method4(2, method3), key2: self.method1(content))
+    end
   end
 end
