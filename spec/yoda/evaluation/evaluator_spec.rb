@@ -15,29 +15,31 @@ RSpec.describe Yoda::Evaluation::Evaluator do
   describe '#calculate_trace' do
     subject { evaluator.calculate_trace(current_node) }
 
-    context 'request information on constant node in sample function' do
-      let(:path) { 'lib/sample2.rb' }
-      let(:location) { Yoda::Parsing::Location.new(row: 23, column: 10) }
+    context 'when in a instance method definition' do
+      context 'request information on constant node in sample function' do
+        let(:path) { 'lib/sample2.rb' }
+        let(:location) { Yoda::Parsing::Location.new(row: 23, column: 10) }
 
-      it 'returns evaluation result of constant node' do
-        expect(subject).to be_a(Yoda::Typing::Traces::Base)
-        expect(subject).to have_attributes(
-          type: Yoda::Model::Types::ModuleType.new('YodaFixture::Sample2'),
-        )
+        it 'returns evaluation result of constant node' do
+          expect(subject).to be_a(Yoda::Typing::Traces::Base)
+          expect(subject).to have_attributes(
+            type: Yoda::Model::Types::ModuleType.new('YodaFixture::Sample2'),
+          )
+        end
       end
-    end
 
-    context 'request information on send node in sample function' do
-      let(:path) { 'lib/sample2.rb' }
-      let(:location) { Yoda::Parsing::Location.new(row: 27, column: 10) }
+      context 'request information on send node in sample function' do
+        let(:path) { 'lib/sample2.rb' }
+        let(:location) { Yoda::Parsing::Location.new(row: 27, column: 10) }
 
-      it 'returns evaluation result of send node' do
-        expect(subject).to be_a(Yoda::Typing::Traces::Send)
-        expect(subject).to have_attributes(
-          type: Yoda::Model::Types::InstanceType.new(
-            Yoda::Model::ScopedPath.new(['YodaFixture::Sample2', 'YodaFixture', 'Object'], 'YodaFixture::Sample2')
-          ),
-        )
+        it 'returns evaluation result of send node' do
+          expect(subject).to be_a(Yoda::Typing::Traces::Send)
+          expect(subject).to have_attributes(
+            type: Yoda::Model::Types::InstanceType.new(
+              Yoda::Model::ScopedPath.new(['YodaFixture::Sample2', 'YodaFixture', 'Object'], 'YodaFixture::Sample2')
+            ),
+          )
+        end
       end
     end
 
