@@ -45,4 +45,18 @@ RSpec.describe Yoda::Store::Query::FindConstant do
       end
     end
   end
+
+  describe '#select_with_prefix' do
+    subject { described_class.new(registry).select_with_prefix(name) }
+
+    context 'with module name string is given' do
+      let(:name) { 'YodaFixture' }
+
+      it 'returns array which includes only the specified module' do
+        expect(subject).to all(be_a(Yoda::Store::Objects::ModuleObject))
+        expect(subject).to include(have_attributes(path: name))
+        expect(subject.length).to eq(1)
+      end
+    end
+  end
 end

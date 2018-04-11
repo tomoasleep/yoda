@@ -19,7 +19,8 @@ module Yoda
           base_name, *constant_names, bottom_name = path_of(path).split
 
           if constant_names.empty? && !bottom_name
-            select_base_namespace(/\A#{Regexp.escape(base_name || '')}/, lexical_scope_paths).to_a
+            # When the path does not contain separator (`::`)
+            select_base_namespace(/\A#{Regexp.escape(base_name || '')}/, lexical_scope_paths).to_a.uniq
           else
             base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
             scope = find_constant(constant_names.join('::'), base_namespace)
