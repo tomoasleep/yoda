@@ -49,13 +49,37 @@ RSpec.describe Yoda::Store::Query::FindConstant do
   describe '#select_with_prefix' do
     subject { described_class.new(registry).select_with_prefix(name) }
 
-    context 'with module name string is given' do
+    context 'with module name string without separetors is given' do
       let(:name) { 'YodaFixture' }
 
       it 'returns array which includes only the specified module' do
         expect(subject).to all(be_a(Yoda::Store::Objects::ModuleObject))
         expect(subject).to include(have_attributes(path: name))
         expect(subject.length).to eq(1)
+      end
+    end
+
+    context 'with partial name string with a separator is given' do
+      let(:name) { 'YodaFixture::Sam' }
+
+      it 'returns array which includes only the specified module' do
+        expect(subject).to include(
+          have_attributes(path: 'YodaFixture::Sample').and(be_a(Yoda::Store::Objects::ClassObject)),
+          have_attributes(path: 'YodaFixture::Sample2').and(be_a(Yoda::Store::Objects::ClassObject)),
+          have_attributes(path: 'YodaFixture::Sample3').and(be_a(Yoda::Store::Objects::ClassObject)),
+        )
+        expect(subject.length).to eq(3)
+      end
+    end
+
+    context 'with module name string whose suffix is separator is given' do
+      let(:name) { 'YodaFixture::' }
+
+      it 'returns constants in YodaFixture namespace' do
+        expect(subject).to include(
+          have_attributes(path: 'YodaFixture::Sample').and(be_a(Yoda::Store::Objects::ClassObject)),
+          have_attributes(path: 'YodaFixture::Sample2').and(be_a(Yoda::Store::Objects::ClassObject)),
+        )
       end
     end
   end

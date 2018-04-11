@@ -47,7 +47,7 @@ module Yoda
       end
 
       def split
-        name.gsub(/\A::/, '').split('::')
+        name.gsub(/\A::/, '').split('::') + (name.end_with?('::') ? [''] : [])
       end
 
       # @param another [Path, String]
