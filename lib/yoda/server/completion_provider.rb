@@ -46,7 +46,7 @@ module Yoda
       # @return [LanguageServerProtocol::Interface::CompletionList, nil]
       def complete_from_cut_source(source, location)
         cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
-        method_completion_worker = Evaluation::MethodCompletion.new(client_info.registry, cut_source, location)
+        method_completion_worker = Evaluation::CodeCompletion.new(client_info.registry, cut_source, location)
         functions = method_completion_worker.method_candidates
         range = method_completion_worker.substitution_range
         return nil unless range

@@ -1,6 +1,6 @@
 module Yoda
   module Evaluation
-    class MethodCompletion
+    class CodeCompletion
       # @return [Store::Registry]
       attr_reader :registry
 
