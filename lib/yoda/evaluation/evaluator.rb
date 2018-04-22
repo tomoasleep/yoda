@@ -20,7 +20,7 @@ module Yoda
       # @param location [Parsing::Location]
       # @return [Evaluator]
       def self.from_root_scope(registry, root_scope, location)
-        new(registry, root_scope.find_evaluation_root_scope(location))
+        new(registry, root_scope.find_evaluation_root_scope(location) || root_scope)
       end
 
       # @param registry [Store::Registry]

@@ -111,5 +111,14 @@ RSpec.describe Yoda::Evaluation::Evaluator do
         end
       end
     end
+
+    context 'when in a magic comment' do
+      let(:path) { 'lib/evaluator_spec_fixture2.rb' }
+      let(:location) { Yoda::Parsing::Location.new(row: 1, column: 0) }
+
+      it 'returns nothing' do
+        expect(subject).to be_falsy
+      end
+    end
   end
 end
