@@ -2,12 +2,22 @@ module Yoda
   module Parsing
     module NodeObjects
       class ConstNode
+        # @param node [::AST::Node]
         attr_reader :node
 
         # @param node [::AST::Node]
         def initialize(node)
           fail ArgumentError, node unless node.is_a?(::AST::Node) && node.type == :const
           @node = node
+        end
+
+        # @return [ConstNode, nil]
+        def parent_const
+          node.children.first && node.children.first.type == :const ? ConstNode.new(node.children.first) : nil
+        end
+
+        def basename
+          parent_const ? ConstNode.new(node.children.last).to_s : to_s
         end
 
         # @param base [String, Symbol, nil]

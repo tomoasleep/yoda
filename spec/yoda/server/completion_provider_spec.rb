@@ -103,6 +103,72 @@ RSpec.describe Yoda::Server::CompletionProvider do
       end
     end
 
+    describe 'const completion' do
+      let(:uri) { file_uri('lib/const_completion_fixture.rb') }
+
+      context 'when the cursor is in an instance method' do
+        context 'and the const node is single constant without cbase' do
+          let(:position) { { line: 9, character: 15 } }
+          let(:text_edit_range) { { start: { line: 9, character: 6 }, end: { line: 9, character: 28 } } }
+
+          it 'returns infomation including appropriate labels' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(label: 'ConstCompletionFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'and the const node is single constant with cbase which does not exist' do
+          let(:position) { { line: 10, character: 15 } }
+
+          it 'returns empty candidates' do
+            expect(subject).to be_falsy
+          end
+        end
+
+        context 'and the const node is single constant with cbase' do
+          let(:position) { { line: 11, character: 15 } }
+          let(:text_edit_range) { { start: { line: 11, character: 8 }, end: { line: 11, character: 19 } } }
+
+          it 'returns infomation including appropriate labels' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(label: 'YodaFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'and the const node is single constant with cbase' do
+          let(:position) { { line: 12, character: 30 } }
+          let(:text_edit_range) { { start: { line: 12, character: 19 }, end: { line: 12, character: 41 } } }
+
+          it 'returns infomation including appropriate labels' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to include(
+              have_attributes(label: 'ConstCompletionFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+
+        context 'and there are constants with the common prefix of the const name but in different namespace' do
+          let(:position) { { line: 13, character: 23 } }
+          let(:text_edit_range) { { start: { line: 13, character: 19 }, end: { line: 13, character: 34 } } }
+
+          it 'returns candidates of constants without ones in different namespace' do
+            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject.is_incomplete).to be_falsy
+            expect(subject.items).to contain_exactly(
+              have_attributes(label: 'YodaInnerModule', text_edit: have_attributes(range: have_attributes(text_edit_range))),
+            )
+          end
+        end
+      end
+    end
+
     describe 'comment completion' do
       describe 'tag completion' do
         context 'request on a sample function' do
