@@ -7,5 +7,6 @@ module Yoda
     require 'yoda/model/scoped_path'
     require 'yoda/model/types'
     require 'yoda/model/values'
+    require 'yoda/model/completion_item'
   end
 end
