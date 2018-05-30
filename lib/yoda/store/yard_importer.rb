@@ -58,12 +58,13 @@ module Yoda
           when :constant
             convert_constant_object(code_object)
           when :proxy
-            nil
+            create_proxy_module(code_object)
           else
             fail ArgumentError, 'Unsupported type code object'
           end
         end
 
+        register_to_parent_proxy(code_object) if code_object.parent && code_object.parent.type == :proxy
         [new_objects].flatten.compact.each { |new_object| patch.register(new_object) }
       end
 
@@ -213,6 +214,39 @@ module Yoda
         else
           type
         end
+      end
+
+      # @param code_object [::YARD::CodeObjects::Proxy]
+      # @return [Array<Objects::ModuleObject>]
+      def create_proxy_module(code_object)
+        module_object = Objects::ModuleObject.new(
+          path: code_object.path,
+          document: '',
+          tag_list: [],
+          sources: [],
+          primary_source: nil,
+          instance_method_addresses: [],
+          mixin_addresses: [],
+          constant_addresses: [],
+        )
+
+        meta_class_object = Objects::MetaClassObject.new(
+          path: code_object.path,
+          sources: [],
+          primary_source: nil,
+          instance_method_addresses: [],
+          mixin_addresses: [],
+        )
+
+        [module_object, meta_class_object]
+      end
+
+      # @param code_object [::YARD::CodeObjects::Base]
+      # @return [vaid]
+      def register_to_parent_proxy(code_object)
+        proxy_module = patch.find(code_object.parent.path)
+        proxy_module.instance_method_addresses.push(code_object.path) if code_object.type == :method
+        proxy_module.constant_addresses.push(code_object.path) if [:class, :module, :proxy].include?(code_object.type)
       end
 
       # @param source [(String, Integer)]
