@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.xdescribe Yoda::Evaluation::MethodCompletion do
+RSpec.xdescribe Yoda::Evaluation::CodeCompletion do
   include TypeHelper
 
   let(:registry) { Yoda::Store::Registry.instance }

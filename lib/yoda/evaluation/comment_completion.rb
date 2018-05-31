@@ -29,8 +29,15 @@ module Yoda
         !!(current_comment_query.current_comment && current_comment_token_query.current_word)
       end
 
-      # @return [Array<Model::Descriptions::Base>]
+      # @return [Array<Model::CompletionItem>]
       def candidates
+        description_candidates.map { |description| Model::CompletionItem.new(description: description, range: substitution_range) }
+      end
+
+      private
+
+      # @return [Array<Model::Descriptions::Base>]
+      def description_candidates
         return [] unless valid?
         case current_comment_token_query.current_state
         when :tag
@@ -68,8 +75,6 @@ module Yoda
           )
         end
       end
-
-      private
 
       def param_candidates
         []
