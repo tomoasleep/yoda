@@ -3,9 +3,15 @@ module Yoda
     class Location
       include Comparable
 
-      attr_reader :row, :column
-      # @param row    [Integer]
-      # @param column [Integer]
+      # @todo Make this 0-indexed.
+      # @return [Integer] 0-indexed column number.
+      attr_reader :row
+
+      # @return [Integer] 0-indexed column number.
+      attr_reader :column
+
+      # @param row    [Integer] 1-indexed row number.
+      # @param column [Integer] 0-indexed column number.
       def initialize(row:, column:)
         @row = row
         @column = column
