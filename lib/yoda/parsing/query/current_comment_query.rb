@@ -1,11 +1,12 @@
 module Yoda
   module Parsing
     module Query
+      # Provides helper methods to find the current comment which means the comment on the current position.
       class CurrentCommentQuery
         attr_reader :comments, :location
 
         # @param comments [Array<::Parser::Source::Comment>]
-        # @param location [Location]
+        # @param location [Location] represents the current position.
         def initialize(comments, location)
           fail ArgumentError, comments unless comments.all? { |comment| comment.is_a?(::Parser::Source::Comment) }
           fail ArgumentError, location unless location.is_a?(Location)
@@ -13,16 +14,19 @@ module Yoda
           @location = location
         end
 
+        # The single line comment which the current position is on.
         # @return [::Parser::Source::Comment, nil]
         def current_comment
           @current_comment ||= comments.find { |comment| location.included?(comment.location) }
         end
 
+        # The multiple line comments which the current position is on.
         # @return [Array<::Parser::Source::Comment>]
         def current_comment_block
           @current_comment_block ||= current_comment ? comment_blocks.find { |block| block.include?(current_comment) } : []
         end
 
+        # The relative coordinates of the current position from the beginning position of the current comment.
         # @return [Location]
         def location_in_current_comment_block
           location.move(row: 1 - current_comment_block.first.location.line, column: - current_comment_block.first.location.column)

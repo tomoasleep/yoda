@@ -1,11 +1,12 @@
 module Yoda
   module Parsing
     module Query
+      # Provides helper methods to find the current comment token (token on current position) and its kind.
       class CurrentCommentTokenQuery
         attr_reader :comment, :location_in_comment
 
         # @param comment [String]
-        # @param location_in_comment [Location]
+        # @param location_in_comment [Location] represents relative coordinates of the current position from the beginning position of the current comment.
         def initialize(comment, location_in_comment)
           fail ArgumentError, comment unless comment.is_a?(String)
           fail ArgumentError, location_in_comment unless location_in_comment.is_a?(Location)

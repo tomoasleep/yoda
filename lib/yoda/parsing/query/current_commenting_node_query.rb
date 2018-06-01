@@ -1,12 +1,13 @@
 module Yoda
   module Parsing
     module Query
+      # Provides helper methods to find the node whose comment include the current position (is the current comment).
       class CurrentCommentingNodeQuery
         attr_reader :ast, :comments, :location
 
         # @param ast      [::Parser::AST::Node]
         # @param comments [Array<::Parser::Source::Comment>]
-        # @param location [Location]
+        # @param location [Location] represents the current position.
         def initialize(ast, comments, location)
           fail ArgumentError, ast unless ast.is_a?(::Parser::AST::Node)
           fail ArgumentError, comments unless comments.all? { |comment| comment.is_a?(::Parser::Source::Comment) }
