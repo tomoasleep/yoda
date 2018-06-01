@@ -1,6 +1,11 @@
 module Yoda
   module Evaluation
     class CommentCompletion
+      require 'yoda/evaluation/comment_completion/base_provider'
+      require 'yoda/evaluation/comment_completion/param_provider'
+      require 'yoda/evaluation/comment_completion/tag_provider'
+      require 'yoda/evaluation/comment_completion/type_provider'
+
       # @type Store::Registry
       attr_reader :registry
 
@@ -25,114 +30,40 @@ module Yoda
       end
 
       # @return [true, false]
-      def valid?
-        !!(current_comment_query.current_comment && current_comment_token_query.current_word)
+      def available?
+        comment? && providers.any?(&:available?)
       end
 
       # @return [Array<Model::CompletionItem>]
       def candidates
-        description_candidates.map { |description| Model::CompletionItem.new(description: description, range: substitution_range) }
+        available? ? providers.select(&:available?).map(&:candidates).flatten : []
       end
 
       private
 
-      # @return [Array<Model::Descriptions::Base>]
-      def description_candidates
-        return [] unless valid?
-        case current_comment_token_query.current_state
-        when :tag
-          tag_candidates
-        when :param
-          param_candidates
-        when :type
-          const_candidates
-        when :type_tag_type
-          const_candidates
-        else
-          []
-        end
+      # @return [Array<CommentCompletion::BaseProvider>]
+      def providers
+        [param_provider, tag_provider, type_provider]
       end
 
-      # @return [Parsing::Range, nil]
-      def substitution_range
-        return nil unless valid?
-
-        if %i(type type_tag_type).include?(current_comment_token_query.current_state)
-          if current_comment_token_query.current_range
-            range = current_comment_token_query.current_range.move(
-              row: current_comment_query.begin_point_of_current_comment_block.row - 1,
-              column: current_comment_query.begin_point_of_current_comment_block.column,
-            )
-            cut_point = current_comment_token_query.at_sign? ? 1 : (current_comment_token_query.current_word.rindex('::') || -2) + 2
-            Parsing::Range.new(range.begin_location.move(row: 0, column: cut_point), range.end_location)
-          else
-            Parsing::Range.new(location, location)
-          end
-        else
-          current_comment_token_query.current_range.move(
-            row: current_comment_query.begin_point_of_current_comment_block.row - 1,
-            column: current_comment_query.begin_point_of_current_comment_block.column,
-          )
-        end
+      # @return [ParamProvider]
+      def param_provider
+        @param_provider ||= ParamProvider.new(registry, ast, comments, location)
       end
 
-      def param_candidates
-        []
+      # @return [TagProvider]
+      def tag_provider
+        @tag_provider ||= TagProvider.new(registry, ast, comments, location)
       end
 
-      # @return [Parsing::Query::CurrentCommentTokenQuery]
-      def current_comment_token_query
-        @current_comment_token_query ||= Parsing::Query::CurrentCommentTokenQuery.new(current_comment_query.current_comment_block_text, current_comment_query.location_in_current_comment_block)
+      # @return [TypeProvider]
+      def type_provider
+        @type_provider ||= TypeProvider.new(registry, ast, comments, location)
       end
 
-      # @return [Parsing::Query::CurrentCommentQuery]
-      def current_comment_query
-        @current_comment_query ||= Parsing::Query::CurrentCommentQuery.new(comments, location)
-      end
-
-      # @return [String]
-      def index_word
-         if %i(type type_tag_type).include?(current_comment_token_query.current_state) && (current_comment_token_query.at_sign?)
-          ''
-        else
-          current_comment_token_query.current_word || ''
-        end
-      end
-
-      # @return [CurrentCommentingNodeQuery]
-      def current_commenting_node_query
-        Parsing::Query::CurrentCommentingNodeQuery.new(ast, comments, location)
-      end
-
-      # @group methods for tag completion
-
-      # @return [Array<String>]
-      def tagnames
-        @tagnames ||= YARD::Tags::Library.labels.map { |tag_symbol, label| "@#{tag_symbol}" }
-      end
-
-      # @return [Array<Model::Descriptions::WordDescription>]
-      def tag_candidates
-        tagnames.select { |tagname| tagname.start_with?(index_word) }.map { |obj| Model::Descriptions::WordDescription.new(obj) }
-      end
-
-      # @group methods for const completion
-
-      # @return [Parsing::NodeObjects::Namespace, nil]
-      def namespace
-        current_commenting_node_query.current_namespace
-      end
-
-      # @return [Array<Model::Descriptions::ValueDescription>]
-      def const_candidates
-        scoped_path = Model::ScopedPath.new(lexical_scope(namespace), index_word)
-        Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path).map { |obj| Model::Descriptions::ValueDescription.new(obj) }
-      end
-
-      # @param namespace [Parsing::NodeObjects::Namespace]
-      # @return [Array<Path>]
-      def lexical_scope(namespace)
-        namespace.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
+      def comment?
+        return @is_comment if instance_variable_defined?(:@is_comment)
+        @is_comment = !!Parsing::Query::CurrentCommentQuery.new(comments, location).current_comment
       end
     end
   end
