@@ -23,10 +23,7 @@ module Yoda
         # @return [Parsing::Range, nil]
         def substitution_range
           return nil unless available?
-          current_comment_token_query.current_range.move(
-            row: current_comment_query.begin_point_of_current_comment_block.row - 1,
-            column: current_comment_query.begin_point_of_current_comment_block.column,
-          )
+          current_comment_query.absolute_range(current_comment_token_query.current_range)
         end
 
         # @return [String]

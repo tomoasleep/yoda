@@ -29,12 +29,38 @@ module Yoda
         # The relative coordinates of the current position from the beginning position of the current comment.
         # @return [Location]
         def location_in_current_comment_block
-          location.move(row: 1 - current_comment_block.first.location.line, column: - current_comment_block.first.location.column)
+          relative_position(location)
         end
 
         # @return [Location]
         def begin_point_of_current_comment_block
           Location.new(row: current_comment_block.first.location.line, column: current_comment_block.first.location.column)
+        end
+
+        # @group Coordinate conversion
+
+        # Calculate relative position (the coordinates from the beginning point) from the relative position.
+        # @param position [Location]
+        def relative_position(position)
+          position.move(row: 1 - current_comment_block.first.location.line, column: - current_comment_block.first.location.column)
+        end
+
+        # Calculate absolute position from the relative position.
+        # @param position [Location]
+        def absolute_position(position)
+          position.move(row: current_comment_block.first.location.line - 1, column: current_comment_block.first.location.column)
+        end
+
+        # Calculate relative range from the relative range.
+        # @param range [Range]
+        def relative_range(range)
+          range.move(row: 1 - current_comment_block.first.location.line, column: - current_comment_block.first.location.column)
+        end
+
+        # Calculate absolute range from the relative range.
+        # @param range [Range]
+        def absolute_range(range)
+          range.move(row: current_comment_block.first.location.line - 1, column: current_comment_block.first.location.column)
         end
 
         # @return [String]
