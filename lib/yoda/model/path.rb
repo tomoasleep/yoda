@@ -9,6 +9,12 @@ module Yoda
         path.is_a?(Path) ? path : new(path)
       end
 
+      # @param names [Array<Path, String>]
+      # @return [Path]
+      def self.from_names(names)
+        new(names.join('::'))
+      end
+
       # @param name [String]
       def initialize(name)
         fail ArgumentError, name unless name.is_a?(String)
