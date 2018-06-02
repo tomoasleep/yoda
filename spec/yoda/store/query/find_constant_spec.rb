@@ -44,6 +44,24 @@ RSpec.describe Yoda::Store::Query::FindConstant do
         expect(subject).not_to be
       end
     end
+
+    context 'with cbase string is given' do
+      let(:name) { '::' }
+
+      it 'returns the specified module' do
+        expect(subject).to be_a(Yoda::Store::Objects::ClassObject)
+        expect(subject.path).to eq('Object')
+      end
+    end
+
+    context 'with cbase string is given' do
+      let(:name) { Yoda::Model::Path.new('::') }
+
+      it 'returns the specified module' do
+        expect(subject).to be_a(Yoda::Store::Objects::ClassObject)
+        expect(subject.path).to eq('Object')
+      end
+    end
   end
 
   describe '#select_with_prefix' do

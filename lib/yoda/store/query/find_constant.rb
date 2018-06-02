@@ -128,7 +128,7 @@ module Yoda
           when Model::ScopedPath
             path.path
           when String
-            Model::Path.new(path.gsub(/\A::/, ''))
+            Model::Path.new(path == '::' ? '::' : path.gsub(/\A::/, ''))
           else
             fail ArgumentError, path
           end
