@@ -20,7 +20,7 @@ module Yoda
 
         private
 
-        # @return [Range]
+        # @return [Range, nil]
         def substitution_range
           return nil unless current_const
           Parsing::Range.of_ast_location(current_const.node.location.name)
@@ -50,7 +50,7 @@ module Yoda
 
         # @return [Array<Store::Objects::Base>]
         def const_parent_paths
-          @const_parent_pathss ||= begin
+          @const_parent_paths ||= begin
             lexical_scope(source_analyzer.current_namespace)
           end
         end
