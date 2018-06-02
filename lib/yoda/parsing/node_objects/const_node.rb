@@ -20,6 +20,13 @@ module Yoda
           parent_const ? ConstNode.new(node.children.last).to_s : to_s
         end
 
+        # @param location [Location]
+        # @return [true, false]
+        def just_after_separator?(location)
+          return false unless node.location.double_colon
+          location == Location.of_ast_location(node.location.double_colon.end)
+        end
+
         # @param base [String, Symbol, nil]
         # @return [String]
         def to_s(base = nil)
