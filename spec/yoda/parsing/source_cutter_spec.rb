@@ -57,8 +57,45 @@ RSpec.describe Yoda::Parsing::SourceCutter do
       end
     end
 
+    context 'cut on cbase or double colon' do
+      subject { described_class.new(source, location).error_recovered_source }
+      let(:source) do
+        <<~EOS
+        ::Const::Name
+        EOS
+      end
+
+      context 'on cbase' do
+        let(:location) { Yoda::Parsing::Location.new(row: 1, column: 2) }
+
+        it 'supplies DUMMY_CONSTANT after cbase' do
+          expect(subject).to eq(
+            <<~EOS.chomp
+            ::
+            DUMMY_CONSTANT
+            ;
+            EOS
+          )
+        end
+      end
+
+      context 'on double colon' do
+        let(:location) { Yoda::Parsing::Location.new(row: 1, column: 9) }
+
+        it 'supplies DUMMY_CONSTANT after cbase' do
+          expect(subject).to eq(
+            <<~EOS.chomp
+            ::Const::
+            DUMMY_CONSTANT
+            ;
+            EOS
+          )
+        end
+      end
+    end
+
     context 'cut on dot' do
-      subject { require 'pry'; Pry::rescue{ described_class.new(source, location).error_recovered_source } }
+      subject { described_class.new(source, location).error_recovered_source }
       let(:location) { Yoda::Parsing::Location.new(row: 32, column: 10) }
       let(:source) do
         <<~EOS
