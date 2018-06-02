@@ -31,7 +31,7 @@ module Yoda
         return nil unless Parsing::Query::CurrentCommentQuery.new(comments, location).current_comment
         completion_worker = Evaluation::CommentCompletion.new(client_info.registry, ast, comments, location)
         return nil unless completion_worker.available?
-        
+
         completion_items = completion_worker.candidates
 
         LSP::Interface::CompletionList.new(
