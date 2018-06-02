@@ -4,7 +4,7 @@ module Yoda
       class ConstProvider < BaseProvider
         # @return [true, false]
         def providable?
-          !!current_const
+          !!current_ancestor_const_node
         end
 
         # Returns constant candidates by using the current lexical scope.
@@ -22,15 +22,21 @@ module Yoda
 
         # @return [Range, nil]
         def substitution_range
-          return nil unless current_const
-          Parsing::Range.of_ast_location(current_const.node.location.name)
+          return nil unless providable?
+          @substitution_range ||=
+            if current_ancestor_const_node.just_after_separator?(source_analyzer.location)
+              subst_location = Parsing::Location.of_ast_location(current_ancestor_const_node.node.location.double_colon.end)
+              Parsing::Range.new(subst_location, subst_location)
+            else
+              Parsing::Range.of_ast_location(current_ancestor_const_node.node.location.name)
+            end
         end
 
         # @return [Parsing::NodeObjects::ConstNode, nil]
-        def current_const
-          @current_const ||= begin
-            node = source_analyzer.nodes_to_current_location_from_root.reverse.take_while { |el| el.type == :const }.last
-            return nil unless node
+        def current_ancestor_const_node
+          @current_ancestor_const_node ||= begin
+            node = source_analyzer.nodes_to_current_location_from_root.reverse.take_while { |el| [:const, :cbase].include?(el.type) }.last
+            return nil if !node || node.type != :const
             Parsing::NodeObjects::ConstNode.new(node)
           end
         end
@@ -39,13 +45,11 @@ module Yoda
         def const_candidates
           return [] unless providable?
           return [] if const_parent_paths.empty?
-          scoped_path = Model::ScopedPath.new(const_parent_paths, current_const.to_s)
-          Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path)
-        end
 
-        # @return [Parsing::ConstNode]
-        def const_parent
-          current_const && current_const.parent_const
+          base_path = current_ancestor_const_node.to_path
+          path = current_ancestor_const_node.just_after_separator?(source_analyzer.location) ? Model::Path.from_names([base_path.spacename, '']) : base_path
+          scoped_path = Model::ScopedPath.new(const_parent_paths, path)
+          Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path)
         end
 
         # @return [Array<Store::Objects::Base>]

@@ -16,8 +16,9 @@ module Yoda
           node.children.first && node.children.first.type == :const ? ConstNode.new(node.children.first) : nil
         end
 
-        def basename
-          parent_const ? ConstNode.new(node.children.last).to_s : to_s
+        # @return [true, false]
+        def absolute?
+          node.children.first == :cbase
         end
 
         # @param location [Location]
@@ -25,6 +26,11 @@ module Yoda
         def just_after_separator?(location)
           return false unless node.location.double_colon
           location == Location.of_ast_location(node.location.double_colon.end)
+        end
+
+        # @return [Model::Path]
+        def to_path
+          Model::Path.new(to_s)
         end
 
         # @param base [String, Symbol, nil]
