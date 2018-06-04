@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'yard', '~> 0.9.11'
   spec.add_dependency 'parslet', '~> 1.8'
   spec.add_dependency 'parser', '~> 2.0'
-  spec.add_dependency 'language_server-protocol', '~> 0.5'
+  spec.add_dependency 'language_server-protocol', '~> 3.7.0.0'
   spec.add_dependency 'leveldb', '~> 0.1.9'
   spec.add_dependency 'lmdb', '~> 0.4.8'
   spec.add_dependency 'ruby-progressbar'
