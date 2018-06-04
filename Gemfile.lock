@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    yoda (0.3.0)
+    yoda-language-server (0.3.0)
       language_server-protocol (~> 3.7.0.0)
       leveldb (~> 0.1.9)
       lmdb (~> 0.4.8)
@@ -72,7 +72,7 @@ DEPENDENCIES
   rspec (~> 3.0)
   rspec-benchmark (~> 0.3)
   stackprof
-  yoda!
+  yoda-language-server!
 
 BUNDLED WITH
    1.16.1

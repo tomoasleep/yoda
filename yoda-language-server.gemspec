@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "yoda/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "yoda"
+  spec.name          = "yoda-language-server"
   spec.version       = Yoda::VERSION
   spec.authors       = ["Tomoya Chiba"]
   spec.email         = ["tomo.asleep@gmail.com"]
