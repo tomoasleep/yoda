@@ -14,12 +14,26 @@ module Yoda
             Model::CompletionItem.new(
               description: Model::Descriptions::ValueDescription.new(const_candidate),
               range: substitution_range,
+              kind: complete_item_kind(const_candidate),
               prefix: just_after_separator? ? '::' : '',
             )
           end
         end
 
         private
+
+        # @param object [Store::Objects::Base]
+        # @return [Symbol]
+        def complete_item_kind(object)
+          case object.kind
+          when :class
+            :class
+          when :module
+            :module
+          else
+            :constant
+          end
+        end
 
         # @return [Range, nil]
         def substitution_range

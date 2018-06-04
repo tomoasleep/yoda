@@ -13,6 +13,7 @@ module Yoda
             Model::CompletionItem.new(
               description: Model::Descriptions::FunctionDescription.new(method_candidate),
               range: substitution_range,
+              kind: :method,
             )
           end
         end

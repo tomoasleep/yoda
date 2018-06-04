@@ -62,7 +62,7 @@ module Yoda
       def create_completion_item(completion_item)
         LSP::Interface::CompletionItem.new(
           label: completion_item.description.is_a?(Model::Descriptions::FunctionDescription) ? completion_item.description.signature : completion_item.description.sort_text,
-          kind: LSP::Constant::CompletionItemKind::METHOD,
+          kind: completion_item.language_server_kind,
           detail: completion_item.description.title,
           documentation: completion_item.description.to_markdown,
           sort_text: completion_item.description.sort_text,
