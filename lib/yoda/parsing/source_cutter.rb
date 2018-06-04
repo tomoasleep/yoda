@@ -138,7 +138,7 @@ module Yoda
           when :tEQL, :tAMPER2, :tPIPE, :tBANG, :tCARET, :tPLUS, :tMINUS, :tSTAR2, :tDIVIDE, :tPERCENT, :tTILDE, :tCOMMA, :tDOT2, :tDOT3, :tCOLON,
               :tANDOP, :tOROP, :tUMINUS, :tUPLUS, :tTILDE, :tPOW, :tMATCH, :tNMATCH, :tEQ, :tNEQ, :tGT, :tRSHFT, :tGEQ, :tLT, :tLSHFT, :tLEQ, :tASSOC, :tEQQ, :tCMP, :tBANG, :tANDDOT
             :kNIL
-          when :tCOLON2
+          when :tCOLON2, :tCOLON3
             :dummy_constant
           when :tDOT
             :dummy_method

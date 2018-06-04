@@ -90,7 +90,7 @@ module Yoda
       end
 
       # @param another [Location]
-      # @return Integer
+      # @return [Integer]
       def <=>(another)
         return 0 if row == another.row && column == another.column
         return 1 if (row == another.row && column >= another.column) || row > another.row
