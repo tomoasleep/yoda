@@ -14,6 +14,7 @@ module Yoda
             Model::CompletionItem.new(
               description: Model::Descriptions::ValueDescription.new(const_candidate),
               range: substitution_range,
+              prefix: just_after_separator? ? '::' : '',
             )
           end
         end
@@ -24,9 +25,8 @@ module Yoda
         def substitution_range
           return nil unless providable?
           @substitution_range ||=
-            if current_ancestor_const_node.just_after_separator?(source_analyzer.location)
-              subst_location = Parsing::Location.of_ast_location(current_ancestor_const_node.node.location.double_colon.end)
-              Parsing::Range.new(subst_location, subst_location)
+            if just_after_separator?
+              Parsing::Range.of_ast_location(current_ancestor_const_node.node.location.double_colon)
             else
               Parsing::Range.of_ast_location(current_ancestor_const_node.node.location.name)
             end
@@ -41,15 +41,21 @@ module Yoda
           end
         end
 
-        # @return [Array<Objects::Base>]
+        # @return [Array<Store::Objects::Base>]
         def const_candidates
           return [] unless providable?
           return [] if const_parent_paths.empty?
 
           base_path = current_ancestor_const_node.to_path
-          path = current_ancestor_const_node.just_after_separator?(source_analyzer.location) ? Model::Path.from_names([base_path.spacename, '']) : base_path
+          path = just_after_separator? ? Model::Path.from_names([base_path.spacename, '']) : base_path
           scoped_path = Model::ScopedPath.new(const_parent_paths, path)
           Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path)
+        end
+
+        # @return [true, false]
+        def just_after_separator?
+          return @is_just_after_separator if instance_variable_defined?(:@is_just_after_separator)
+          @is_just_after_separator = current_ancestor_const_node.just_after_separator?(source_analyzer.location)
         end
 
         # @return [Array<Store::Objects::Base>]

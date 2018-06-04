@@ -68,7 +68,7 @@ module Yoda
           sort_text: completion_item.description.sort_text,
           text_edit: LSP::Interface::TextEdit.new(
             range: LSP::Interface::Range.new(completion_item.range.to_language_server_protocol_range),
-            new_text: completion_item.description.sort_text,
+            new_text: completion_item.edit_text,
           ),
           data: {},
         )

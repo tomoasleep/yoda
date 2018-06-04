@@ -171,7 +171,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
 
         context 'and the cursor is after cbase' do
           let(:position) { { line: 11, character: 8 } }
-          let(:text_edit_range) { { start: { line: 11, character: 8 }, end: { line: 11, character: 8 } } }
+          let(:text_edit_range) { { start: { line: 11, character: 6 }, end: { line: 11, character: 8 } } }
 
           it 'returns candidates under Object' do
             expect(subject).to be_a(LSP::Interface::CompletionList)
@@ -185,7 +185,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
         context 'and the cursor is after double colons' do
           context 'and the const node is single constant without cbase' do
             let(:position) { { line: 12, character: 19 } }
-            let(:text_edit_range) { { start: { line: 12, character: 19 }, end: { line: 12, character: 19 } } }
+            let(:text_edit_range) { { start: { line: 12, character: 17 }, end: { line: 12, character: 19 } } }
 
             it 'returns candidates under YodaFixture' do
               expect(subject).to be_a(LSP::Interface::CompletionList)
