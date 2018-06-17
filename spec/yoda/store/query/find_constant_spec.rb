@@ -9,6 +9,15 @@ RSpec.describe Yoda::Store::Query::FindConstant do
   describe '#find' do
     subject { described_class.new(registry).find(name) }
 
+    context 'when the name is Object' do
+      let(:name) { 'Object' }
+
+      it 'returns object class' do
+        expect(subject).to be_a(Yoda::Store::Objects::ClassObject)
+        expect(subject.path).to eq(name)
+      end
+    end
+
     context 'with module name string is given' do
       let(:name) { 'YodaFixture' }
 
