@@ -76,6 +76,7 @@ module Yoda
       def evaluation_context
         @evaluation_context ||= begin
           fail RuntimeError, "The namespace #{scope.scope_name} (#{scope}) is not registered" unless scope_constant
+          fail RuntimeError, "The namespace for #{scope} (#{scope.scope_name}) is not registered" unless receiver
           lexical_scope = Typing::LexicalScope.new(scope_constant, scope.ancestor_scopes)
           context = Typing::Context.new(registry: registry, caller_object: receiver, lexical_scope: lexical_scope)
           context.env.bind_method_parameters(current_method_signature) if current_method_signature
@@ -89,6 +90,7 @@ module Yoda
         @current_method_signature ||= Store::Query::FindSignature.new(registry).select(scope_constant, scope.name.to_s)&.first
       end
 
+      # @return [Store::Objects::Base, nil]
       def receiver
         @receiver ||= begin
           if scope.kind == :method
