@@ -3,16 +3,9 @@ module Yoda
     module Objects
       # @abstract
       class Base
+        include Serializable
+
         class << self
-          def json_creatable?
-            true
-          end
-
-          # @param params [Hash]
-          def json_create(params)
-            new(params.map { |k, v| [k.to_sym, v] }.to_h)
-          end
-
           # @return [Array<Symbol>]
           def attr_names
             %i(path document tag_list sources primary_source)
@@ -72,11 +65,6 @@ module Yoda
             sources: sources,
             primary_source: primary_source
           }
-        end
-
-        # @return [String]
-        def to_json
-          to_h.merge(json_class: self.class.name).to_json
         end
 
         # @param another [self]
