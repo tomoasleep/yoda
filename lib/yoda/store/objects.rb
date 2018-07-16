@@ -17,6 +17,7 @@ module Yoda
       require 'yoda/store/objects/patch'
       require 'yoda/store/objects/patch_set'
       require 'yoda/store/objects/tag'
+      require 'yoda/store/objects/project_status'
 
       class << self
         # @param hsh [Hash]

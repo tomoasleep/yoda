@@ -13,9 +13,21 @@ module Yoda
       # @return [Objects::PatchSet]
       attr_reader :patch_set
 
+      PROJECT_STATUS_KEY = '%project_status'
+
       def initialize(adapter = nil)
         @patch_set = Objects::PatchSet.new
         @adapter = adapter
+      end
+
+      # @return [Objects::ProjectStatus, nil]
+      def project_status
+        adapter&.exist?(PROJECT_STATUS_KEY) && adapter.get(PROJECT_STATUS_KEY)
+      end
+
+      # @param new_project_status [Objects::ProjectStatus]
+      def save_project_status(new_project_status)
+        adapter.put(PROJECT_STATUS_KEY, new_project_status)
       end
 
       # @param path [String]
