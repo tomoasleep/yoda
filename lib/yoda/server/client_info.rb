@@ -29,7 +29,7 @@ module Yoda
       end
 
       def setup
-        project.setup
+        project.build_cache
       end
 
       # @param path [String]

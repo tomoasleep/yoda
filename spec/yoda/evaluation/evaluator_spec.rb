@@ -10,7 +10,7 @@ RSpec.describe Yoda::Evaluation::Evaluator do
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
   let(:project) { Yoda::Store::Project.new(fixture_root) }
   let(:registry) { project.registry }
-  before { project.setup }
+  before { project.build_cache }
 
   describe '#calculate_trace' do
     subject { evaluator.calculate_trace(current_node) }
