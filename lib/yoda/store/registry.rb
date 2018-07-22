@@ -4,6 +4,9 @@ require 'ruby-progressbar'
 module Yoda
   module Store
     class Registry
+      # @note This number must be updated when breaking change is added.
+      REGISTRY_VERSION = 1
+
       # @return [Adapters::LmdbAdapter, nil]
       attr_reader :adapter
 

@@ -4,7 +4,7 @@ module Yoda
   module Store
     class Project
       require 'yoda/store/project/cache'
-      require 'yoda/store/project/builder'
+      require 'yoda/store/project/library_doc_loader'
 
       # @type String
       attr_reader :root_path
@@ -20,20 +20,31 @@ module Yoda
         @registry = Registry.new
       end
 
-      def clean
-      end
-
       def setup
         YARD::Logger.instance(STDERR)
         make_dir
-        cache.setup
+        cache.register_adapter(registry)
+      end
+
+      def clear
+        setup
+        registry.adapter.clear
+      end
+
+      def build_cache(progress: false)
+        setup
+        LibraryDocLoader.build_for(self).run(progress: progress)
         load_project_files
         self
       end
 
       def rebuild_cache(progress: false)
-        make_dir
-        cache.build(progress: progress)
+        clear
+        build_cache(progress: progress)
+      end
+
+      def yoda_dir
+        File.expand_path('.yoda', root_path)
       end
 
       # @param source_path [String]
@@ -41,22 +52,19 @@ module Yoda
         Actions::ReadFile.run(registry, source_path)
       end
 
-      def yoda_dir
-        File.expand_path('.yoda', root_path)
-      end
-
       private
-
-      def make_dir
-        File.exist?(yoda_dir) || FileUtils.mkdir(yoda_dir)
-      end
 
       def load_project_files
         Actions::ReadProjectFiles.new(registry, root_path).run
       end
 
+      def make_dir
+        File.exist?(yoda_dir) || FileUtils.mkdir(yoda_dir)
+      end
+
+      # @return [Cache]
       def cache
-        @cache ||= Cache.new(self)
+        @cache ||= Cache.build_for(self)
       end
     end
   end
