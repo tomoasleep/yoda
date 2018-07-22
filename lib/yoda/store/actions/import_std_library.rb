@@ -1,7 +1,7 @@
 module Yoda
   module Store
     module Actions
-      class ImportCoreLibrary
+      class ImportStdLibrary
         # @return [Registry]
         attr_reader :registry
 
@@ -27,7 +27,7 @@ module Yoda
         private
 
         def doc_path
-          File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc")
+          File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc-stdlib")
         end
       end
     end
