@@ -8,7 +8,6 @@ RSpec.describe Yoda::Server::HoverProvider do
   end
 
   let(:session) { described_class.new }
-  after { session.project&.clean }
 
   let(:root_path) { fixture_root }
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
