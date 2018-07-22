@@ -1,20 +1,20 @@
 module Yoda
   class Server
     class HoverProvider
-      attr_reader :client_info
+      attr_reader :session
 
-      # @param client_info [ClientInfo]
-      def initialize(client_info)
-        @client_info = client_info
+      # @param session [Session]
+      def initialize(session)
+        @session = session
       end
 
       # @param uri      [String]
       # @param position [{Symbol => Integer}]
       def request_hover(uri, position)
-        source = client_info.file_store.get(uri)
+        source = session.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-        node_worker = Evaluation::CurrentNodeExplain.new(client_info.registry, source, location)
+        node_worker = Evaluation::CurrentNodeExplain.new(session.registry, source, location)
 
         current_node_signature = node_worker.current_node_signature
         create_hover(current_node_signature) if current_node_signature

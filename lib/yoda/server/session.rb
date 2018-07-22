@@ -2,7 +2,7 @@ require 'uri'
 
 module Yoda
   class Server
-    class ClientInfo
+    class Session
       # @return [String]
       attr_reader :root_uri
 

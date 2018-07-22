@@ -1,18 +1,18 @@
 module Yoda
   class Server
     class CompletionProvider
-      # @type ClientInfo
-      attr_reader :client_info
+      # @type Session
+      attr_reader :session
 
-      # @param client_info [ClientInfo]
-      def initialize(client_info)
-        @client_info = client_info
+      # @param session [Session]
+      def initialize(session)
+        @session = session
       end
 
       # @param uri      [String]
       # @param position [{Symbol => Integer}]
       def complete(uri, position)
-        source = client_info.file_store.get(uri)
+        source = session.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
         if candidates = comment_complete(source, location)
@@ -29,7 +29,7 @@ module Yoda
       def comment_complete(source, location)
         ast, comments = Parsing::Parser.new.parse_with_comments(source)
         return nil unless Parsing::Query::CurrentCommentQuery.new(comments, location).current_comment
-        completion_worker = Evaluation::CommentCompletion.new(client_info.registry, ast, comments, location)
+        completion_worker = Evaluation::CommentCompletion.new(session.registry, ast, comments, location)
         return nil unless completion_worker.available?
 
         completion_items = completion_worker.candidates
@@ -47,7 +47,7 @@ module Yoda
       # @return [LanguageServerProtocol::Interface::CompletionList, nil]
       def complete_from_cut_source(source, location)
         cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
-        method_completion_worker = Evaluation::CodeCompletion.new(client_info.registry, cut_source, location)
+        method_completion_worker = Evaluation::CodeCompletion.new(session.registry, cut_source, location)
         completion_items = method_completion_worker.candidates
         return nil if completion_items.empty?
 

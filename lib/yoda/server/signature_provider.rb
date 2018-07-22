@@ -1,21 +1,21 @@
 module Yoda
   class Server
     class SignatureProvider
-      attr_reader :client_info
+      attr_reader :session
 
-      # @param client_info [ClientInfo]
-      def initialize(client_info)
-        @client_info = client_info
+      # @param session [Session]
+      def initialize(session)
+        @session = session
       end
 
       # @param uri      [String]
       # @param position [{Symbol => Integer}]
       def provide(uri, position)
-        source = client_info.file_store.get(uri)
+        source = session.file_store.get(uri)
         location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
         cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
 
-        signature_worker = Evaluation::SignatureDiscovery.new(client_info.registry, cut_source, location)
+        signature_worker = Evaluation::SignatureDiscovery.new(session.registry, cut_source, location)
 
         functions = signature_worker.method_candidates
         create_signature_help(functions)

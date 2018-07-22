@@ -7,7 +7,7 @@ module Yoda
     require 'yoda/server/hover_provider'
     require 'yoda/server/definition_provider'
     require 'yoda/server/deserializer'
-    require 'yoda/server/client_info'
+    require 'yoda/server/session'
 
     LSP = ::LanguageServer::Protocol
 
@@ -21,8 +21,8 @@ module Yoda
     # @type ::LanguageServer::Protocol::Transport::Stdio::Writer
     attr_reader :writer
 
-    # @type ClientInfo
-    attr_reader :client_info
+    # @return [Responser]
+    attr_reader :session
 
     # @type CompletionProvider
     attr_reader :completion_provider
@@ -97,12 +97,12 @@ module Yoda
     end
 
     def handle_initialize(params)
-      @client_info = ClientInfo.new(params[:root_uri])
-      @completion_provider = CompletionProvider.new(@client_info)
-      @hover_provider = HoverProvider.new(@client_info)
-      @signature_provider = SignatureProvider.new(@client_info)
-      @definition_provider = DefinitionProvider.new(@client_info)
-      client_info.setup
+      @session = Session.new(params[:root_uri])
+      @completion_provider = CompletionProvider.new(@session)
+      @hover_provider = HoverProvider.new(@session)
+      @signature_provider = SignatureProvider.new(@session)
+      @definition_provider = DefinitionProvider.new(@session)
+      session.setup
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
@@ -143,19 +143,19 @@ module Yoda
       def handle_text_document_did_open(params)
         uri = params[:text_document][:uri]
         text = params[:text_document][:text]
-        client_info.file_store.store(uri, text)
+        session.file_store.store(uri, text)
       end
 
       def handle_text_document_did_save(params)
         uri = params[:text_document][:uri]
 
-        client_info.reparse_doc(uri)
+        session.reparse_doc(uri)
       end
 
       def handle_text_document_did_change(params)
         uri = params[:text_document][:uri]
         text = params[:content_changes].first[:text]
-        client_info.file_store.store(uri, text)
+        session.file_store.store(uri, text)
       end
 
       def handle_text_document_completion(params)
