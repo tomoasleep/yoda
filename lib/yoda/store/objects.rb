@@ -5,6 +5,8 @@ module Yoda
       MODULE_TAIL_PATTERN = /(?:::(\w+)|^(\w+))$/
 
       require 'yoda/store/objects/serializable'
+      require 'yoda/store/objects/addressable'
+      require 'yoda/store/objects/patchable'
       require 'yoda/store/objects/base'
       require 'yoda/store/objects/namespace_object'
       require 'yoda/store/objects/class_object'

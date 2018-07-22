@@ -3,7 +3,9 @@ module Yoda
     module Objects
       # @abstract
       class Base
+        include Addressable
         include Serializable
+        include Patchable
 
         class << self
           # @return [Array<Symbol>]
