@@ -8,6 +8,9 @@ module Yoda
         # @param gem_specs [Array<Objects::ProjectStatus::GemStatus, Bundler::LazySpecification>]
         attr_reader :gem_specs
 
+        # @param errors [Array<BaseError>]
+        attr_reader :errors
+
         class << self
           # @param project [Project]
           # @return [LibraryDocLoader]
@@ -32,6 +35,7 @@ module Yoda
         def initialize(registry:, gem_specs:)
           @registry = registry
           @gem_specs = gem_specs
+          @errors = []
         end
 
         def run(progress: false)
@@ -66,6 +70,7 @@ module Yoda
         # @return [Objects::ProjectStatus::BundleStatus]
         def import_core(bundle_status)
           result = Actions::ImportCoreLibrary.run(registry)
+          errors.push(CoreImportError.new('core')) unless result
           bundle_status.derive(std_status: bundle_status.std_status.derive(core_present: !!result))
         end
 
@@ -73,6 +78,7 @@ module Yoda
         # @return [Objects::ProjectStatus::BundleStatus]
         def import_std(bundle_status)
           result = Actions::ImportStdLibrary.run(registry)
+          errors.push(CoreImportError.new('std')) unless result
           bundle_status.derive(std_status: bundle_status.std_status.derive(std_present: !!result))
         end
 
@@ -84,6 +90,7 @@ module Yoda
               gem_status
             else
               result = Actions::ImportGem.run(registry: registry, gem_name: gem_status.name, gem_version: gem_status.version)
+              errors.push(GemImportError.new(name: gem_status.name, version: gem_status.version)) unless result
               gem_status.derive(present: result)
             end
           end

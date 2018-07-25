@@ -31,11 +31,13 @@ module Yoda
         registry.adapter.clear
       end
 
+      # @return [Array<BaseError>]
       def build_cache(progress: false)
         setup
-        LibraryDocLoader.build_for(self).run(progress: progress)
+        loader = LibraryDocLoader.build_for(self)
+        loader.run(progress: progress)
         load_project_files
-        self
+        loader.errors
       end
 
       def rebuild_cache(progress: false)
