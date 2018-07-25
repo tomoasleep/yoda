@@ -6,6 +6,7 @@ module Yoda
     require 'yoda/server/signature_provider'
     require 'yoda/server/hover_provider'
     require 'yoda/server/definition_provider'
+    require 'yoda/server/initialization_provider'
     require 'yoda/server/deserializer'
     require 'yoda/server/session'
 
@@ -52,6 +53,12 @@ module Yoda
           STDERR.puts ex.backtrace
         end
       end
+    end
+
+    # @param method [String]
+    # @param params [Object]
+    def send_message(method:, params:)
+      writer.write(id: SecureRandom.hex(8), method: method, params: params)
     end
 
     def callback(request)
@@ -102,7 +109,10 @@ module Yoda
       @hover_provider = HoverProvider.new(@session)
       @signature_provider = SignatureProvider.new(@session)
       @definition_provider = DefinitionProvider.new(@session)
-      session.setup
+
+      if message = InitializationProvider.new(@session).provide
+        send_message(message)
+      end
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
