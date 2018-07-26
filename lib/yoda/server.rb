@@ -1,4 +1,5 @@
 require 'language_server-protocol'
+require 'securerandom'
 
 module Yoda
   class Server
@@ -83,10 +84,12 @@ module Yoda
 
     # @param hash [Hash]
     # @param key [String, Symbol]
+    # @return [Symbol, nil]
     def resolve(hash, key)
-      key.to_s.split('/').reduce(hash) do |scope, key|
+      resolved = key.to_s.split('/').reduce(hash) do |scope, key|
         (scope || {})[key.to_sym]
       end
+      resolved.is_a?(Symbol) && resolved
     end
 
     def request_registrations
