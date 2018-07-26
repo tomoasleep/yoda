@@ -12,6 +12,14 @@
   "dependencies": {
     "atom-languageclient": "^0.9.5"
   },
+  "configSchema": {
+    "serverPath": {
+      "title": "yoda Server Path",
+      "description": "Exection File Path of yoda (if empty, find from your PATH)",
+      "type": "string",
+      "default": ""
+    }
+  },
   "consumedServices": {
     "atom-ide-busy-signal": {
       "versions": {

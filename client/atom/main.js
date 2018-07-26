@@ -5,12 +5,17 @@ const { resolve } = require('path')
 class YodaClient extends AutoLanguageClient {
   constructor() {
     super()
-    atom.config.set('core.debugLSP', true) // Debug the hell out of this
   }
+
   getGrammarScopes () { return ['source.ruby', 'source.rb', 'source.ruby.rails'] }
   getLanguageName () { return 'Ruby' }
   getServerName () { return 'Yoda' }
   getConnectionType() { return 'stdio' }
+
+  getServerPath() {
+    const serverPath = atom.config.get('yoda.serverPath');
+    return (serverPath && serverPath.length) ? serverPath : 'yoda';
+  }
 
   startServerProcess (projectPath) {
     const yoda = this._launchYoda(projectPath);
@@ -25,8 +30,7 @@ class YodaClient extends AutoLanguageClient {
 
   _launchYoda(projectPath) {
     const commandOptions = { cwd: projectPath };
-    const commandName = atom.inDevMode() ? resolve(__dirname, '../../exe/yoda') : 'yoda';
-    return spawn(commandName, ['server'], commandOptions);
+    return spawn(this.getServerPath(), ['server'], commandOptions);
   }
 }
 
