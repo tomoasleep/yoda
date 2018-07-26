@@ -51,7 +51,11 @@ module Yoda
       reader.read do |request|
         begin
           if result = callback(request)
-            writer.write(id: request[:id], result: result)
+            if result.is_a?(LanguageServer::Protocol::Interface::ResponseError)
+              send_error(id: request[:id], error: result)
+            else
+              send_response(id: request[:id], result: result)
+            end
           end
           process_after_notifications if session&.client_initialized
         rescue StandardError => ex
@@ -71,6 +75,18 @@ module Yoda
     # @param params [Object]
     def send_notification(method:, params:)
       writer.write(method: method, params: params)
+    end
+
+    # @param id [String]
+    # @param result [Object]
+    def send_response(id:, result:)
+      writer.write(id: id, result: result)
+    end
+
+    # @param method [String]
+    # @param error [Object]
+    def send_error(id:, error:)
+      writer.write(id: id, error: error)
     end
 
     def callback(request)
@@ -144,6 +160,12 @@ module Yoda
             trigger_characters: ['(', ','],
           ),
         ),
+      )
+    rescue => e
+      LanguageServer::Protocol::Interface::ResponseError.new(
+        message: "Failed to initialize yoda: #{e.class} #{e.message}",
+        code: LanguageServer::Protocol::Constant::InitializeError::UNKNOWN_PROTOCOL_VERSION,
+        data: LanguageServer::Protocol::Interface::InitializeError.new(retry: false),
       )
     end
 
