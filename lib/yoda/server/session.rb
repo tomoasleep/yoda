@@ -12,11 +12,14 @@ module Yoda
       # @return [Store::Project]
       attr_reader :project
 
+      attr_accessor :client_initialized
+
       # @param root_uri [String] an uri expression of project root path
       def initialize(root_uri)
         @root_uri = root_uri
         @file_store = FileStore.new
         @project = Store::Project.new(root_path)
+        @client_initialized = false
       end
 
       def root_path

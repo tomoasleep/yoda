@@ -37,9 +37,13 @@ module Yoda
     # @type DefinitionProvider
     attr_reader :definition_provider
 
+    # @return [Array<Hash>]
+    attr_reader :after_notifications
+
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
+      @after_notifications = []
     end
 
     def run
@@ -48,6 +52,7 @@ module Yoda
           if result = callback(request)
             writer.write(id: request[:id], result: result)
           end
+          process_after_notifications if session&.client_initialized
         rescue StandardError => ex
           STDERR.puts ex
           STDERR.puts ex.backtrace
@@ -55,10 +60,16 @@ module Yoda
       end
     end
 
+    def process_after_notifications
+      while notification = after_notifications.pop
+        send_notification(**notification)
+      end
+    end
+
     # @param method [String]
     # @param params [Object]
-    def send_message(method:, params:)
-      writer.write(id: SecureRandom.hex(8), method: method, params: params)
+    def send_notification(method:, params:)
+      writer.write(method: method, params: params)
     end
 
     def callback(request)
@@ -110,9 +121,7 @@ module Yoda
       @signature_provider = SignatureProvider.new(@session)
       @definition_provider = DefinitionProvider.new(@session)
 
-      if message = InitializationProvider.new(@session).provide
-        send_message(message)
-      end
+      (InitializationProvider.new(@session).provide || []).each { |notification| after_notifications.push(notification) }
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(
@@ -136,6 +145,7 @@ module Yoda
     end
 
     def handle_initialized(_params)
+      session.client_initialized = true
     end
 
     def handle_shutdown(_params)
