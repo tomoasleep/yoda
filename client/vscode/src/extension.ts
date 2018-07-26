@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "yoda" is now active!');
 
     let execOptions = {
-        command: path.resolve(__dirname, '../../../exe/yoda'),
+        command: 'yoda',
         args: ['server'],
     }
 
@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    let disposable = new LanguageClient('yoda', 'Yoda Language Server', serverOptions, clientOptions).start();
+    let disposable = new LanguageClient('yoda', 'Yoda', serverOptions, clientOptions).start();
 }
 
 // this method is called when your extension is deactivated
