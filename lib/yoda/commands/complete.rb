@@ -1,14 +1,11 @@
 module Yoda
-  module Runner
-    class Infer
+  module Commands
+    class Complete < Base
+      include FileCursorParsable
+
       attr_reader :filename_with_position
 
-      # @param filename_with_position [String]
-      def self.run(filename_with_position)
-        new(filename_with_position).run
-      end
-
-      # @param filename_with_position [String]
+      # @param filename_with_position [String] position representation with the format `path/to/file:line_num:character_num`
       def initialize(filename_with_position)
         @filename_with_position = filename_with_position
       end
@@ -33,17 +30,6 @@ module Yoda
 
       def project
         @project ||= Store::Project.new(Dir.pwd)
-      end
-
-      def filename
-        @filename ||= filename_with_position.split(':').first
-      end
-
-      def position
-        @position ||= begin
-          row, column = filename_with_position.split(':').slice(1..2)
-          Parsing::Location.new(row: row.to_i, column: column.to_i)
-        end
       end
     end
   end

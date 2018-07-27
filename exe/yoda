@@ -5,23 +5,4 @@ if Dir.exist?(File.join(__dir__, "..", ".git"))
 end
 
 require 'yoda'
-require 'optparse'
-
-opt = OptionParser.new("Usage: yoda [options]") do |opt|
-end
-
-argv = opt.parse(ARGV)
-
-case argv.first
-when 'setup'
-  require 'pry'
-  Pry::rescue { Yoda::Runner::Setup.run(argv[1]) }
-when 'infer'
-  require 'pry'
-  Pry::rescue { Yoda::Runner::Infer.run(argv[1]) }
-when 'server'
-  Yoda::Server.new.run
-else
-  puts opt.help
-  exit 1
-end
+Yoda::Commands::Top.start(ARGV)
