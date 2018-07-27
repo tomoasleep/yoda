@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'yard', '~> 0.9.11'
+  spec.add_dependency 'thor', '~> 0.20.0'
   spec.add_dependency 'parslet', '~> 1.8'
   spec.add_dependency 'parser', '~> 2.0'
   spec.add_dependency 'language_server-protocol', '~> 3.7.0.0'
