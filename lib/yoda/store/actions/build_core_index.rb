@@ -31,11 +31,11 @@ module Yoda
 
         def build_core_index
           o, e = Open3.capture2e(script_path)
-          STDERR.puts o unless o.empty?
+          Logger.debug o unless o.empty?
           if e.success?
-            STDERR.puts "Success to build yard index"
+            Logger.info "Success to build yard index"
           else
-            STDERR.puts "Failed to build #{gem_name} #{gem_version}"
+            Logger.warn "Failed to build #{gem_name} #{gem_version}"
           end
         end
       end

@@ -42,22 +42,22 @@ module Yoda
 
         def create_dependency_doc
           if yardoc_path
-            STDERR.puts "Gem docs for #{gem_name} #{gem_version} already exist"
+            Logger.info "Gem docs for #{gem_name} #{gem_version} already exist"
             return true
           end
-          STDERR.puts "Building gem docs for #{gem_name} #{gem_version}"
+          Logger.info "Building gem docs for #{gem_name} #{gem_version}"
           begin
             o, e = Open3.capture2e("yard gems #{gem_name} #{gem_version}")
-            STDERR.puts o unless o.empty?
+            Logger.debug o unless o.empty?
             if e.success?
-              STDERR.puts "Done building gem docs for #{gem_name} #{gem_version}"
+              Logger.info "Done building gem docs for #{gem_name} #{gem_version}"
             else
-              STDERR.puts "Failed to build #{gem_name} #{gem_version}"
+              Logger.warn "Failed to build #{gem_name} #{gem_version}"
             end
           rescue => ex
-            STDERR.puts ex
-            STDERR.puts ex.backtrace
-            STDERR.puts "Failed to build #{gem_name} #{gem_version}"
+            Logger.debug ex
+            Logger.debug ex.backtrace
+            Logger.warn "Failed to build #{gem_name} #{gem_version}"
           end
         end
 
@@ -68,9 +68,9 @@ module Yoda
           begin
             YardImporter.import(yardoc_file, root_path: gem_source_path)
           rescue => ex
-            STDERR.puts ex
-            STDERR.puts ex.backtrace
-            STDERR.puts "Failed to load #{yardoc_file}"
+            Logger.debug ex
+            Logger.debug ex.backtrace
+            Logger.warn "Failed to load #{yardoc_file}"
             nil
           end
         end
@@ -79,8 +79,8 @@ module Yoda
         def yardoc_path
           YARD::Registry.yardoc_file_for_gem(gem_name, gem_version)
         rescue Bundler::BundlerError => ex
-          STDERR.puts ex
-          STDERR.puts ex.backtrace
+          Logger.debug ex
+          Logger.debug ex.backtrace
           nil
         end
 

@@ -21,7 +21,6 @@ module Yoda
       end
 
       def setup
-        YARD::Logger.instance(STDERR)
         make_dir
         cache.register_adapter(registry)
       end
