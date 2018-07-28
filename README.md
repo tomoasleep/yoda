@@ -27,7 +27,7 @@ $ yoda complete <path-to-your-code>:<line-num>:<char-num> # Show completion at t
 ### Atom
 
 ```
-apm install github.com/tomoasleep/yoda
+apm install tomoasleep/yoda
 ```
 
 ### VSCode
