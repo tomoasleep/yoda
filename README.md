@@ -1,74 +1,76 @@
 # Yoda (In Progress) [![Build Status](https://travis-ci.org/tomoasleep/yoda.svg?branch=master)](https://travis-ci.org/tomoasleep/yoda)
 
-Yoda is a static analytics tool for Ruby to provide autocompletion, go-to-definition, documentation on hover and so on.
-Yoda is designed to provide these features for multiple editors by using language server protocol (https://microsoft.github.io/language-server-protocol/).
+Yoda is a Language Server for Ruby and provides autocompletion and code analysis (go-to-definition, code information, etc...).
+(To know Language Server, please see http://langserver.org/)
 
-## Language Server
+## Instation and Usage
 
-`yoda server` provides many features such as autocompletion and hovering datatips over language server protocol (https://microsoft.github.io/language-server-protocol/).
+Yoda is hosted on RubyGems.
+
+```
+gem install yoda-language-server
+```
+
+See `Instation of Editor Plugin` section to install Yoda on your editor.
+
+
+Yoda can be also used as a cli tool.
+
+```
+$ yoda setup # You must run this command first for your each project.
+$ yoda infer path-to-your-code:line_num:char_num # Show information of the code at the specified position.
+$ yoda complete <path-to-your-code>:<line-num>:<char-num> # Show completion at the specified position.
+```
+
+## Installation of Editor Plugin
+
+### Atom
+
+```
+apm install github.com/tomoasleep/yoda
+```
+
+### VSCode
+
+TBW
+
+### Vim
+
+TBW
+
+### Emacs
+
+TBW
+
+## Internal
+
+### YARD utilization
+
+Yoda figures structures of your source codes and library codes with YARD.
+Yoda intepret YARD tags such as `@return` tags and `@param` tags and infer code types from these information.
+
+### Indexing
+
+Yoda built index files for fast inference under `<your-project-dir>/.yoda` at startup.
+These index files contains structures of external sources (gems and standard libraries).
+Your project codes are parsed at startup but does not stored in indexes.
 
 ### Supporting Features
 
 - autocompletion
   - [x] method completion
-    - Supported in method bodies only
-  - [ ] constant completion
+  - [x] constant completion
   - [ ] (local, class, instance) variable completion
   - :small_red_triangle: comment completion
     - [x] YARD tag completion
     - [x] YARD type literal completion
     - [ ] parameter completion
-- :small_red_triangle: jump to definition
-  - Supported in method bodies only
-- :small_red_triangle: hover
-  - Supported in method bodies only
-- :small_red_triangle: signature help
-  - Supported in method bodies only
+- [x] jump to definition
+- [x] hover
+- [x] signature help
 - [ ] find references
 - [ ] workspace symbols
 - [ ] diagnostics
-
-## Internal
-
-Yoda analyzes your program structure without executing your code by using ruby parser and YARD.
-Yoda figures program structures of your dependencies from YARD index files and
-figures one of your project codes by parsing your project codes.
-
-Yoda internally uses YARD for program analysis so Yoda can understand type hints written in your comments such as `@return` tags and `@param` tags.
-Yoda utilizes these type hints for completion features.
-
-## Installation
-
-### Install cli command
-
-```
-$ bundle exec rake install
-$ ./scripts/build_core_index.sh # Download Ruby source code and build index of ruby core and stdlib.
-```
-
-You can infer the type of the specified code.
-
-```
-$ yoda setup # Build index for your project
-$ yoda infer <YOUR_FILE_TO_INSPECT>:<LINE_NUMBER>:<COLUMN_NUMBER> 
-```
-
-### Install Atom Package
-
-This repository contains an Atom package to use Yoda.
-(This package is alpha version and it has many bugs.)
-
-This package requires cli
-
-```
-$ ./bin/setup
-$ apm link
-```
-
-
-## Usage
-
-TBW
 
 ## Development
 
