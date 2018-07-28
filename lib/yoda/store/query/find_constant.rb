@@ -62,7 +62,8 @@ module Yoda
           constant_names = path_of(name).split
           namespace = registry.find('Object') unless namespace
           constant_names.reduce(namespace) do |namespace, name|
-            if namespace
+            # @todo resolve its value if namespace is ValueObject
+            if namespace && namespace.is_a?(Objects::NamespaceObject)
               select_constants_from_ancestors(namespace, name).first
             else
               return nil

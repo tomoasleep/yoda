@@ -71,6 +71,15 @@ RSpec.describe Yoda::Store::Query::FindConstant do
         expect(subject.path).to eq('Object')
       end
     end
+
+    context 'with path including assigned constant name is given' do
+      let(:name) { Yoda::Model::Path.new('YF::Constant') }
+
+      # @todo resolve constant assignment
+      it 'does not fails' do
+        expect(subject).to be_nil
+      end
+    end
   end
 
   describe '#select_with_prefix' do
