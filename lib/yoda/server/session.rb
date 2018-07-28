@@ -32,6 +32,7 @@ module Yoda
       end
 
       def setup
+        Store::Actions::BuildCoreIndex.run unless Store::Actions::BuildCoreIndex.exists?
         project.build_cache
       end
 
