@@ -1,5 +1,6 @@
 module Yoda
   require "yoda/version"
+  require "yoda/logger"
   require "yoda/commands"
   require "yoda/errors"
   require "yoda/evaluation"
@@ -10,3 +11,5 @@ module Yoda
   require "yoda/typing"
   require "yoda/yard_extensions"
 end
+
+YARD::Logger.instance.io = Yoda::Logger.instance.pipeline(tag: 'YARD')

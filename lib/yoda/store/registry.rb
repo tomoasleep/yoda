@@ -68,7 +68,7 @@ module Yoda
 
         adapter.batch_write(data, bar)
         adapter.sync
-        STDERR.puts "saved #{el_keys.length} keys."
+        Logger.info "saved #{el_keys.length} keys."
         @patch_set = Objects::PatchSet.new
       end
 

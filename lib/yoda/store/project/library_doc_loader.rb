@@ -56,7 +56,7 @@ module Yoda
         # @return [Objects::ProjectStatus::BundleStatus]
         def update_bundle(bundle_status, progress: false)
           unless bundle_status.all_present?
-            STDERR.puts 'Constructing database for the current project.'
+            Logger.info 'Constructing database for the current project.'
             bundle_status = import_deps(bundle_status)
             registry.compress_and_save(progress: progress)
           end

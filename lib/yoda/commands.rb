@@ -10,25 +10,41 @@ module Yoda
     require 'yoda/commands/complete'
 
     class Top < Thor
+      class_option :log_level, type: :string, desc: 'Set log level (debug info warn error fatal)'
+
       desc 'setup', 'Setup indexes for current Ruby version and project gems'
       option :force_build, type: :boolean, desc: "If enabled, (re)build current project's index forcibly"
       def setup
+        process_class_options
         Commands::Setup.run(force_build: options[:force_build])
       end
 
       desc 'infer POSITION', 'Infer the type of value at the specified position'
       def infer(position)
+        process_class_options
         Commands::Infer.run(position)
       end
 
       desc 'complete POSITION', 'Provide completion candidates for the specified position'
       def complete(position)
+        process_class_options
         Commands::Complete.run(position)
       end
 
       desc 'server', 'Start Language Server'
       def server
+        process_class_options
         Server.new.run
+      end
+
+      private
+
+      def process_class_options
+        set_log_level
+      end
+
+      def set_log_level
+        Yoda::Logger.log_level = options[:log_level].to_sym if options[:log_level]
       end
     end
   end

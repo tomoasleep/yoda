@@ -59,8 +59,8 @@ module Yoda
           end
           process_after_notifications if session&.client_initialized
         rescue StandardError => ex
-          STDERR.puts ex
-          STDERR.puts ex.backtrace
+          Logger.warn ex
+          Logger.warn ex.backtrace
         end
       end
     end

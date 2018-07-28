@@ -16,10 +16,10 @@ module Yoda
       def run
         build_core_index
         if File.exist?(File.expand_path('Gemfile.lock', dir)) || force_build
-          STDERR.puts 'Building index for the current project...'
+          Logger.info 'Building index for the current project...'
           force_build ? project.rebuild_cache(progress: true) : project.build_cache(progress: true)
         else
-          STDERR.puts 'Skipped building project index because Gemfile.lock is not exist for the current dir'
+          Logger.info 'Skipped building project index because Gemfile.lock is not exist for the current dir'
         end
       end
 
