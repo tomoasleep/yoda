@@ -11,8 +11,9 @@ module Yoda
 
     class Top < Thor
       desc 'setup', 'Setup indexes for current Ruby version and project gems'
+      option :force_build, type: :boolean, desc: "If enabled, (re)build current project's index forcibly"
       def setup
-        Commands::Setup.run
+        Commands::Setup.run(force_build: options[:force_build])
       end
 
       desc 'infer POSITION', 'Infer the type of value at the specified position'
