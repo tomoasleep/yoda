@@ -127,5 +127,22 @@ RSpec.describe Yoda::Typing::Evaluator do
         expect(subject).to be_a(Yoda::Model::Types::Base)
       end
     end
+
+    context 'with empty body method' do
+      include_context 'define a method to root'
+
+      let(:ast) do
+        s(:begin,
+          s(:def, :handle_shutdown,
+            s(:args,
+              s(:arg, :_params)), nil),
+          s(:nil),
+        )
+      end
+
+      it 'does not fail' do
+        expect(subject).to eq(Yoda::Model::Types::ValueType.new('nil'))
+      end
+    end
   end
 end

@@ -200,8 +200,9 @@ module Yoda
         new_caller_object = context.lexical_scope.namespace
         method_object = Store::Query::FindSignature.new(context.registry).select(new_caller_object, node.children[-3].to_s).first
         new_context = context.derive(caller_object: new_caller_object)
-        new_context.env.bind_method_parameters(method_object)
-        self.class.new(new_context).process(node.children[-1])
+        new_context.env.bind_method_parameters(method_object) if method_object
+        method_body_node = node.children[-1]
+        method_body_node ? self.class.new(new_context).process(method_body_node) : nil_type
       end
 
       # @param node [::AST::Node]
@@ -211,9 +212,7 @@ module Yoda
         new_caller_object = type.resolve(context.registry).first
         method_object = Store::Query::FindSignature.new(context.registry).select(new_caller_object, node.children[-3].to_s).first
         new_context = context.derive(caller_object: new_caller_object)
-        if method_object
-          new_context.env.bind_method_parameters(method_object)
-        end
+        new_context.env.bind_method_parameters(method_object) if method_object
         self.class.new(new_context).process(node.children[-1])
       end
 
@@ -236,6 +235,10 @@ module Yoda
 
       def unknown_type
         Model::Types::UnknownType.new
+      end
+
+      def nil_type
+        Model::Types::ValueType.new('nil')
       end
 
       # @return [Environment]
