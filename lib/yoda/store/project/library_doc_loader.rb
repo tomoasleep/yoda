@@ -15,8 +15,7 @@ module Yoda
           # @param project [Project]
           # @return [LibraryDocLoader]
           def build_for(project)
-            lockfile_parser = parse_gemfile_lock(project.root_path, Cache.gemfile_lock_path(project.root_path))
-            new(registry: project.registry, gem_specs: lockfile_parser&.specs || [])
+            new(registry: project.registry, gem_specs: gem_specs(project))
           end
 
           private
@@ -26,6 +25,13 @@ module Yoda
             return if !gemfile_lock_path || !File.exists?(gemfile_lock_path)
             Dir.chdir(root_path) do
               Bundler::LockfileParser.new(File.read(gemfile_lock_path))
+            end
+          end
+
+          def gem_specs(project)
+            lockfile_parser = parse_gemfile_lock(project.root_path, Cache.gemfile_lock_path(project.root_path))
+            (lockfile_parser&.specs || []).reject do |spec|
+              spec.source.is_a?(Bundler::Source::Path) && (File.expand_path(spec.source.path) == File.expand_path(project.root_path))
             end
           end
         end
