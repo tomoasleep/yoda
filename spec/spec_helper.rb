@@ -19,4 +19,4 @@ RSpec.configure do |config|
 end
 
 YARD::Logger.instance(File.open(File::Constants::NULL, 'w'))
-require_relative './support/helpers/type_helper'
+require_relative './support/helpers'

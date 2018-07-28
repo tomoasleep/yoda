@@ -3,14 +3,18 @@ require 'spec_helper'
 RSpec.describe Yoda::Evaluation::Evaluator do
   let(:evaluator) { described_class.from_ast(registry, ast, location) }
   let(:source) { File.read(File.expand_path(path, fixture_root)) }
-  let(:source_analyzer) { Yoda::Parsing::SourceAnalyzer.from_source(source, location) }
+  let(:source_string) { nil }
+  let(:source_analyzer) { Yoda::Parsing::SourceAnalyzer.from_source(source_string || source, location) }
   let(:ast) { source_analyzer.ast }
   let(:current_node) { source_analyzer.nodes_to_current_location_from_root.last }
 
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
   let(:project) { Yoda::Store::Project.new(fixture_root) }
   let(:registry) { project.registry }
-  before { project.build_cache }
+  before do
+    project.build_cache
+    ReadSourceHelper.read_source(project: project, source: source_string) if source_string
+  end
 
   describe '#calculate_trace' do
     subject { evaluator.calculate_trace(current_node) }
