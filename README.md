@@ -1,7 +1,8 @@
-# Yoda (In Progress) [![Build Status](https://travis-ci.org/tomoasleep/yoda.svg?branch=master)](https://travis-ci.org/tomoasleep/yoda)
+# Yoda [![Build Status](https://travis-ci.org/tomoasleep/yoda.svg?branch=master)](https://travis-ci.org/tomoasleep/yoda)
 
-Yoda is a Language Server for Ruby and provides autocompletion and code analysis (go-to-definition, code information, etc...).
-(To know Language Server, please see http://langserver.org/)
+Yoda is a Language Server (http://langserver.org/) for Ruby and provides autocompletion and code analysis (go-to-definition, code information, etc...).  
+
+**Note: Yoda is alpha version. Please use with caution. Contributions are welcome!**
 
 ## Instation and Usage
 
@@ -34,9 +35,16 @@ apm install tomoasleep/yoda
 
 TBW
 
-### Vim
+### Vim/NeoVim
 
-TBW
+Please use language server client such as [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim).
+Here is a configuration example for LanguageClient-neovim.
+
+```vim
+let g:LanguageClient_serverCommands = {
+    \ 'ruby': ['yoda', 'server'],
+    \ }
+```
 
 ### Emacs
 
@@ -46,13 +54,13 @@ TBW
 
 ### YARD utilization
 
-Yoda figures structures of your source codes and library codes with YARD.
+Yoda figures structures of your source codes and library codes with YARD.  
 Yoda intepret YARD tags such as `@return` tags and `@param` tags and infer code types from these information.
 
 ### Indexing
 
-Yoda built index files for fast inference under `<your-project-dir>/.yoda` at startup.
-These index files contains structures of external sources (gems and standard libraries).
+Yoda built index files for fast inference under `<your-project-dir>/.yoda` at startup.  
+These index files contains structures of external sources (gems and standard libraries).  
 Your project codes are parsed at startup but does not stored in indexes.
 
 ### Supporting Features
