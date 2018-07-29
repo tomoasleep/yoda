@@ -56,6 +56,7 @@ module Yoda
       private
 
       def load_project_files
+        Logger.debug('Loading current project files...')
         Actions::ReadProjectFiles.new(registry, root_path).run
       end
 
