@@ -31,17 +31,17 @@ module Yoda
       end
 
       # @return [Array<BaseError>]
-      def build_cache(progress: false)
+      def build_cache
         setup
         loader = LibraryDocLoader.build_for(self)
-        loader.run(progress: progress)
+        loader.run
         load_project_files
         loader.errors
       end
 
-      def rebuild_cache(progress: false)
+      def rebuild_cache
         clear
-        build_cache(progress: progress)
+        build_cache
       end
 
       def yoda_dir
@@ -57,6 +57,7 @@ module Yoda
 
       def load_project_files
         Logger.debug('Loading current project files...')
+        Instrument.instance.initialization_progress(phase: :load_project_files, message: 'Loading current project files')
         Actions::ReadProjectFiles.new(registry, root_path).run
       end
 

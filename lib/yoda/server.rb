@@ -146,7 +146,7 @@ module Yoda
       @signature_provider = SignatureProvider.new(@session)
       @definition_provider = DefinitionProvider.new(@session)
 
-      (InitializationProvider.new(@session).provide || []).each { |notification| after_notifications.push(notification) }
+      (InitializationProvider.new(session: session, notifier: notifier).provide || []).each { |notification| after_notifications.push(notification) }
 
       LSP::Interface::InitializeResult.new(
         capabilities: LSP::Interface::ServerCapabilities.new(

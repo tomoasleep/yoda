@@ -14,7 +14,15 @@ module Yoda
         end
 
         def run
-          project_files.each { |file| ReadFile.run(registry, file) }
+          files = project_files
+          progress = Instrument::Progress.new(files.length) do |index:, length:|
+            Instrument.instance.initialization_progress(phase: :load_project_files, message: "Loading current project files (#{index} / #{length})", index: index, length: length)
+          end
+
+          files.each do |file|
+            ReadFile.run(registry, file)
+            progress.increment
+          end
         end
 
         private

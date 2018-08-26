@@ -67,6 +67,7 @@ module Yoda
         # @param bundle_status [Objects::ProjectStatus::BundleStatus]
         # @return [Objects::ProjectStatus::BundleStatus]
         def import_deps(bundle_status)
+          Instrument.instance.initialization_progress(phase: :load_core, message: 'Loading core index')
           bundle_status = import_core(bundle_status) unless bundle_status.std_status.core_present?
           bundle_status = import_std(bundle_status) unless bundle_status.std_status.std_present?
           import_gems(bundle_status)
@@ -91,16 +92,20 @@ module Yoda
         # @param bundle_status [Objects::ProjectStatus::BundleStatus]
         # @return [Objects::ProjectStatus::BundleStatus]
         def import_gems(bundle_status)
-          gem_statuses = bundle_status.gem_statuses.map do |gem_status|
-            if gem_status.present?
-              gem_status
-            else
-              result = Actions::ImportGem.run(registry: registry, gem_name: gem_status.name, gem_version: gem_status.version)
-              errors.push(GemImportError.new(name: gem_status.name, version: gem_status.version)) unless result
-              gem_status.derive(present: result)
-            end
+          present_gem_statuses, absent_gem_statuses = bundle_status.gem_statuses.partition { |gem_status| gem_status.present? }
+
+          progress = Instrument::Progress.new(absent_gem_statuses.length) do |index:, length:|
+            Instrument.instance.initialization_progress(phase: :load_gems, message: "Loading gems (#{index} / #{length})", index: index, length: length)
           end
-          bundle_status.derive(gem_statuses: gem_statuses)
+
+          new_gem_statuses = absent_gem_statuses.map do |gem_status|
+            result = Actions::ImportGem.run(registry: registry, gem_name: gem_status.name, gem_version: gem_status.version)
+            progress.increment
+            errors.push(GemImportError.new(name: gem_status.name, version: gem_status.version)) unless result
+            gem_status.derive(present: result)
+          end
+
+          bundle_status.derive(gem_statuses: present_gem_statuses + new_gem_statuses)
         end
       end
     end

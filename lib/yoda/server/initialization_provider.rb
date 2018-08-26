@@ -4,14 +4,21 @@ module Yoda
       # @return [Session]
       attr_reader :session
 
+      # @return [Notifier]
+      attr_reader :notifier
+
       # @param session [Session]
-      def initialize(session)
+      # @param nofitier [Notifier]
+      def initialize(session:, notifier:)
         @session = session
+        @notifier = notifier
       end
 
       # @return [LanguageServer::Protocol::Interface::ShowMessageParams, nil]
       def provide
-        errors = session.setup
+        errors = Instrument.instance.hear(initialization_progress: method(:notify_initialization_progress)) do
+          session.setup
+        end
         build_complete_message(errors)
       end
 
@@ -79,6 +86,10 @@ module Yoda
         Failed to import some core libraries (Ruby version: #{RUBY_VERSION}).
         Please execute `yoda setup` with Ruby version #{RUBY_VERSION}.
         EOS
+      end
+
+      def notify_initialization_progress(phase: nil, message: nil, **params)
+        notifier.event(type: :initialization, phase: phase, message: message)
       end
     end
   end
