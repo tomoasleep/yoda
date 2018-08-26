@@ -24,7 +24,7 @@ module Yoda
 
         # @return [String]
         def to_s
-          value
+          'any'
         end
       end
     end
