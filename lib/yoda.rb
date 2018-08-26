@@ -1,6 +1,7 @@
 module Yoda
   require "yoda/version"
   require "yoda/logger"
+  require "yoda/instrument"
   require "yoda/commands"
   require "yoda/errors"
   require "yoda/evaluation"
