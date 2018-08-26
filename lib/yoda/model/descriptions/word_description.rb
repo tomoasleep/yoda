@@ -23,7 +23,7 @@ module Yoda
         # @return [String]
         def to_markdown
           <<~EOS
-          word
+          #{word}
           EOS
         end
       end
