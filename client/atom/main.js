@@ -7,6 +7,26 @@ class YodaClient extends AutoLanguageClient {
     super()
   }
 
+  preInitialization(connection) {
+    connection.onTelemetryEvent(({ type, phase, message }) => {
+      if (!this.busySignalService) { return; }
+      if (type != 'initialization') { return; }
+
+      if (this.initializationBusyMessage) {
+        this.initializationBusyMessage.setTitle(message);
+      } else {
+        this.initializationBusyMessage = this.busySignalService.reportBusy(message);
+      }
+    });
+  }
+
+  postInitialization(_server) {
+    if (this.initializationBusyMessage) {
+      this.initializationBusyMessage.dispose();
+      this.initializationBusyMessage = null;
+    }
+  }
+
   getGrammarScopes () { return ['source.ruby', 'source.rb', 'source.ruby.rails'] }
   getLanguageName () { return 'Ruby' }
   getServerName () { return 'Yoda' }
