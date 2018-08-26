@@ -1,5 +1,4 @@
 require 'yard'
-require 'ruby-progressbar'
 
 module Yoda
   module Store
@@ -56,17 +55,16 @@ module Yoda
 
       # Store patch set data to the database.
       # old data in the database are discarded.
-      # @param progress [true, false]
-      def compress_and_save(progress: false)
+      def compress_and_save
         return unless adapter
         el_keys = patch_set.keys
-        bar = ProgressBar.create(format: " %c/%C |%w>%i| %e ", total: el_keys.length) if progress
+        progress = Instrument::Progress.new(el_keys.length) { |length:, index:| Instrument.instance.registry_dump(index: index, length: length) }
 
         data = Enumerator.new do |yielder|
           el_keys.each { |key| yielder << [key, patch_set.find(key)] }
         end
 
-        adapter.batch_write(data, bar)
+        adapter.batch_write(data, progress)
         adapter.sync
         Logger.info "saved #{el_keys.length} keys."
         @patch_set = Objects::PatchSet.new

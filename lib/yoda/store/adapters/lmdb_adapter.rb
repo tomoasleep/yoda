@@ -33,7 +33,7 @@ module Yoda
         end
 
         # @param data [Enumerator<(String, Object)>]
-        # @param bar [ProgressBar, nil]
+        # @param bar [#increment, nil]
         def batch_write(data, bar)
           env = LMDB.new(@path, mapsize: @env.info[:mapsize], writemap: true, mapasync: true, nosync: true)
           db = env.database('main', create: true)

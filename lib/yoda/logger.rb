@@ -2,11 +2,11 @@ require 'forwardable'
 
 module Yoda
   class Logger
-    LOG_LEVELS = %i(debug info warn error fatal).freeze
+    LOG_LEVELS = %i(trace debug info warn error fatal).freeze
 
     class << self
       extend Forwardable
-      def_delegators :instance, *%i(pipeline debug info warn error fatal log_level allow_debug? allow_info? allow_warn? allow_error? allow_fatal? log_level=)
+      def_delegators :instance, *%i(pipeline trace debug info warn error fatal log_level allow_debug? allow_info? allow_warn? allow_error? allow_fatal? log_level=)
 
       # @return [Yoda::Logger]
       def instance
@@ -23,7 +23,7 @@ module Yoda
         define_method(level) do |content, tag: nil|
           return unless public_send("allow_#{level}?")
           prefix = "[#{level}]#{tag ? ' (' + tag + ')' : '' } "
-          io.puts(prefix + content.split("\n").join(prefix))
+          io.puts(prefix + content.to_s.split("\n").join(prefix))
         end
 
         define_method("allow_#{level}?") do

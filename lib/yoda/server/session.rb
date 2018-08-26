@@ -32,7 +32,10 @@ module Yoda
       end
 
       def setup
-        Store::Actions::BuildCoreIndex.run unless Store::Actions::BuildCoreIndex.exists?
+        unless Store::Actions::BuildCoreIndex.exists?
+          Instrument.instance.initialization_progress(phase: :core, message: 'Downloading and building core index')
+          Store::Actions::BuildCoreIndex.run
+        end
         project.build_cache
       end
 
