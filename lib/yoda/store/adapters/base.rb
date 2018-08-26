@@ -52,6 +52,12 @@ module Yoda
         def clear
           fail NotImplementedError
         end
+
+        # @param data [Enumerator<(String, Object)>]
+        # @param bar [#increment, nil]
+        # @abstract
+        def batch_write(data, bar)
+        end
       end
     end
   end

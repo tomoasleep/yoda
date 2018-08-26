@@ -44,9 +44,9 @@ module Yoda
           @errors = []
         end
 
-        def run(progress: false)
+        def run
           project_status = registry.project_status || Objects::ProjectStatus.initial_build(specs: gem_specs)
-          new_bundle_status = update_bundle(project_status.bundle, progress: progress)
+          new_bundle_status = update_bundle(project_status.bundle)
           registry.save_project_status(project_status.derive(bundle: new_bundle_status))
         end
 
@@ -54,11 +54,11 @@ module Yoda
 
         # @param bundle_status [Objects::ProjectStatus::BundleStatus]
         # @return [Objects::ProjectStatus::BundleStatus]
-        def update_bundle(bundle_status, progress: false)
+        def update_bundle(bundle_status)
           unless bundle_status.all_present?
             Logger.info 'Constructing database for the current project.'
             bundle_status = import_deps(bundle_status)
-            registry.compress_and_save(progress: progress)
+            registry.compress_and_save
           end
           bundle_status
         end
