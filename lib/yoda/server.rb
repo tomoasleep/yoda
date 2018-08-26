@@ -3,6 +3,7 @@ require 'securerandom'
 
 module Yoda
   class Server
+    require 'yoda/server/notifier'
     require 'yoda/server/completion_provider'
     require 'yoda/server/signature_provider'
     require 'yoda/server/hover_provider'
@@ -45,6 +46,11 @@ module Yoda
       @reader = LSP::Transport::Stdio::Reader.new
       @writer = LSP::Transport::Stdio::Writer.new
       @after_notifications = []
+    end
+
+    # @return [Notifier]
+    def notifier
+      @notifier ||= Notifier.new(self)
     end
 
     def run
