@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    yoda-language-server (0.5.0)
+    yoda-language-server (0.6.0)
       language_server-protocol (~> 3.7.0.0)
       leveldb (~> 0.1.9)
       lmdb (~> 0.4.8)
@@ -57,10 +57,10 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.1)
-    ruby-progressbar (1.9.0)
+    ruby-progressbar (1.10.0)
     stackprof (0.2.11)
     thor (0.20.0)
-    yard (0.9.15)
+    yard (0.9.16)
 
 PLATFORMS
   ruby
