@@ -35,7 +35,7 @@ module Yoda
           if e.success?
             Logger.info "Success to build yard index"
           else
-            Logger.warn "Failed to build #{gem_name} #{gem_version}"
+            Logger.warn "Failed to build core index"
           end
         end
       end
