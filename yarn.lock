@@ -2,12 +2,46 @@
 # yarn lockfile v1
 
 
-atom-languageclient@^0.7.3:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/atom-languageclient/-/atom-languageclient-0.7.3.tgz#4d5c859baab3f3394dc45129935b3037719542fb"
+"@types/atom@^1.28.0":
+  version "1.28.0"
+  resolved "https://registry.yarnpkg.com/@types/atom/-/atom-1.28.0.tgz#1c80cfa41381b6609e3eac4f84c013cd5069d36d"
   dependencies:
-    vscode-jsonrpc "^3.5.0"
+    "@types/node" "*"
 
-vscode-jsonrpc@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/vscode-jsonrpc/-/vscode-jsonrpc-3.5.0.tgz#87239d9e166b2d7352245b8a813597804c1d63aa"
+"@types/node@*":
+  version "10.9.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.9.2.tgz#f0ab8dced5cd6c56b26765e1c0d9e4fdcc9f2a00"
+
+"@types/node@^8.0.41":
+  version "8.10.28"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.28.tgz#03bf70dd7f1de7826251331ce57beddf7f9dd253"
+
+atom-languageclient@^0.9.5:
+  version "0.9.6"
+  resolved "https://registry.yarnpkg.com/atom-languageclient/-/atom-languageclient-0.9.6.tgz#2bbb8fad72ae183c0a7d5ac3cbeea87358ecf260"
+  dependencies:
+    "@types/atom" "^1.28.0"
+    "@types/node" "^8.0.41"
+    fuzzaldrin-plus "^0.6.0"
+    vscode-jsonrpc "^3.6.0"
+    vscode-languageserver-protocol "3.6.0-next.5"
+    vscode-languageserver-types "^3.6.0-next.1"
+
+fuzzaldrin-plus@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/fuzzaldrin-plus/-/fuzzaldrin-plus-0.6.0.tgz#832f6489fbe876769459599c914a670ec22947ee"
+
+vscode-jsonrpc@^3.6.0, vscode-jsonrpc@^3.6.0-next.1:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/vscode-jsonrpc/-/vscode-jsonrpc-3.6.2.tgz#3b5eef691159a15556ecc500e9a8a0dd143470c8"
+
+vscode-languageserver-protocol@3.6.0-next.5:
+  version "3.6.0-next.5"
+  resolved "https://registry.yarnpkg.com/vscode-languageserver-protocol/-/vscode-languageserver-protocol-3.6.0-next.5.tgz#ed2ec2db759826f753c0a13977dfb2bedc4d31b3"
+  dependencies:
+    vscode-jsonrpc "^3.6.0-next.1"
+    vscode-languageserver-types "^3.6.0-next.1"
+
+vscode-languageserver-types@^3.6.0-next.1:
+  version "3.12.0"
+  resolved "https://registry.yarnpkg.com/vscode-languageserver-types/-/vscode-languageserver-types-3.12.0.tgz#f96051381b6a050b7175b37d6cb5d2f2eb64b944"
