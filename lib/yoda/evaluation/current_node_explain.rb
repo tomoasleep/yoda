@@ -1,5 +1,6 @@
 module Yoda
   module Evaluation
+    # CurrentNodeExplain shows help for the current node.
     class CurrentNodeExplain
       # @return [Store::Registry]
       attr_reader :registry
