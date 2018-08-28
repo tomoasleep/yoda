@@ -12,6 +12,7 @@ module Yoda
           end
         end
 
+        # @param registry [Registry]
         def initialize(registry)
           @registry = registry
         end
