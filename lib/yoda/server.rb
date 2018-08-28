@@ -213,28 +213,36 @@ module Yoda
         uri = params[:text_document][:uri]
         position = params[:position]
 
-        completion_provider&.complete(uri, position)
+        notifier.busy(type: :text_document_completion) do
+          completion_provider&.complete(uri, position)
+        end
       end
 
       def handle_text_document_hover(params)
         uri = params[:text_document][:uri]
         position = params[:position]
 
-        hover_provider&.request_hover(uri, position)
+        notifier.busy(type: :text_document_hover) do
+          hover_provider&.request_hover(uri, position)
+        end
       end
 
       def handle_text_document_signature_help(params)
         uri = params[:text_document][:uri]
         position = params[:position]
 
-        signature_provider&.provide(uri, position)
+        notifier.busy(type: :text_document_signature_help) do
+          signature_provider&.provide(uri, position)
+        end
       end
 
       def handle_text_document_definition(params)
         uri = params[:text_document][:uri]
         position = params[:position]
 
-        definition_provider&.provide(uri, position)
+        notifier.busy(type: :text_document_definition) do
+          definition_provider&.provide(uri, position)
+        end
       end
     end
     include TextDocument

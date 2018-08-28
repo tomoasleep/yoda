@@ -58,6 +58,7 @@ module Yoda
           unless bundle_status.all_present?
             Logger.info 'Constructing database for the current project.'
             bundle_status = import_deps(bundle_status)
+            Instrument.instance.initialization_progress(phase: :save, message: 'Saving registry')
             registry.compress_and_save
           end
           bundle_status

@@ -1,6 +1,7 @@
 module Yoda
   class Server
     class HoverProvider
+      # @return [Session]
       attr_reader :session
 
       # @param session [Session]

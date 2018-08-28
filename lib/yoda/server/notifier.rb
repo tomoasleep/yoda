@@ -6,6 +6,14 @@ module Yoda
         @server = server
       end
 
+      # @param type [Symbol]
+      def busy(type:)
+        event(type: type, phase: :begin)
+        yield
+      ensure
+        event(type: type, phase: :end)
+      end
+
       # @param params [Hash]
       def event(params)
         server.send_notification(method: 'telemetry/event', params: params)
