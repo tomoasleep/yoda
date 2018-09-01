@@ -9,9 +9,6 @@ module Yoda
       # @return [Adapters::LmdbAdapter, nil]
       attr_reader :adapter
 
-      # @param adapter [Adapters::LmdbAdapter]
-      attr_writer :adapter
-
       # @return [Objects::PatchSet]
       attr_reader :patch_set
 
@@ -51,6 +48,12 @@ module Yoda
       # @return [true, false]
       def has_key?(path)
         adapter&.exists?(path) || patch_set.has_key?(path)
+      end
+
+      def clear
+        lock.with_write_lock do
+          adapter.clear
+        end
       end
 
       # Store patch set data to the database.
