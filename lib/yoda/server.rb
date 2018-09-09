@@ -5,6 +5,7 @@ module Yoda
   class Server
     require 'yoda/server/session'
     require 'yoda/server/file_store'
+    require 'yoda/server/concurrent_writer'
     require 'yoda/server/notifier'
     require 'yoda/server/completion_provider'
     require 'yoda/server/signature_provider'
@@ -22,7 +23,7 @@ module Yoda
     # @type ::LanguageServer::Protocol::Transport::Stdio::Reader
     attr_reader :reader
 
-    # @type ::LanguageServer::Protocol::Transport::Stdio::Writer
+    # @return [ConcurrentWriter]
     attr_reader :writer
 
     # @return [Responser]
@@ -45,8 +46,8 @@ module Yoda
 
     def initialize
       @reader = LSP::Transport::Stdio::Reader.new
-      @writer = LSP::Transport::Stdio::Writer.new
       @after_notifications = []
+      @writer = ConcurrentWriter.new(LanguageServer::Protocol::Transport::Stdio::Writer.new)
     end
 
     # @return [Notifier]
