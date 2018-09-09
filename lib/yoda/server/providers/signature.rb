@@ -8,9 +8,7 @@ module Yoda
 
         # @param params [Hash]
         def provide(params)
-          notifier.busy(type: :text_document_signature_help) do
-            calculate(params[:text_document][:uri], params[:position])
-          end
+          calculate(params[:text_document][:uri], params[:position])
         end
 
         private

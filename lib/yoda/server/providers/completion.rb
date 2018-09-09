@@ -10,9 +10,7 @@ module Yoda
           uri = params[:text_document][:uri]
           position = params[:position]
 
-          notifier.busy(type: :text_document_completion) do
-            calculate(uri, position)
-          end
+          calculate(uri, position)
         end
 
         private

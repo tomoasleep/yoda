@@ -41,7 +41,7 @@ module Yoda
         return write_response(id, build_error_response(NOT_INITIALIZED)) unless session
 
         if provider = Providers.build_provider(notifier: notifier, session: session, method: method)
-          provide_async(provider: provider, id: id, params: params)
+          provide_async(provider: provider, id: id, method: method, params: params)
         else
           write_response(id, build_error_response(NotImplementedMethod.new(method)))
         end
@@ -72,9 +72,9 @@ module Yoda
       end
 
       # @return [Concurrent::Future]
-      def provide_async(provider:, id:, params:)
+      def provide_async(provider:, id:, method:, params:)
         future = Concurrent::Future.new(executor: thread_pool) do
-          provider.provide(params)
+          notifier.busy(type: method, id: id) { provider.provide(params) }
         end
         future.add_observer do |_time, value, reason|
           begin

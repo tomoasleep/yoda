@@ -7,11 +7,11 @@ module Yoda
       end
 
       # @param type [Symbol]
-      def busy(type:)
-        event(type: type, phase: :begin)
+      def busy(type:, id: nil)
+        event(type: type, phase: :begin, id: id)
         yield
       ensure
-        event(type: type, phase: :end)
+        event(type: type, phase: :end, id: id)
       end
 
       # @param params [Hash]

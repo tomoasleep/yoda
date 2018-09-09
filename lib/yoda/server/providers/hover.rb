@@ -7,7 +7,7 @@ module Yoda
         end
 
         def provide(params)
-          notifier.busy(type: :text_document_hover) { calculate(params[:text_document][:uri], params[:position]) }
+          calculate(params[:text_document][:uri], params[:position]) 
         end
 
         private
