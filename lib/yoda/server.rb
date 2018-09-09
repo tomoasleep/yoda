@@ -3,6 +3,8 @@ require 'securerandom'
 
 module Yoda
   class Server
+    require 'yoda/server/session'
+    require 'yoda/server/file_store'
     require 'yoda/server/notifier'
     require 'yoda/server/completion_provider'
     require 'yoda/server/signature_provider'
@@ -10,7 +12,6 @@ module Yoda
     require 'yoda/server/definition_provider'
     require 'yoda/server/initialization_provider'
     require 'yoda/server/deserializer'
-    require 'yoda/server/session'
 
     LSP = ::LanguageServer::Protocol
 
