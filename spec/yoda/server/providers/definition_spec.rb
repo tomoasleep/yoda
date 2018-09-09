@@ -1,34 +1,34 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Server::DefinitionProvider do
-  LSP = ::LanguageServer::Protocol
+RSpec.describe Yoda::Server::Providers::Definition do
+  include FileUriHelper
 
-  def file_uri(path)
-    "file://#{File.expand_path(path, fixture_root)}"
-  end
-
-  let(:session) { described_class.new }
-
-  let(:root_path) { fixture_root }
-  let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
-  let(:root_uri) { file_uri(root_path) }
-
-  let(:session) { Yoda::Server::Session.new(root_uri) }
-  let(:provider) { described_class.new(session) }
+  let(:session) { Yoda::Server::Session.new(fixture_root_uri) }
+  let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
+  let(:notifier) { Yoda::Server::Notifier.new(writer) }
+  let(:provider) { described_class.new(session: session, notifier: notifier) }
 
   describe '#provide' do
     before do
       session.setup
       session.file_store.load(uri)
     end
-    subject { provider.provide(uri, position) }
+    let(:params) do
+      {
+        text_document: {
+          uri: uri,
+        },
+        position: position,
+      }
+    end
+    subject { provider.provide(params) }
 
     context 'request information on constant node in sample function' do
       let(:uri) { file_uri('lib/sample2.rb') }
       let(:position) { { line: 22, character: 10 } }
 
       it 'returns infomation of method1' do
-        expect(subject).to contain_exactly(be_a(LSP::Interface::Location))
+        expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
         expect(subject).to contain_exactly(
           have_attributes(
             uri: uri,
@@ -43,7 +43,7 @@ RSpec.describe Yoda::Server::DefinitionProvider do
       let(:position) { { line: 26, character: 10 } }
 
       it 'returns infomation of method1' do
-        expect(subject).to contain_exactly(be_a(LSP::Interface::Location))
+        expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
         expect(subject).to contain_exactly(
           have_attributes(
             uri: uri,

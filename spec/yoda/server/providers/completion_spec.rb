@@ -1,27 +1,27 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Server::CompletionProvider do
-  LSP = ::LanguageServer::Protocol
+RSpec.describe Yoda::Server::Providers::Completion do
+  include FileUriHelper
 
-  def file_uri(path)
-    "file://#{File.expand_path(path, fixture_root)}"
-  end
+  let(:session) { Yoda::Server::Session.new(fixture_root_uri) }
+  let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
+  let(:notifier) { Yoda::Server::Notifier.new(writer) }
+  let(:provider) { described_class.new(session: session, notifier: notifier) }
 
-  let(:session) { described_class.new }
-
-  let(:root_path) { fixture_root }
-  let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
-  let(:root_uri) { file_uri(root_path) }
-
-  let(:session) { Yoda::Server::Session.new(root_uri) }
-  let(:provider) { described_class.new(session) }
-
-  describe '#complete' do
+  describe '#provide' do
     before do
       session.setup
       session.file_store.load(uri)
     end
-    subject { provider.complete(uri, position) }
+    let(:params) do
+      {
+        text_document: {
+          uri: uri,
+        },
+        position: position,
+      }
+    end
+    subject { provider.provide(params) }
 
     describe 'method completion' do
       context 'request information in sample function' do
@@ -30,7 +30,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
         let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 18 } } }
 
         it 'returns infomation including appropriate labels' do
-          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to include(
             have_attributes(label: 'method1(String str): any'),
@@ -40,7 +40,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
         end
 
         it 'returns infomation of `str` variable' do
-          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to include(
             have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
@@ -56,7 +56,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
         let(:text_edit_range) { { start: { line: 11, character: 11 }, end: { line: 11, character: 11 } } }
 
         it 'returns infomation of `str` variable' do
-          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to include(
             have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
@@ -72,7 +72,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
         let(:text_edit_range) { { start: { line: 26, character: 6 }, end: { line: 26, character: 13 } } }
 
         it 'returns infomation of `str` variable' do
-          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to include(
             have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
@@ -90,7 +90,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
         let(:text_edit_range) { { start: { line: 31, character: 14 }, end: { line: 31, character: 17 } } }
 
         it 'returns infomation of `str` variable' do
-          expect(subject).to be_a(LSP::Interface::CompletionList)
+          expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to contain_exactly(
             have_attributes(
@@ -112,7 +112,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 9, character: 6 }, end: { line: 9, character: 28 } } }
 
             it 'returns infomation including appropriate labels' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to include(
                 have_attributes(label: 'ConstCompletionFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
@@ -124,7 +124,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:position) { { line: 10, character: 15 } }
 
             it 'returns empty candidates' do
-              expect(subject).to be_falsy
+              expect(subject.items).to be_empty
             end
           end
 
@@ -133,7 +133,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 11, character: 8 }, end: { line: 11, character: 19 } } }
 
             it 'returns infomation including appropriate labels' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to include(
                 have_attributes(label: 'YodaFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
@@ -146,7 +146,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 12, character: 19 }, end: { line: 12, character: 41 } } }
 
             it 'returns infomation including appropriate labels' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to include(
                 have_attributes(label: 'ConstCompletionFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
@@ -159,7 +159,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 13, character: 19 }, end: { line: 13, character: 34 } } }
 
             it 'returns candidates of constants without ones in different namespace' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to contain_exactly(
                 have_attributes(label: 'YodaInnerModule', text_edit: have_attributes(range: have_attributes(text_edit_range))),
@@ -173,7 +173,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 11, character: 6 }, end: { line: 11, character: 8 } } }
 
           it 'returns candidates under Object' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(label: 'YodaFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
@@ -187,7 +187,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 12, character: 17 }, end: { line: 12, character: 19 } } }
 
             it 'returns candidates under YodaFixture' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to include(
                 have_attributes(label: 'ConstCompletionFixture', text_edit: have_attributes(range: have_attributes(text_edit_range))),
@@ -207,7 +207,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 5, character: 6 }, end: { line: 5, character: 8 } } }
 
           it 'returns @param and @private tags' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(text_edit: have_attributes(new_text: "@param", range: have_attributes(text_edit_range))),
@@ -224,7 +224,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 5, character: 18 }, end: { line: 5, character: 19 } } }
 
           it 'returns type candidates' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
@@ -239,7 +239,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 10, character: 28 }, end: { line: 10, character: 29 } } }
 
           it 'returns type candidates' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(text_edit: have_attributes(new_text: "Sample", range: have_attributes(text_edit_range))),
@@ -255,7 +255,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 8, character: 20 }, end: { line: 8, character: 21 } } }
 
             it 'returns type candidates' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to include(
                 have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
@@ -270,7 +270,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
             let(:text_edit_range) { { start: { line: 8, character: 20 }, end: { line: 8, character: 20 } } }
 
             it 'returns type candidates' do
-              expect(subject).to be_a(LSP::Interface::CompletionList)
+              expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
               expect(subject.is_incomplete).to be_falsy
               expect(subject.items).to include(
                 have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
@@ -286,7 +286,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 3, character: 14 }, end: { line: 3, character: 14 } } }
 
           it 'returns type candidates' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
@@ -301,7 +301,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 3, character: 14 }, end: { line: 3, character: 15 } } }
 
           it 'returns type candidates' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
@@ -316,7 +316,7 @@ RSpec.describe Yoda::Server::CompletionProvider do
           let(:text_edit_range) { { start: { line: 6, character: 20 }, end: { line: 6, character: 20 } } }
 
           it 'returns type candidates' do
-            expect(subject).to be_a(LSP::Interface::CompletionList)
+            expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
             expect(subject.is_incomplete).to be_falsy
             expect(subject.items).to include(
               have_attributes(text_edit: have_attributes(new_text: "String", range: have_attributes(text_edit_range))),
