@@ -10,6 +10,10 @@ module Yoda
           calculate(params[:text_document][:uri], params[:position])
         end
 
+        def timeout
+          10
+        end
+
         private
 
         # @param uri      [String]

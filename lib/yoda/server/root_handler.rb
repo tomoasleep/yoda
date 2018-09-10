@@ -84,6 +84,8 @@ module Yoda
           end
         end
         future_map.put_if_absent(id, future)
+        Concurrent::ScheduledTask.execute(provider.timeout, executor: thread_pool) { future.cancel } if provider.timeout
+        
         future.execute
         future
       end

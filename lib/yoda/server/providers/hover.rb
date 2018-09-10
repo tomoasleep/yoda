@@ -7,7 +7,11 @@ module Yoda
         end
 
         def provide(params)
-          calculate(params[:text_document][:uri], params[:position]) 
+          calculate(params[:text_document][:uri], params[:position])
+        end
+
+        def timeout
+          10
         end
 
         private

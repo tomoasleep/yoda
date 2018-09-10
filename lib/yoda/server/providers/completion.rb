@@ -13,6 +13,10 @@ module Yoda
           calculate(uri, position)
         end
 
+        def timeout
+          10
+        end
+
         private
 
         # @param uri      [String]
@@ -53,7 +57,6 @@ module Yoda
           cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
           method_completion_worker = Evaluation::CodeCompletion.new(session.registry, cut_source, location)
           completion_items = method_completion_worker.candidates
-          return nil if completion_items.empty?
 
           LanguageServer::Protocol::Interface::CompletionList.new(
             is_incomplete: false,

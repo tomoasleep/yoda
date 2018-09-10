@@ -34,6 +34,11 @@ module Yoda
         def provide(params)
           fail NotImplementedError
         end
+
+        # @return [Integer, nil] Seconds to timeout the task. if nil, the task does not timeout.
+        def timeout
+          nil
+        end
       end
     end
   end
