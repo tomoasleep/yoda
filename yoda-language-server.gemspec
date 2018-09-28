@@ -39,5 +39,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry", "~> 0.11"
   spec.add_development_dependency "pry-rescue", "~> 1.4"
   spec.add_development_dependency "pry-stack_explorer", "~> 0.4"
+  spec.add_development_dependency "simplecov", ">= 0.13.0"
   spec.add_development_dependency "stackprof"
 end

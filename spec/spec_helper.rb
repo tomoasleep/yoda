@@ -1,6 +1,9 @@
 require "bundler/setup"
 require 'rspec-benchmark'
 require "yoda"
+require 'simplecov'
+
+SimpleCov.start
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
