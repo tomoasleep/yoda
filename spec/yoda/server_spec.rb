@@ -1,29 +1,47 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Server do
-  LSP = ::LanguageServer::Protocol
-  let(:server) { described_class.new }
+  include FileUriHelper
 
-  let(:root_path) { File.absolute_path('../support/fixtures', __dir__) }
-  let(:init_param) do
-    {
-      root_uri: "file://#{root_path}",
-    }
+  let(:server) do
+    described_class.new(
+      writer: writer,
+      reader: reader_class.new,
+    )
   end
 
-  describe '#callback' do
-    subject { server.callback({ method: :initialize, params: init_param }) }
-
-    it 'returns capabilities' do
-      expect(subject).to be_instance_of(LSP::Interface::InitializeResult)
-    end
+  let(:reader_class) do
+    example_requests = requests
+    Class.new { define_method(:read) { |&blk| example_requests.map { |request| blk.call(request) } } }
   end
+  let(:requests) { [] }
+  let(:writer) { instance_double('Writer') }
 
-  describe '#handle_initialize' do
-    subject { server.handle_initialize(init_param) }
+  describe '#run' do
+    subject { server.run }
+    let(:id) { SecureRandom.hex(10) }
 
-    it 'returns capabilities' do
-      expect(subject).to be_instance_of(LSP::Interface::InitializeResult)
+    describe 'with initialize method' do
+      let(:requests) do
+        [
+          { id: id, method: 'initialize', params: params },
+        ]
+      end
+      let(:params) do
+        {
+          root_uri: fixture_root_uri,
+        }
+      end
+
+      it 'sends capabilities' do
+        allow(writer).to receive(:write)
+        expect(writer).to receive(:write).with(
+          id: id,
+          result: be_instance_of(LanguageServer::Protocol::Interface::InitializeResult),
+        )
+
+        subject
+      end
     end
   end
 end

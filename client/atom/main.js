@@ -3,10 +3,10 @@ const { spawn } = require('child_process')
 const { resolve } = require('path')
 
 const busyMessages = {
-  text_document_hover: 'Preparing hover help',
-  text_document_signature_help: 'Preparing signature help',
-  text_document_completion: 'Completing',
-  text_document_definition: 'Finding definition',
+  'textDocument/hover': 'Preparing hover help',
+  'textDocument/signatureHelp': 'Preparing signature help',
+  'textDocument/completion': 'Completing',
+  'textDocument/definition': 'Finding definition',
 };
 
 class YodaClient extends AutoLanguageClient {
@@ -57,10 +57,10 @@ class YodaClient extends AutoLanguageClient {
     switch (eventBody.type) {
       case 'initialization':
         return this.handleInitializationEvent(eventBody);
-      case 'text_document_hover':
-      case 'text_document_completion':
-      case 'text_document_signature_help':
-      case 'text_document_completion':
+      case 'textDocument/hover':
+      case 'textDocument/completion':
+      case 'textDocument/signatureHelp':
+      case 'textDocument/completion':
         return this.handleBusyEvent(eventBody.type, eventBody);
       default:
     }
@@ -74,17 +74,24 @@ class YodaClient extends AutoLanguageClient {
     }
   }
 
-  handleBusyEvent(handlerName, { phase, message }) {
+  handleBusyEvent(handlerName, { phase, id }) {
     switch (phase) {
       case 'begin':
         if (!this.busyHandlers[handlerName]) {
-          this.busyHandlers[handlerName] = this.busySignalService.reportBusy("(Yoda) " + busyMessages[handlerName]);
+          this.busyHandlers[handlerName] = {
+            handler: this.busySignalService.reportBusy("(Yoda) " + (busyMessages[handlerName] || 'Processing')),
+            ids: new Set([]),
+          };
+          if (id) { this.busyHandlers[handlerName].ids.add(id); }
         }
         break;
       case 'end':
         if (this.busyHandlers[handlerName]) {
-          this.busyHandlers[handlerName].dispose();
-          this.busyHandlers[handlerName] = null;
+          if (id) { this.busyHandlers[handlerName].ids.delete(id); }
+          if (!this.busyHandlers[handlerName].ids.size) {
+            this.busyHandlers[handlerName].handler.dispose();
+            this.busyHandlers[handlerName] = null;
+          }
         }
         break;
     }

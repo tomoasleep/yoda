@@ -1,28 +1,28 @@
 module Yoda
   class Server
     class Notifier
-      # @param server [Server]
-      def initialize(server)
-        @server = server
+      # @param writer [ConcurrentWriter]
+      def initialize(writer)
+        @writer = writer
       end
 
       # @param type [Symbol]
-      def busy(type:)
-        event(type: type, phase: :begin)
+      def busy(type:, id: nil)
+        event(type: type, phase: :begin, id: id)
         yield
       ensure
-        event(type: type, phase: :end)
+        event(type: type, phase: :end, id: id)
       end
 
       # @param params [Hash]
       def event(params)
-        server.send_notification(method: 'telemetry/event', params: params)
+        write(method: 'telemetry/event', params: params)
       end
 
       # @param type [String, Symbol]
       # @param message [String]
       def show_message(type:, message:)
-        server.send_notification(
+        write(
           method: 'window/showMessage',
           params: LanguageServer::Protocol::Interface::ShowMessageParams.new(
             type: message_type(type),
@@ -34,7 +34,7 @@ module Yoda
       # @param type [String, Symbol]
       # @param message [String]
       def log_message(type:, message:)
-        server.send_notification(
+        write(
           method: 'window/logMessage',
           params: LanguageServer::Protocol::Interface::ShowMessageParams.new(
             type: message_type(type),
@@ -44,6 +44,10 @@ module Yoda
       end
 
       private
+
+      def write(params)
+        @writer.write(params)
+      end
 
       # @param type [String, Symbol]
       def message_type(type)

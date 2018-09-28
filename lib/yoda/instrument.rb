@@ -1,3 +1,5 @@
+require 'concurrent'
+
 module Yoda
   class Instrument
     class Subscription
@@ -57,9 +59,19 @@ module Yoda
     # @return [Array<Subscription>]
     attr_reader :subscriptions
 
-    # @return [Instrument]
-    def self.instance
-      @instance ||= new
+    class << self
+      # Returns Instrument instance (thread local).
+      # @return [Instrument]
+      def instance
+        local.value
+      end
+
+      private
+
+      # @return [Concurrent::ThreadLocalVar<Instrument>]
+      def local
+        @local ||= Concurrent::ThreadLocalVar.new { Instrument.new }
+      end
     end
 
     def initialize

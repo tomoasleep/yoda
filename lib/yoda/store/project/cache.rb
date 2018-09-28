@@ -45,11 +45,10 @@ module Yoda
           File.exist?(cache_path)
         end
 
-        # @param registry [Registry]
-        def register_adapter(registry)
-          return if registry.adapter
+        # @return [Registry]
+        def prepare_registry
           make_cache_dir
-          registry.adapter = Adapters.default_adapter_class.for(cache_path)
+          Registry.new(Adapters.default_adapter_class.for(cache_path))
         end
 
         # @return [String]

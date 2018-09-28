@@ -6,10 +6,10 @@ module Yoda
       require 'yoda/store/project/cache'
       require 'yoda/store/project/library_doc_loader'
 
-      # @type String
+      # @return [String]
       attr_reader :root_path
 
-      # @type Registry
+      # @return [Registry, nil]
       attr_reader :registry
 
       # @param root_path [String]
@@ -17,17 +17,18 @@ module Yoda
         fail ArgumentError, root_path unless root_path.is_a?(String)
 
         @root_path = File.absolute_path(root_path)
-        @registry = Registry.new
       end
 
       def setup
+        return if registry
         make_dir
-        cache.register_adapter(registry)
+        @registry = cache.prepare_registry
       end
 
+      # Delete all data from registry
       def clear
         setup
-        registry.adapter.clear
+        registry.clear
       end
 
       # @return [Array<BaseError>]
