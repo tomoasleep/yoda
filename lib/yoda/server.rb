@@ -18,17 +18,20 @@ module Yoda
     # @return [ConcurrentWriter]
     attr_reader :writer
 
+    # @return [RootHandler]
+    attr_reader :root_handler
+
     # Use this value as return value for notification handling
     NO_RESPONSE = :no_response
 
-    def initialize
-      @reader = LanguageServer::Protocol::Transport::Stdio::Reader.new
-      @writer = ConcurrentWriter.new(LanguageServer::Protocol::Transport::Stdio::Writer.new)
-    end
-
-    # @return [Notifier]
-    def root_handler
-      @root_handler ||= RootHandler.new(writer: writer)
+    def initialize(
+      reader: LanguageServer::Protocol::Transport::Stdio::Reader.new,
+      writer: LanguageServer::Protocol::Transport::Stdio::Writer.new,
+      root_handler_class: RootHandler
+    )
+      @reader = reader
+      @writer = ConcurrentWriter.new(writer)
+      @root_handler = RootHandler.new(writer: @writer)
     end
 
     def run
