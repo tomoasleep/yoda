@@ -12,6 +12,7 @@ module Yoda
       def initialize(adapter = nil)
         @patch_set = Objects::PatchSet.new
         @adapter = adapter
+        @lock = Concurrent::ReentrantReadWriteLock.new
       end
 
       # @return [Objects::ProjectStatus, nil]
@@ -89,9 +90,7 @@ module Yoda
       attr_reader :patch_set
 
       # @return [Concurrent::ReentrantReadWriteLock]
-      def lock
-        @lock ||= Concurrent::ReentrantReadWriteLock.new
-      end
+      attr_reader :lock
 
       def keys
         Set.new(adapter&.keys.map(&:to_s) || []).union(patch_set.keys)
