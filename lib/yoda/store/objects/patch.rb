@@ -9,9 +9,10 @@ module Yoda
         attr_reader :registry
 
         # @param id [String]
-        def initialize(id)
+        # @param  [Array[Addressable], nil]
+        def initialize(id, contents = nil)
           @id = id
-          @registry = Hash.new
+          @registry = (contents || []).map { |content| [content.address.to_sym, content] }.to_h
         end
 
         # @param addressable [Addressable]
