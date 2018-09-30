@@ -12,6 +12,8 @@ module Yoda
       def initialize(adapter = nil)
         @patch_set = Objects::PatchSet.new
         @adapter = adapter
+        @registry_cache = RegistryCache.new
+        @lock = Concurrent::ReentrantReadWriteLock.new
       end
 
       # @return [Objects::ProjectStatus, nil]
@@ -32,10 +34,12 @@ module Yoda
       # @return [Objects::Base, nil]
       def find(path)
         lock.with_read_lock do
-          if adapter&.exist?(path)
-            patch_set.patch(adapter.get(path))
-          else
-            patch_set.find(path)
+          registry_cache.fetch_or_calc(path) do
+            if adapter&.exist?(path)
+              patch_set.patch(adapter.get(path))
+            else
+              patch_set.find(path)
+            end
           end
         end
       end
@@ -43,6 +47,7 @@ module Yoda
       # @param patch [Patch]
       def add_patch(patch)
         lock.with_write_lock do
+          registry_cache.clear_from_patch(patch)
           patch_set.register(patch)
         end
       end
@@ -57,6 +62,7 @@ module Yoda
 
       def clear
         lock.with_write_lock do
+          registry_cache.delete_all
           adapter.clear
         end
       end
@@ -77,6 +83,7 @@ module Yoda
           adapter.sync
           Logger.info "saved #{el_keys.length} keys."
           @patch_set = Objects::PatchSet.new
+          registry_cache.delete_all
         end
       end
 
@@ -88,10 +95,11 @@ module Yoda
       # @return [Objects::PatchSet]
       attr_reader :patch_set
 
+      # @return [RegistryCache]
+      attr_reader :registry_cache
+
       # @return [Concurrent::ReentrantReadWriteLock]
-      def lock
-        @lock ||= Concurrent::ReentrantReadWriteLock.new
-      end
+      attr_reader :lock
 
       def keys
         Set.new(adapter&.keys.map(&:to_s) || []).union(patch_set.keys)
