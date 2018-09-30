@@ -1,3 +1,6 @@
+require 'set'
+require 'forwardable'
+
 module Yoda
   module Store
     module Objects
@@ -36,7 +39,7 @@ module Yoda
 
         # @return [Hash{ Symbol => Object }]
         def attributes
-          @attributes ||= instances.map { |i| default_attributes.merge(i.to_h) }.reduce { |a, b| merge_attributes(a, b) }
+          @attributes ||= normalize_attributes(instances.map { |i| default_attributes.merge(i.to_h) }.reduce { |a, b| merge_attributes(a, b) })
         end
 
         # @param one [Hash{ Symbol => Object }]
@@ -45,15 +48,15 @@ module Yoda
           {
             path: one[:path] || another[:path],
             document: one[:document] + (one[:document].empty? || another[:document].empty? ? '' : "\n") + another[:document],
-            tag_list: one[:tag_list] + another[:tag_list],
-            sources: one[:sources] + another[:sources],
+            tag_list: PendingArray.append(one[:tag_list], another[:tag_list]),
+            sources: PendingSet.merge(one[:sources], another[:sources]),
             primary_source: one[:primary_source] || another[:primary_source],
-            instance_method_addresses: (one[:instance_method_addresses] + another[:instance_method_addresses]).uniq,
-            mixin_addresses: (one[:mixin_addresses] + another[:mixin_addresses]).uniq,
-            constant_addresses: (one[:constant_addresses] + another[:constant_addresses]).uniq,
+            instance_method_addresses: PendingSet.merge(one[:instance_method_addresses], another[:instance_method_addresses]),
+            mixin_addresses: PendingSet.merge(one[:mixin_addresses], another[:mixin_addresses]),
+            constant_addresses: PendingSet.merge(one[:constant_addresses], another[:constant_addresses]),
             visibility: one[:visibility] || another[:visibility],
             parameters: one[:parameters].empty? ? another[:parameters] : one[:parameters],
-            overloads: one[:overloads] + another[:overloads],
+            overloads: PendingArray.append(one[:overloads], another[:overloads]),
             superclass_path: select_superclass(one, another),
             value: one[:value] || another[:value],
           }
@@ -78,6 +81,26 @@ module Yoda
           }
         end
 
+        # @param attrs [Hash{ Symbol => Object }]
+        # @return [Hash{ Symbol => Object }]
+        def normalize_attributes(attrs)
+          {
+            path: attrs[:path],
+            document: attrs[:document],
+            tag_list: attrs[:tag_list].to_a,
+            sources: attrs[:sources].to_a,
+            primary_source: attrs[:primary_source],
+            instance_method_addresses: attrs[:instance_method_addresses].to_a,
+            mixin_addresses: attrs[:mixin_addresses].to_a,
+            constant_addresses: attrs[:constant_addresses].to_a,
+            visibility: attrs[:visibility],
+            parameters: attrs[:parameters].to_a,
+            overloads: attrs[:overloads].to_a,
+            superclass_path: attrs[:superclass_path],
+            value: attrs[:value],
+          }
+        end
+
         # @param one [Hash{ Symbol => Object }]
         # @param another [Hash{ Symbol => Object }]
         # @return [ScopedPath]
@@ -86,6 +109,66 @@ module Yoda
             one[:superclass_path] || another[:superclass_path]
           else
             another[:superclass_path] || one[:superclass_path]
+          end
+        end
+
+        class PendingArray
+          extend Forwardable
+
+          # @param els1 [Array<Object>, PendingArray]
+          # @param others [Array<Array<Object>, PendingArray>]
+          def self.append(els, *others)
+            if els.is_a?(PendingArray)
+              others.reduce(els) { |array, item| array.append(item) }
+            else
+              append(PendingArray.new(els), *others)
+            end
+          end
+
+          # @return [Array<Object>]
+          attr_reader :array
+
+          delegate %i(to_a each) => :array
+
+          # @param els [Array<Object>]
+          def initialize(els)
+            @array = els.dup
+          end
+
+          # @param els [Array<Object>]
+          def append(els)
+            array.push(*els)
+            self
+          end
+        end
+
+        class PendingSet
+          extend Forwardable
+
+          # @param els1 [Array<Object>, PendingSet]
+          # @param els2 [Array<Object>, PendingSet]
+          def self.merge(els1, els2)
+            if els1.is_a?(PendingSet)
+              els1.merge(els2)
+            else
+              PendingSet.new(els1).merge(els2)
+            end
+          end
+
+          # @return [Set<Object>]
+          attr_reader :set
+
+          delegate %i(to_a each) => :set
+
+          # @param els [Array<Object>]
+          def initialize(els)
+            @set = Set.new(els)
+          end
+
+          # @param els [Array<Object>]
+          def merge(els)
+            set.merge(els)
+            self
           end
         end
       end
