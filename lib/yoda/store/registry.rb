@@ -5,7 +5,7 @@ module Yoda
   module Store
     class Registry
       # @note This number must be updated when breaking change is added.
-      REGISTRY_VERSION = 1
+      REGISTRY_VERSION = 2
 
       PROJECT_STATUS_KEY = '%project_status'
 

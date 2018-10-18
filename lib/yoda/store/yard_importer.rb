@@ -39,7 +39,7 @@ module Yoda
       def register(code_object)
         return if @registered.member?(code_object.path)
         @registered.add(code_object.path)
-        register(code_object.parent) if code_object.parent && !code_object.parent.root?
+        register(code_object.parent) if code_object.parent
 
         new_objects = begin
           case code_object.type
