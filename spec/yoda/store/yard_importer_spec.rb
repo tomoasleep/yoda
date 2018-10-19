@@ -27,6 +27,7 @@ RSpec.describe Yoda::Store::YardImporter do
       expect(subject.patch.find('BaseModule::Long::Long2::Long3.test_singleton_method')).to be_a(Yoda::Store::Objects::MethodObject)
       expect(subject.patch.find('BaseModule::Long::Long2::Long3.test_singleton_class_method')).to be_a(Yoda::Store::Objects::MethodObject)
       expect(subject.patch.find('BaseModule::Nested')).to be_a(Yoda::Store::Objects::ModuleObject)
+      expect(subject.patch.find('BaseModule::Nested::Object')).to be_a(Yoda::Store::Objects::ClassObject)
       expect(subject.patch.find('BaseModule::Nested::Nested2')).to be_a(Yoda::Store::Objects::ClassObject)
       expect(subject.patch.find('BaseModule::Nested::Nested2%class')).to be_a(Yoda::Store::Objects::MetaClassObject)
       expect(subject.patch.find('BaseModule::Nested::Nested2#test_method')).to be_a(Yoda::Store::Objects::MethodObject)
@@ -67,6 +68,7 @@ RSpec.describe Yoda::Store::YardImporter do
       )
       expect(subject.patch.find('BaseModule::Nested')).to have_attributes(
         constant_addresses: contain_exactly(
+          "BaseModule::Nested::Object",
           "BaseModule::Nested::Nested2",
           "BaseModule::Nested::ChildClass",
         ),

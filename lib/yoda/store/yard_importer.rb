@@ -271,13 +271,13 @@ module Yoda
       end
 
       # @param code_object [::YARD::CodeObjects::Base]
-      # @return [String]
+      # @return [String] absolute object path to store.
       def calc_path_to_store(object)
         return 'Object' if object.root?
         parent_path = path_to_store(object.parent)
 
         if object.type == :proxy || object.is_a?(YARD::CodeObjects::Proxy)
-          # For now, we suppose the proxy object exists directly under its lexical namespace.
+          # For now, we suppose the proxy object exists directly under its namespace.
           [path_to_store(object.parent), object.name].join('::')
         elsif object.parent.path == path_to_store(object.parent)
           object.path

@@ -18,6 +18,9 @@ module BaseModule
     end
   end
 
+  class Nested::Object
+  end
+
   class Nested::Nested2
     # @return [String]
     def test_method
