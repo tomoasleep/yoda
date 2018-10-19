@@ -5,7 +5,12 @@ module Yoda
     module Query
       module Associators
         class AssociateAncestors
-          class CircularReferenceError < StandardError; end
+          class CircularReferenceError < StandardError
+            # @param circular_scope [Objects::NamespaceObject, nil]
+            def initialize(circular_scope)
+              super("#{circular_scope&.path} appears twice")
+            end
+          end
 
           # @return [Registry]
           attr_reader :registry
