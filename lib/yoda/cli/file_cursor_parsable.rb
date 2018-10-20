@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Cli
     # Provide parsing methods of positon representation with the format `path/to/file:line_num:character_num`
     module FileCursorParsable
       private

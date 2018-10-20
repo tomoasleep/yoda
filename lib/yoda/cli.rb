@@ -1,13 +1,13 @@
 require 'thor'
 
 module Yoda
-  # Commands module has handler for each cli command.
-  module Commands
-    require 'yoda/commands/base'
-    require 'yoda/commands/file_cursor_parsable'
-    require 'yoda/commands/setup'
-    require 'yoda/commands/infer'
-    require 'yoda/commands/complete'
+  # Cli module has handler for each cli command.
+  module Cli
+    require 'yoda/cli/base'
+    require 'yoda/cli/file_cursor_parsable'
+    require 'yoda/cli/setup'
+    require 'yoda/cli/infer'
+    require 'yoda/cli/complete'
 
     class Top < Thor
       class_option :log_level, type: :string, desc: 'Set log level (debug info warn error fatal)'
@@ -17,19 +17,19 @@ module Yoda
       option :force_build, type: :boolean, desc: "If enabled, (re)build current project's index forcibly"
       def setup
         process_class_options
-        Commands::Setup.run(force_build: options[:force_build])
+        Cli::Setup.run(force_build: options[:force_build])
       end
 
       desc 'infer POSITION', 'Infer the type of value at the specified position'
       def infer(position)
         process_class_options
-        Commands::Infer.run(position)
+        Cli::Infer.run(position)
       end
 
       desc 'complete POSITION', 'Provide completion candidates for the specified position'
       def complete(position)
         process_class_options
-        Commands::Complete.run(position)
+        Cli::Complete.run(position)
       end
 
       desc 'server', 'Start Language Server'

@@ -5,4 +5,4 @@ if Dir.exist?(File.join(__dir__, "..", ".git"))
 end
 
 require 'yoda'
-Yoda::Commands::Top.start(ARGV)
+Yoda::Cli::Top.start(ARGV)

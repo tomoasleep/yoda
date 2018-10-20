@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Cli
     class Complete < Base
       include FileCursorParsable
 

@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Cli
     class Infer < Base
       attr_reader :filename_with_position
 

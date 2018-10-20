@@ -1,7 +1,7 @@
 require 'ruby-progressbar'
 
 module Yoda
-  module Commands
+  module Cli
     class Setup < Base
       # @return [String]
       attr_reader :dir

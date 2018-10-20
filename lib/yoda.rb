@@ -2,7 +2,7 @@ module Yoda
   require "yoda/version"
   require "yoda/logger"
   require "yoda/instrument"
-  require "yoda/commands"
+  require "yoda/cli"
   require "yoda/errors"
   require "yoda/evaluation"
   require "yoda/model"

@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Cli
     # @abstract
     class Base
       def self.run(*args)
