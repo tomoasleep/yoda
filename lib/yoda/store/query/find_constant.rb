@@ -78,8 +78,7 @@ module Yoda
           Enumerator.new do |yielder|
             met = Set.new
 
-            Associators::AssociateAncestors.new(registry).associate(scope)
-            scope.ancestors.each do |ancestor|
+            Associators::AssociateAncestors.new(registry).associate(scope).each do |ancestor|
               select_child_constants(ancestor, name).each do |obj|
                 next if met.include?(obj.name)
                 met.add(obj.name)

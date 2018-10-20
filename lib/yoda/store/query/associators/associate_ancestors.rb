@@ -21,11 +21,14 @@ module Yoda
           end
 
           # @param obj [Objects::Base]
+          # @return [Enumerator<Objects::NamespaceObject>]
           def associate(obj)
             if obj.is_a?(Objects::NamespaceObject)
-              obj.ancestors = Enumerator.new do |yielder|
+              Enumerator.new do |yielder|
                 Processor.new(registry).process(obj).each { |klass| yielder << klass }
               end
+            else
+              []
             end
           end
 
