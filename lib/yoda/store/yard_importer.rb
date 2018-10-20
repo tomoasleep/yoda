@@ -79,7 +79,7 @@ module Yoda
           tag_list: code_object.tags.map { |tag| convert_tag(tag, '') },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
           mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
           constant_addresses: (code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path } + ['Object']).uniq,
         )
@@ -87,7 +87,7 @@ module Yoda
           path: path_to_store(code_object),
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-          instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
+          instance_method_addresses: code_object.meths(included: false, scope: :class).map { |meth| path_to_store(meth) },
           mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
         )
         [object_class, object_meta_class]
@@ -149,7 +149,7 @@ module Yoda
           tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object)) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
           mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
         )
@@ -158,7 +158,7 @@ module Yoda
           path: path_to_store(code_object),
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-          instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
+          instance_method_addresses: code_object.meths(included: false, scope: :class).map { |meth| path_to_store(meth) },
           mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
         )
 
@@ -174,7 +174,7 @@ module Yoda
           tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object)) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-          instance_method_addresses: code_object.meths(included: false, scope: :instance).map(&:path),
+          instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
           mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| path_to_store(constant) },
           superclass_path: !code_object.superclass || code_object.superclass&.path == 'Qnil' ? nil : path_to_store(code_object.superclass),
@@ -184,7 +184,7 @@ module Yoda
           path: path_to_store(code_object),
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-          instance_method_addresses: code_object.meths(included: false, scope: :class).map(&:path),
+          instance_method_addresses: code_object.meths(included: false, scope: :class).map { |meth| path_to_store(meth) },
           mixin_addresses: code_object.class_mixins.map { |mixin| path_to_store(mixin) },
         )
 
