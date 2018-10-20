@@ -27,29 +27,9 @@ module Yoda
         def lazy_select(namespace, expected, visibility: nil)
           visibility ||=  %i(public private protected)
           Enumerator.new do |yielder|
-            met = Set.new
-
-            all_method_addresses(namespace).each do |address|
-              name = Objects::MethodObject.name_of_path(address)
-              if match_name?(name, expected)
-                next if met.include?(name)
-                if el = registry.find(address)
-                  met.add(name)
-                  yielder << el if visibility.include?(el.visibility)
-                end
-              end
-            end
-          end
-        end
-
-        # @param namespace [Objects::Namespace]
-        # @return [Enumerator<Objects::MethodObject>]
-        def all_method_addresses(namespace)
-          Enumerator.new do |yielder|
-            Associators::AssociateAncestors.new(registry).associate(namespace)
-            namespace.ancestors.each do |ancestor|
-              ancestor.instance_method_addresses.each do |address|
-                yielder << address
+            Associators::AssociateMethods.new(registry).associate(namespace).each do |method|
+              if match_name?(method.name, expected) && visibility.include?(method.visibility)
+                yielder << method
               end
             end
           end

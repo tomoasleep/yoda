@@ -5,7 +5,12 @@ module Yoda
     module Query
       module Associators
         class AssociateAncestors
-          class CircularReferenceError < StandardError; end
+          class CircularReferenceError < StandardError
+            # @param circular_scope [Objects::NamespaceObject, nil]
+            def initialize(circular_scope)
+              super("#{circular_scope&.path} appears twice")
+            end
+          end
 
           # @return [Registry]
           attr_reader :registry
@@ -16,11 +21,14 @@ module Yoda
           end
 
           # @param obj [Objects::Base]
+          # @return [Enumerator<Objects::NamespaceObject>]
           def associate(obj)
             if obj.is_a?(Objects::NamespaceObject)
-              obj.ancestors = Enumerator.new do |yielder|
+              Enumerator.new do |yielder|
                 Processor.new(registry).process(obj).each { |klass| yielder << klass }
               end
+            else
+              []
             end
           end
 

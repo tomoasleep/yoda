@@ -4,7 +4,7 @@ module Yoda
       include Comparable
 
       # @todo Make this 0-indexed.
-      # @return [Integer] 0-indexed column number.
+      # @return [Integer] 1-indexed column number.
       attr_reader :row
 
       # @return [Integer] 0-indexed column number.
