@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     class CodeCompletion
       class ConstProvider < BaseProvider
         # @return [true, false]

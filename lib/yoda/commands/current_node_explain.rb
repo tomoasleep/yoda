@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     # CurrentNodeExplain shows help for the current node.
     class CurrentNodeExplain
       # @return [Store::Registry]

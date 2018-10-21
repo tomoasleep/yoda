@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     class CommentCompletion
       # @abstract
       class BaseProvider

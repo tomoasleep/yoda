@@ -1,10 +1,10 @@
 module Yoda
-  module Evaluation
+  module Commands
     class CodeCompletion
-      require 'yoda/evaluation/code_completion/base_provider'
-      require 'yoda/evaluation/code_completion/method_provider'
-      require 'yoda/evaluation/code_completion/variable_provider'
-      require 'yoda/evaluation/code_completion/const_provider'
+      require 'yoda/commands/code_completion/base_provider'
+      require 'yoda/commands/code_completion/method_provider'
+      require 'yoda/commands/code_completion/variable_provider'
+      require 'yoda/commands/code_completion/const_provider'
 
       # @return [Store::Registry]
       attr_reader :registry

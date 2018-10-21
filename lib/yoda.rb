@@ -4,7 +4,7 @@ module Yoda
   require "yoda/instrument"
   require "yoda/cli"
   require "yoda/errors"
-  require "yoda/evaluation"
+  require "yoda/commands"
   require "yoda/model"
   require "yoda/store"
   require "yoda/server"

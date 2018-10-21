@@ -23,7 +23,7 @@ module Yoda
       end
 
       def worker
-        @worker ||= Evaluation::CurrentNodeExplain.new(project.registry, File.read(filename), position)
+        @worker ||= Commands::CurrentNodeExplain.new(project.registry, File.read(filename), position)
       end
 
       def project

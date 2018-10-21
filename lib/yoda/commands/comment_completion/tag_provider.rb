@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     class CommentCompletion
       class TagProvider < BaseProvider
         # @return [true, false]

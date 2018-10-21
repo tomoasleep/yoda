@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     class Evaluator
       # @return [Parsing::Scopes::Base]
       attr_reader :scope

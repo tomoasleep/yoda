@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     class CodeCompletion
       # @abstract
       # Base class of completion candidates providers for code completion.

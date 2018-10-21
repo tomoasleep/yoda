@@ -1,5 +1,5 @@
 module Yoda
-  module Evaluation
+  module Commands
     # SignatureDiscovery infers method candidates for the nearest send node and specify the number of index of these parameters.
     # SignatureDiscovery shows help for the current parameter of method candidates.
     class SignatureDiscovery
