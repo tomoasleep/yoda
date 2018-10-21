@@ -124,7 +124,7 @@ RSpec.describe Yoda::Typing::Evaluator do
 
       it "returns the assigned value's type" do
         # TODO
-        expect(subject).to be_a(Yoda::Model::Types::Base)
+        expect(subject).to be_a(Yoda::Model::TypeExpressions::Base)
       end
     end
 
@@ -141,7 +141,7 @@ RSpec.describe Yoda::Typing::Evaluator do
       end
 
       it 'does not fail' do
-        expect(subject).to eq(Yoda::Model::Types::ValueType.new('nil'))
+        expect(subject).to eq(Yoda::Model::TypeExpressions::ValueType.new('nil'))
       end
     end
   end

@@ -1,6 +1,6 @@
 module Yoda
   module Model
-    module Types
+    module TypeExpressions
       class FunctionType < Base
         # @return [Base, nil]
         attr_reader :context

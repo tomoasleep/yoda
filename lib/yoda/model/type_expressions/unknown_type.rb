@@ -1,6 +1,6 @@
 module Yoda
   module Model
-    module Types
+    module TypeExpressions
       class UnknownType < Base
         attr_reader :name
 

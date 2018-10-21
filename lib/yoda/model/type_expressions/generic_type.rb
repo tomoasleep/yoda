@@ -1,6 +1,6 @@
 module Yoda
   module Model
-    module Types
+    module TypeExpressions
       class GenericType < Base
         # @return [Base]
         attr_reader :base_type
@@ -21,7 +21,7 @@ module Yoda
           self.class.new(base_type.change_root(paths), type_arguments.map { |type| type.change_root(paths) })
         end
 
-        # @param base_type      [Types::Base]
+        # @param base_type      [TypeExpressions::Base]
         # @param type_arguments [Array<Base>]
         def initialize(base_type, type_arguments)
           @base_type = base_type

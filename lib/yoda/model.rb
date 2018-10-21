@@ -5,7 +5,7 @@ module Yoda
     require 'yoda/model/node_signature'
     require 'yoda/model/path'
     require 'yoda/model/scoped_path'
-    require 'yoda/model/types'
+    require 'yoda/model/type_expressions'
     require 'yoda/model/values'
     require 'yoda/model/completion_item'
   end

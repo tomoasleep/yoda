@@ -1,6 +1,6 @@
 module Yoda
   module Model
-    module Types
+    module TypeExpressions
       class ModuleType < Base
         # @return [ScopedPath]
         attr_reader :path

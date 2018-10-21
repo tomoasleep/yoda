@@ -14,7 +14,7 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
     context 'with no parameters and no tags' do
       it 'returns empty parameter function type' do
         expect(subject).to eq(
-          Yoda::Model::Types::FunctionType.new(
+          Yoda::Model::TypeExpressions::FunctionType.new(
             return_type: unknown_type,
           )
         )
@@ -26,7 +26,7 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
 
       it 'returns empty parameter function type' do
         expect(subject).to eq(
-          Yoda::Model::Types::FunctionType.new(
+          Yoda::Model::TypeExpressions::FunctionType.new(
             required_parameters: [unknown_type],
             return_type: unknown_type,
           )
@@ -39,7 +39,7 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
 
       it 'returns empty parameter function type' do
         expect(subject).to eq(
-          Yoda::Model::Types::FunctionType.new(
+          Yoda::Model::TypeExpressions::FunctionType.new(
             required_parameters: [unknown_type],
             optional_parameters: [unknown_type],
             return_type: unknown_type,
@@ -60,7 +60,7 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
 
       it 'returns empty parameter function type' do
         expect(subject).to eq(
-          Yoda::Model::Types::FunctionType.new(
+          Yoda::Model::TypeExpressions::FunctionType.new(
             required_parameters: [instance_type('Integer').change_root(['Object'])],
             optional_parameters: [instance_type('String').change_root(['Object'])],
             return_type: instance_type('Array').change_root(['Object']),

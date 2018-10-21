@@ -4,7 +4,7 @@ module Yoda
       # @abstract
       class Base
         # @abstract
-        # @return [Types::FunctionType]
+        # @return [TypeExpressions::FunctionType]
         def type
           fail NotImplementedError
         end
@@ -51,7 +51,7 @@ module Yoda
         end
 
         # @abstract
-        # @return [Types::Base, nil]
+        # @return [TypeExpressions::Base, nil]
         def parameter_type_of(param)
           fail NotImplementedError
         end

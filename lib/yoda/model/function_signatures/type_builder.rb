@@ -16,31 +16,31 @@ module Yoda
           @tag_list = tag_list
         end
 
-        # @return [Types::FunctionType]
+        # @return [TypeExpressions::FunctionType]
         def type
           @type ||= begin
             if !type_tags.empty?
               parsed_type = parse_type_tag(type_tags.first)
-              parsed_type.is_a?(Types::FunctionType) ? parsed_type : Types::FunctionType.new(return_type: parsed_type)
+              parsed_type.is_a?(TypeExpressions::FunctionType) ? parsed_type : TypeExpressions::FunctionType.new(return_type: parsed_type)
             else
-              Types::FunctionType.new(return_type: return_types.first || Types::UnknownType.new('nodoc'), **parameter_options)
+              TypeExpressions::FunctionType.new(return_type: return_types.first || TypeExpressions::UnknownType.new('nodoc'), **parameter_options)
             end
           end
         end
 
         # @param param [String]
-        # @return [Types::Base]
+        # @return [TypeExpressions::Base]
         def type_of(param)
-          param_type_table[param] || Types::UnknownType.new('nodoc')
+          param_type_table[param] || TypeExpressions::UnknownType.new('nodoc')
         end
 
         private
 
         # @param type_tag [Store::Objects::Tag]
-        # @return [Types::FunctionType]
+        # @return [TypeExpressions::FunctionType]
         def parse_type_tag(tag)
           parsed_type = Parsing::TypeParser.new.safe_parse(tag.text).change_root(convert_lexical_scope_literals(tag.lexical_scope))
-          parsed_type.is_a?(Types::FunctionType) ? parsed_type : Types::FunctionType.new(return_type: parsed_type)
+          parsed_type.is_a?(TypeExpressions::FunctionType) ? parsed_type : TypeExpressions::FunctionType.new(return_type: parsed_type)
         end
 
         # @return [Hash]
@@ -72,22 +72,22 @@ module Yoda
           @param_tags ||= tag_list.select { |tag| tag.tag_name == 'param' }
         end
 
-        # @return [Array<Types::Base>]
+        # @return [Array<TypeExpressions::Base>]
         def return_types
           @return_types ||= parse_yard_type_tags(return_tags)
         end
 
         # @param tags [Array<Store::Objects::Tag>]
-        # @return [Array<Types::Base>]
+        # @return [Array<TypeExpressions::Base>]
         def parse_yard_type_tags(tags)
           tags.map do |tag|
-            tag.yard_types.empty? ? Types::UnknownType.new('nodoc') : Types.parse_type_strings(tag.yard_types).change_root(convert_lexical_scope_literals(tag.lexical_scope))
+            tag.yard_types.empty? ? TypeExpressions::UnknownType.new('nodoc') : TypeExpressions.parse_type_strings(tag.yard_types).change_root(convert_lexical_scope_literals(tag.lexical_scope))
           end
         end
 
-        # @return [{ String => Types::Base }]
+        # @return [{ String => TypeExpressions::Base }]
         def param_type_table
-          @param_type_table ||= param_tags.map(&:name).zip(parse_yard_type_tags(param_tags)).group_by(&:first).map { |k, v| [k, Types::UnionType.new(v.map(&:last))] }.to_h
+          @param_type_table ||= param_tags.map(&:name).zip(parse_yard_type_tags(param_tags)).group_by(&:first).map { |k, v| [k, TypeExpressions::UnionType.new(v.map(&:last))] }.to_h
         end
 
         # @param lexical_scope_literals [Array<String>]

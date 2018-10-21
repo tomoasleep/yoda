@@ -44,13 +44,13 @@ module Yoda
         nearest_send_node&.selector_name
       end
 
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def receiver_type
         @receiver_type ||= begin
           if nearest_send_node
             evaluator.calculate_type(nearest_send_node.receiver_node)
           else
-            Model::Types::InstanceType.new(analyzer.namespace_object.path)
+            Model::TypeExpressions::InstanceType.new(analyzer.namespace_object.path)
           end
         end
       end

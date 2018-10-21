@@ -1,6 +1,6 @@
 module Yoda
   module Model
-    module Types
+    module TypeExpressions
       class SequenceType < Base
         attr_reader :base_type, :types
 

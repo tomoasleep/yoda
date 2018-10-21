@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Model::Types do
+RSpec.describe Yoda::Model::TypeExpressions do
   include TypeHelper
 
   describe '.parse' do

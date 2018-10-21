@@ -1,22 +1,13 @@
 module Yoda
   module Model
-    module Types
-      class DuckType < Base
-        attr_reader :method_name
-
-        # @param method_name [String]
-        def initialize(method_name)
-          @method_name = method_name
-        end
-
-        # @param another [Object]
+    module TypeExpressions
+      class AnyType < Base
         def eql?(another)
-          another.is_a?(DuckType) &&
-          method_name == another.method_name
+          another.is_a?(AnyType)
         end
 
         def hash
-          [self.class.name, method_name].hash
+          [self.class.name].hash
         end
 
         # @param paths [Array<Paths>]
@@ -33,7 +24,7 @@ module Yoda
 
         # @return [String]
         def to_s
-          "##{method_name}"
+          'any'
         end
       end
     end

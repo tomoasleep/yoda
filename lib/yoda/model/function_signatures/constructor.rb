@@ -53,7 +53,7 @@ module Yoda
           initialize_method.primary_source
         end
 
-        # @return [Types::Base, nil]
+        # @return [TypeExpressions::Base, nil]
         def parameter_type_of(param)
           type_builder.type_of(param)
         end

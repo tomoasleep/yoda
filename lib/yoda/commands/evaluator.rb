@@ -31,7 +31,7 @@ module Yoda
       end
 
       # @param code_node   [::Parser::AST::Node]
-      # @return [Model::Types::Base, nil]
+      # @return [Model::TypeExpressions::Base, nil]
       def calculate_type(code_node)
         calculate_trace(code_node)&.type
       end

@@ -10,7 +10,7 @@ module Yoda
         end
 
         # @abstract
-        # @return [Model::Types::Base]
+        # @return [Model::TypeExpressions::Base]
         def type
           fail NotImplementedError
         end

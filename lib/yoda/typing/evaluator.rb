@@ -11,7 +11,7 @@ module Yoda
       end
 
       # @param node [::AST::Node]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def process(node)
         evaluate(node).tap { |type| bind_trace(node, Traces::Normal.new(context, type)) unless find_trace(node) }
       end
@@ -31,7 +31,7 @@ module Yoda
       private
 
       # @param node [::AST::Node]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate(node)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn
@@ -63,7 +63,7 @@ module Yoda
           type_for_sexp_type(node.type)
         when :return, :break, :next
           # TODO
-          node.children[0] ? process(node.children[0]) : Model::Types::ValueType.new('nil')
+          node.children[0] ? process(node.children[0]) : Model::TypeExpressions::ValueType.new('nil')
         when :resbody
           # TODO
           process(node.children[2])
@@ -74,7 +74,7 @@ module Yoda
         when :const
           const_node = Parsing::NodeObjects::ConstNode.new(node)
           if const = context.lexical_scope.find_constant(context.registry, const_node.to_s)
-            Model::Types::ModuleType.new(const.path)
+            Model::TypeExpressions::ModuleType.new(const.path)
           else
             unknown_type
           end
@@ -97,14 +97,14 @@ module Yoda
       end
 
       # @param node [Array<::AST::Node>]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate_branch_nodes(nodes)
-        Model::Types::UnionType.new(nodes.map { |node| process(node) })
+        Model::TypeExpressions::UnionType.new(nodes.map { |node| process(node) })
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate_send_node(node)
         receiver_node, method_name_sym, *argument_nodes = node.children
         if receiver_node
@@ -117,8 +117,8 @@ module Yoda
 
         _type = argument_nodes.reduce([unknown_type]) { |(_type), node| process(node) }
         method_candidates = receiver_candidates.map { |receiver| Store::Query::FindSignature.new(context.registry).select(receiver, method_name_sym.to_s) }.flatten
-        return_type = Model::Types::UnionType.new(method_candidates.map(&:type).map(&:return_type)).map do |type|
-          type.is_a?(Model::Types::ValueType) && type.value == 'self' ? receiver_type : type
+        return_type = Model::TypeExpressions::UnionType.new(method_candidates.map(&:type).map(&:return_type)).map do |type|
+          type.is_a?(Model::TypeExpressions::ValueType) && type.value == 'self' ? receiver_type : type
         end
         trace = Traces::Send.new(context, method_candidates, return_type)
         bind_trace(node, trace)
@@ -126,7 +126,7 @@ module Yoda
       end
 
       # @param node [Array<::AST::Node>]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate_hash_node(node)
         node.children.each do |node|
           case node.type
@@ -136,12 +136,12 @@ module Yoda
             node.children.each(&method(:process))
           end
         end
-        Model::Types::InstanceType.new('::Hash')
+        Model::TypeExpressions::InstanceType.new('::Hash')
       end
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [[Model::Types::Baseironment]]
+      # @return [[Model::TypeExpressions::Baseironment]]
       def evaluate_block_node(node)
         send_node, arguments_node, body_node = node.children
         # TODO
@@ -151,7 +151,7 @@ module Yoda
 
       # @param node [::AST::Node]
       # @param env  [Environment]
-      # @return [[Model::Types::Baseironment]]
+      # @return [[Model::TypeExpressions::Baseironment]]
       def evaluate_case_node(node)
         # TODO
         subject_node, *when_nodes, else_node = node.children
@@ -160,9 +160,9 @@ module Yoda
       end
 
       # @param node [::AST::Node]
-      # @param type [Model::Types::Base]
+      # @param type [Model::TypeExpressions::Base]
       # @param env  [Environment]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate_bind(symbol, type)
         env.bind(symbol, type)
         type
@@ -172,30 +172,30 @@ module Yoda
       def type_for_sexp_type(sexp_type)
         case sexp_type
         when :dstr, :str, :xstr, :string
-          Model::Types::InstanceType.new('::String')
+          Model::TypeExpressions::InstanceType.new('::String')
         when :dsym, :sym
-          Model::Types::InstanceType.new('::Symbol')
+          Model::TypeExpressions::InstanceType.new('::Symbol')
         when :array, :splat
-          Model::Types::InstanceType.new('::Array')
+          Model::TypeExpressions::InstanceType.new('::Array')
         when :irange, :erange
-          Model::Types::InstanceType.new('::Range')
+          Model::TypeExpressions::InstanceType.new('::Range')
         when :regexp
-          Model::Types::InstanceType.new('::RegExp')
+          Model::TypeExpressions::InstanceType.new('::RegExp')
         when :defined
           boolean_type
         when :self
           type_of_class(context.caller_object)
         when :true, :false, :nil
-          Model::Types::ValueType.new(sexp_type.to_s)
+          Model::TypeExpressions::ValueType.new(sexp_type.to_s)
         when :int, :float, :complex, :rational
-          Model::Types::InstanceType.new('::Numeric')
+          Model::TypeExpressions::InstanceType.new('::Numeric')
         else
-          Model::Types::UnknownType.new(sexp_type)
+          Model::TypeExpressions::UnknownType.new(sexp_type)
         end
       end
 
       # @param node [::AST::Node]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate_method_definition(node)
         new_caller_object = context.lexical_scope.namespace
         method_object = Store::Query::FindSignature.new(context.registry).select(new_caller_object, node.children[-3].to_s).first
@@ -206,7 +206,7 @@ module Yoda
       end
 
       # @param node [::AST::Node]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def evaluate_smethod_definition(node)
         type = process(node.children[-4])
         new_caller_object = type.resolve(context.registry).first
@@ -217,28 +217,28 @@ module Yoda
       end
 
       # @param object [Store::Objects::Base]
-      # @return [Model::Types::Base]
+      # @return [Model::TypeExpressions::Base]
       def type_of_class(object)
         case object
         when Store::Objects::ClassObject, Store::Objects::ModuleObject
-          Model::Types::InstanceType.new(object.path)
+          Model::TypeExpressions::InstanceType.new(object.path)
         when Store::Objects::MetaClassObject
-          Model::Types::ModuleType.new(object.path)
+          Model::TypeExpressions::ModuleType.new(object.path)
         else
-          Model::Types::UnknownType.new
+          Model::TypeExpressions::UnknownType.new
         end
       end
 
       def boolean_type
-        Model::Types::UnionType.new(Model::Types::ValueType.new('true'), Model::Types::ValueType.new('false'))
+        Model::TypeExpressions::UnionType.new(Model::TypeExpressions::ValueType.new('true'), Model::TypeExpressions::ValueType.new('false'))
       end
 
       def unknown_type
-        Model::Types::UnknownType.new
+        Model::TypeExpressions::UnknownType.new
       end
 
       def nil_type
-        Model::Types::ValueType.new('nil')
+        Model::TypeExpressions::ValueType.new('nil')
       end
 
       # @return [Environment]

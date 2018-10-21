@@ -27,7 +27,7 @@ RSpec.describe Yoda::Commands::Evaluator do
         it 'returns evaluation result of constant node' do
           expect(subject).to be_a(Yoda::Typing::Traces::Base)
           expect(subject).to have_attributes(
-            type: Yoda::Model::Types::ModuleType.new('YodaFixture::Sample2'),
+            type: Yoda::Model::TypeExpressions::ModuleType.new('YodaFixture::Sample2'),
           )
         end
       end
@@ -39,7 +39,7 @@ RSpec.describe Yoda::Commands::Evaluator do
         it 'returns evaluation result of send node' do
           expect(subject).to be_a(Yoda::Typing::Traces::Send)
           expect(subject).to have_attributes(
-            type: Yoda::Model::Types::InstanceType.new(
+            type: Yoda::Model::TypeExpressions::InstanceType.new(
               Yoda::Model::ScopedPath.new(['YodaFixture::Sample2', 'YodaFixture', 'Object'], 'YodaFixture::Sample2')
             ),
           )
@@ -53,7 +53,7 @@ RSpec.describe Yoda::Commands::Evaluator do
         it 'returns evaluation result of send node' do
           expect(subject).to be_a(Yoda::Typing::Traces::Send)
           expect(subject).to have_attributes(
-            type: Yoda::Model::Types::InstanceType.new(
+            type: Yoda::Model::TypeExpressions::InstanceType.new(
               Yoda::Model::ScopedPath.new(['YodaFixture::EvaluatorSpecFixture', 'YodaFixture', 'Object'], 'String'),
             ),
           )
@@ -69,7 +69,7 @@ RSpec.describe Yoda::Commands::Evaluator do
         it 'contains constant type' do
           expect(subject).to be_a(Yoda::Typing::Traces::Base)
           expect(subject).to have_attributes(
-            type: Yoda::Model::Types::ModuleType.new('YodaFixture'),
+            type: Yoda::Model::TypeExpressions::ModuleType.new('YodaFixture'),
           )
         end
       end
@@ -84,7 +84,7 @@ RSpec.describe Yoda::Commands::Evaluator do
         it 'contains symbol type' do
           expect(subject).to be_a(Yoda::Typing::Traces::Base)
           expect(subject).to have_attributes(
-            type: Yoda::Model::Types::InstanceType.new('::Symbol'),
+            type: Yoda::Model::TypeExpressions::InstanceType.new('::Symbol'),
           )
         end
       end
@@ -96,7 +96,7 @@ RSpec.describe Yoda::Commands::Evaluator do
           it 'contains type of self' do
             expect(subject).to be_a(Yoda::Typing::Traces::Base)
             expect(subject).to have_attributes(
-              type: Yoda::Model::Types::ModuleType.new('YodaFixture::EvaluatorSpecFixture'),
+              type: Yoda::Model::TypeExpressions::ModuleType.new('YodaFixture::EvaluatorSpecFixture'),
             )
           end
         end
@@ -107,7 +107,7 @@ RSpec.describe Yoda::Commands::Evaluator do
           it 'contains type of the variable' do
             expect(subject).to be_a(Yoda::Typing::Traces::Base)
             expect(subject).to have_attributes(
-              type: Yoda::Model::Types::InstanceType.new(
+              type: Yoda::Model::TypeExpressions::InstanceType.new(
                 Yoda::Model::ScopedPath.new(['YodaFixture::EvaluatorSpecFixture', 'YodaFixture', 'Object'], 'String'),
               ),
             )

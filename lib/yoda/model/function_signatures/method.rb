@@ -31,7 +31,7 @@ module Yoda
           @method_object.document
         end
 
-        # @return [Types::FunctionType]
+        # @return [TypeExpressions::FunctionType]
         def type
           type_builder.type
         end

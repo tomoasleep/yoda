@@ -6,9 +6,9 @@ module Yoda
         attr_reader :context, :type
 
         # @param context [Context]
-        # @param type    [Model::Types::Base]
+        # @param type    [Model::TypeExpressions::Base]
         def initialize(context, type)
-          fail ArgumentError, type unless type.is_a?(Model::Types::Base)
+          fail ArgumentError, type unless type.is_a?(Model::TypeExpressions::Base)
           @context = context
           @type = type
         end

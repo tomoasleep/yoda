@@ -2,7 +2,7 @@ require 'set'
 
 module Yoda
   module Model
-    module Types
+    module TypeExpressions
       class UnionType < Base
         attr_reader :types
 
