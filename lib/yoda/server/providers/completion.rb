@@ -37,7 +37,7 @@ module Yoda
         def comment_complete(source, location)
           ast, comments = Parsing::Parser.new.parse_with_comments(source)
           return nil unless Parsing::Query::CurrentCommentQuery.new(comments, location).current_comment
-          completion_worker = Commands::CommentCompletion.new(session.registry, ast, comments, location)
+          completion_worker = Services::CommentCompletion.new(session.registry, ast, comments, location)
           return nil unless completion_worker.available?
 
           completion_items = completion_worker.candidates
@@ -55,7 +55,7 @@ module Yoda
         # @return [LanguageServerProtocol::Interface::CompletionList, nil]
         def complete_from_cut_source(source, location)
           cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
-          method_completion_worker = Commands::CodeCompletion.new(session.registry, cut_source, location)
+          method_completion_worker = Services::CodeCompletion.new(session.registry, cut_source, location)
           completion_items = method_completion_worker.candidates
 
           LanguageServer::Protocol::Interface::CompletionList.new(

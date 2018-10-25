@@ -1,10 +1,10 @@
 module Yoda
-  module Commands
+  module Services
     class CommentCompletion
-      require 'yoda/commands/comment_completion/base_provider'
-      require 'yoda/commands/comment_completion/param_provider'
-      require 'yoda/commands/comment_completion/tag_provider'
-      require 'yoda/commands/comment_completion/type_provider'
+      require 'yoda/services/comment_completion/base_provider'
+      require 'yoda/services/comment_completion/param_provider'
+      require 'yoda/services/comment_completion/tag_provider'
+      require 'yoda/services/comment_completion/type_provider'
 
       # @type Store::Registry
       attr_reader :registry

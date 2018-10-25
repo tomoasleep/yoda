@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Services
     class CodeCompletion
       # @abstract
       # Base class of completion candidates providers for code completion.
@@ -50,6 +50,11 @@ module Yoda
         # @return [Parsing::Location]
         def location
           source_analyzer.location
+        end
+
+        # @return [::Parser::AST::Node, nil]
+        def current_node
+          @current_node ||= source_analyzer.nodes_to_current_location_from_root.last
         end
       end
     end

@@ -24,7 +24,7 @@ module Yoda
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
           cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
 
-          signature_worker = Commands::SignatureDiscovery.new(session.registry, cut_source, location)
+          signature_worker = Services::SignatureDiscovery.new(session.registry, cut_source, location)
 
           functions = signature_worker.method_candidates
           create_signature_help(functions)
@@ -38,7 +38,7 @@ module Yoda
           )
         end
 
-        # @param signature [Commands::Descriptions::FunctionDescription]
+        # @param signature [Services::Descriptions::FunctionDescription]
         def create_signature_info(signature)
           LanguageServer::Protocol::Interface::SignatureInformation.new(
             label: signature.title.to_s,

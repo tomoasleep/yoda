@@ -1,10 +1,10 @@
 module Yoda
-  module Commands
+  module Services
     class CodeCompletion
-      require 'yoda/commands/code_completion/base_provider'
-      require 'yoda/commands/code_completion/method_provider'
-      require 'yoda/commands/code_completion/variable_provider'
-      require 'yoda/commands/code_completion/const_provider'
+      require 'yoda/services/code_completion/base_provider'
+      require 'yoda/services/code_completion/method_provider'
+      require 'yoda/services/code_completion/local_variable_provider'
+      require 'yoda/services/code_completion/const_provider'
 
       # @return [Store::Registry]
       attr_reader :registry
@@ -38,7 +38,7 @@ module Yoda
 
       # @return [Array<CodeCompletion::BaseProvider>]
       def providers
-        [method_provider, variable_provider, const_provider]
+        [method_provider, local_variable_provider, const_provider]
       end
 
       # @return [Parsing::SourceAnalyzer]
@@ -51,9 +51,9 @@ module Yoda
         @method_provider ||= MethodProvider.new(registry, source_analyzer)
       end
 
-      # @return [VariableProvider]
-      def variable_provider
-        @variable_provider ||= VariableProvider.new(registry, source_analyzer)
+      # @return [LocalVariableProvider]
+      def local_variable_provider
+        @local_variable_provider ||= LocalVariableProvider.new(registry, source_analyzer)
       end
 
       # @return [ConstantProvider]

@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Services
     class CommentCompletion
       class TagProvider < BaseProvider
         # @return [true, false]

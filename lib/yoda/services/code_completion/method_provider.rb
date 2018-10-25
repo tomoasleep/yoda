@@ -1,5 +1,5 @@
 module Yoda
-  module Commands
+  module Services
     class CodeCompletion
       class MethodProvider < BaseProvider
         # @return [true, false]
@@ -60,9 +60,8 @@ module Yoda
         # @return [Parsing::NodeObjects::SendNode, nil]
         def current_send
           @current_send ||= begin
-            node = source_analyzer.nodes_to_current_location_from_root.last
-            return nil unless node.type == :send
-            Parsing::NodeObjects::SendNode.new(node)
+            return nil unless current_node.type == :send
+            Parsing::NodeObjects::SendNode.new(current_node)
           end
         end
 

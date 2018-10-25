@@ -22,13 +22,13 @@ module Yoda
           source = session.file_store.get(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-          node_worker = Commands::CurrentNodeExplain.new(session.registry, source, location)
+          node_worker = Services::CurrentNodeExplain.new(session.registry, source, location)
 
           current_node_signature = node_worker.current_node_signature
           create_hover(current_node_signature) if current_node_signature
         end
 
-        # @param signature [Commands::NodeSignature]
+        # @param signature [Services::NodeSignature]
         def create_hover(signature)
           LanguageServer::Protocol::Interface::Hover.new(
             contents: signature.descriptions.map { |value| create_hover_text(value) },
@@ -36,7 +36,7 @@ module Yoda
           )
         end
 
-        # @param description [Commands::Descriptions::Base]
+        # @param description [Services::Descriptions::Base]
         # @return [String]
         def create_hover_text(description)
           description.to_markdown

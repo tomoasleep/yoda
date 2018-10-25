@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Commands::Evaluator do
+RSpec.describe Yoda::Services::Evaluator do
   let(:evaluator) { described_class.from_ast(registry, ast, location) }
   let(:source) { File.read(File.expand_path(path, fixture_root)) }
   let(:source_string) { nil }
