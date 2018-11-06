@@ -8,5 +8,6 @@ module Yoda
     require 'yoda/model/type_expressions'
     require 'yoda/model/values'
     require 'yoda/model/completion_item'
+    require 'yoda/model/parameters'
   end
 end
