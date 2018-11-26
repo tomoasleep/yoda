@@ -38,7 +38,7 @@ module Yoda
 
         # @param path [String]
         # @param document [Document, nil]
-        # @param tag_list [TagList, nil]
+        # @param tag_list [Array<Tag>, nil]
         # @param visibility [Symbol]
         # @param overloads [Array<Overload>]
         # @param parameters [Array<(String, String)>, nil]
