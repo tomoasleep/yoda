@@ -7,9 +7,16 @@ module Yoda
         def find(path)
           lexical_scope_paths = lexical_scopes_of(path)
           base_name, *constant_names = path_of(path).split
-          base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
+          # if path start with '::', base_name becomes ''.
+          base_namespace_key = base_name == '' ? 'Object' : base_name
+          base_namespace = select_base_namespace(base_namespace_key, lexical_scope_paths).first
 
-          find_constant(constant_names.join('::'), base_namespace)
+          if constant_names.empty?
+            # When the path does not contain separator (`::`)
+            base_namespace
+          else
+            find_constant(constant_names.join('::'), base_namespace)
+          end
         end
 
         # @param path [String, Model::Path, Model::ScopedPath]

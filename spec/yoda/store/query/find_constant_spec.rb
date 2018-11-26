@@ -9,6 +9,14 @@ RSpec.describe Yoda::Store::Query::FindConstant do
   describe '#find' do
     subject { described_class.new(registry).find(name) }
 
+    context 'when no constant is present for the name' do
+      let(:name) { 'ConstantDoesNotExist' }
+
+      it 'returns nil' do
+        expect(subject).to be_nil
+      end
+    end
+
     context 'when the name is Object' do
       let(:name) { 'Object' }
 
@@ -85,12 +93,30 @@ RSpec.describe Yoda::Store::Query::FindConstant do
   describe '#select_with_prefix' do
     subject { described_class.new(registry).select_with_prefix(name) }
 
+    context 'when no constant is present for the name' do
+      let(:name) { 'ConstantDoesNotExist' }
+
+      it 'returns nil' do
+        expect(subject).to be_empty
+      end
+    end
+
     context 'with module name string without separetors is given' do
       let(:name) { 'YodaFixture' }
 
       it 'returns array which includes only the specified module' do
         expect(subject).to all(be_a(Yoda::Store::Objects::ModuleObject))
-        expect(subject).to include(have_attributes(path: name))
+        expect(subject).to include(have_attributes(path: 'YodaFixture'))
+        expect(subject.length).to eq(1)
+      end
+    end
+
+    context 'with module name which start with cbase is given' do
+      let(:name) { '::YodaFixture' }
+
+      it 'returns array which includes only the specified module' do
+        expect(subject).to all(be_a(Yoda::Store::Objects::ModuleObject))
+        expect(subject).to include(have_attributes(path: 'YodaFixture'))
         expect(subject.length).to eq(1)
       end
     end
