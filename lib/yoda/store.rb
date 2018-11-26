@@ -1,6 +1,7 @@
 require 'yard'
 
 module Yoda
+  # {Store} treats persistence and caching of code objects and querying of these objects in {Store::Registry}.
   module Store
     require 'yoda/store/actions'
     require 'yoda/store/adapters'
