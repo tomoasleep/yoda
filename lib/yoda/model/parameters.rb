@@ -5,6 +5,7 @@ module Yoda
       require 'yoda/model/parameters/multiple'
       require 'yoda/model/parameters/named'
       require 'yoda/model/parameters/unnamed'
+      require 'yoda/model/parameters/binder'
     end
   end
 end

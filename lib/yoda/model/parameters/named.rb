@@ -7,7 +7,7 @@ module Yoda
 
         # @param name [String, Symbol]
         def initialize(name)
-          @name = name
+          @name = name.to_sym
         end
 
         # @return [Symbol]
