@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+if Dir.exist?(File.join(__dir__, "..", ".git"))
+  $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
+end
+
+require 'yoda'
+require 'stackprof'
+
+StackProf.run(mode: :cpu, raw: true, out: 'tmp/stackprof-yoda.dump') do
+  Yoda::Runner::Setup.run(File.expand_path('~/src/github.com/increments/Qiita'))
+end

@@ -3,6 +3,12 @@ module Yoda
     class Inferencer
       # Bindings of local variables
       class Environment
+        # @return [Environment, nil]
+        attr_reader :parent
+
+        # @return [Hash{ Symbol => Store::Types::Base}]
+        attr_reader :binds
+
         # @param parent [Environment, nil]
         # @param binds [Hash{ Symbol => Store::Types::Base}, nil]
         def initialize(parent: nil, binds: nil)
@@ -23,6 +29,11 @@ module Yoda
           @binds.transform_values! { |value| value == key ? type : value }
           @binds[key] = type
           self
+        end
+
+        # @return [Hash{ Symbol => Store::Types::Base }]
+        def all_variables
+          (parent&.all_variables || {}).merge(binds)
         end
       end
     end

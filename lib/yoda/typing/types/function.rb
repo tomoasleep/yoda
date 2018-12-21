@@ -45,16 +45,16 @@ module Yoda
           @return_type = return_type
         end
 
-        def to_expression(resolver)
-          Store::TypeExpressions::FunctionType.new(
-            context: context.to_expression(resolver),
-            return_type: return_type.to_expression(resolver),
-            parameters: parameters.map { |type| type.to_expression(resolver) },
-            rest_parameter: rest_parameter&.to_expression(resolver),
-            post_parameters: post_parameters.map { |type| type.to_expression(resolver) },
-            keyword_parameters: keyword_parameters.map { |keyword, type| [keyword, type.to_expression(resolver)] },
-            keyword_rest_parameter: keyword_rest_parameter&.to_expression(resolver),
-            block_parameter: block_parameter&.to_expression(resolver),
+        def to_expression
+          Model::TypeExpressions::FunctionType.new(
+            context: context.to_expression,
+            return_type: return_type.to_expression,
+            parameters: parameters.map(&:to_expression),
+            rest_parameter: rest_parameter&.to_expression,
+            post_parameters: post_parameters.map(&:to_expression),
+            keyword_parameters: keyword_parameters.map { |keyword, type| [keyword, type.to_expression] },
+            keyword_rest_parameter: keyword_rest_parameter&.to_expression,
+            block_parameter: block_parameter&.to_expression,
           )
         end
       end

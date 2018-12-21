@@ -15,6 +15,11 @@ module Yoda
           fail NotImplementedError
         end
 
+        # @return [String]
+        def label
+          sort_text
+        end
+
         # @abstract
         # @return [String]
         def to_markdown

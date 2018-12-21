@@ -25,11 +25,23 @@ module Yoda
         # @param optional_parameters [Array<Base>]
         # @param rest_parameter [Base, nil]
         # @param post_parameters [Array<Base>]
-        # @param keyword_parameters [Array<(String, Base)>]
+        # @param required_keyword_parameters [Array<(String, Base)>]
+        # @param optional_keyword_parameters [Array<(String, Base)>]
         # @param keyword_rest_parameter [Base, nil]
         # @param block_parameter [Base, nil]
         # @param return_type [Base]
         def initialize(context: nil, return_type:, required_parameters: [], optional_parameters: [], rest_parameter: nil, post_parameters: [], optional_keyword_parameters: [], required_keyword_parameters: [], keyword_rest_parameter: nil, block_parameter: nil)
+          fail TypeError, return_type unless return_type.is_a?(Base)
+          fail TypeError, context if context && !context.is_a?(Base)
+          fail TypeError, rest_parameter if rest_parameter && !rest_parameter.is_a?(Base)
+          fail TypeError, keyword_rest_parameter if keyword_rest_parameter && !keyword_rest_parameter.is_a?(Base)
+          fail TypeError, block_parameter if block_parameter && !block_parameter.is_a?(Base)
+          fail TypeError, required_parameters unless required_parameters.all? { |type| type.is_a?(Base) }
+          fail TypeError, optional_parameters unless optional_parameters.all? { |type| type.is_a?(Base) }
+          fail TypeError, post_parameters unless post_parameters.all? { |type| type.is_a?(Base) }
+          fail TypeError, optional_keyword_parameters unless optional_keyword_parameters.all? { |name, type| name.is_a?(String) && type.is_a?(Base) }
+          fail TypeError, required_keyword_parameters unless required_keyword_parameters.all? { |name, type| name.is_a?(String) && type.is_a?(Base) }
+
           @context = context
           @required_parameters = required_parameters
           @optional_parameters = optional_parameters

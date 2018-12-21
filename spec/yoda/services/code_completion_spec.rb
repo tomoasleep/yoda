@@ -3,6 +3,7 @@ require 'spec_helper'
 RSpec.xdescribe Yoda::Services::CodeCompletion do
   include TypeHelper
 
+  let(:service) { described_class.new(registry, source, location) }
   let(:registry) { Yoda::Store::Registry.instance }
   let(:root) { registry.at(:root) }
 
@@ -20,8 +21,9 @@ RSpec.xdescribe Yoda::Services::CodeCompletion do
     end
   end
 
+
   describe '#method_candidates' do
-    subject { described_class.new(registry, source, location).method_candidates }
+    subject { service.method_candidates }
 
     context 'a class definition is given' do
       include_context 'define a class to root'

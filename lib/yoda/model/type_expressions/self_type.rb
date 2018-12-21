@@ -4,12 +4,11 @@ module Yoda
       class SelfType < Base
         # @param another [Object]
         def eql?(another)
-          another.is_a?(ValueType) &&
-          value == another.value
+          another.is_a?(SelfType)
         end
 
         def hash
-          [self.class.name, value].hash
+          [self.class.name].hash
         end
 
         # @param paths [Array<Path>]
@@ -21,27 +20,12 @@ module Yoda
         # @param registry [Registry]
         # @return [Array<YARD::CodeObjects::Base>]
         def resolve(registry)
-          [Store::Query::FindConstant.new(registry).find(value_class)].compact
-        end
-
-        def value_class
-          case value
-          when 'true'
-            '::TrueClass'
-          when 'false'
-            '::FalseClass'
-          when 'nil'
-            '::NilClass'
-          when /\A\d+\Z/
-            '::Numeric'
-          else
-            nil
-          end
+          fail NotImplementedError
         end
 
         # @return [String]
         def to_s
-          value
+          'self'
         end
       end
     end

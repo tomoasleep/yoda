@@ -25,8 +25,8 @@ module Yoda
           @types = types
         end
 
-        def to_expression(resolver)
-          Store::TypeExpressions::UnionType.new(types.map { |type| to_expression(type) })
+        def to_expression
+          Model::TypeExpressions::UnionType.new(types.map(&:to_expression))
         end
       end
     end

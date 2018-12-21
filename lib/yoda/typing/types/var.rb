@@ -25,8 +25,8 @@ module Yoda
           @ref&.ref
         end
 
-        def to_expression(resolver)
-          ref&.to_expression(resolver) || Store::TypeExpressions::UnknownType.new
+        def to_expression
+          ref&.to_expression || Store::TypeExpressions::UnknownType.new
         end
       end
     end

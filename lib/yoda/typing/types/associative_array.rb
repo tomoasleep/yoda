@@ -6,18 +6,12 @@ module Yoda
         attr_reader :contents
 
         # @param hash [::Hash{ String, Symbol => Base }]
-        def initailize(contents:)
+        def initialize(contents:)
           @contents = contents
         end
 
-        def to_expression(resolver)
-          callee_type = to_expression(callee)
-          values = callee_type.instanciate(resolver.registry)
-          Store::TypeExpressions::UnionType.new(
-            values.map do |value|
-              value.methods(visibility: visibility).select { |func| func.name == method_name }
-            end.flatten
-          )
+        def to_expression
+          contents.transform_values(&:to_expression)
         end
 
         def visilibity

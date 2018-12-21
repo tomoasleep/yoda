@@ -87,6 +87,10 @@ module Yoda
         end
       end
 
+      def inspect
+        "#<#{self.class.name}: @adapter=#{adapter.inspect}>"
+      end
+
       private
 
       # @return [Adapters::LmdbAdapter, nil]

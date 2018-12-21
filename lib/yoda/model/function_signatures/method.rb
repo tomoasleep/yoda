@@ -2,7 +2,7 @@ module Yoda
   module Model
     module FunctionSignatures
       class Method < Base
-        # @type Store::Objects::MethodObject
+        # @return [Store::Objects::MethodObject]
         attr_reader :method_object
 
         # @param method_object [Store::Objects::MethodObject]

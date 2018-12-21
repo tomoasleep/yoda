@@ -64,9 +64,6 @@ module Yoda
           end
         end
 
-        # In YARD, proxy module is undetermined its absolute path and its defined namespace is undetermined.
-        # In Yoda, proxy module is assumed to be defined directory under parent namespace.
-        register_to_parent(code_object) if code_object.parent && (code_object.type == :proxy || code_object.parent.type == :proxy)
         [new_objects].flatten.compact.each { |new_object| patch.register(new_object) }
       end
 
@@ -248,14 +245,6 @@ module Yoda
         )
 
         [module_object, meta_class_object]
-      end
-
-      # @param code_object [::YARD::CodeObjects::Base]
-      # @return [vaid]
-      def register_to_parent(code_object)
-        parent_module = patch.find(path_to_store(code_object.parent))
-        parent_module.instance_method_addresses.push(path_to_store(code_object)) if code_object.type == :method
-        parent_module.constant_addresses.push(path_to_store(code_object)) if [:class, :module, :proxy].include?(code_object.type)
       end
 
       # @param source [(String, Integer)]

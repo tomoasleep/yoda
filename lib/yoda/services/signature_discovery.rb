@@ -48,7 +48,7 @@ module Yoda
       def receiver_type
         @receiver_type ||= begin
           if nearest_send_node
-            evaluator.calculate_type(nearest_send_node.receiver_node)
+            evaluator.type(nearest_send_node.receiver_node)
           else
             Model::TypeExpressions::InstanceType.new(analyzer.namespace_object.path)
           end
@@ -65,7 +65,7 @@ module Yoda
 
       private
 
-      # @return [Array<Store::Values::Base>]
+      # @return [Array<Store::Objects::Base>]
       def receiver_values
         return [] unless valid?
         @receiver_values ||= evaluator.calculate_values(nearest_send_node.receiver_node)
@@ -78,7 +78,7 @@ module Yoda
 
       # @return [Evaluator]
       def evaluator
-        @evaluator ||= Evaluator.from_ast(registry, analyzer.ast, location)
+        @evaluator ||= Evaluator.new(ast: analyzer.ast, registry: registry)
       end
     end
   end

@@ -12,24 +12,27 @@ module Yoda
 
       def run
         project.build_cache
-        puts create_signature_help(worker.current_node_signature)
+        puts create_completions(worker.candidates)
       end
 
       private
 
-      # @param signature [Model::NodeSignature, nil]
+      # @param completion_item [Model::CompletionItem]
       # @return [String, nil]
-      def create_signature_help(signature)
-        return nil unless signature
-        signature.descriptions.map(&:title).join("\n")
+      def create_completions(completion_item)
+        completion_item.join("\n")
       end
 
       def worker
-        @worker ||= Services::CurrentNodeExplain.new(project.registry, File.read(filename), position)
+        @worker ||= Services::CodeCompletion.new(project.registry, source, position)
       end
 
       def project
         @project ||= Store::Project.new(Dir.pwd)
+      end
+
+      def source
+        Parsing::SourceCutter.new(File.read(filename), position).error_recovered_source
       end
     end
   end

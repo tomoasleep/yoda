@@ -11,6 +11,7 @@ module Yoda
       require 'yoda/model/type_expressions/duck_type'
       require 'yoda/model/type_expressions/module_type'
       require 'yoda/model/type_expressions/sequence_type'
+      require 'yoda/model/type_expressions/self_type'
       require 'yoda/model/type_expressions/generic_type'
       require 'yoda/model/type_expressions/union_type'
       require 'yoda/model/type_expressions/unknown_type'
@@ -63,6 +64,7 @@ module Yoda
         class Generator < Parslet::Transform
           rule(instance_type: simple(:instance_type)) { TypeExpressions::InstanceType.new(instance_type.to_s) }
           rule(value: simple(:value)) { TypeExpressions::ValueType.new(value.to_s) }
+          rule(value: 'self') { TypeExpressions::SelfType.new }
 
           rule(base_type: simple(:base_type), key_type: simple(:key_type), value_type: simple(:value_type)) { TypeExpressions::GenericType.from_key_value(base_type, key_type, value_type) }
           rule(base_type: simple(:base_type), value_types: sequence(:value_types)) { TypeExpressions::SequenceType.new(base_type, value_types) }

@@ -15,6 +15,10 @@ module Yoda
           "#{function.namespace_path}#{function.sep}#{function.to_s}"
         end
 
+        def label
+          signature
+        end
+
         def signature
           "#{function.to_s}"
         end

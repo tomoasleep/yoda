@@ -27,6 +27,10 @@ module TypeHelper
     Yoda::Model::TypeExpressions::AnyType.new
   end
 
+  def self_type
+    Yoda::Model::TypeExpressions::SelfType.new
+  end
+
   def generic_type(name, *type_arguments)
     Yoda::Model::TypeExpressions::GenericType.new(name, type_arguments)
   end

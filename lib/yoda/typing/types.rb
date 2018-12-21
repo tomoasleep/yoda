@@ -14,8 +14,6 @@ module Yoda
 
       require 'yoda/typing/types/generator'
       require 'yoda/typing/types/converter'
-      require 'yoda/typing/types/resolver'
-      require 'yoda/typing/types/unifier'
     end
   end
 end

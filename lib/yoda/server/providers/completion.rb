@@ -26,9 +26,10 @@ module Yoda
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
           if candidates = comment_complete(source, location)
-            return candidates
+            candidates
+          else
+            complete_from_cut_source(source, location)
           end
-          complete_from_cut_source(source, location)
         end
 
         # @param source   [String]
@@ -68,13 +69,13 @@ module Yoda
         # @return            [LanguageServer::Protocol::Interface::CompletionItem]
         def create_completion_item(completion_item)
           LanguageServer::Protocol::Interface::CompletionItem.new(
-            label: completion_item.description.is_a?(Model::Descriptions::FunctionDescription) ? completion_item.description.signature : completion_item.description.sort_text,
+            label: completion_item.label,
             kind: completion_item.language_server_kind,
-            detail: completion_item.description.title,
-            documentation: completion_item.description.to_markdown,
-            sort_text: completion_item.description.sort_text,
+            detail: completion_item.title,
+            documentation: completion_item.to_markdown,
+            sort_text: completion_item.sort_text,
             text_edit: LanguageServer::Protocol::Interface::TextEdit.new(
-              range: LanguageServer::Protocol::Interface::Range.new(completion_item.range.to_language_server_protocol_range),
+              range: LanguageServer::Protocol::Interface::Range.new(completion_item.language_server_range),
               new_text: completion_item.edit_text,
             ),
             data: {},

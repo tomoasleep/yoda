@@ -18,9 +18,13 @@ module Yoda
       # @return [TraceStore]
       attr_reader :trace_store
 
+      # @return [Context, nil]
+      attr_reader :parent
+
       # @param registry       [Store::Registry]
-      # @param caller_object  [Store::Objects::Base] represents who is the evaluator of the code.
+      # @param caller_object  [Store::Objects::Base] represents the class object of the current code evaluator.
       # @param lexical_scope [Array<Path>] represents where the code presents.
+      # @param parent        [Context, nil] represents parent context.
       def initialize(registry:, caller_object:, lexical_scope:, env: Environment.new, parent: nil, trace_store: TraceStore.new)
         fail ArgumentError, registry unless registry.is_a?(Store::Registry)
         fail ArgumentError, caller_object unless caller_object.is_a?(Store::Objects::Base)
@@ -31,6 +35,7 @@ module Yoda
         @lexical_scope = lexical_scope
         @env = env
         @trace_store = trace_store
+        @parent = parent
       end
 
       # @param registry       [Store::Registry]

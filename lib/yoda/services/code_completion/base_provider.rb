@@ -3,7 +3,7 @@ module Yoda
     class CodeCompletion
       # @abstract
       # Base class of completion candidates providers for code completion.
-      # This class bridges analysis features such as syntastic analysis {#analyzer} and symbolic execiton {#evaluator}.
+      # This class bridges analysis features such as syntastic analysis {#source_analyzer} and symbolic execiton {#evaluator}.
       class BaseProvider
         # @return [Store::Registry]
         attr_reader :registry
@@ -11,11 +11,16 @@ module Yoda
         # @return [Parsing::SourceAnalyzer]
         attr_reader :source_analyzer
 
+        # @return [Evaluator]
+        attr_reader :evaluator
+
         # @param registry [Store::Registry]
         # @param source_analyzer [Parsing::SourceAnalyzer]
-        def initialize(registry, source_analyzer)
+        # @param evaluator [Evaluator]
+        def initialize(registry, source_analyzer, evaluator)
           @registry = registry
           @source_analyzer = source_analyzer
+          @evaluator = evaluator
         end
 
         # @abstract
@@ -31,16 +36,6 @@ module Yoda
         end
 
         private
-
-        # @return [SourceAnalyzer]
-        def analyzer
-          @analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
-        end
-
-        # @return [Evaluator]
-        def evaluator
-          @evaluator ||= Evaluator.from_ast(registry, source_analyzer.ast, location)
-        end
 
         # @return [::Parser::AST::Node]
         def ast

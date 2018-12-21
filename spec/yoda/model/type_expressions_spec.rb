@@ -21,6 +21,11 @@ RSpec.describe Yoda::Model::TypeExpressions do
       it { is_expected.to eq value_type('hoge') }
     end
 
+    context 'self is given' do
+      let(:type_string) { 'self' }
+      it { is_expected.to eq self_type }
+    end
+
     context 'a duck type literal is given' do
       let(:type_string) { '#hello' }
       it { is_expected.to eq duck_type('hello') }

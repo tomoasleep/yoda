@@ -233,17 +233,6 @@ Lint/ScriptPermission:
   Exclude:
     - 'bin/bench'
 
-# Offense count: 25
-Lint/ShadowingOuterLocalVariable:
-  Exclude:
-    - 'lib/yoda/model/parameters/binder.rb'
-    - 'lib/yoda/parsing/scopes/builder.rb'
-    - 'lib/yoda/parsing/type_parser.rb'
-    - 'lib/yoda/store/query/find_constant.rb'
-    - 'lib/yoda/typing/evaluator.rb'
-    - 'lib/yoda/typing/inferencer.rb'
-    - 'lib/yoda/typing/inferencer/object_resolver.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Lint/StringConversionInInterpolation:
@@ -652,39 +641,6 @@ Style/SymbolProc:
 Style/TrailingCommaInArguments:
   Enabled: false
 
-# Offense count: 19
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleForMultiline.
-# SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInArrayLiteral:
-  Exclude:
-    - 'lib/yoda/store/actions/build_core_index.rb'
-    - 'spec/yoda/model/function_signatures/function_type_builder_spec.rb'
-    - 'spec/yoda/server_spec.rb'
-    - 'spec/yoda/store/objects/patch_set_spec.rb'
-    - 'spec/yoda/store/objects/project_status_spec.rb'
-    - 'spec/yoda/store/project/library_doc_loader_spec.rb'
-    - 'spec/yoda/typing/inferencer/arguments_binder_spec.rb'
-
-# Offense count: 25
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleForMultiline.
-# SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInHashLiteral:
-  Exclude:
-    - 'lib/yoda/model/function_signatures/parameter_list.rb'
-    - 'lib/yoda/model/function_signatures/type_builder.rb'
-    - 'lib/yoda/parsing/source_cutter.rb'
-    - 'lib/yoda/store/objects/base.rb'
-    - 'lib/yoda/store/objects/merger.rb'
-    - 'spec/yoda/server/providers/completion_spec.rb'
-    - 'spec/yoda/server/providers/definition_spec.rb'
-    - 'spec/yoda/server/providers/hover_spec.rb'
-    - 'spec/yoda/server/providers/signature_spec.rb'
-    - 'spec/yoda/server/root_handler_spec.rb'
-    - 'spec/yoda/server_spec.rb'
-    - 'spec/yoda/typing/inferencer/arguments_binder_spec.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/UnneededInterpolation:
@@ -696,16 +652,6 @@ Style/UnneededInterpolation:
 Style/UnneededPercentQ:
   Exclude:
     - 'yoda-language-server.gemspec'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, MinSize, WordRegex.
-# SupportedStyles: percent, brackets
-Style/WordArray:
-  Exclude:
-    - 'spec/yoda/model/function_signatures/function_type_builder_spec.rb'
-    - 'spec/yoda/store/query/find_constant_spec.rb'
-    - 'spec/yoda/store/query/find_meta_class_spec.rb'
 
 # Offense count: 1
 # Cop supports --auto-correct.

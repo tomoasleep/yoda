@@ -80,6 +80,11 @@ module Yoda
           @numeric_type ||= instance_type_of('Numeric')
         end
 
+        # @return [Instance]
+        def object_type(object_class)
+          Instance.new(klass: object_class)
+        end
+
         # @return [Any]
         def any_type
           Any.new
@@ -102,17 +107,15 @@ module Yoda
           Instance.new(klass: find_or_build(path))
         end
 
-        # @param object [Store::Objects::Base]
         # @return [Instance]
-        def constant_type_from(object)
-          case object.kind
-          when :class
-            Instance.new(class_class, metaklass: object)
-          when :module
-            Instance.new(module_class, metaklass: object)
-          else
-            Instance.new(object_class, metaklass: object)
-          end
+        def singleton_type_of(path)
+          Instance.new(klass: find_or_singleton_class(path))
+        end
+
+        # @param types [Array<Base>]
+        # @return [Union]
+        def union(*types)
+          Union.new(*types)
         end
 
         # @return [Generator]
@@ -132,8 +135,8 @@ module Yoda
           find(path) || Yoda::Store::Objects::ClassObject.new(path: path, superclass_path: 'Object')
         end
 
-        def find_or_meta_singleton_class(path)
-          find(path) || Yoda::Store::Objects::MetaClassObject.new(path: path)
+        def find_or_singleton_class(path)
+          find_meta_class(path) || Yoda::Store::Objects::MetaClassObject.new(path: path)
         end
       end
     end

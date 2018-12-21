@@ -50,8 +50,8 @@ module Yoda
             optional_parameters: parameters.optional_parameters.map(&:first).map(&method(:type_of)),
             rest_parameter: parameters.rest_parameter ? type_of(parameters.rest_parameter) : nil,
             post_parameters: parameters.post_parameters.map(&method(:type_of)),
-            required_keyword_parameters: parameters.required_keyword_parameters.map(&method(:type_of)),
-            optional_keyword_parameters: parameters.optional_keyword_parameters.map(&:first).map(&method(:type_of)),
+            required_keyword_parameters: parameters.required_keyword_parameters.map { |keyword| [keyword, type_of(keyword)] },
+            optional_keyword_parameters: parameters.optional_keyword_parameters.map(&:first).map { |keyword| [keyword, type_of(keyword)] },
             keyword_rest_parameter: parameters.keyword_rest_parameter ? type_of(parameters.keyword_rest_parameter) : nil,
             block_parameter: parameters.block_parameter ? type_of(parameters.block_parameter) : nil,
           }

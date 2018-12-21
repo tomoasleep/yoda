@@ -65,6 +65,20 @@ module Yoda
           @namespace_path ||= MethodObject.namespace_of_path(path)
         end
 
+        # @return [String]
+        def parent_address
+          @parent_address ||= begin
+            case MethodObject.sep_of_path(path)
+            when '#'
+              namespace_path
+            when '.'
+              MetaClassObject.address_of(namespace_path)
+            else
+              fail TypeError
+            end
+          end
+        end
+
         def kind
           :method
         end

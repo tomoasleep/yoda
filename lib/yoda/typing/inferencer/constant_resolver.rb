@@ -15,9 +15,22 @@ module Yoda
           @node = node
         end
 
+        # @return [Store::Objects::Base]
+        def constant
+          @constant ||= Store::Query::FindConstant.new(context.registry).find(scoped_path)
+        end
+
         # @return [Types::Base]
-        def resolve
-          @resolved ||= Types::Union.new(*constants.map { generator.constant_type_from(constant) })
+        def resolve_constant_type
+          case constant
+          when Store::Objects::NamespaceObject
+            generator.singleton_type_of(constant.path)
+          when Store::Objects::ValueObject
+            # TODO
+            generator.any_type
+          else
+            generator.any_type
+          end
         end
 
         private
@@ -27,30 +40,19 @@ module Yoda
           @generator ||= Types::Generator.new(context.registry)
         end
 
-        # @return [Store::Objects::Base]
-        def constants
-          @constants ||= Store::Query::FindConstant.new(registry).find(scoped_path)
-        end
-
         # @return [Array<Path>]
         def lexical_scopes
-          @lexical_scopes ||= namespaces.map(&:path)
+          @lexical_scopes ||= context.lexical_scope_objects.map(&:path)
         end
 
         # @return [ScopedPath]
         def scoped_path
-          scoped_path ||= Model::ScopedPath.new(lexical_scopes.reverse, Parsing::NodeObjects::ConstNode.new(node).to_s)
+          scoped_path ||= Model::ScopedPath.new(lexical_scopes, const_node.to_s)
         end
 
-        # @return [Enumerator<NamespaceContext>]
-        def namespaces
-          Enumerator.new do |yielder|
-            current_context = context
-            while current_context
-              yielder << current_context if current_context.is_a?(NamespaceContext)
-              current_context = context.parent
-            end
-          end
+        # @return [Parsing::NodeObjects::ConstNode]
+        def const_node
+          @const_node ||= Parsing::NodeObjects::ConstNode.new(node)
         end
       end
     end

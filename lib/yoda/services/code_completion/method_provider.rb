@@ -4,7 +4,7 @@ module Yoda
       class MethodProvider < BaseProvider
         # @return [true, false]
         def providable?
-          !!(current_send)
+          !!current_send
         end
 
         # @return [Array<Model::CompletionItem>]
@@ -27,12 +27,12 @@ module Yoda
           nil
         end
 
-        # @return [Array<Store::Objects::Method>]
+        # @return [Array<FunctionSignatures::Base>]
         def method_candidates
           return [] unless providable?
-          receiver_values
-            .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(current_send)) }
-            .flatten
+          @method_candidates ||= receiver_values.flat_map do |receiver|
+            Store::Query::FindSignature.new(registry).select(receiver, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(current_send))
+          end
         end
 
         # @param send_node [Parsing::NodeObjects::SendNode]
@@ -47,14 +47,7 @@ module Yoda
 
         # @return [Array<Store::Objects::Base>]
         def receiver_values
-          @receiver_values ||= begin
-            if current_receiver_node
-              evaluator.calculate_values(current_receiver_node)
-            else
-              # implicit call for self
-              [evaluator.scope_constant]
-            end
-          end
+          @receiver_values ||= evaluator.receiver_candidates(current_send.node) || []
         end
 
         # @return [Parsing::NodeObjects::SendNode, nil]

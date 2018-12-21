@@ -6,19 +6,27 @@ module Yoda
       require 'yoda/typing/inferencer/environment'
       require 'yoda/typing/inferencer/constant_resolver'
       require 'yoda/typing/inferencer/method_resolver'
+      require 'yoda/typing/inferencer/method_definition_resolver'
       require 'yoda/typing/inferencer/object_resolver'
+      require 'yoda/typing/inferencer/tracer'
 
-      # @return [Context]
+      # @return [BaseContext]
       attr_reader :context
 
-      # @param context [Context]
-      def initialize(context)
+      # @return [Tracer]
+      attr_reader :tracer
+
+      # @param context [BaseContext]
+      # @param tracer [Tracer, nil]
+      def initialize(context:, tracer: nil)
         @context = context
+        @tracer = tracer || Tracer.new(registry: context.registry, generator: generator)
       end
 
       # @param node [::AST::Node]
       # @return [Store::Types::Base]
       def infer(node)
+        tracer.bind_context(node: node, context: context)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn
           process_bind(node.children[0], node.children[1])
@@ -49,7 +57,7 @@ module Yoda
           type_for_sexp_type(node.type)
         when :return, :break, :next
           # TODO
-          node.children[0] ? infer(node.children[0]) : Types.nil_type
+          node.children[0] ? infer(node.children[0]) : generator.nil_type
         when :resbody
           # TODO
           infer(node.children[2])
@@ -61,25 +69,27 @@ module Yoda
         when :const
           infer_const_node(node)
         when :lvar, :cvar, :ivar, :gvar
-          context.env.resolve(node.children.first) || unknown_type
+          context.environment.resolve(node.children.first) || generator.any_type
         when :begin, :kwbegin, :block
           node.children.map { |node| infer(node) }.last
         when :dstr, :dsym, :xstr
           node.children.each { |node| infer(node) }
           type_for_sexp_type(node.type)
         when :def
-          evaluate_method_definition(node)
+          infer_method_node(node)
         when :defs
-          evaluate_smethod_definition(node)
+          infer_smethod_node(node)
         when :hash
-          infer_hash_node(node.children)
+          infer_hash_node(node)
         when :self
-          context.receiver_type
+          context.receiver
         when :defined
           generator.boolean_type
+        when :module, :class
+          infer_namespace_node(node)
         else
           type_for_literal_sexp(node.type)
-        end.tap { |type| context.bind(node, type) }
+        end.tap { |type| tracer.bind_type(node: node, type: type, context: context) }
       end
 
       private
@@ -88,8 +98,8 @@ module Yoda
       # @param body_node [::AST::Node]
       # @return [Store::Types::Base]
       def process_bind(var, body_node)
-        body_type = process(body_node)
-        context.env.bind_var(var, body_type)
+        body_type = infer(body_node)
+        context.environment.bind(var, body_type)
         body_type
       end
 
@@ -162,10 +172,10 @@ module Yoda
         type
       end
 
-      # @param nodes [Array<::AST::Node>]
+      # @param node [::AST::Node]
       # @return [Model::TypeExpressions::Base]
-      def infer_hash_node(nodes)
-        hash = nodes.children.each_with_object({}) do |node, memo|
+      def infer_hash_node(node)
+        hash = node.children.each_with_object({}) do |node, memo|
           case node.type
           when :pair
             pair_key, pair_value = node.children
@@ -194,7 +204,7 @@ module Yoda
       def infer_send_node(node, block_param_node = nil, block_node = nil)
         receiver_node, method_name_sym, *argument_nodes = node.children
 
-        receiver_type = receiver_node ? infer(receiver_node) : context.self_type
+        receiver_type = receiver_node ? infer(receiver_node) : context.receiver
         argument_types = infer_argument_nodes(argument_nodes)
 
         method_resolver = MethodResolver.new(
@@ -203,15 +213,15 @@ module Yoda
           name: method_name_sym.to_s,
           argument_types: argument_types,
           generator: generator,
+          implicit_receiver: receiver_node.nil?,
         )
 
         if block_node
           new_context = method_resolver.generate_block_context(context: context, block_param_node: block_param_node)
-          Inferencer.new(new_context).infer(block_node)
+          derive(context: new_context).infer(block_node)
         end
 
-        trace = Traces::Send.new(context, method_resolver.method_candidates, method_resolver.return_type)
-        # context.bind_trace(node, trace)
+        tracer.bind_send(node: node, method_candidates: method_resolver.method_candidates, receiver_candidates: method_resolver.receiver_candidates)
         method_resolver.return_type
       end
 
@@ -252,6 +262,12 @@ module Yoda
       # @return [Types::Generator]
       def generator
         @generator ||= Types::Generator.new(context.registry)
+      end
+
+      # @param context [Context]
+      # @return [self]
+      def derive(context:)
+        self.class.new(context: context, tracer: tracer)
       end
 
       # @param sexp_type [::Symbol, nil]

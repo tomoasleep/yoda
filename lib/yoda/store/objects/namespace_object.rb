@@ -50,6 +50,10 @@ module Yoda
           )
         end
 
+        def namespace?
+          true
+        end
+
         private
 
         # @param another [self]

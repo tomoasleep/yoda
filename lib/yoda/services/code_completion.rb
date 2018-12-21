@@ -48,17 +48,22 @@ module Yoda
 
       # @return [MethodProvider]
       def method_provider
-        @method_provider ||= MethodProvider.new(registry, source_analyzer)
+        @method_provider ||= MethodProvider.new(registry, source_analyzer, evaluator)
       end
 
       # @return [LocalVariableProvider]
       def local_variable_provider
-        @local_variable_provider ||= LocalVariableProvider.new(registry, source_analyzer)
+        @local_variable_provider ||= LocalVariableProvider.new(registry, source_analyzer, evaluator)
       end
 
       # @return [ConstantProvider]
       def const_provider
-        @constant_provider ||= ConstProvider.new(registry, source_analyzer)
+        @constant_provider ||= ConstProvider.new(registry, source_analyzer, evaluator)
+      end
+
+      # @return [Typing::Inferencer::Tracer]
+      def evaluator
+        @evaluator ||= Evaluator.new(ast: source_analyzer.ast, registry: registry)
       end
     end
   end

@@ -57,6 +57,14 @@ module Yoda
           path
         end
 
+        # @return [String]
+        def parent_address
+          @parent_address ||= begin
+            sliced_address = address.slice(0, (path.rindex('::') || 0))
+            sliced_address.empty? ? 'Object' : sliced_address
+          end
+        end
+
         # @return [Hash]
         def to_h
           {
@@ -65,7 +73,7 @@ module Yoda
             document: document,
             tag_list: tag_list,
             sources: sources,
-            primary_source: primary_source
+            primary_source: primary_source,
           }
         end
 
@@ -85,6 +93,10 @@ module Yoda
 
         def ==(another)
           eql?(another)
+        end
+
+        def namespace?
+          false
         end
 
         private

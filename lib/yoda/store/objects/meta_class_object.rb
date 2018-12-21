@@ -8,6 +8,18 @@ module Yoda
           "#{path}%class"
         end
 
+        # @param address [String]
+        # @return [true, false]
+        def self.meta_class_address?(address)
+          address.end_with?('%class')
+        end
+
+        # @param address [String]
+        # @return [String]
+        def self.path_of(address)
+          address.sub(/%class$/, '')
+        end
+
         # @param path [String]
         # @param document [Document, nil]
         # @param tag_list [TagList, nil]

@@ -58,6 +58,10 @@ module Yoda
         # @abstract
         def batch_write(data, bar)
         end
+
+        def inspect
+          "#<#{self.class.name}: #{self.type}>"
+        end
       end
     end
   end

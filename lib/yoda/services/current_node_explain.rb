@@ -36,9 +36,9 @@ module Yoda
         return [] if !valid? || !current_node_trace
         case current_node.type
         when :send
-          current_node_trace.functions.map { |function| function.primary_source }.compact
+          method_candidates.map { |function| function.primary_source }.compact
         when :const
-          current_node_trace.values.map { |value| value.primary_source || value.sources.first }.compact
+          current_node_objects.map { |value| value.primary_source || value.sources.first }.compact
         else
           []
         end
@@ -46,10 +46,16 @@ module Yoda
 
       private
 
-      # @return [Typing::Traces::Base, nil]
-      def current_node_trace
-        return nil unless valid?
-        @current_node_trace ||= evaluator.calculate_trace(current_node)
+      # @return [Array<Store::Objects::Base>]
+      def current_node_objects
+        return [] unless valid?
+        @current_node_objects ||= evaluator.objects(current_node)
+      end
+
+      # @return [Array<Store::Objects::Base>]
+      def method_candidates
+        return [] unless valid?
+        @method_candidates ||= evaluator.method_candidates(current_node)
       end
 
       # @return [Parser::AST::Node]

@@ -1,6 +1,8 @@
 module Yoda
   module Model
     class CompletionItem
+      extend Forwardable
+
       # @return [Descriptions::Base]
       attr_reader :description
 
@@ -12,6 +14,8 @@ module Yoda
 
       # @return [String]
       attr_reader :prefix
+
+      delegate %i(label title to_markdown sort_text) => :description
 
       # @param description [Descriptions::Base]
       # @param range       [Parsing::Range]
@@ -34,9 +38,10 @@ module Yoda
 
       # @return [Symbol]
       def available_kinds
-        %i(method class module constant)
+        %i(method class module constant variable)
       end
 
+      # @return [Symbol]
       def language_server_kind
         case kind
         when :constant
@@ -47,9 +52,20 @@ module Yoda
           LanguageServer::Protocol::Constant::CompletionItemKind::CLASS
         when :module
           LanguageServer::Protocol::Constant::CompletionItemKind::MODULE
+        when :variable
+          LanguageServer::Protocol::Constant::CompletionItemKind::VARIABLE
         else
           nil
         end
+      end
+
+      def to_s
+        title
+      end
+
+      # @return [{Symbol => { Symbol => Integer } }]
+      def language_server_range
+        range.to_language_server_protocol_range
       end
     end
   end

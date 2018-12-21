@@ -11,5 +11,6 @@ module Yoda
     require 'yoda/parsing/range'
     require 'yoda/parsing/query'
     require 'yoda/parsing/type_parser'
+    require 'yoda/parsing/traverser'
   end
 end

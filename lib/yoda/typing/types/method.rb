@@ -19,7 +19,7 @@ module Yoda
         def to_expression(resolver)
           callee_type = to_expression(callee)
           values = callee_type.instanciate(resolver.registry)
-          Store::TypeExpressions::UnionType.new(
+          Model::TypeExpressions::UnionType.new(
             values.map do |value|
               value.methods(visibility: visibility).select { |func| func.name == method_name }
             end.flatten
