@@ -7,7 +7,15 @@ module Yoda
         # @param visibility [Array<Symbol>, nil]
         # @return [Array<Objects::MethodObject>]
         def select(namespace, method_name, visibility: nil)
-          FindMethod.new(registry).select(namespace, method_name, visibility: visibility).map { |el| build(namespace, el) }.flatten
+          FindMethod.new(registry).select(namespace, method_name, visibility: visibility).flat_map { |el| build(namespace, el) }
+        end
+
+        # @param namespaces [Array<Objects::NamespaceObject>]
+        # @param method_name [String, Regexp]
+        # @param visibility [Array<Symbol>, nil]
+        # @return [Array<Objects::MethodObject>]
+        def select_on_multiple(namespaces, method_name, visibility: nil)
+          namespaces.flat_map { |namespace| select(namespace, method_name, visibility: visibility) }
         end
 
         private
