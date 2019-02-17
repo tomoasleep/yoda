@@ -7,14 +7,14 @@ module Yoda
         # @return [::Parser::AST::Node]
         attr_reader :node
 
-        # @return [Typing::Traces::Base]
-        attr_reader :trace
+        # @return [TypeExpressions::Base]
+        attr_reader :type
 
         # @param node  [::Parser::AST::Node]
-        # @param trace [Typing::Traces::Base]
-        def initialize(node, trace)
+        # @param type [TypeExpressions::Base]
+        def initialize(node, type)
           @node = node
-          @trace = trace
+          @type = type
         end
 
         # @return [String]
@@ -30,7 +30,7 @@ module Yoda
         # @return [String]
         def to_markdown
           <<~EOS
-          #{node_body.gsub("\n", ";")}: #{trace.type}
+          #{node_body.gsub("\n", ";")}: #{type}
           EOS
         end
 
