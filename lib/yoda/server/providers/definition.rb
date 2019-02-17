@@ -24,7 +24,7 @@ module Yoda
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
           node_worker = Services::CurrentNodeExplain.new(session.registry, source, location)
-          references = node_worker.defined_files
+          references = node_worker.current_node_signature.defined_files
           references.map { |(path, line, column)| create_location(path, line, column) }
         end
 

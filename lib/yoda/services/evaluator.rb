@@ -11,7 +11,7 @@ module Yoda
       # @return [Store::Registry]
       attr_reader :registry
 
-      delegate %i(type type_expression context_variable_types receiver_candidates method_candidates) => :tracer
+      delegate %i(type type_expression context_variable_types receiver_candidates method_candidates node_info) => :tracer
 
       # @param ast [::Parser::AST::Node]
       # @param registry [Store::Registry]

@@ -25,10 +25,13 @@ module Yoda
         !!nearest_send_node
       end
 
-      # @return [Parsing::NodeObjects::SendNode, nil]
-      def nearest_send_node
-        @nearest_send_node ||= send_nodes_to_current_location.reverse.find { |node| node.on_parameter?(location) }
+      # @return [Array<Store::Objects::MethodObject>]
+      def method_candidates
+        return [] unless valid?
+        Store::Query::FindSignature.new(registry).select_on_multiple(receiver_objects, /\A#{Regexp.escape(index_word)}/)
       end
+
+      private
 
       # @return [Array<Parsing::NodeObjects::SendNode>]
       def send_nodes_to_current_location
@@ -44,31 +47,20 @@ module Yoda
         nearest_send_node&.selector_name
       end
 
-      # @return [Model::TypeExpressions::Base]
-      def receiver_type
-        @receiver_type ||= begin
-          if nearest_send_node
-            evaluator.type(nearest_send_node.receiver_node)
-          else
-            Model::TypeExpressions::InstanceType.new(analyzer.namespace_object.path)
-          end
-        end
-      end
-
-      # @return [Array<Store::Objects::MethodObject>]
-      def method_candidates
-        return [] unless valid?
-        receiver_values
-          .map { |value| Store::Query::FindSignature.new(registry).select(value, /\A#{Regexp.escape(index_word)}/) }
-          .flatten
-      end
-
-      private
-
       # @return [Array<Store::Objects::Base>]
-      def receiver_values
+      def receiver_objects
         return [] unless valid?
-        @receiver_values ||= evaluator.calculate_values(nearest_send_node.receiver_node)
+        @receiver_objects ||= nearest_send_node_info.receiver_candidates
+      end
+
+      # @return [Parsing::NodeObjects::SendNode, nil]
+      def nearest_send_node
+        @nearest_send_node ||= send_nodes_to_current_location.reverse.find { |node| node.on_parameter?(location) }
+      end
+
+      # @return [Typing::NodeInfo]
+      def nearest_send_node_info
+        evaluator.node_info(nearest_send_node.node)
       end
 
       # @return [SourceAnalyzer]

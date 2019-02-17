@@ -22,8 +22,8 @@ module Yoda
 
       # @return [Model::NodeSignature, nil]
       def current_node_signature
-        return nil if !valid? || !current_node_trace
-        @current_node_signature ||= Model::NodeSignature.new(current_node, current_node_trace)
+        return nil if !valid? || !current_node
+        @current_node_signature ||= Model::NodeSignatures.for_node_info(current_node_info)
       end
 
       # @return [true, false]
@@ -31,31 +31,11 @@ module Yoda
         !!(current_node)
       end
 
-      # @return [Array<(String, Integer, Integer)>]
-      def defined_files
-        return [] if !valid? || !current_node_trace
-        case current_node.type
-        when :send
-          method_candidates.map { |function| function.primary_source }.compact
-        when :const
-          current_node_objects.map { |value| value.primary_source || value.sources.first }.compact
-        else
-          []
-        end
-      end
-
       private
 
-      # @return [Array<Store::Objects::Base>]
-      def current_node_objects
-        return [] unless valid?
-        @current_node_objects ||= evaluator.objects(current_node)
-      end
-
-      # @return [Array<Store::Objects::Base>]
-      def method_candidates
-        return [] unless valid?
-        @method_candidates ||= evaluator.method_candidates(current_node)
+      # @return [Typing::NodeInfo]
+      def current_node_info
+        @current_node_info ||= evaluator.node_info(current_node)
       end
 
       # @return [Parser::AST::Node]
@@ -65,7 +45,7 @@ module Yoda
 
       # @return [Evaluator]
       def evaluator
-        @evaluator ||= Evaluator.from_ast(registry, analyzer.ast, location)
+        @evaluator ||= Evaluator.new(ast: analyzer.ast, registry: registry)
       end
 
       # @return [SourceAnalyzer]
