@@ -31,14 +31,18 @@ module Yoda
 
       # @return [Array<Model::CompletionItem>]
       def candidates
-        providers.select(&:providable?).map(&:candidates).flatten
+        unify(providers.select(&:providable?).map(&:candidates).flatten)
       end
 
       private
 
+      def unify(candidates)
+        candidates.each_with_object({}) { |candidate, memo| memo.update(candidate.sort_text => candidate) { |_key, old_value, new_value| old_value.merge(new_value) } }.values
+      end
+
       # @return [Array<CodeCompletion::BaseProvider>]
       def providers
-        [method_provider, local_variable_provider, const_provider]
+        [local_variable_provider, method_provider, const_provider]
       end
 
       # @return [Parsing::SourceAnalyzer]
