@@ -2,7 +2,7 @@ module Yoda
   module Model
     module Descriptions
       class FunctionDescription < Base
-        # @type Store::Objects::MethodObject
+        # @return [FunctionSignatures::Base]
         attr_reader :function
 
         # @param function [FunctionSignatures::Base]

@@ -6,7 +6,7 @@ module Yoda
         @range = range
         @prefix = prefix
       end
-      
+
       # @param object [Store::Objects::Base]
       # @return [Symbol]
       def complete_item_kind(object)
