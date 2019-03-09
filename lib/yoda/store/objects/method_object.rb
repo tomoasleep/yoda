@@ -12,27 +12,42 @@ module Yoda
         attr_reader :overloads
 
         class << self
+          METHOD_SEPARATOR_PATTERN = /[#.]|(::)/
+
           # @param path [String]
           # @return [String]
           def namespace_of_path(path)
-            path.slice(0, (path.rindex(/[#.]/) || 0))
+            divide_by_separator(path)&.at(0)
           end
 
           # @param path [String]
           # @return [String]
           def name_of_path(path)
-            path.slice((path.rindex(/[#.]/) || -1) + 1, path.length)
+            divide_by_separator(path)&.at(2)
           end
 
           # @param path [String]
-          # @return [String]
+          # @return [String, nil]
           def sep_of_path(path)
-            path.slice(path.rindex(/[#.]/))
+            divide_by_separator(path)&.at(1)
           end
 
           # @return [Array<Symbol>]
           def attr_names
             super + %i(parameters visibility overloads)
+          end
+
+          private
+
+          # @param path [String]
+          # @return [(String, String, String), nil]
+          def divide_by_separator(path)
+            rev_path = path.reverse
+            if match_data = rev_path.match(METHOD_SEPARATOR_PATTERN)
+              [match_data.post_match.reverse, match_data.to_s, match_data.pre_match.reverse]
+            else
+              nil
+            end
           end
         end
 
@@ -71,7 +86,7 @@ module Yoda
             case MethodObject.sep_of_path(path)
             when '#'
               namespace_path
-            when '.'
+            when '.', '::'
               MetaClassObject.address_of(namespace_path)
             else
               fail TypeError
