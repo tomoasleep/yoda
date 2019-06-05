@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import { getDocUri, activate } from './helper';
+import { getDocUri, activate } from '../helper';
 
 describe('Should do completion', () => {
   const docUri = getDocUri('completion.rb');
