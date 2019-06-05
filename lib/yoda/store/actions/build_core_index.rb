@@ -1,8 +1,14 @@
+require 'zip'
+require 'open-uri'
+require 'fileutils'
+
 module Yoda
   module Store
     module Actions
       # @todo Build index without using shell script
       class BuildCoreIndex
+        SOURCE_PATH = File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}")
+
         class << self
           # @return [true, false]
           def run
@@ -11,31 +17,52 @@ module Yoda
 
           def exists?
             [
-              "~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc",
-              "~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc-stdlib",
-            ].all? { |path| File.exists?(File.expand_path(path)) }
+              File.expand_path(SOURCE_PATH, '.yardoc'),
+              File.expand_path(SOURCE_PATH, '.yardoc-stdlib'),
+            ].all? { |path| File.exists?(path) }
           end
         end
 
         # @return [true, false]
         def run
+          Logger.info "Downloading ruby source"
+          download_core_index_file
+          Logger.info "Building ruby core and stdlib index"
           build_core_index
         end
 
         private
 
-        # @return [String]
-        def script_path
-          File.expand_path('../../../../scripts/build_core_index.sh', __dir__)
+        def download_core_index_file
+          Zip.warn_invalid_date = false
+
+          open("https://cache.ruby-lang.org/pub/ruby/#{RUBY_VERSION.sub(/^(\d+)\.(\d+)\.\d+$/, "\\1.\\2")}/ruby-#{RUBY_VERSION}.zip") do |file|
+            Zip::File.open_buffer(file) do |zip_file|
+              zip_file.each do |entry|
+                extracted_entry_path = File.join(SOURCE_PATH, entry.to_s)
+                FileUtils.mkdir_p(File.dirname(extracted_entry_path))
+                zip_file.extract(entry, extracted_entry_path) { true }
+              end
+            end
+          end
         end
 
         def build_core_index
-          o, e = Open3.capture2e(script_path)
+          Dir.chdir(SOURCE_PATH) do
+            exec_yardoc("yard doc -n *.c") || return
+            exec_yardoc("yard doc -b .yardoc-stdlib -o doc-stdlib -n") || return
+          end
+          Logger.info "Success to build yard index"
+        end
+
+        def exec_yardoc(cmdline)
+          o, e = Open3.capture2e(cmdline)
           Logger.debug o unless o.empty?
           if e.success?
-            Logger.info "Success to build yard index"
+            true
           else
             Logger.warn "Failed to build core index"
+            false
           end
         end
       end
