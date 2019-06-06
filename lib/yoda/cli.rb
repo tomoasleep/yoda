@@ -8,6 +8,7 @@ module Yoda
     require 'yoda/cli/setup'
     require 'yoda/cli/infer'
     require 'yoda/cli/complete'
+    require 'yoda/cli/console'
 
     class Top < Thor
       class_option :log_level, type: :string, desc: 'Set log level (debug info warn error fatal)'
@@ -30,6 +31,12 @@ module Yoda
       def complete(position)
         process_class_options
         Cli::Complete.run(position)
+      end
+
+      desc 'console', 'Launch debug console'
+      def console
+        process_class_options
+        Cli::Console.run
       end
 
       desc 'server', 'Start Language Server'
