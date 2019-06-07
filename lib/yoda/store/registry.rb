@@ -4,6 +4,13 @@ require 'yard'
 module Yoda
   module Store
     class Registry
+      include HasServices
+
+      service(:constant_finder) { Query::FindConstant.new(self) }
+      service(:meta_class_finder) { Query::FindMetaClass.new(self) }
+      service(:method_finder) { Query::FindMethod.new(self) }
+      service(:signature_finder) { Query::FindSignature.new(self) }
+
       # @note This number must be updated when breaking change is added.
       REGISTRY_VERSION = 2
 
