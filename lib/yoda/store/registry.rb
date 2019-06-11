@@ -12,7 +12,7 @@ module Yoda
       service(:signature_finder) { Query::FindSignature.new(self) }
 
       # @note This number must be updated when breaking change is added.
-      REGISTRY_VERSION = 2
+      REGISTRY_VERSION = 3
 
       PROJECT_STATUS_KEY = '%project_status'
 

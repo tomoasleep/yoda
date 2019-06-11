@@ -1,10 +1,11 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Store::Project::LibraryDocLoader do
+RSpec.xdescribe Yoda::Store::Actions::ImportProjectDependencies do
+  let(:project) { Yoda::Store::Project.new }
   let(:registry) { Yoda::Store::Registry.new(adapter) }
   let(:adapter) { Yoda::Store::Adapters::MemoryAdapter.new }
 
-  let(:loader) { described_class.new(registry: registry, gem_specs: gem_specs) }
+  let(:loader) { described_class.new(registry: registry) }
 
   describe '#run' do
     subject { loader.run }

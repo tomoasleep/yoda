@@ -12,8 +12,8 @@ module Yoda
 
         # @param specs [Array<Bundler::LazySpecification>]
         # @return [BundleStatus]
-        def self.initial_build(specs:)
-          new(bundle: BundleStatus.initial_build(specs), version: Registry::REGISTRY_VERSION)
+        def self.initial_build(dependencies:)
+          new(bundle: BundleStatus.initial_build(dependencies), version: Registry::REGISTRY_VERSION)
         end
 
         # @param bundle [BundleStatus]
@@ -34,26 +34,36 @@ module Yoda
           # @return [Array<GemStatus>]
           attr_reader :gem_statuses
 
+          # @return [Array<LocalLibraryStatus>]
+          attr_reader :local_library_statuses
+
           # @return [StdStatus]
           attr_reader :std_status
 
-          # @param specs [Array<Bundler::LazySpecification>]
+          # @param deps [Array<Project::Dependency>]
           # @return [BundleStatus]
-          def self.initial_build(specs)
-            gem_statuses = specs.map { |spec| ProjectStatus::GemStatus.initial_build(spec) }
+          def self.initial_build(deps)
+            gem_statuses = deps.select(&:gem?).map { |dep| ProjectStatus::GemStatus.initial_build(dep) }
+            local_library_statuses = deps.reject(&:gem?).map { |dep| ProjectStatus::LocalLibraryStatus.initial_build(dep) }
             std_status = StdStatus.initial_build
-            new(gem_statuses: gem_statuses, std_status: std_status)
+            new(gem_statuses: gem_statuses, local_library_statuses: local_library_statuses, std_status: std_status)
           end
 
           # @param gem_statuses [Array<GemStatus>]
+          # @param local_library_statuses [Array<LocalLibraryStatus>]
           # @param std_status [StdStatus]
-          def initialize(gem_statuses:, std_status:)
+          def initialize(gem_statuses:, local_library_statuses:, std_status:)
             @gem_statuses = gem_statuses
+            @local_library_statuses = local_library_statuses
             @std_status = std_status
           end
 
           def to_h
-            { gem_statuses: gem_statuses, std_status: std_status }
+            {
+              gem_statuses: gem_statuses,
+              local_library_statuses: local_library_statuses,
+              std_status: std_status,
+            }
           end
 
           # @param name [String]
@@ -127,6 +137,36 @@ module Yoda
 
           def to_h
             { version: version, core_present: core_present, std_present: std_present }
+          end
+        end
+
+        class LocalLibraryStatus
+          include Serializable
+          # @return [String]
+          attr_reader :name, :path
+
+          # @return [true, false]
+          attr_reader :present
+
+          # @param deps [Dependency]
+          # @return [GemStatus]
+          def self.initial_build(deps)
+            new(name: deps.name, path: deps.source_path, present: false)
+          end
+
+          def initialize(name:, path:, present:)
+            @name = name
+            @path = path
+            @present = present
+          end
+
+          def to_h
+            { name: name, path: path, present: present }
+          end
+
+          # @return [true, false]
+          def present?
+            !!present
           end
         end
 

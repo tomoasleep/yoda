@@ -15,6 +15,7 @@ RSpec.describe Yoda::Store::Objects::ProjectStatus do
               name: 'yard', version: '0.9.0', present: false,
             ),
           ],
+          local_library_statuses: [],
           std_status: Yoda::Store::Objects::ProjectStatus::StdStatus.new(
             version: '2.5.0', core_present: true, std_present: false,
           ),

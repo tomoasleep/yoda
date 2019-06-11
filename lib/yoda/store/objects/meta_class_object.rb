@@ -1,6 +1,7 @@
 module Yoda
   module Store
     module Objects
+      # @todo Rename to SingletonClassObject
       class MetaClassObject < NamespaceObject
         # @param path [String]
         # @return [String]

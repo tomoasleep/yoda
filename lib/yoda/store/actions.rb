@@ -5,6 +5,8 @@ module Yoda
       require 'yoda/store/actions/import_core_library'
       require 'yoda/store/actions/import_std_library'
       require 'yoda/store/actions/import_gem'
+      require 'yoda/store/actions/import_local_library'
+      require 'yoda/store/actions/import_project_dependencies'
       require 'yoda/store/actions/read_file'
       require 'yoda/store/actions/read_project_files'
     end
