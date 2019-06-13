@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'leveldb', '~> 0.1.9'
   spec.add_dependency 'lmdb', '~> 0.4.8'
   spec.add_dependency 'ruby-progressbar'
-  spec.add_dependency 'concurrent-ruby', '~> 1.0.0'
+  spec.add_dependency 'concurrent-ruby', '~> 1.1.0'
   spec.add_dependency 'rubyzip', '>= 1.0.0'
 
   spec.add_development_dependency "bundler", "~> 1.16"
