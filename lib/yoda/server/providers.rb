@@ -2,6 +2,7 @@ module Yoda
   class Server
     module Providers
       require 'yoda/server/providers/base'
+      require 'yoda/server/providers/with_timeout'
 
       require 'yoda/server/providers/completion'
       require 'yoda/server/providers/signature'

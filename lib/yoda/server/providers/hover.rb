@@ -2,6 +2,8 @@ module Yoda
   class Server
     module Providers
       class Hover < Base
+        include WithTimeout
+
         def self.provider_method
           :'textDocument/hover'
         end

@@ -2,6 +2,8 @@ module Yoda
   class Server
     module Providers
       class Completion < Base
+        include WithTimeout
+
         def self.provider_method
           :'textDocument/completion'
         end

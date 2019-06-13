@@ -13,18 +13,13 @@ module Yoda
       # @return [ConcurrentWriter]
       attr_reader :writer
 
-      # @return [Concurrent::ThreadPoolExecutor]
-      attr_reader :thread_pool
-
-      # @return [Concurrent::ThreadPoolExecutor]
-      def self.default_thread_pool
-        Concurrent.global_fast_executor
-      end
+      # @return [Scheduler]
+      attr_reader :scheduler
 
       # @param writer [ConcurrentWriter]
-      # @param thread_pool [Concurrent::ThreadPoolExecutor]
-      def initialize(writer:, thread_pool: nil)
-        @thread_pool = thread_pool || self.class.default_thread_pool
+      # @param scheduler [Scheduler]
+      def initialize(writer:, scheduler: nil)
+        @scheduler = scheduler || Scheduler.new
         @writer = writer
         @future_map = Concurrent::Map.new
       end
@@ -54,11 +49,11 @@ module Yoda
 
       # @param id [String]
       def cancel_request(id)
-        future_map[id]&.cancel
+        scheduler.cancel(id)
       end
 
       def cancel_all_requests
-        future_map.each_value { |future| future&.cancel }
+        scheduler.cancel_all
       end
 
       private
@@ -73,20 +68,13 @@ module Yoda
 
       # @return [Concurrent::Future]
       def provide_async(provider:, id:, method:, params:)
-        future = Concurrent::Future.new(executor: thread_pool) do
+        future = scheduler.async(id: id) do
           notifier.busy(type: method, id: id) { provider.provide(params) }
         end
         future.add_observer do |_time, value, reason|
-          begin
-            reason ? write_response(id, build_error_response(reason)) : write_response(id, value)
-          ensure
-            future_map.delete(id)
-          end
+          reason ? write_response(id, build_error_response(reason)) : write_response(id, value)
         end
-        future_map.put_if_absent(id, future)
-        Concurrent::ScheduledTask.execute(provider.timeout, executor: thread_pool) { future.cancel } if provider.timeout
-        
-        future.execute
+
         future
       end
 

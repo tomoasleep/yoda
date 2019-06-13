@@ -5,9 +5,10 @@ RSpec.describe Yoda::Server::RootHandler do
   TIMEOUT = 10
 
   include FileUriHelper
-  let(:handler) { described_class.new(writer: Yoda::Server::ConcurrentWriter.new(writer), thread_pool: thread_pool) }
+  let(:handler) { described_class.new(writer: Yoda::Server::ConcurrentWriter.new(writer), scheduler: scheduler) }
   let(:writer) { instance_double('Yoda::Server::ConcurrentWriter') }
   let(:thread_pool) { Concurrent.new_fast_executor(auto_terminate: true) }
+  let(:scheduler) { Yoda::Server::Scheduler.new(thread_pool: thread_pool) }
 
   before { allow(writer).to receive(:write) }
   after { thread_pool.shutdown }

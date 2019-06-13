@@ -11,6 +11,7 @@ module Yoda
     require 'yoda/server/root_handler'
     require 'yoda/server/lifecycle_handler'
     require 'yoda/server/deserializer'
+    require 'yoda/server/scheduler'
 
     # @return [::LanguageServer::Protocol::Transport::Stdio::Reader]
     attr_reader :reader
