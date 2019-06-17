@@ -15,11 +15,18 @@ module Yoda
           calculate(uri, position)
         end
 
+        private
+
         def timeout
           10
         end
 
-        private
+        def timeout_message(params)
+          uri = params[:text_document][:uri]
+          position = params[:position]
+
+          "#{self.class.provider_method}: #{uri}:#{position[:line]}:#{position[:character]}"
+        end
 
         # @param uri      [String]
         # @param position [{Symbol => Integer}]

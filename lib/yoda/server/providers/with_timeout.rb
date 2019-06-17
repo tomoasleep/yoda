@@ -6,7 +6,16 @@ module Yoda
       module WithTimeout
         module PrependHook
           def provide(*args)
-            Timeout.timeout(timeout) { super }
+            begin
+              Timeout.timeout(timeout) { super }
+            rescue Timeout::Error => err
+              if message = timeout_message(*args)
+                Logger.error("Request expired: " + message)
+              else
+                Logger.error("Request expired")
+              end
+              raise err
+            end
           end
         end
 
@@ -15,6 +24,10 @@ module Yoda
         end
 
         def timeout
+          nil
+        end
+
+        def timeout_message(*args)
           nil
         end
       end
