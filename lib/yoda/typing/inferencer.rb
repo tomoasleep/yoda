@@ -54,7 +54,7 @@ module Yoda
           infer_case_node(node)
         when :super, :zsuper, :yield
           # TODO
-          type_for_sexp_type(node.type)
+          type_for_literal_sexp(node.type)
         when :return, :break, :next
           # TODO
           node.children[0] ? infer(node.children[0]) : generator.nil_type
@@ -74,7 +74,7 @@ module Yoda
           node.children.map { |node| infer(node) }.last
         when :dstr, :dsym, :xstr
           node.children.each { |node| infer(node) }
-          type_for_sexp_type(node.type)
+          type_for_literal_sexp(node.type)
         when :def
           infer_method_node(node)
         when :defs
