@@ -140,8 +140,19 @@ module Yoda
         EOS
       end
 
-      def notify_initialization_progress(phase: nil, message: nil, **params)
-        notifier.event(type: :initialization, phase: phase, message: message)
+      def notify_initialization_progress(phase: nil, message: nil, index:, length:)
+        if length
+          percentage = (index || 0) * 100 / length
+          if index <= 0
+            notifier.start_progress(id: phase, title: phase, message: message, percentage: percentage)
+          elsif index >= length
+            notifier.done_progress(id: phase)
+          else
+            notifier.report_progress(id: phase, message: message, percentage: percentage)
+          end
+        else
+          notifier.event(type: :initialization, phase: phase, message: message)
+        end
       end
     end
   end
