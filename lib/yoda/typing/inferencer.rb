@@ -256,7 +256,7 @@ module Yoda
         # TODO
         subject_node, *when_nodes, else_node = node.children
         when_body_nodes = when_nodes.map { |node| node.children.last }
-        Types::Union.new([*when_body_nodes, else_node].map { |node| infer(node) })
+        Types::Union.new([*when_body_nodes, else_node].compact.map { |node| infer(node) })
       end
 
       # @return [Types::Generator]
