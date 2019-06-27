@@ -1,4 +1,5 @@
 require 'concurrent'
+require 'forwardable'
 
 module Yoda
   class Instrument
@@ -60,6 +61,10 @@ module Yoda
     attr_reader :subscriptions
 
     class << self
+      extend Forwardable
+
+      delegate %i(hear subscribe emit unsubscribe) => :instance
+
       # Returns Instrument instance (thread local).
       # @return [Instrument]
       def instance
