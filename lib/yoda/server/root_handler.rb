@@ -100,6 +100,11 @@ module Yoda
             code: LanguageServer::Protocol::Constant::ErrorCodes::REQUEST_CANCELLED,
             message: 'Request is canceled',
           )
+        when Timeout::Error
+          LanguageServer::Protocol::Interface::ResponseError.new(
+            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
+            message: 'Requiest timeout',
+          )
         when NOT_INITIALIZED
           LanguageServer::Protocol::Interface::ResponseError.new(
             code: LanguageServer::Protocol::Constant::ErrorCodes::SERVER_NOT_INITIALIZED,
