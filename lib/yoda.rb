@@ -4,6 +4,7 @@ module Yoda
   require "yoda/has_services"
 
   require "yoda/instrument"
+  require "yoda/ast"
   require "yoda/cli"
   require "yoda/errors"
   require "yoda/services"
