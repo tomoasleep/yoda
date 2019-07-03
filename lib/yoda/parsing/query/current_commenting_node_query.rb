@@ -5,11 +5,11 @@ module Yoda
       class CurrentCommentingNodeQuery
         attr_reader :ast, :comments, :location
 
-        # @param ast      [::Parser::AST::Node]
+        # @param ast      [AST::Node]
         # @param comments [Array<::Parser::Source::Comment>]
         # @param location [Location] represents the current position.
         def initialize(ast, comments, location)
-          fail ArgumentError, ast unless ast.is_a?(::Parser::AST::Node)
+          fail ArgumentError, ast unless ast.is_a?(AST::Vnode)
           fail ArgumentError, comments unless comments.all? { |comment| comment.is_a?(::Parser::Source::Comment) }
           fail ArgumentError, location unless location.is_a?(Location)
           @ast = ast
@@ -35,20 +35,20 @@ module Yoda
         private
 
         def current_commenting_node_location
-          @current_commenting_node_location ||= Location.of_ast_location(current_commenting_node.location)
+          @current_commenting_node_location ||= current_commenting_node.location
         end
 
         # @return [Namespace]
         def namespace
-          @namespace ||= NodeObjects::Namespace.new(ast)
+          @namespace ||= ast.namespace
         end
 
-        # @return [{::Parser::AST::Node => Array<::Parser::Source::Comment>}]
+        # @return [{AST::Node => Array<::Parser::Source::Comment>}]
         def association
-          @association ||= ::Parser::Source::Comment.associate(ast, comments)
+          @association ||= ast.associate_comments(comments)
         end
 
-        # @return [{Array<::Parser::Source::Comment> => ::Parser::AST::Node}]
+        # @return [{Array<::Parser::Source::Comment> => AST::Node}]
         def inverse_association
           @inverse_association ||= association.invert
         end

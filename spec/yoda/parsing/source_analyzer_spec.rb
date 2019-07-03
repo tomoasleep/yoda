@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Parsing::SourceAnalyzer do
+RSpec.xdescribe Yoda::Parsing::SourceAnalyzer do
   include TypeHelper
   include AST::Sexp
 

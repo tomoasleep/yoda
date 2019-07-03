@@ -8,18 +8,23 @@ module Yoda
         # @return [Store::Registry]
         attr_reader :registry
 
-        # @return [Parsing::SourceAnalyzer]
-        attr_reader :source_analyzer
+        # @return [AST::Vnode]
+        attr_reader :ast
+
+        # @return [Parsing::Location]
+        attr_reader :location
 
         # @return [Evaluator]
         attr_reader :evaluator
 
         # @param registry [Store::Registry]
-        # @param source_analyzer [Parsing::SourceAnalyzer]
+        # @param ast [AST::Vnode]
+        # @param location [Parsing::Location]
         # @param evaluator [Evaluator]
-        def initialize(registry, source_analyzer, evaluator)
+        def initialize(registry, ast, location, evaluator)
           @registry = registry
-          @source_analyzer = source_analyzer
+          @ast = ast
+          @location = location
           @evaluator = evaluator
         end
 
@@ -37,19 +42,9 @@ module Yoda
 
         private
 
-        # @return [::Parser::AST::Node]
-        def ast
-          source_analyzer.ast
-        end
-
-        # @return [Parsing::Location]
-        def location
-          source_analyzer.location
-        end
-
-        # @return [::Parser::AST::Node, nil]
+        # @return [AST::Node, nil]
         def current_node
-          @current_node ||= source_analyzer.nodes_to_current_location_from_root.last
+          @current_node ||= ast.positionally_nearest_child(location)
         end
       end
     end

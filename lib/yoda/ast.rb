@@ -1,12 +1,11 @@
 module Yoda
   module AST
+    require 'yoda/ast/method_traversable'
     require 'yoda/ast/namespace_traversable'
     require 'yoda/ast/namespace'
     require 'yoda/ast/vnode'
     require 'yoda/ast/node'
 
-    require 'yoda/ast/argument_node'
-    require 'yoda/ast/arguments_node'
     require 'yoda/ast/array_node'
     require 'yoda/ast/assignment_node'
     require 'yoda/ast/block_call_node'
@@ -29,13 +28,16 @@ module Yoda
     require 'yoda/ast/module_node'
     require 'yoda/ast/multiple_left_hand_side_node'
     require 'yoda/ast/name_vnode'
-    require 'yoda/ast/optional_argument_node'
+    require 'yoda/ast/optional_parameter_node'
     require 'yoda/ast/pair_node'
+    require 'yoda/ast/parameter_node'
+    require 'yoda/ast/parameters_node'
     require 'yoda/ast/rescue_clause_node'
     require 'yoda/ast/root_vnode'
     require 'yoda/ast/send_node'
     require 'yoda/ast/singleton_class_node'
     require 'yoda/ast/special_call_node'
+    require 'yoda/ast/variable_node'
     require 'yoda/ast/when_node'
 
     class << self
@@ -90,13 +92,13 @@ module Yoda
         when :dstr, :dsym, :xstr
           InterpolationTextNode
         when :args
-          ArgumentsNode
+          ParametersNode
+        when :arg, :shadowarg, :restarg, :blockarg, :kwarg, :kwrestarg
+          ParameterNode
+        when :optarg, :kwoptarg
+          OptionalParameterNode
         when :mlhs
           MultipleLeftHandSideNode
-        when :arg, :shadowarg, :restarg, :blockarg, :kwarg, :kwrestarg
-          ArgumentNode
-        when :optarg, :kwoptarg
-          OptionalArgumentNode
         when :def
           DefNode
         when :defs
@@ -110,10 +112,10 @@ module Yoda
         when :module
           ModuleNode
         when :class
-          ClassNoode
+          ClassNode
         when :sclass
-          SingletonClassNoode
-        when :int, :float, :complex, :rational, :str, :string
+          SingletonClassNode
+        when :int, :float, :complex, :rational, :str, :string, :sym
           LiteralNode
         else
           Node

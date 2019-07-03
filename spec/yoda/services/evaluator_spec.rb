@@ -4,9 +4,8 @@ RSpec.describe Yoda::Services::Evaluator do
   let(:evaluator) { described_class.new(registry: registry, ast: ast) }
   let(:source) { File.read(File.expand_path(path, fixture_root)) }
   let(:source_string) { nil }
-  let(:source_analyzer) { Yoda::Parsing::SourceAnalyzer.from_source(source_string || source, location) }
-  let(:ast) { source_analyzer.ast }
-  let(:current_node) { source_analyzer.nodes_to_current_location_from_root.last }
+  let(:ast) { Yoda::Parsing::Parser.new.parse(source_string || source) }
+  let(:current_node) { ast.positionally_nearest_child(location) }
 
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
   let(:project) { Yoda::Store::Project.new(fixture_root) }

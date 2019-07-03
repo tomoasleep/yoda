@@ -46,43 +46,37 @@ module Yoda
             end
         end
 
-        # @return [Parsing::NodeObjects::ConstNode, nil]
+        # @return [AST::Vnode, nil]
         def current_ancestor_const_node
-          @current_ancestor_const_node ||= begin
-            node = source_analyzer.nodes_to_current_location_from_root.reverse.take_while { |el| [:const, :cbase].include?(el.type) }.last
-            return nil if !node || node.type != :const
-            Parsing::NodeObjects::ConstNode.new(node)
-          end
+          nearst_constant_group = ast.positionally_nearest_child(location)&.nesting&.reverse&.find(&:constant?)
         end
 
         # @return [Array<Store::Objects::Base>]
         def const_candidates
           return [] unless providable?
-          return [] if const_parent_paths.empty?
 
-          base_path = current_ancestor_const_node.to_path
-          path = just_after_separator? ? Model::Path.from_names([base_path.spacename, '']) : base_path
-          scoped_path = Model::ScopedPath.new(const_parent_paths, path)
-          Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path)
+          if current_ancestor_const_node.base.present?
+            namespace_path = evaluator.node_info(current_ancestor_const_node.base).objects.map(&:path).first
+            return [] unless namespace_path
+            base_name = just_after_separator? ? '' : current_ancestor_const_node.name.name.to_s
+            path = Model::Path.from_names([namespace_path, base_name])
+          else
+            path = Model::ScopedPath.new(lexical_scopes, current_ancestor_const_node.path)
+          end
+
+          Store::Query::FindConstant.new(registry).select_with_prefix(path)
         end
 
         # @return [true, false]
         def just_after_separator?
           return @is_just_after_separator if instance_variable_defined?(:@is_just_after_separator)
-          @is_just_after_separator = current_ancestor_const_node.just_after_separator?(source_analyzer.location)
-        end
-
-        # @return [Array<Store::Objects::Base>]
-        def const_parent_paths
-          @const_parent_paths ||= begin
-            lexical_scope(source_analyzer.current_namespace)
-          end
+          @is_just_after_separator = current_ancestor_const_node.just_after_separator?(location)
         end
 
         # @param namespace [Parsing::NodeObjects::Namespace]
         # @return [Array<Path>]
-        def lexical_scope(namespace)
-          namespace.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
+        def lexical_scopes
+          evaluator.node_info(current_ancestor_const_node).scope_nestings.map(&:path)
         end
       end
     end

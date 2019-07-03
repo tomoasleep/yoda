@@ -1,6 +1,8 @@
 module Yoda
   module AST
     class ModuleNode < Node
+      include Namespace
+
       # @return [ConstantNode]
       def receiver
         children[0]

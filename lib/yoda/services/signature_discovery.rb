@@ -33,12 +33,10 @@ module Yoda
 
       private
 
-      # @return [Array<Parsing::NodeObjects::SendNode>]
+      # @return [Array<AST::SendNode>]
       def send_nodes_to_current_location
         @send_nodes_to_current_location ||= begin
-          analyzer.nodes_to_current_location_from_root.map do |node|
-            node.type == :send ? Parsing::NodeObjects::SendNode.new(node) : nil
-          end.compact
+          ast.positionally_nearest_child(location).nesting.select { |node| node.type == :send }
         end
       end
 
@@ -53,24 +51,24 @@ module Yoda
         @receiver_objects ||= nearest_send_node_info.receiver_candidates
       end
 
-      # @return [Parsing::NodeObjects::SendNode, nil]
+      # @return [AST::SendNode, nil]
       def nearest_send_node
-        @nearest_send_node ||= send_nodes_to_current_location.reverse.find { |node| node.on_parameter?(location) }
+        @nearest_send_node ||= send_nodes_to_current_location.reverse.find { |node| node.on_arguments?(location) }
       end
 
       # @return [Typing::NodeInfo]
       def nearest_send_node_info
-        evaluator.node_info(nearest_send_node.node)
+        evaluator.node_info(nearest_send_node)
       end
 
-      # @return [SourceAnalyzer]
-      def analyzer
-        @analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
+      # @return [AST::Vnode]
+      def ast
+        @ast ||= Parsing::Parser.new.parse(source)
       end
 
       # @return [Evaluator]
       def evaluator
-        @evaluator ||= Evaluator.new(ast: analyzer.ast, registry: registry)
+        @evaluator ||= Evaluator.new(ast: ast, registry: registry)
       end
     end
   end

@@ -1,15 +1,16 @@
 module Yoda
   module Typing
     class Inferencer
+      # @deprecated
       class ConstantResolver
         # @retrn [Context]
         attr_reader :context
 
-        # @return [::AST::Node]
+        # @return [AST::Node]
         attr_reader :node
 
         # @param context [Context]
-        # @param node [::AST::Node]
+        # @param node [AST::Node]
         def initialize(context:, node:)
           @context = context
           @node = node
@@ -40,19 +41,14 @@ module Yoda
           @generator ||= Types::Generator.new(context.registry)
         end
 
-        # @return [Array<Path>]
+        # @return [Array<Model::Path>]
         def lexical_scopes
           @lexical_scopes ||= context.lexical_scope_objects.map(&:path)
         end
 
-        # @return [ScopedPath]
+        # @return [Model::ScopedPath]
         def scoped_path
-          scoped_path ||= Model::ScopedPath.new(lexical_scopes, const_node.to_s)
-        end
-
-        # @return [Parsing::NodeObjects::ConstNode]
-        def const_node
-          @const_node ||= Parsing::NodeObjects::ConstNode.new(node)
+          scoped_path ||= Model::ScopedPath.new(lexical_scopes, node.path)
         end
       end
     end

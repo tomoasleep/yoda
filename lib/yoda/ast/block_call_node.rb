@@ -1,17 +1,17 @@
 module Yoda
   module AST
     class BlockCallNode < Node
-      # @return [Node]
+      # @return [SendNode]
       def send_clause
         children[0]
       end
 
-      # @return [Node]
-      def arguments_clause
+      # @return [ParametersNode]
+      def parameters
         children[1]
       end
 
-      # @return [Node]
+      # @return [Vnode]
       def body
         children[2]
       end

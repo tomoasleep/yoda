@@ -10,7 +10,7 @@ module Yoda
         # @return [TypeExpressions::Base]
         attr_reader :type
 
-        # @param node  [::Parser::AST::Node]
+        # @param node  [AST::Vnode]
         # @param type [TypeExpressions::Base]
         def initialize(node, type)
           @node = node
@@ -38,7 +38,11 @@ module Yoda
 
         # @return [String]
         def node_body
-          @node_body ||= Unparser.unparse(node)
+          @node_body ||= begin
+            if node.respond_to?(:node)
+              Unparser.unparse(node.node)
+            end
+          end
         end
       end
     end

@@ -27,11 +27,10 @@ module Yoda
 
         # Generate block context for the candidate
         # @param context [Context]
-        # @param args_node [::AST::Node]
+        # @param params_node [AST::ParametersNode]
         # @return [Context]
-        def generate_method_context(context:, args_node:)
-          args_node = Parsing::NodeObjects::ArgsNode.new(args_node)
-          binds = ArgumentsBinder.new(generator: generator).bind(types: method_types, arguments: args_node.parameter)
+        def generate_method_context(context:, params_node:)
+          binds = ArgumentsBinder.new(generator: generator).bind(types: method_types, arguments: params_node.parameter)
 
           MethodContext.new(parent: context, registry: registry, receiver: receiver_type, binds: binds)
         end

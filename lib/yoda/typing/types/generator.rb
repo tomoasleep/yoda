@@ -80,9 +80,16 @@ module Yoda
           @numeric_type ||= instance_type_of('Numeric')
         end
 
+        # @param object_class [Store::Objects::NamespaceObject]
         # @return [Instance]
         def object_type(object_class)
           Instance.new(klass: object_class)
+        end
+
+        # @param object_class [Store::Objects::NamespaceObject]
+        # @return [Instance]
+        def instance_type(object_class)
+          instance_type_of(object_class.path)
         end
 
         # @return [Any]

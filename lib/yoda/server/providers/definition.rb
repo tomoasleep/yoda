@@ -32,7 +32,7 @@ module Yoda
           source = session.file_store.get(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-          node_worker = Services::CurrentNodeExplain.new(session.registry, source, location)
+          node_worker = Services::CurrentNodeExplain.from_source(registry: session.registry, source: source, location: location)
           references = node_worker.current_node_signature.defined_files
           references.map { |(path, line, column)| create_location(path, line, column) }
         end

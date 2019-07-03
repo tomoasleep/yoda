@@ -19,7 +19,7 @@ module Yoda
           @predicate = predicate
         end
 
-        # @param node [::AST::Node]
+        # @param node [AST::Node]
         # @return [Boolean]
         def match?(node)
           return false if type && type != node.type
@@ -28,35 +28,35 @@ module Yoda
           true
         end
 
-        # @param node [::AST::Node]
+        # @param node [AST::Node]
         # @return [Symbol, nil]
         # @see https://github.com/whitequark/parser/blob/v2.5.3.0/doc/AST_FORMAT.md
         def name_of(node)
           case node.type
           when :lvar, :ivar, :cvar, :gvar
-            node.children.first
+            node.name
           when :lvasgn, :ivasgn, :cvasgn, :gvasgn
-            node.children.first
+            node.assignee.try(:name)
           when :const
-            node.children.last
+            node.name.name
           when :casgn
-            node.children[1]
+            node.assignee.name
           when :sym
-            node.children.first
+            node.value
           when :send, :csend
-            node.children[1]
+            node.selector.name
           when :"op-asgn"
-            node.children[1]
+            node.children[1].name
           when :def
-            node.children.first
+            node.name_clause.name
           when :defs
-            node.children[1]
+            node.name_clause.name
           when :arg, :blockarg, :kwarg
-            node.children.first
+            node.content.try(:name)
           when :optarg, :kwoptarg
-            node.children.first
+            node.content.try(:name)
           when :restarg, :kwrestarg
-            node.children.first
+            node.content.try(:name)
           end
         end
       end

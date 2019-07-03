@@ -7,15 +7,15 @@ module Yoda
       require 'yoda/parsing/traverser/result_set'
       include QueryInterface
 
-      # @return [::AST::Node]
+      # @return [AST::Node]
       attr_reader :node
 
-      # @param node [::AST::Node]
+      # @param node [AST::Node]
       def initialize(node)
         @node = node
       end
 
-      # @return [Enumerable<::AST::Node>]
+      # @return [Enumerable<AST::Node>]
       def all_nodes
         all_nodes_for(node)
       end

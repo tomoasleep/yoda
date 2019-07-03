@@ -16,6 +16,12 @@ module Yoda
       # @return [Tracer]
       attr_reader :tracer
 
+      # @param registry [Store::Registry]
+      # @return [Inferencer]
+      def self.create_for_root(registry)
+        new(context: NamespaceContext.root_scope(registry))
+      end
+
       # @param context [BaseContext]
       # @param tracer [Tracer, nil]
       def initialize(context:, tracer: nil)
@@ -23,22 +29,22 @@ module Yoda
         @tracer = tracer || Tracer.new(registry: context.registry, generator: generator)
       end
 
-      # @param node [::AST::Node]
+      # @param node [AST::Vnode]
       # @return [Store::Types::Base]
       def infer(node)
         tracer.bind_context(node: node, context: context)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn
-          process_bind(node.children[0], node.children[1])
+          infer_assignment_node(node)
         when :casgn
           # TODO
-          infer(node.children.last)
+          infer(node.content)
         when :masgn
           # TODO
-          infer(node.children.last)
+          infer(node.content)
         when :op_asgn, :or_asgn, :and_asgn
           # TODO
-          infer(node.children.last)
+          infer(node.content)
         when :and, :or, :not
           # TODO
           Types::Union.new(node.children.map { |node| infer(node) })
@@ -46,10 +52,10 @@ module Yoda
           infer_branch_nodes(node.children.first, node.children.slice(1..2).compact)
         when :while, :until, :while_post, :until_post
           # TODO
-          infer(node.children[1])
+          infer(node.body)
         when :for
           # TODO
-          infer(node.children[2])
+          infer(node.body)
         when :case
           infer_case_node(node)
         when :super, :zsuper, :yield
@@ -57,19 +63,20 @@ module Yoda
           type_for_literal_sexp(node.type)
         when :return, :break, :next
           # TODO
-          node.children[0] ? infer(node.children[0]) : generator.nil_type
+          node.arguments[0] ? infer(node.arguments[0]) : generator.nil_type
         when :resbody
           # TODO
           infer(node.children[2])
         when :csend, :send
           infer_send_node(node)
         when :block
-          send_node, arg_node, block_node = node
-          infer_send_node(send_node, arg_node, block_node)
+          infer_block_call_node(node)
+        when :cbase
+          infer_const_base_node(node)
         when :const
           infer_const_node(node)
         when :lvar, :cvar, :ivar, :gvar
-          context.environment.resolve(node.children.first) || generator.any_type
+          context.environment.resolve(node.name) || generator.any_type
         when :begin, :kwbegin, :block
           node.children.map { |node| infer(node) }.last
         when :dstr, :dsym, :xstr
@@ -94,102 +101,116 @@ module Yoda
 
       private
 
-      # @param var [Symbol]
-      # @param body_node [::AST::Node]
+      # @param node [AST::ArgumentNode]
       # @return [Store::Types::Base]
-      def process_bind(var, body_node)
-        body_type = infer(body_node)
-        context.environment.bind(var, body_type)
+      def infer_assignment_node(node)
+        body_type = infer(node.content)
+        context.environment.bind(node.assignee.name, body_type)
         body_type
       end
 
-      # @param node [::AST::Node]
+      # @param node [AST::ConstantBaseNode]h
+      # @return [Types::Base]
+      def infer_const_base_node(node)
+        object = Store::Query::FindConstant.new(context.registry).find('::')
+
+        case object
+        when Store::Objects::NamespaceObject
+          generator.singleton_type_of(object.path)
+        when Store::Objects::ValueObject
+          # TODO
+          generator.any_type
+        else
+          generator.any_type
+        end
+      end
+
+      # @param node [AST::ConstantNode]
       # @return [Types::Base]
       def infer_const_node(node)
-        constant_resolver = ConstantResolver.new(context: context, node: node)
-        constant_resolver.resolve_constant_type
+        object = 
+          if node.base.present?
+            base_type = infer(node.base)
+            base_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(base_type)
+            # TODO: Support multiple candidate
+            Store::Query::FindConstant.new(context.registry).find(Model::Path.from_names([base_objects.first.path, node.name.name]))
+          else
+            Store::Query::FindConstant.new(context.registry).find(Model::ScopedPath.new(context.lexical_scope_objects.map(&:path), node.name.name.to_s))
+          end
+
+        case object
+        when Store::Objects::NamespaceObject
+          generator.singleton_type_of(object.path)
+        when Store::Objects::ValueObject
+          # TODO
+          generator.any_type
+        else
+          generator.any_type
+        end
       end
 
-      # @param node [::AST::Node]
+      # @param node [AST::DefNode]
       # @return [Types::Base]
       def infer_method_node(node)
-        name, args_node, body_node = node.children
-        receiver_type = generator.union(context.current_objects.map { |object| generator.object_type(object) })
+        receiver_type = generator.union(context.current_objects.map { |object| generator.instance_type(object) })
 
         method_definition_provider = MethodDefinitionResolver.new(
           receiver_type: receiver_type,
-          name: name,
+          name: node.name,
           registry: context.registry,
           generator: generator,
         )
 
-        if body_node
-          method_context = method_definition_provider.generate_method_context(context: context, args_node: args_node)
-          derive(context: method_context).infer(body_node)
-        end
+        method_context = method_definition_provider.generate_method_context(context: context, params_node: node.parameters)
+        derive(context: method_context).infer(node.body)
 
         generator.symbol_type
       end
 
-      # @param node [::AST::Node]
+      # @param node [AST::DefSingletonNode]
       # @return [Types::Base]
       def infer_smethod_node(node)
-        receiver_node, name, args_node, body_node = node.children
-        receiver_type = infer(receiver_node)
+        receiver_type = infer(node.receiver)
 
         method_definition_provider = MethodDefinitionResolver.new(
           receiver_type: receiver_type,
-          name: name,
+          name: node.name,
           registry: context.registry,
           generator: generator,
         )
 
-        if body_node
-          method_context = method_definition_provider.generate_method_context(context: context, args_node: args_node)
-          derive(context: method_context).infer(body_node)
-        end
+        method_context = method_definition_provider.generate_method_context(context: context, params_node: node.parameters)
+        derive(context: method_context).infer(node.body)
 
         generator.symbol_type
       end
 
-      # @param node [::AST::Node]
+      # @param node [AST::ModuleNode, AST::ClassNode]
       # @return [Types::Base]
       def infer_namespace_node(node)
-        case node.type
-        when :module
-          name_node, block_node = node.children
-        when :class
-          name_node, _, block_node = node.children
-        end
-        constant_resolver = ConstantResolver.new(context: context, node: name_node)
-        type = constant_resolver.resolve_constant_type
-        block_context = NamespaceContext.new(objects: [constant_resolver.constant], parent: context, registry: context.registry, receiver: type)
+        namespace_type = infer(node.receiver)
+        namespace_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(namespace_type)
 
-        if block_node
-          derive(context: block_context).infer(block_node)
-        end
+        block_context = NamespaceContext.new(objects: namespace_objects, parent: context, registry: context.registry, receiver: namespace_type)
+        derive(context: block_context).infer(node.body)
 
-        type
+        namespace_type
       end
 
-      # @param node [::AST::Node]
+      # @param node [AST::HashNode]
       # @return [Model::TypeExpressions::Base]
       def infer_hash_node(node)
-        hash = node.children.each_with_object({}) do |node, memo|
+        hash = node.contents.each_with_object({}) do |node, memo|
           case node.type
           when :pair
-            pair_key, pair_value = node.children
-            case pair_key.type
-            when :sym
-              memo[pair_key.children.first.to_sym] = infer(pair_value)
-            when :str
-              memo[pair_key.children.first.to_s] = infer(pair_value)
+            case node.key.type
+            when :sym, :str
+              memo[node.key.value.to_s] = infer(node.value)
             else
               # TODO: Support other key types.
             end
           when :kwsplat
-            content_node = node.children.first
-            content_type = infer(content_node)
+            infer(node.content)
             # TODO: merge infered result
           end
         end
@@ -197,23 +218,27 @@ module Yoda
         Types::AssociativeArray.new(contents: hash)
       end
 
-      # @param node [::AST::Node]
-      # @param block_param_node [::AST::Node, nil]
-      # @param block_node [::AST::Node, nil]
+      # @param node [AST::BlockCallNode]
+      def infer_block_call_node(node)
+        infer_send_node(node.send_clause, node.parameters, node.body)
+      end
+
+
+      # @param node [AST::SendNode]
+      # @param block_param_node [AST::ParametersNode, nil]
+      # @param block_node [AST::Vnode, nil]
       # @return [Types::Base]
       def infer_send_node(node, block_param_node = nil, block_node = nil)
-        receiver_node, method_name_sym, *argument_nodes = node.children
-
-        receiver_type = receiver_node ? infer(receiver_node) : context.receiver
-        argument_types = infer_argument_nodes(argument_nodes)
+        receiver_type = node.implicit_receiver? ? context.receiver : infer(node.receiver)
+        argument_types = infer_argument_nodes(node.arguments)
 
         method_resolver = MethodResolver.new(
           registry: context.registry,
           receiver_type: receiver_type,
-          name: method_name_sym.to_s,
+          name: node.selector_name,
           argument_types: argument_types,
           generator: generator,
-          implicit_receiver: receiver_node.nil?,
+          implicit_receiver: node.implicit_receiver?,
         )
 
         if block_node
@@ -300,6 +325,8 @@ module Yoda
           generator.numeric_type
         when :rational
           generator.numeric_type
+        when :empty
+          generator.nil_type
         else
           generator.any_type
         end

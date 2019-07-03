@@ -40,6 +40,11 @@ module Yoda
 
         private
 
+        # @return [Evaluator]
+        def evaluator
+          @evaluator ||= Evaluator.new(ast: ast, registry: registry)
+        end
+
         # @return [Parsing::Query::CurrentCommentTokenQuery]
         def current_comment_token_query
           @current_comment_token_query ||=

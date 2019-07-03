@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Typing::Evaluator do
+RSpec.xdescribe Yoda::Typing::Evaluator do
   include TypeHelper
   include AST::Sexp
 

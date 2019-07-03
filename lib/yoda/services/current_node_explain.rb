@@ -2,11 +2,8 @@ module Yoda
   module Services
     # CurrentNodeExplain shows help for the current node.
     class CurrentNodeExplain
-      # @return [Store::Registry]
-      attr_reader :registry
-
-      # @return [String]
-      attr_reader :source
+      # @return [Evaluator]
+      attr_reader :evaluator
 
       # @return [Parsing::Location]
       attr_reader :location
@@ -14,9 +11,18 @@ module Yoda
       # @param registry [Store::Registry]
       # @param source   [String]
       # @param location [Parsing::Location]
-      def initialize(registry, source, location)
-        @registry = registry
-        @source = source
+      # @return [CurrentNodeExplain]
+      def self.from_source(registry:, source:, location:)
+        new(
+          evaluator: Evaluator.new(registry: registry, ast: Parsing::Parser.new.parse(source)),
+          location: location
+        )
+      end
+
+      # @param evaluator [Evaluator]
+      # @param location [Parsing::Location]
+      def initialize(evaluator:, location:)
+        @evaluator = evaluator
         @location = location
       end
 
@@ -40,17 +46,7 @@ module Yoda
 
       # @return [Parser::AST::Node]
       def current_node
-        analyzer.nodes_to_current_location_from_root.last
-      end
-
-      # @return [Evaluator]
-      def evaluator
-        @evaluator ||= Evaluator.new(ast: analyzer.ast, registry: registry)
-      end
-
-      # @return [SourceAnalyzer]
-      def analyzer
-        @analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
+        @current_node ||= evaluator.ast.positionally_nearest_child(location)
       end
     end
   end

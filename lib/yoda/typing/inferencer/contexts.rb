@@ -59,6 +59,7 @@ module Yoda
           parent&.current_namespace_context
         end
 
+        # @return [Array<Store::Objects::NamespaceObject>]
         def lexical_scope_objects
           (current_namespace_context.parent&.lexical_scope_objects || []) + current_objects
         end

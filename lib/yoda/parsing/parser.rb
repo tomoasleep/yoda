@@ -4,15 +4,16 @@ module Yoda
   module Parsing
     class Parser
       # @param string [String]
-      # @return [::Parser::AST::Node]
+      # @return [AST::Vnode]
       def parse(string)
-        ::Parser::CurrentRuby.parse(string)
+        AST.wrap(::Parser::CurrentRuby.parse(string))
       end
 
       # @param string [String]
-      # @return [(::Parser::AST::Node, Array<::Parser::Source::Comment>)]
+      # @return [(AST::Vnode, Array<::Parser::Source::Comment>)]
       def parse_with_comments(string)
-        ::Parser::CurrentRuby.parse_with_comments(string)
+        node, comments = ::Parser::CurrentRuby.parse_with_comments(string)
+        [AST.wrap(node), comments]
       end
 
       # @param string [String]

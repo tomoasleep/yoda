@@ -31,6 +31,7 @@ module Yoda
 
       # @return [Array<Model::CompletionItem>]
       def candidates
+        # require 'pry'; binding.pry
         unify(providers.select(&:providable?).map(&:candidates).flatten)
       end
 
@@ -45,29 +46,29 @@ module Yoda
         [local_variable_provider, method_provider, const_provider]
       end
 
-      # @return [Parsing::SourceAnalyzer]
-      def source_analyzer
-        @source_analyzer ||= Parsing::SourceAnalyzer.from_source(source, location)
-      end
-
       # @return [MethodProvider]
       def method_provider
-        @method_provider ||= MethodProvider.new(registry, source_analyzer, evaluator)
+        @method_provider ||= MethodProvider.new(registry, ast, location, evaluator)
       end
 
       # @return [LocalVariableProvider]
       def local_variable_provider
-        @local_variable_provider ||= LocalVariableProvider.new(registry, source_analyzer, evaluator)
+        @local_variable_provider ||= LocalVariableProvider.new(registry, ast, location, evaluator)
       end
 
       # @return [ConstantProvider]
       def const_provider
-        @constant_provider ||= ConstProvider.new(registry, source_analyzer, evaluator)
+        @constant_provider ||= ConstProvider.new(registry, ast, location, evaluator)
+      end
+
+      # @return [Yoda::AST::Vnode]
+      def ast
+        @ast ||= Yoda::Parsing::Parser.new.parse(source)
       end
 
       # @return [Typing::Inferencer::Tracer]
       def evaluator
-        @evaluator ||= Evaluator.new(ast: source_analyzer.ast, registry: registry)
+        @evaluator ||= Evaluator.new(ast: ast, registry: registry)
       end
     end
   end

@@ -25,12 +25,18 @@ module Yoda
 
       # @return [String]
       def identifier
-        "#{type}:#{source_map ? source_map.expression : object_id}"
+        "#{type}:#{source_map&.expression ? source_map_expression : object_id}"
       end
       
       # @return [Parser::Source::Map, nil]
       def source_map
         node.location
+      end
+
+      private
+
+      def source_map_expression
+        "#{source_map.expression.source_buffer.name}:(#{source_map.line},#{source_map.column})..(#{source_map.last_line},#{source_map.last_column})"
       end
     end
   end

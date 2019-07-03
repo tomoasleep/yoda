@@ -5,21 +5,21 @@ module Yoda
         include QueryInterface
         include Enumerable
 
-        # @return [Enumerable<::AST::Node>]
+        # @return [Enumerable<AST::Node>]
         attr_reader :nodes
         alias each nodes
 
-        # @params nodes [::AST::Node]
+        # @params nodes [AST::Node]
         def initialize(nodes)
           @nodes = nodes
         end
 
-        # @return [Enumerable<::AST::Node>]
+        # @return [Enumerable<AST::Node>]
         def all_nodes
           flat_map(&method(:all_nodes_for))
         end
 
-        # @return [Array<::AST::Node>]
+        # @return [Array<AST::Node>]
         def to_a
           nodes.to_a
         end

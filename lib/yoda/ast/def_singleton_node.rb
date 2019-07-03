@@ -1,24 +1,31 @@
 module Yoda
   module AST
-    class DefNode < Node
-      # @return [Node]
+    class DefSingletonNode < Node
+      # @return [Symbol]
+      delegate name: :name_clause
+
+      # @return [Vnode]
       def receiver
         children[0]
       end
 
-      # @return [Node]
-      def name
+      # @return [NameVnode]
+      def name_clause
         children[1]
       end
 
-      # @return [Node]
-      def arguments
+      # @return [ParametersNode]
+      def parameters
         children[2]
       end
 
-      # @return [Node]
+      # @return [Vnode]
       def body
         children[3]
+      end
+
+      def method?
+        true
       end
     end
   end

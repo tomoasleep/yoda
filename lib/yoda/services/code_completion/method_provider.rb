@@ -31,14 +31,13 @@ module Yoda
         def method_candidates
           return [] unless providable?
           @method_candidates ||= receiver_values.flat_map do |receiver|
-            Store::Query::FindSignature.new(registry).select(receiver, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility_of_send_node(current_send))
+            Store::Query::FindSignature.new(registry).select(receiver, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility)
           end
         end
 
-        # @param send_node [Parsing::NodeObjects::SendNode]
         # @return [Array<Symbol>]
-        def method_visibility_of_send_node(send_node)
-          if send_node.receiver_node
+        def method_visibility
+          if current_send.implicit_receiver?
             %i(public)
           else
             %i(public private protected)
@@ -47,20 +46,21 @@ module Yoda
 
         # @return [Array<Store::Objects::Base>]
         def receiver_values
-          @receiver_values ||= evaluator.receiver_candidates(current_send.node) || []
+          @receiver_values ||= evaluator.receiver_candidates(current_send) || []
         end
 
-        # @return [Parsing::NodeObjects::SendNode, nil]
+        # @return [AST::SendNode, nil]
         def current_send
           @current_send ||= begin
-            return nil unless current_node.type == :send
-            Parsing::NodeObjects::SendNode.new(current_node)
+            current_node = ast.positionally_nearest_child(location)
+            return nil unless current_node&.type == :send
+            current_node
           end
         end
 
-        # @return [Parser::AST::Node, nil]
+        # @return [AST::Node, nil]
         def current_receiver_node
-          current_send&.receiver_node
+          current_send&.receiver
         end
 
         # @return [String, nil]

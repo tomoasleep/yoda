@@ -13,7 +13,7 @@ module Yoda
 
         # @return [Range]
         def node_range
-          Parsing::Range.of_ast_location(node_info.location)
+          node_info.range
         end
 
         # @abstract

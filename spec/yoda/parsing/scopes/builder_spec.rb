@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Parsing::Scopes::Builder do
+RSpec.xdescribe Yoda::Parsing::Scopes::Builder do
   let(:builder) { described_class.new(ast) }
   let(:ast) { Yoda::Parsing::Parser.new.parse(source) }
 

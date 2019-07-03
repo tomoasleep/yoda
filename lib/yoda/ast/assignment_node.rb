@@ -1,7 +1,7 @@
 module Yoda
   module AST
     class AssignmentNode < Node
-      # @return [Node]
+      # @return [NameVnode]
       def assignee
         children[0]
       end

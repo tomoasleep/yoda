@@ -15,14 +15,14 @@ module Yoda
 
         private
 
-        # @return [Enumerable<::AST::Node>]
+        # @return [Enumerable<AST::Node>]
         def select(**kwargs, &predicate)
           matcher = Matcher.new(**kwargs, &predicate)
           all_nodes.select { |node| matcher.match?(node) }
         end
 
-        # @param node [::AST::Node]
-        # @return [Enumerable<::AST::Node>]
+        # @param node [AST::Node]
+        # @return [Enumerable<AST::Node>]
         def all_nodes_for(node)
           Enumerator.new { |yielder| repeat_for(node, yielder) }.lazy
         end

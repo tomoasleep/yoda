@@ -19,7 +19,7 @@ module Yoda
         # @param node [::Parser::AST::Node]
         # @param parent [Base, nil]
         def initialize(node, parent = nil)
-          fail ArgumentError, node unless node.is_a?(::Parser::AST::Node)
+          fail ArgumentError, node unless node.is_a?(AST::Vnode)
           fail ArgumentError, parent if parent && !parent.is_a?(Base)
           @node = node
           @parent = parent

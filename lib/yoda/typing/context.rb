@@ -2,6 +2,7 @@ require 'set'
 
 module Yoda
   module Typing
+    # @deprecated
     class Context
       # @return [Store::Registry]
       attr_reader :registry

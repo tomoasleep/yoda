@@ -2,12 +2,12 @@ module Yoda
   module Parsing
     module NodeObjects
       class ConstNode
-        # @param node [::AST::Node]
+        # @param node [AST::Node]
         attr_reader :node
 
-        # @param node [::AST::Node]
+        # @param node [AST::Node]
         def initialize(node)
-          fail ArgumentError, node unless node.is_a?(::AST::Node) && node.type == :const
+          fail ArgumentError, node unless node.is_a?(AST::Node) && node.type == :const
           @node = node
         end
 

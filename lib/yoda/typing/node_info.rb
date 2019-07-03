@@ -6,15 +6,15 @@ module Yoda
     class NodeInfo
       extend Forwardable
 
-      # @return [Parser::AST::Node]
+      # @return [AST::Node]
       attr_reader :node
 
       # @return [Inferencer::Tracer]
       attr_reader :tracer
 
-      delegate %i(type location) => :node
+      delegate %i(type location range) => :node
 
-      # @param node [Parser::AST::Node]
+      # @param node [AST::Node]
       # @param tracer [Inferencer::Tracer]
       def initialize(node:, tracer:)
         @node = node
@@ -39,6 +39,23 @@ module Yoda
       # @return [Array<Store::Objects::Base>]
       def objects
         tracer.objects(node)
+      end
+
+      # @return [Array<Store::Objects::Base>]
+      def scope_objects
+        tracer.objects(node)
+      end
+
+      # @return [Array<Store::Objects::NamespaceObject>]
+      def scope_nestings
+        context.lexical_scope_objects
+      end
+
+      private
+
+      # @return [Inferencer::BaseContext]
+      def context
+        tracer.context(node)
       end
     end
   end

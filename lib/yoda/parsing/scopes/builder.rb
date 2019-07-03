@@ -24,7 +24,7 @@ module Yoda
         # @param scope [Base]
         # @return [void]
         def build(node, scope)
-          return if !node || !node.is_a?(AST::Node)
+          return if !node || !node.is_a?(AST::Vnode)
           case node.type
           when :def
             mscope = MethodDefinition.new(node, scope)

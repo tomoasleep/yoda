@@ -5,11 +5,14 @@ module Yoda
     class Evaluator
       extend Forwardable
 
-      # @return [::Parser::AST::Node]
+      # @return [AST::Vnode]
       attr_reader :ast
 
       # @return [Store::Registry]
       attr_reader :registry
+
+      # @return [Typing::Inferencer]
+      attr_reader :inferencer
 
       delegate %i(type type_expression context_variable_types receiver_candidates method_candidates node_info) => :tracer
 
@@ -18,18 +21,17 @@ module Yoda
       def initialize(ast:, registry:)
         @ast = ast
         @registry = registry
-      end
-
-      # @return [Typing::Inferencer]
-      def inferencer
-        @inferencer ||= Typing::Inferencer.new(context: Typing::Inferencer::NamespaceContext.root_scope(registry))
+        @inferencer = Typing::Inferencer.create_for_root(registry)
+        @lock = Concurrent::ReadWriteLock.new
       end
 
       # @return [Typing::Inferencer::Tracer]
       def tracer
-        @tracer ||= begin
-          inferencer.infer(ast)
-          inferencer.tracer
+        @lock.with_write_lock do
+          @tracer ||= begin
+            inferencer.infer(ast)
+            inferencer.tracer
+          end
         end
       end
     end

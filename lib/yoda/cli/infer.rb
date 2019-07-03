@@ -23,7 +23,7 @@ module Yoda
       end
 
       def worker
-        @worker ||= Services::CurrentNodeExplain.new(project.registry, File.read(filename), position)
+        @worker ||= Services::CurrentNodeExplain.from_source(registry: project.registry, source: File.read(filename), location: position)
       end
 
       def project

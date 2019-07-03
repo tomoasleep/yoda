@@ -17,6 +17,7 @@ module Yoda
         # @return [Array<Model::Descriptions::Base>]
         def description_candidates
           return [] unless available?
+          return [] unless namespace
           scoped_path = Model::ScopedPath.new(lexical_scope(namespace), index_word)
           Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path).map { |obj| Model::Descriptions::ValueDescription.new(obj) }
         end
@@ -42,15 +43,15 @@ module Yoda
           current_comment_token_query.at_sign? ? '' : current_comment_token_query.current_word
         end
 
-        # @return [Parsing::NodeObjects::Namespace, nil]
+        # @return [AST::Namespace, nil]
         def namespace
           current_commenting_node_query.current_namespace
         end
 
-        # @param namespace [Parsing::NodeObjects::Namespace]
+        # @param namespace [AST::Namespace]
         # @return [Array<Path>]
         def lexical_scope(namespace)
-          namespace.paths_from_root.reverse.map { |name| Model::Path.build(name.empty? ? 'Object' : name.gsub(/\A::/, '')) }
+          evaluator.node_info(namespace).scope_nestings.reverse.map(&:path)
         end
       end
     end
