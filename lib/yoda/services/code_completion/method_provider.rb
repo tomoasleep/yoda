@@ -52,7 +52,6 @@ module Yoda
         # @return [AST::SendNode, nil]
         def current_send
           @current_send ||= begin
-            current_node = ast.positionally_nearest_child(location)
             return nil unless current_node&.type == :send
             current_node
           end

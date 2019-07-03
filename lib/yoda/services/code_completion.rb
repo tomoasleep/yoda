@@ -31,7 +31,6 @@ module Yoda
 
       # @return [Array<Model::CompletionItem>]
       def candidates
-        # require 'pry'; binding.pry
         unify(providers.select(&:providable?).map(&:candidates).flatten)
       end
 
