@@ -7,7 +7,9 @@ module Yoda
     module Actions
       # @todo Build index without using shell script
       class BuildCoreIndex
-        SOURCE_PATH = File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}")
+        SOURCE_PATH = File.expand_path("~/.yoda/sources")
+        VERSION_DIR_NAME = "ruby-#{RUBY_VERSION}"
+        VERSION_SOURCE_PATH = File.join(SOURCE_PATH, VERSION_DIR_NAME)
 
         class << self
           # @return [true, false]
@@ -17,8 +19,8 @@ module Yoda
 
           def exists?
             [
-              File.expand_path(SOURCE_PATH, '.yardoc'),
-              File.expand_path(SOURCE_PATH, '.yardoc-stdlib'),
+              File.expand_path(VERSION_SOURCE_PATH, '.yardoc'),
+              File.expand_path(VERSION_SOURCE_PATH, '.yardoc-stdlib'),
             ].all? { |path| File.exists?(path) }
           end
         end
@@ -36,7 +38,7 @@ module Yoda
         def download_core_index_file
           Zip.warn_invalid_date = false
 
-          open("https://cache.ruby-lang.org/pub/ruby/#{RUBY_VERSION.sub(/^(\d+)\.(\d+)\.\d+$/, "\\1.\\2")}/ruby-#{RUBY_VERSION}.zip") do |file|
+          open("https://cache.ruby-lang.org/pub/ruby/#{RUBY_VERSION.sub(/^(\d+)\.(\d+)\.\d+$/, '\\1.\\2')}/ruby-#{RUBY_VERSION}.zip") do |file|
             Zip::File.open_buffer(file) do |zip_file|
               zip_file.each do |entry|
                 extracted_entry_path = File.join(SOURCE_PATH, entry.to_s)
@@ -48,7 +50,7 @@ module Yoda
         end
 
         def build_core_index
-          Dir.chdir(SOURCE_PATH) do
+          Dir.chdir(VERSION_SOURCE_PATH) do
             exec_yardoc("yard doc -n *.c") || return
             exec_yardoc("yard doc -b .yardoc-stdlib -o doc-stdlib -n") || return
           end
