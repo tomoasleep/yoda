@@ -38,7 +38,11 @@ module Yoda
         if provider = Providers.build_provider(notifier: notifier, session: session, method: method)
           provide_async(provider: provider, id: id, method: method, params: params)
         else
-          write_response(id, build_error_response(NotImplementedMethod.new(method)))
+          if id
+            write_response(id, build_error_response(NotImplementedMethod.new(method)))
+          else
+            Logger.instance.debug("A notification with a not implemented method (#{method}) received")
+          end
         end
       end
 
