@@ -51,10 +51,7 @@ module Yoda
 
         # @return [AST::SendNode, nil]
         def current_send
-          @current_send ||= begin
-            return nil unless current_node&.type == :send
-            current_node
-          end
+          @current_send ||= current_node&.type == :send ? current_node : nil
         end
 
         # @return [AST::Node, nil]

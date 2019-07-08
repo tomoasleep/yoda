@@ -39,7 +39,7 @@ module Yoda
           create_hover(current_node_signature) if current_node_signature
         end
 
-        # @param signature [Services::NodeSignature]
+        # @param signature [Model::NodeSignatures::Base]
         def create_hover(signature)
           LanguageServer::Protocol::Interface::Hover.new(
             contents: signature.descriptions.map { |value| create_hover_text(value) },
