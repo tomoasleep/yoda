@@ -39,6 +39,11 @@ module Yoda
       def eql?(another)
         another.is_a?(ScopedPath) && path == another.path && scopes == another.scopes
       end
+
+      # @return [Array<Path>]
+      def paths
+        scopes.map { |scope| Path.from_names([scope, path]) }
+      end
     end
   end
 end

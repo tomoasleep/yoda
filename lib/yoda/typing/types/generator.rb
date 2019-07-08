@@ -139,11 +139,26 @@ module Yoda
         end
 
         def find_or_build(path)
-          find(path) || Yoda::Store::Objects::ClassObject.new(path: path, superclass_path: 'Object')
+          find(path) || Yoda::Store::Objects::ClassObject.new(path: normalize_path(path), superclass_path: 'Object')
         end
 
         def find_or_singleton_class(path)
-          find_meta_class(path) || Yoda::Store::Objects::MetaClassObject.new(path: path)
+          find_meta_class(path) || Yoda::Store::Objects::MetaClassObject.new(path: normalize_path(path))
+        end
+
+        private
+
+        def normalize_path(path)
+          case path
+          when Model::ScopedPath
+            path.paths.first.to_s
+          when Model::Path
+            path.to_s
+          when String, Symbol
+            path.to_s
+          else
+            fail TypeError, path
+          end
         end
       end
     end
