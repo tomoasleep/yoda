@@ -1,5 +1,6 @@
 module Yoda
   module AST
+    require 'yoda/ast/traversable'
     require 'yoda/ast/method_traversable'
     require 'yoda/ast/namespace_traversable'
     require 'yoda/ast/namespace'

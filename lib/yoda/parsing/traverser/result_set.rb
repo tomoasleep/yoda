@@ -19,6 +19,11 @@ module Yoda
           flat_map(&method(:all_nodes_for))
         end
 
+        # @return [Enumerable<AST::Node>]
+        def nesting
+          flat_map(&method(:nesting))
+        end
+
         # @return [Array<AST::Node>]
         def to_a
           nodes.to_a

@@ -10,7 +10,18 @@ module Yoda
 
         # @return [ResultSet]
         def query_all(**kwargs, &predicate)
-          select(**kwargs, &predicate)
+          ResultSet.new(select(**kwargs, &predicate))
+        end
+
+        # @return [Traverser, nil]
+        def query_ancestor(**kwargs, &predicate)
+          result = select(**kwargs, &predicate).first
+          result ? Traverser.new(result) : nil
+        end
+
+        # @return [Traverser, nil]
+        def query_ancestors(**kwargs, &predicate)
+          ResultSet.new(select(**kwargs, &predicate))
         end
 
         private
@@ -19,6 +30,12 @@ module Yoda
         def select(**kwargs, &predicate)
           matcher = Matcher.new(**kwargs, &predicate)
           all_nodes.select { |node| matcher.match?(node) }
+        end
+
+        # @return [Enumerable<AST::Node>]
+        def select_ancestors(**kwargs, &predicate)
+          matcher = Matcher.new(**kwargs, &predicate)
+          nesting.select { |node| matcher.match?(node) }
         end
 
         # @param node [AST::Node]
@@ -37,6 +54,12 @@ module Yoda
         # @abstract
         # @return [Enumerable<AST::Node>]
         def all_nodes
+          fail NotImplementedError
+        end
+
+        # @abstract
+        # @return [Enumerable<AST::Node>]
+        def nesting
           fail NotImplementedError
         end
       end

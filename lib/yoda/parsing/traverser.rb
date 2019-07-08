@@ -19,6 +19,11 @@ module Yoda
       def all_nodes
         all_nodes_for(node)
       end
+
+      # @return [Enumerable<AST::Node>]
+      def nesting
+        node.nesting
+      end
     end
   end
 end

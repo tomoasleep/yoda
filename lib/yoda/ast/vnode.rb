@@ -4,6 +4,7 @@ module Yoda
     class Vnode
       include NamespaceTraversable
       include MethodTraversable
+      include Traversable
 
       # @return [Vnode, nil]
       attr_reader :parent
