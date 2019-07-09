@@ -47,10 +47,10 @@ module Yoda
           )
         end
 
-        # @param description [Services::Descriptions::Base]
-        # @return [String]
+        # @param description [Model::Descriptions::Base]
+        # @return [String, Hash]
         def create_hover_text(description)
-          description.to_markdown
+          description.markup_content
         end
       end
     end

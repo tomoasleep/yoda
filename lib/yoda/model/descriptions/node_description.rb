@@ -34,6 +34,13 @@ module Yoda
           EOS
         end
 
+        def markup_content
+          {
+            language: 'ruby',
+            value: "#{node_body.gsub("\n", ";")} # #{type}",
+          }
+        end
+
         private
 
         # @return [String]

@@ -25,6 +25,12 @@ module Yoda
         def to_markdown
           fail NotImplementedError
         end
+
+        # Return an LSP MarkedString content for description
+        # @return [String, Hash]
+        def markup_content
+          to_markdown
+        end
       end
     end
   end

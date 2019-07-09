@@ -28,6 +28,13 @@ module Yoda
         def to_markdown
           ""
         end
+
+        def markup_content
+          {
+            language: 'ruby',
+            value: "#{variable} # #{type}",
+          }
+        end
       end
     end
   end
