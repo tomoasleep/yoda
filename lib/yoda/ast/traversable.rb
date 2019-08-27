@@ -3,22 +3,22 @@ module Yoda
     module Traversable
       # @return [Vnode, nil]
       def query(query)
-        Traverser.new(self).query&.node
+        Parsing::Traverser.new(self).query(query)&.node
       end
 
       # @return [Parsing::Traverser::ResultSet]
       def query_all(query)
-        Traverser.new(self).query
+        Parsing::Traverser.new(self).query(query)
       end
 
       # @return [Vnode, nil]
       def query_ancestor(query)
-        Traverser.new(self).query_ancestor&.node
+        Parsing::Traverser.new(self).query_ancestor(query)&.node
       end
 
       # @return [Parsing::Traverser::ResultSet]
       def query_ancestors(query)
-        Traverser.new(self).query_ancestors
+        Parsing::Traverser.new(self).query_ancestors(query)
       end
     end
   end

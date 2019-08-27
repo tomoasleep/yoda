@@ -1,13 +1,16 @@
+require 'forwardable'
+
 module Yoda
   module Parsing
     class Traverser
       class ResultSet
+        extend Forwardable
         include QueryInterface
         include Enumerable
 
         # @return [Enumerable<AST::Node>]
         attr_reader :nodes
-        alias each nodes
+        delegate each: :nodes
 
         # @params nodes [AST::Node]
         def initialize(nodes)

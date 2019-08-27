@@ -15,13 +15,13 @@ module Yoda
 
         # @return [Traverser, nil]
         def query_ancestor(**kwargs, &predicate)
-          result = select(**kwargs, &predicate).first
+          result = select_ancestors(**kwargs, &predicate).first
           result ? Traverser.new(result) : nil
         end
 
         # @return [Traverser, nil]
         def query_ancestors(**kwargs, &predicate)
-          ResultSet.new(select(**kwargs, &predicate))
+          ResultSet.new(select_ancestors(**kwargs, &predicate))
         end
 
         private
