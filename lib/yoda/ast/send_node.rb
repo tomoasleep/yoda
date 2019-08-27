@@ -21,6 +21,25 @@ module Yoda
         children.slice(2..-1)
       end
 
+      # @return [Array<Vnode>]
+      def expanded_arguments
+        block_pass_arguments, arguments_without_block_pass = arguments.partition { |node| node.type == :block_pass }
+        if last_argument = arguments_without_block_pass.last
+          arguments_without_block_pass.slice(0..-2) + (last_argument.type == :hash ? last_argument.children : [last_argument]) + block_pass_arguments
+        else
+          arguments_without_block_pass.slice(0..-2) + block_pass_arguments
+        end
+      end
+
+      def keyword_argument
+        non_bpass_arguments = arguments.reject { |node| node.type == :block_pass }
+        non_bpass_arguments.last&.type == :hash ? non_bpass_arguments.last : nil
+      end
+
+      def block_pass_argument
+        arguments.last.type == :block_pass ? arguments.last : nil
+      end
+
       def implicit_receiver?
         receiver.empty?
       end

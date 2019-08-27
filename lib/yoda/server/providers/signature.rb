@@ -33,17 +33,20 @@ module Yoda
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
           cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
 
-          signature_worker = Services::SignatureDiscovery.new(session.registry, cut_source, location)
+          signature_worker = Services::SignatureDiscovery.from_source(registry: session.registry, source: cut_source, location: location)
 
           functions = signature_worker.method_candidates
-          create_signature_help(functions)
+          argument_number = signature_worker.argument_number
+          create_signature_help(functions, argument_number)
         end
 
         # @param code_objects [Array<Model::FunctionSignatures::Base>]
-        def create_signature_help(functions)
+        # @param argument_number [Integer, nil]
+        def create_signature_help(functions, argument_number)
           signatures = functions.map { |func| Model::Descriptions::FunctionDescription.new(func) }
           LanguageServer::Protocol::Interface::SignatureHelp.new(
             signatures: signatures.map { |signature| create_signature_info(signature) },
+            active_parameter: argument_number,
           )
         end
 
