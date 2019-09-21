@@ -6,48 +6,47 @@ module Yoda
       require 'yoda/store/project/cache'
       require 'yoda/store/project/dependency'
 
+      # @note This number must be updated when breaking change is added.
+      REGISTRY_VERSION = 4
+
       # @return [String]
       attr_reader :root_path
 
-      # @return [Registry, nil]
-      attr_reader :registry
-
       # @param root_path [String]
-      def initialize(root_path, registry: nil)
+      def initialize(root_path)
         fail ArgumentError, root_path unless root_path.is_a?(String)
 
         @root_path = File.absolute_path(root_path)
-        @registry = registry
+      end
+      
+      # @return [Registry]
+      def registry
+        @registry ||= Registry::ProjectRegistry.for_project(self)
       end
 
-      def setup
-        return if registry
-        make_dir
-        @registry = cache.prepare_registry
+      # @return [Dependency]
+      def dependency
+        @dependency ||= Dependency.new(self)
       end
 
-      # Delete all data from registry
-      def clear
-        setup
-        registry.clear
-      end
-
-      # @return [Array<BaseError>]
-      def build_cache
-        setup
-        importer = Actions::ImportProjectDependencies.new(self)
-        importer.run
-        load_project_files
-        importer.errors
-      end
-
-      def rebuild_cache
-        clear
-        build_cache
+      # @return [Cache]
+      def cache
+        @cache ||= Cache.build_for(self)
       end
 
       def yoda_dir
         File.expand_path('.yoda', root_path)
+      end
+
+      def setup
+        import_project_dependencies
+        load_project_files
+      end
+      alias build_cache setup
+
+      # @return [Array<BaseError>]
+      def import_project_dependencies
+        Actions::ImportProjectDependencies.new(self).run.errors
       end
 
       # @param source_path [String]
@@ -55,9 +54,14 @@ module Yoda
         Actions::ReadFile.run(registry, source_path)
       end
 
-      # @return [Array<Dependency>]
-      def dependencies
-        @dependencies ||= Dependency.build_for_project(self)
+      def registry_name
+        @registry_name ||= begin
+          digest = Digest::SHA256.new
+          digest.update(RUBY_VERSION)
+          digest.update(Project::REGISTRY_VERSION.to_s)
+          digest.update(Adapters.default_adapter_class.type.to_s)
+          digest.hexdigest
+        end
       end
 
       private
@@ -70,11 +74,6 @@ module Yoda
 
       def make_dir
         File.exist?(yoda_dir) || FileUtils.mkdir(yoda_dir)
-      end
-
-      # @return [Cache]
-      def cache
-        @cache ||= Cache.build_for(self)
       end
     end
   end

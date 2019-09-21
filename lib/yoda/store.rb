@@ -6,9 +6,8 @@ module Yoda
     require 'yoda/store/actions'
     require 'yoda/store/adapters'
     require 'yoda/store/project'
-    require 'yoda/store/registry_cache'
-    require 'yoda/store/registry'
     require 'yoda/store/objects'
+    require 'yoda/store/registry'
     require 'yoda/store/query'
     require 'yoda/store/yard_importer'
   end

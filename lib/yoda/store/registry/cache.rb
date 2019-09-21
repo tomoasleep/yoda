@@ -1,10 +1,35 @@
 require 'concurrent'
+require 'forwardable'
 
 module Yoda
   module Store
     # Registry Cache is a cache layer for {Registry}.
     # This class intended to reduce patch calculations of {PatchSet#patch}.
-    class RegistryCache
+    class Registry::Cache
+      class RegistryWrapper
+        extend Forwardable
+        include MissingDelegatable
+
+        delegate_missing :registry
+
+        attr_reader :registry
+
+        def initialize(registry, cache = Registry::Cache.new)
+          @registry = registry
+          @cache = cache
+        end
+
+        def get(key)
+          @cache.fetch_or_calc(key) do
+            @registry.get(key)
+          end
+        end
+
+        def clear_cache
+          @cache.delete_all
+        end
+      end
+
       def initialize
         @data = Concurrent::Map.new
       end

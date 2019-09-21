@@ -232,6 +232,9 @@ module Yoda
         receiver_type = node.implicit_receiver? ? context.receiver : infer(node.receiver)
         argument_types = infer_argument_nodes(node.arguments)
 
+        # argument_types = node.arguments.map { |node| infer(node) }
+        # arguments = Arguments.new(node.arguments, tracer)
+
         method_resolver = MethodResolver.new(
           registry: context.registry,
           receiver_type: receiver_type,

@@ -50,7 +50,7 @@ module Yoda
           return [] if class_object.type == :proxy
           opts = { scope: :instance, visibility: visibility }.compact
           method_names = Set.new(class_object.meths(opts).map(&:name))
-          if object = registry.find('::Object')
+          if object = registry.get('::Object')
             object.meths(opts)
               .reject { |o| ![visibility].flatten.include?(:private) && o.namespace.name == :Kernel }
               .reject { |o| method_names.include?(o.name) }

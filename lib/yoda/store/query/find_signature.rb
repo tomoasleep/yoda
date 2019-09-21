@@ -38,7 +38,7 @@ module Yoda
         # @return [FunctionSignatures::Constructor, nil]
         def try_to_build_constructor(receiver, method_object)
           if method_object.path == 'Class#new' && receiver.is_a?(Store::Objects::MetaClassObject) && receiver.path != 'Class'
-            base_class = registry.find(receiver.base_class_address) || return
+            base_class = registry.get(receiver.base_class_address) || return
             initialize_object = FindMethod.new(registry).find(base_class, 'initialize') || return
             Model::FunctionSignatures::Constructor.new(base_class, initialize_object)
           else

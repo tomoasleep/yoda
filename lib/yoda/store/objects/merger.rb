@@ -10,6 +10,7 @@ module Yoda
 
         # @param instances [Array<Base>]
         def initialize(instances)
+          fail ArgumentError, 'instances must not be an empty array' if instances.empty?
           @instances = instances
         end
 

@@ -10,6 +10,16 @@ module Yoda
       def parameter
         content.present? ? Model::Parameters::Named.new(content.name) : Model::Parameters::Unnamed.new
       end
+
+      # @return [Model::Parameters::Base]
+      def parameter_root
+        parameter_root_node.parameter
+      end
+
+      # @return [ParametersNode]
+      def parameter_root_node
+        parent.try(:parameter_root_node)
+      end
     end
   end
 end

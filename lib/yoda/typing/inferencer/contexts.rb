@@ -24,7 +24,6 @@ module Yoda
         # @param binds         [Hash{Symbol => Types::Base}, nil]
         # @param lexical_scope [Hash{Symbol => Types::Base}, nil]
         def initialize(registry:, receiver:, parent: nil, binds: nil)
-          fail TypeError, registry unless registry.is_a?(Store::Registry)
           fail TypeError, receiver unless receiver.is_a?(Types::Base)
 
           @registry = registry

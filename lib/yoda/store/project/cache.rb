@@ -38,6 +38,7 @@ module Yoda
         def initialize(cache_dir_path:, gemfile_lock_path: nil)
           @cache_dir_path = cache_dir_path
           @gemfile_lock_path = gemfile_lock_path
+          make_cache_dir
         end
 
         # @return [true, false]
@@ -45,29 +46,7 @@ module Yoda
           File.exist?(cache_path)
         end
 
-        # @return [Registry]
-        def prepare_registry
-          make_cache_dir
-          Registry.new(Adapters.default_adapter_class.for(cache_path))
-        end
-
-        # @return [String]
-        def cache_path
-          File.expand_path(cache_name, cache_dir_path)
-        end
-
         private
-
-        # @return [String]
-        def cache_name
-          @cache_path ||= begin
-            digest = Digest::SHA256.new
-            digest.file(gemfile_lock_path) if gemfile_lock_path && File.exist?(gemfile_lock_path)
-            digest.update(Registry::REGISTRY_VERSION.to_s)
-            digest.update(Adapters.default_adapter_class.type.to_s)
-            digest.hexdigest
-          end
-        end
 
         def make_cache_dir
           File.exist?(cache_dir_path) || FileUtils.mkdir_p(cache_dir_path)

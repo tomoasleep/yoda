@@ -67,7 +67,7 @@ module Yoda
         # @return [Objects::Base, nil]
         def find_constant(name, namespace = nil)
           constant_names = path_of(name).split
-          namespace = registry.find('Object') unless namespace
+          namespace = registry.get('Object') unless namespace
           constant_names.reduce(namespace) do |namespace, name|
             # @todo resolve its value if namespace is ValueObject
             if namespace && namespace.is_a?(Objects::NamespaceObject)
@@ -102,7 +102,7 @@ module Yoda
           Enumerator.new do |yielder|
             if scope.is_a?(Objects::NamespaceObject)
               scope.constant_addresses.select { |address| match_name?(Model::Path.new(address).basename, name) }.each do |address|
-                obj = registry.find(address)
+                obj = registry.get(address)
                 yielder << obj if obj
               end
             end

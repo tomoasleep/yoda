@@ -60,7 +60,7 @@ module Yoda
         end
 
         def inspect
-          "#<#{self.class.name}: #{self.type}>"
+          "#<#{self.class.name}: #{self.class.type}>"
         end
       end
     end

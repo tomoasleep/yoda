@@ -6,9 +6,13 @@ module Yoda
       require 'yoda/store/adapters/lmdb_adapter'
       require 'yoda/store/adapters/memory_adapter'
 
-      # @return [Base.class]
+      # @return [Class<Base>]
       def self.default_adapter_class
         LmdbAdapter
+      end
+
+      def self.for(path)
+        default_adapter_class.for(path)
       end
     end
   end

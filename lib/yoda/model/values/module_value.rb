@@ -59,9 +59,9 @@ module Yoda
         def parent_methods(visibility: nil)
           case namespace_object.type
           when :class
-            InstanceValue.new(registry, registry.find_or_proxy('::Class')).methods(visibility: visibility)
+            InstanceValue.new(registry, registry.get_or_proxy('::Class')).methods(visibility: visibility)
           when :module
-            InstanceValue.new(registry, registry.find_or_proxy('::Module')).methods(visibility: visibility)
+            InstanceValue.new(registry, registry.get_or_proxy('::Module')).methods(visibility: visibility)
           else
             []
           end

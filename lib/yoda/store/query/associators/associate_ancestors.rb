@@ -74,7 +74,7 @@ module Yoda
             def find_mixins(obj)
               Enumerator.new do |yielder|
                 obj.mixin_addresses.each do |address|
-                  if el = registry.find(address.to_s)
+                  if el = registry.get(address.to_s)
                     yielder << el
                   end
                 end
@@ -94,11 +94,11 @@ module Yoda
             # @param obj [Objects::MetaClassObject]
             # @return [Enumerator<Objects::NamespaceObject>]
             def find_metaclass_superclass_ancestors(obj)
-              base_class = registry.find(obj.base_class_address)
+              base_class = registry.get(obj.base_class_address)
               if base_class && base_class.is_a?(Objects::ClassObject) && base_class.superclass_path
                 (meta_class = FindMetaClass.new(registry).find(base_class.superclass_path || 'Object')) ? process(meta_class) : []
               elsif base_class
-                (class_object = registry.find('Class')) ? process(class_object) : []
+                (class_object = registry.get('Class')) ? process(class_object) : []
               else
                 []
               end
