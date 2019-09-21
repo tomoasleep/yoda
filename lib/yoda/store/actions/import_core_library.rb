@@ -13,7 +13,7 @@ module Yoda
         end
 
         # @param project [Project]
-        def initialize(Project)
+        def initialize(project)
           @project = project
         end
 

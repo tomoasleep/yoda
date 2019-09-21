@@ -39,7 +39,7 @@ module Yoda
         end
       end
 
-      include Serializable
+      include Objects::Serializable
 
       def initialize(content: {})
         @content = content
