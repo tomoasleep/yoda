@@ -4,7 +4,7 @@ RSpec.describe Yoda::Typing::Inferencer do
   include AST::Sexp
 
   let(:registry) { Yoda::Store::Registry.new(Yoda::Store::Adapters::MemoryAdapter.new) }
-  let(:receiver_type) { Yoda::Typing::Types::Instance.new(klass: registry.find('Object')) }
+  let(:receiver_type) { Yoda::Typing::Types::Instance.new(klass: registry.get('Object')) }
   let(:context) { Yoda::Typing::Inferencer::NamespaceContext.root_scope(registry) }
 
   let(:inferencer) { described_class.new(context: context) }

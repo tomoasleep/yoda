@@ -2,32 +2,26 @@ module Yoda
   module Store
     module Actions
       class ImportStdLibrary
-        # @return [Registry]
-        attr_reader :registry
+        # @return [Project]
+        attr_reader :project
 
         class << self
-          # @return [true, false]
-          def run(registry)
-            new(registry).run
+          # @return [LibraryRegistry]
+          def run(project)
+            new(project).run
           end
         end
 
-        def initialize(registry)
-          @registry = registry
+        # @param project [Project]
+        def initialize(Project)
+          @project = project
         end
 
-        # @return [true, false]
+        # @return [LibraryRegistry]
         def run
-          return false unless File.exist?(doc_path)
-          patch = YardImporter.import(doc_path)
-          registry.add_patch(patch)
-          true
-        end
-
-        private
-
-        def doc_path
-          File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc-stdlib")
+          return false unless File.exist?(project.dependency.std.doc_path)
+          patch = YardImporter.import(project.dependency.std.doc_path)
+          LibraryRegistry.create_from_patch(project.dependency.std, patch)
         end
       end
     end

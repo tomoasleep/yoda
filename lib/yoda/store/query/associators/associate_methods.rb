@@ -23,7 +23,7 @@ module Yoda
                     method_name = Objects::MethodObject.name_of_path(method_address)
                     if !name_set.member?(method_name)
                       name_set.add(method_name)
-                      if el = registry.find(method_address)
+                      if el = registry.get(method_address)
                         yielder << el
                       end
                     end

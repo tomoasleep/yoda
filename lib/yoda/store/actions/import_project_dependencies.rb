@@ -15,30 +15,50 @@ module Yoda
         end
 
         def run
-          project_status = registry.project_status || Objects::ProjectStatus.initial_build(dependencies: project.dependencies)
-          bundle_status = project_status.bundle
+          project_status = project.registry.project_status
+          library_to_add, library_to_remove = calculate_dependency(project_status)
 
-          unless bundle_status.all_present?
-            Logger.info 'Constructing database for the current project.'
+          Logger.info 'Constructing database for the current project.' if !library_to_add.empty? || !library_to_remove.empty?
 
-            # Try to import missing gems and core libraries.
-            Instrument.instance.initialization_progress(phase: :load_core, message: 'Loading core index')
+          # registries_to_remove = library_to_remove.map do |library|
+          #   case library
+          #   when Objects::ProjectStatus::CoreStatus
+          #     LibraryRegistry.for_library(project.dependency.core)
+          #   when Objects::ProjectStatus::StdStatus
+          #     LibraryRegistry.for_library(project.dependency.std)
+          #   when Objects::ProjectStatus::GemStatus
+          #     result = Actions::ImportGem.run(registry: registry, gem_name: gem_status.name, gem_version: gem_status.version)
+          #   when Objects::ProjectStatus::LocalLibraryStatus
+          #     result = Actions::ImportLocalLibrary.run(registry: registry, path: lib_status.path)
+          #   end
+          # end
 
-            bundle_status = import_core(bundle_status) unless bundle_status.std_status.core_present?
-            bundle_status = import_std(bundle_status) unless bundle_status.std_status.std_present?
-            bundle_status = import_libraries(bundle_status)
-
-            Instrument.instance.initialization_progress(phase: :save, message: 'Saving registry')
-            registry.compress_and_save
-            registry.save_project_status(project_status.derive(bundle: bundle_status))
+          unless library_to_add.empty?
+            library_to_add.each do |library|
+              case library
+              when Objects::ProjectStatus::CoreStatus
+                bundle_status = import_core(bundle_status)
+              when Objects::ProjectStatus::StdStatus
+                bundle_status = import_std(bundle_status)
+              when Objects::ProjectStatus::GemStatus
+                result = Actions::ImportGem.run(registry: registry, gem_name: gem_status.name, gem_version: gem_status.version)
+              when Objects::ProjectStatus::LocalLibraryStatus
+                result = Actions::ImportLocalLibrary.run(registry: registry, path: lib_status.path)
+              end
+            end
           end
+
+          self
         end
 
         private
 
-        # @return [Registry]
-        def registry
-          project.registry
+        # @param project_status [Object::ProjectStatus]
+        def calculate_dependency(project_status)
+          libraries = Objects::ProjectStatus.libraies_from_dependencies(project.dependencies)
+          library_to_add = libraries - project_status.libraries
+          library_to_remove = project_status.libraries - library
+          [library_to_add, library_to_remove]
         end
 
         # @param bundle_status [Objects::ProjectStatus::BundleStatus]

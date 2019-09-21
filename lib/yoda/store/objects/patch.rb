@@ -20,6 +20,7 @@ module Yoda
         def find(address)
           @registry[address.to_sym]
         end
+        alias get find
 
         # @param address [String, Symbol]
         # @return [true, false]

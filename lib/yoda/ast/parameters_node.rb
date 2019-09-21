@@ -47,6 +47,16 @@ module Yoda
       def block_parameter_node
         @block_parameter_node ||= children.find { |arg_node| arg_node.type == :blockarg }
       end
+
+      # @return [Model::Parameters::Base]
+      def parameter_root
+        parameter_root_node.parameter
+      end
+
+      # @return [ParametersNode]
+      def parameter_root_node
+        parent.try(:parameter_root_node) || self
+      end
     end
   end
 end

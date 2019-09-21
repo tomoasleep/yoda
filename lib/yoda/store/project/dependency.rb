@@ -2,34 +2,152 @@ module Yoda
   module Store
     class Project
       class Dependency
+        LOCAL_REGISTRY_ROOT = '~/.yoda/registry'
+
         # @param project [Project]
-        # @return [Array<Dependency>]
-        def self.build_for_project(project)
-          Builder.new(project).dependencies
+        def initilaize(project)
+          @project = project
         end
 
-        # @return [Bundler::LazySpecification]
-        attr_reader :spec
-
-        # @param spec [Bundler::LazySpecification]
-        def initialize(spec)
-          @spec = spec
+        # @return [Array<Library>]
+        def libraries
+          builder.libraries
         end
 
-        def name
-          spec.name
+        # @param name [String]
+        # @param version [String]
+        # @return [Library, nil]
+        def gem_dependency(name:, version:)
+          libraries.find { |library| library.name == name && library.version == version }
         end
 
-        def version
-          spec.version
+        def core
+          @core ||= Core.new
         end
 
-        def gem?
-          !source_path
+        def std
+          @std ||= Std.new
         end
 
-        def source_path
-          spec.source.respond_to?(:path) ? spec.source.path : nil
+        def builder
+          @builder ||= Builder.new(project)
+        end
+
+        module WithRegistryPath
+          def registry_path
+            @registry_path ||= File.join(registry_dir_path, registry_name)
+          end
+
+          def registry_dir_path
+            @registry_dir_path ||= global_registry_dir_path || local_registry_dir_path
+          end
+
+          private
+
+          def registry_name
+            @registry_name ||= begin
+              digest = Digest::SHA256.new
+              digest.update(RUBY_VERSION)
+              digest.update(Project::REGISTRY_VERSION.to_s)
+              digest.update(Adapters.default_adapter_class.type.to_s)
+              digest.hexdigest
+            end
+          end
+
+          def global_registry_dir_path
+            nil
+          end
+
+          def local_registry_dir_path
+            File.join(LOCAL_REGISTRY_ROOT, name, version)
+          end
+        end
+
+        class Core
+          include WithRegistryPath
+
+          def id
+            name
+          end
+
+          def name
+            'core'
+          end
+
+          def version
+            RUBY_VERSION
+          end
+
+          def doc_path
+            File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc")
+          end
+        end
+
+        class Std
+          include WithRegistryPath
+
+          def id
+            name
+          end
+
+          def name
+            'std'
+          end
+
+          def version
+            RUBY_VERSION
+          end
+
+          def doc_path
+            File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc-stdlib")
+          end
+        end
+
+        class Library
+          include WithRegistryPath
+          
+          # @return [Bundler::LazySpecification]
+          attr_reader :spec
+
+          # @param spec [Bundler::LazySpecification]
+          def initialize(spec)
+            @spec = spec
+          end
+
+          def id
+            "#{name}:#{version}"
+          end
+
+          def name
+            spec.name
+          end
+
+          def version
+            spec.version
+          end
+
+          def gem?
+            !source_path
+          end
+
+          def source_path
+            spec.source.respond_to?(:path) ? spec.source.path : nil
+          end
+
+          def full_gem_path
+            spec.full_gem_path
+          end
+
+          private
+
+          def global_registry_dir_path
+            doc_path = spec.doc_path
+            base_path = File.dirname(doc_path)
+            registry_path = spec.doc_path('.yoda')
+            if File.writable?(doc_path) || (!File.directory?(doc_path) && File.writable?(base_path))
+              registry_path
+            end
+          end
         end
 
         class Builder
@@ -41,10 +159,10 @@ module Yoda
             @project = project
           end
 
-          # @return [Array<Dependency>]
-          def dependencies
-            @gem_specs ||= begin
-              (gemfile_lock_parser&.specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Dependency.new(spec) }
+          # @return [Array<Library>]
+          def libraries
+            @libraries ||= begin
+              (gemfile_lock_parser&.specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Library.new(spec) }
             end
           end
 
