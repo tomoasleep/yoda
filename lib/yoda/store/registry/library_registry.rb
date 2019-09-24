@@ -1,6 +1,6 @@
 module Yoda
   module Store
-    class LibraryRegistry
+    class Registry::LibraryRegistry
       class << self
         # @param library_dependency [Project::Dependnecy::Library]
         def create_from_patch(library_dependency, patch)

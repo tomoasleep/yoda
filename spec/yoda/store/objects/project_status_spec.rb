@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Store::Objects::ProjectStatus do
+RSpec.xdescribe Yoda::Store::Objects::ProjectStatus do
   describe 'serialization' do
     subject { JSON.load(project_status.to_json) }
     let(:project_status) do

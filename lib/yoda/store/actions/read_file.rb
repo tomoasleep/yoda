@@ -28,7 +28,7 @@ module Yoda
           YARD::Registry.clear
           YARD.parse([file])
           patch = YardImporter.new(file).import(YARD::Registry.all + [YARD::Registry.root]).patch
-          registry.add_patch(patch)
+          registry.add_file_patch(patch)
         end
       end
     end

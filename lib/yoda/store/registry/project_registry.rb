@@ -2,7 +2,7 @@ require 'forwardable'
 
 module Yoda
   module Store
-    class ProjectRegistry
+    class Registry::ProjectRegistry
       extend Forwardable
       include HasServices
 
@@ -18,13 +18,14 @@ module Yoda
 
       class << self
         # @param project [Project]
-        def self.for_project(project)
+        def for_project(project)
           path = File.expand_path(project.registry_name, project.cache.cache_dir_path)
-          new(adapter: Adapters.for(path))
+          new(Adapters.for(path))
         end
       end
 
       def initialize(adapter)
+        fail TypeError, adapter unless adapter.is_a?(Adapters::Base)
         @adapter = adapter
       end
 
@@ -60,6 +61,7 @@ module Yoda
         save
       end
 
+      # @param patch [Objects::Patch]
       def add_file_patch(patch)
         root_store.clear_cache
         local_store.add_registry(patch)
@@ -83,18 +85,18 @@ module Yoda
 
       def library_store
         @library_store ||= begin
-          library_composer = Registry::Composer.new(id: :library, initial_gem_registries)
-          Registry::Index::ComposerWrapper.new(composer: gem_composer, index: gem_store_index)
+          library_composer = Registry::Composer.new(id: :library)
+          Registry::Index::ComposerWrapper.new(composer: library_composer, index: library_store_index)
         end
       end
 
       def library_store_index
-        @library_store_index ||= adapter.get(LIBRARY_STORE_INDEX_KEY)
+        @library_store_index ||= adapter.get(LIBRARY_STORE_INDEX_KEY) || Registry::Index.new
       end
 
       def save
         adapter.put(PROJECT_STATUS_KEY, project_statue_key)
-        adapter.put(GEM_INDEX_KEY, gem_store_index)
+        adapter.put(GEM_INDEX_KEY, library_store_index)
       end
 
       def inspect

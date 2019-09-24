@@ -6,7 +6,7 @@ module Yoda
     # Registry Cache is a cache layer for {Registry}.
     # This class intended to reduce patch calculations of {PatchSet#patch}.
     class Registry::Cache
-      module RegistryWrapper
+      class RegistryWrapper
         extend Forwardable
         delegate %i(has_key? keys) => :@registry
 

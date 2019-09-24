@@ -4,8 +4,10 @@ module Yoda
       class Dependency
         LOCAL_REGISTRY_ROOT = '~/.yoda/registry'
 
+        attr_reader :project
+
         # @param project [Project]
-        def initilaize(project)
+        def initialize(project)
           @project = project
         end
 

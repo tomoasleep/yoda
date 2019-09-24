@@ -1,26 +1,33 @@
 require 'set'
+require 'forwardable'
 
 module Yoda
   module Store
     class Registry::Index
       class ComposerWrapper
+        extend Forwardable
+
         # @return [Registry::Index]
         attr_reader :index
 
         # @return [Registry::Composer]
         attr_reader :composer
 
+        delegate id: :composer
+
         # @param index [Registry::Index]
         # @param composer [Registry::Composer]
         def initialize(index:, composer:)
+          fail TypeError, "index must be an instance of Registry::Index but #{index}" unless index.is_a?(Registry::Index)
+          fail TypeError, "composer must be an instance of Registry::Composer but #{composer}" unless composer.is_a?(Registry::Composer)
           @index = index
           @composer = composer
         end
 
-      # @param [String, Symbol]
-      # @return [Objects::Addressable]
+        # @param [String, Symbol]
+        # @return [Objects::Addressable]
         def get(address)
-          composer.get(address, from: index.get(address).map { |key| registry.get_registry(key) })
+          composer.get(address, registry_ids: index.get(address).map)
         end
 
         def add_registry(registry)
@@ -41,6 +48,9 @@ module Yoda
 
       include Objects::Serializable
 
+      # @return [Hash]
+      attr_reader :content
+
       def initialize(content: {})
         @content = content
       end
@@ -52,7 +62,7 @@ module Yoda
       # @param address [String, Symbol]
       # @return [Set<Symbol>]
       def get(address)
-        content[address.to_sym] || Set.new
+        content[address.to_sym] ||= Set.new
       end
 
       # @param address [String, Symbol]
@@ -74,11 +84,11 @@ module Yoda
       end
 
       def remember_registry_contents(registry)
-        registry.each_keys { |key| add(address, registry.id) }
+        registry.keys.each { |key| add(key, registry.id) }
       end
 
       def forget_registry_contents
-        registry.each_keys { |key| remove(address, registry.id) }
+        registry.keys.each { |key| remove(key, registry.id) }
       end
     end
   end

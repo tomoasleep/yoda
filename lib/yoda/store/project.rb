@@ -21,7 +21,7 @@ module Yoda
       
       # @return [Registry]
       def registry
-        @registry ||= ProjectRegistry.for_project(self)
+        @registry ||= Registry::ProjectRegistry.for_project(self)
       end
 
       # @return [Dependency]
@@ -42,6 +42,7 @@ module Yoda
         import_project_dependencies
         load_project_files
       end
+      alias build_cache setup
 
       # @return [Array<BaseError>]
       def import_project_dependencies

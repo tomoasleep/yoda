@@ -14,7 +14,7 @@ RSpec.describe Yoda::Typing::Inferencer do
       objects.each { |object| patch.register(object) }
     end
   end
-  before { registry.add_patch(patch) }
+  before { registry.add_file_patch(patch) }
 
   let(:objects) do
     [

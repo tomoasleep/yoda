@@ -55,9 +55,9 @@ module Yoda
 
         # @param project_status [Object::ProjectStatus]
         def calculate_dependency(project_status)
-          libraries = Objects::ProjectStatus.libraies_from_dependencies(project.dependencies)
+          libraries = Objects::ProjectStatus.libraies_from_dependency(project.dependency)
           library_to_add = libraries - project_status.libraries
-          library_to_remove = project_status.libraries - library
+          library_to_remove = project_status.libraries - libraries
           [library_to_add, library_to_remove]
         end
 
@@ -71,6 +71,11 @@ module Yoda
         end
 
         # @param bundle_status [Objects::ProjectStatus::BundleStatus]
+        # @param project [Project]
+        def self.for_project(project)
+          path = File.expand_path(project.registry_name, project.cache.cache_dir_path)
+          new(adapter: Adapters.for(path))
+        end
         # @return [Objects::ProjectStatus::BundleStatus]
         def import_std(bundle_status)
           unless result = ImportStdLibrary.run(registry)

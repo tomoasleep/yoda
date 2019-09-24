@@ -7,7 +7,7 @@ RSpec.xdescribe Yoda::Typing::Evaluator do
   before do
     patch.register(root)
     instance_methods.each { |method| patch.register(method) }
-    registry.add_patch(patch)
+    registry.add_file_patch(patch)
   end
 
   let(:registry) { Yoda::Store::Registry.new }

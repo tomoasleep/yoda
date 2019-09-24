@@ -7,15 +7,15 @@ module Yoda
         # @return [Array<CoreStatus, StdStatus, GemStatus, LocalLibraryStatus>]
         attr_reader :libraries
 
-        # @param dependencies [Array<Dependency::Library>]
-        def self.libraies_from_dependencies(dependencies)
-          dependencies.map do |dependency|
+        # @param dependency [Project::Dependency]
+        def self.libraies_from_dependency(dependency)
+          dependency.libraries.map do |dependency|
             if dependency.gem?
               GemStatus.from_gem_specification(dependency.spec)
             else
               LocalLibraryStatus.from_dependency(dependency)
             end
-          end + [CoreStatus.current_version, StdStatus.current_version]
+          end + [dependency.core, dependency.std]
         end
 
         # @param bundle [BundleStatus]
