@@ -33,6 +33,19 @@ module Yoda
         def derive(params = {})
           self.class.new(to_h.merge(params))
         end
+
+        def eql?(another)
+          return false unless self.class.name == another.class.name
+          to_h.eql?(another.to_h)
+        end
+
+        def ==(another)
+          eql?(another)
+        end
+
+        def hash
+          to_h.hash
+        end
       end
     end
   end
