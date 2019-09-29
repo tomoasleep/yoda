@@ -20,6 +20,7 @@ module Yoda
       require 'yoda/store/objects/patch_set'
       require 'yoda/store/objects/tag'
       require 'yoda/store/objects/project_status'
+      require 'yoda/store/objects/library'
 
       class << self
         # @param hsh [Hash]

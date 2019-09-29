@@ -6,9 +6,6 @@ module Yoda
       require 'yoda/store/project/cache'
       require 'yoda/store/project/dependency'
 
-      # @note This number must be updated when breaking change is added.
-      REGISTRY_VERSION = 4
-
       # @return [String]
       attr_reader :root_path
 
@@ -19,7 +16,7 @@ module Yoda
         @root_path = File.absolute_path(root_path)
       end
       
-      # @return [Registry]
+      # @return [Registry::ProjectRegistry]
       def registry
         @registry ||= Registry::ProjectRegistry.for_project(self)
       end
@@ -55,13 +52,7 @@ module Yoda
       end
 
       def registry_name
-        @registry_name ||= begin
-          digest = Digest::SHA256.new
-          digest.update(RUBY_VERSION)
-          digest.update(Project::REGISTRY_VERSION.to_s)
-          digest.update(Adapters.default_adapter_class.type.to_s)
-          digest.hexdigest
-        end
+        @registry_name ||= Registry.registry_name
       end
 
       private

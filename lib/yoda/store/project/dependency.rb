@@ -2,7 +2,7 @@ module Yoda
   module Store
     class Project
       class Dependency
-        LOCAL_REGISTRY_ROOT = '~/.yoda/registry'
+        LOCAL_REGISTRY_ROOT = File.expand_path('~/.yoda/registry')
 
         attr_reader :project
 
@@ -11,9 +11,9 @@ module Yoda
           @project = project
         end
 
-        # @return [Array<Library>]
-        def libraries
-          builder.libraries
+        # @return [Array<Objects::Library::Gem>]
+        def gems
+          builder.gems
         end
 
         # @param name [String]
@@ -24,132 +24,15 @@ module Yoda
         end
 
         def core
-          @core ||= Core.new
+          @core ||= Objects::Library::Core.current_version
         end
 
         def std
-          @std ||= Std.new
+          @std ||= Objects::Library::Std.current_version
         end
 
         def builder
           @builder ||= Builder.new(project)
-        end
-
-        module WithRegistryPath
-          def registry_path
-            @registry_path ||= File.join(registry_dir_path, registry_name)
-          end
-
-          def registry_dir_path
-            @registry_dir_path ||= global_registry_dir_path || local_registry_dir_path
-          end
-
-          private
-
-          def registry_name
-            @registry_name ||= begin
-              digest = Digest::SHA256.new
-              digest.update(RUBY_VERSION)
-              digest.update(Project::REGISTRY_VERSION.to_s)
-              digest.update(Adapters.default_adapter_class.type.to_s)
-              digest.hexdigest
-            end
-          end
-
-          def global_registry_dir_path
-            nil
-          end
-
-          def local_registry_dir_path
-            File.join(LOCAL_REGISTRY_ROOT, name, version)
-          end
-        end
-
-        class Core
-          include WithRegistryPath
-
-          def id
-            name
-          end
-
-          def name
-            'core'
-          end
-
-          def version
-            RUBY_VERSION
-          end
-
-          def doc_path
-            File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc")
-          end
-        end
-
-        class Std
-          include WithRegistryPath
-
-          def id
-            name
-          end
-
-          def name
-            'std'
-          end
-
-          def version
-            RUBY_VERSION
-          end
-
-          def doc_path
-            File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc-stdlib")
-          end
-        end
-
-        class Library
-          include WithRegistryPath
-          
-          # @return [Bundler::LazySpecification]
-          attr_reader :spec
-
-          # @param spec [Bundler::LazySpecification]
-          def initialize(spec)
-            @spec = spec
-          end
-
-          def id
-            "#{name}:#{version}"
-          end
-
-          def name
-            spec.name
-          end
-
-          def version
-            spec.version
-          end
-
-          def gem?
-            !source_path
-          end
-
-          def source_path
-            spec.source.respond_to?(:path) ? spec.source.path : nil
-          end
-
-          def full_gem_path
-            spec.full_gem_path
-          end
-
-          private
-
-          def global_registry_dir_path
-            doc_path = spec.doc_path
-            base_path = File.dirname(doc_path)
-            registry_path = spec.doc_path('.yoda')
-            if File.writable?(doc_path) || (!File.directory?(doc_path) && File.writable?(base_path))
-              registry_path
-            end
-          end
         end
 
         class Builder
@@ -161,10 +44,10 @@ module Yoda
             @project = project
           end
 
-          # @return [Array<Library>]
-          def libraries
+          # @return [Array<Objects::Library::Gem>]
+          def gems
             @libraries ||= begin
-              (gemfile_lock_parser&.specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Library.new(spec) }
+              (gemfile_lock_parser&.specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Objects::Library::Gem.from_gem_spec(spec) }
             end
           end
 
