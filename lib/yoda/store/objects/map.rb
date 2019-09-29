@@ -29,25 +29,25 @@ module Yoda
         end
 
         def []=(key, value)
-          updated_keys.add(key)
-          cache[key] = value
+          updated_keys.add(key.to_sym)
+          cache[key.to_sym] = value
         end
 
         def [](key)
-          cache.fetch(key) do
-            cache[key] = adapter.get(path_for(key))
+          cache.fetch(key.to_sym) do
+            cache[key.to_sym] = adapter.get(path_for(key))
           end
         end
 
         def save
           updated_keys.each do |key|
-            adapter.put(path_for(key), self[key])
+            adapter.put(path_for(key), self[key.to_sym])
           end
         end
 
         def keys
-          @adapter_keys ||= adapter.keys.select { |key| key.start_with?("#{path}#{separator}") }
-          Set.new(@adapter_keys + updated_keys)
+          @adapter_keys ||= adapter.keys.select { |key| key.start_with?("#{path}#{separator}") }.map { |key| key.slice(("#{path}#{separator}".length)..-1).to_sym }
+          Set.new(@adapter_keys) + updated_keys
         end
 
         private
