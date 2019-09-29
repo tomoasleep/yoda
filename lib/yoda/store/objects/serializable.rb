@@ -38,6 +38,14 @@ module Yoda
           return false unless self.class.name == another.class.name
           to_h.eql?(another.to_h)
         end
+
+        def ==(another)
+          eql?(another)
+        end
+
+        def hash
+          to_h.hash
+        end
       end
     end
   end
