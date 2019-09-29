@@ -15,7 +15,7 @@ module Yoda
               spec.__materialize__
               new(
                 name: spec.name,
-                version: spec.version,
+                version: spec.version.version,
                 source_path: spec.source.respond_to?(:path) ? spec.source.path : nil,
                 full_gem_path: spec.full_gem_path,
                 doc_dir: spec.doc_dir,
