@@ -1,5 +1,6 @@
 require 'lmdb'
 require 'json'
+require 'fileutils'
 
 module Yoda
   module Store
@@ -18,7 +19,7 @@ module Yoda
 
         # @param path [String] represents the path to store db.
         def initialize(path)
-          Dir.mkdir(path) unless Dir.exist?(path)
+          FileUtils.mkdir_p(path) unless Dir.exist?(path)
           @path = path
           @env = LMDB.new(path)
           @db = @env.database('main', create: true)
