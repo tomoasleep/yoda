@@ -7,8 +7,21 @@ module Yoda
       require 'yoda/store/registry/library_registry'
       require 'yoda/store/registry/project_registry'
 
-      def self.new(adapter)
-        ProjectRegistry.new(adapter)
+      # @note This number must be updated when breaking change is added.
+      REGISTRY_VERSION = 4
+
+      class << self
+        def new(adapter)
+          ProjectRegistry.new(adapter)
+        end
+
+        def registry_name
+          digest = Digest::SHA256.new
+          digest.update(RUBY_VERSION)
+          digest.update(REGISTRY_VERSION.to_s)
+          digest.update(Adapters.default_adapter_class.type.to_s)
+          digest.hexdigest
+        end
       end
     end
   end
