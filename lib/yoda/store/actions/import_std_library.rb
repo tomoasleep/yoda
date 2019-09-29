@@ -2,26 +2,27 @@ module Yoda
   module Store
     module Actions
       class ImportStdLibrary
-        # @return [Project]
-        attr_reader :project
+        # @return [Project::Dependency::Std]
+        attr_reader :dep
 
         class << self
-          # @return [LibraryRegistry]
-          def run(project)
-            new(project).run
+          # @param dep [Project::Dependency::Std]
+          # @return [Objects::Patch]
+          def run(dep)
+            new(dep).run
           end
         end
 
-        # @param project [Project]
-        def initialize(project)
-          @project = project
+        # @param dep [Project::Dependency::Std]
+        def initialize(dep)
+          @dep = dep
         end
 
-        # @return [LibraryRegistry]
+        # @return [Objects::Patch]
         def run
-          return false unless File.exist?(project.dependency.std.doc_path)
-          patch = YardImporter.import(project.dependency.std.doc_path)
-          LibraryRegistry.create_from_patch(project.dependency.std, patch)
+          BuildCoreIndex.run unless BuildCoreIndex.exists?
+          return false unless File.exist?(dep.doc_path)
+          YardImporter.import(dep.doc_path)
         end
       end
     end

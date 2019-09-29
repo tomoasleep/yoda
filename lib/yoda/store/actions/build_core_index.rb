@@ -5,7 +5,6 @@ require 'fileutils'
 module Yoda
   module Store
     module Actions
-      # @todo Build index without using shell script
       class BuildCoreIndex
         SOURCE_PATH = File.expand_path("~/.yoda/sources")
         VERSION_DIR_NAME = "ruby-#{RUBY_VERSION}"
