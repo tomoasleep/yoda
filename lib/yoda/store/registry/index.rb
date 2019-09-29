@@ -35,12 +35,12 @@ module Yoda
             index.remove_registry(old_registry)
           end
           composer.add_registry(registry)
-          index.remember_registry_contents(registry)
+          index.add_registry(registry)
         end
 
         def remove_registry(registry)
           composer.remove_registry(registry)
-          index.forget_registry_contents(registry)
+          index.remove_registry(registry)
         end
 
         def keys
@@ -53,12 +53,16 @@ module Yoda
       # @return [Hash]
       attr_reader :content
 
-      def initialize(content: {})
-        @content = content
+      # @return [Set]
+      attr_reader :registry_ids
+
+      def initialize(content: {}, registry_ids: Set.new)
+        @content = content.map { |key, value| [key, Set.new(value)] }.to_h
+        @registry_ids = Set.new(registry_ids)
       end
 
       def to_h
-        { content: content }
+        { content: content.map { |key, value| [key, value.to_a] }.to_h, registry_ids: registry_ids.to_a }
       end
 
       # @param address [String, Symbol]
@@ -72,6 +76,7 @@ module Yoda
       def add(address, registry_id)
         content[address.to_sym] ||= Set.new
         content[address.to_sym].add(registry_id)
+        content[address.to_sym].select! { |id| registry_ids.member?(id) }
       end
 
       # @param address [String, Symbol]
@@ -85,12 +90,13 @@ module Yoda
         Set.new(content.keys)
       end
 
-      def remember_registry_contents(registry)
+      def add_registry(registry)
+        registry_ids.add(registry.id)
         registry.keys.each { |key| add(key, registry.id) }
       end
 
-      def forget_registry_contents
-        registry.keys.each { |key| remove(key, registry.id) }
+      def remove_registry(registry)
+        registry_ids.delete(registry.id)
       end
     end
   end

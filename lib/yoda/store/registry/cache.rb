@@ -10,6 +10,8 @@ module Yoda
         extend Forwardable
         delegate %i(has_key? keys) => :@registry
 
+        attr_reader :registry
+
         def initialize(registry, cache = Registry::Cache.new)
           @registry = registry
           @cache = cache

@@ -37,15 +37,32 @@ module Yoda
         end
       end
 
-      def modify_library_registries(add:, remove:)
+      def modify_libraries(add:, remove:)
         add.each do |library|
-          root_store.clear_cache
-          library_store.add_registry(registry)
+          if registry = library.registry
+            library_store.add_registry(registry)
+            project_status.libraries.push(library)
+          end
         end
         remove.each do |library|
-          root_store.clear_cache
-          library_store.remove_registry(registry)
+          if registry = library_store.get_registry(library.id)
+            library_store.remove_registry(registry)
+            project_status.libraries.delete(library)
+          end
         end
+        root_store.clear_cache
+        save
+      end
+
+      def add_library(library)
+        add_library_registry(library.registry)
+        project_status.libraries.push(library)
+        save
+      end
+
+      def remove_library(library)
+        remove_library_registry(library.registry)
+        project_status.libraries.delete(library)
         save
       end
 
@@ -67,7 +84,7 @@ module Yoda
         local_store.add_registry(patch)
       end
 
-      # @return [ProjectStatus]
+      # @return [Objects::ProjectStatus]
       def project_status
         @project_status ||= adapter.get(PROJECT_STATUS_KEY) || Objects::ProjectStatus.new
       end
@@ -85,7 +102,7 @@ module Yoda
 
       def library_store
         @library_store ||= begin
-          library_composer = Registry::Composer.new(id: :library)
+          library_composer = Registry::Composer.new(id: :library, registries: project_status.registries)
           Registry::Index::ComposerWrapper.new(composer: library_composer, index: library_store_index)
         end
       end
