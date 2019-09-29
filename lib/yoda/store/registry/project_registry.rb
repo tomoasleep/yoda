@@ -95,8 +95,8 @@ module Yoda
       end
 
       def save
-        adapter.put(PROJECT_STATUS_KEY, project_statue_key)
-        adapter.put(GEM_INDEX_KEY, library_store_index)
+        adapter.put(PROJECT_STATUS_KEY, project_status)
+        adapter.put(LIBRARY_STORE_INDEX_KEY, library_store_index)
       end
 
       def inspect

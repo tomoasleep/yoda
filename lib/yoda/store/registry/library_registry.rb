@@ -38,10 +38,16 @@ module Yoda
         end
       end
 
+      # @return [String]
+      attr_reader :id
+
+      # @return [Adapters::Base]
+      attr_reader :adapter
+
       # @param id [String]
       # @param adapter [Adapters::Base]
       def initialize(id:, adapter:)
-        @id
+        @id = id
         @adapter = adapter
       end
 

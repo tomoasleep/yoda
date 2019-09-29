@@ -27,17 +27,19 @@ module Yoda
         # @param [String, Symbol]
         # @return [Objects::Addressable]
         def get(address)
-          composer.get(address, registry_ids: index.get(address).map)
+          composer.get(address, registry_ids: index.get(address))
         end
 
         def add_registry(registry)
           if old_registry = composer.get_registry(registry.id)
-            index.forget_registry_contents(old_registry)
+            index.remove_registry(old_registry)
           end
+          composer.add_registry(registry)
           index.remember_registry_contents(registry)
         end
 
         def remove_registry(registry)
+          composer.remove_registry(registry)
           index.forget_registry_contents(registry)
         end
 
