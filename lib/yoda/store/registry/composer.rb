@@ -28,7 +28,7 @@ module Yoda
 
       # @return [Set]
       def keys
-        registries.map(&:keys).reduce(Set.new) { |memo, keys| memo + keys }
+        registries.values.map(&:keys).reduce(Set.new) { |memo, keys| memo + keys }
       end
 
       def get_registry(key)

@@ -93,6 +93,10 @@ module Yoda
       def remove_registry(registry)
         registry_ids.delete(registry.id)
       end
+
+      def wrap(composer)
+        ComposerWrapper.new(composer: composer, index: self)
+      end
     end
   end
 end

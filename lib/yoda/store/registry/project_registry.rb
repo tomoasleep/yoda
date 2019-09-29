@@ -38,16 +38,16 @@ module Yoda
       end
 
       def modify_libraries(add:, remove:)
-        add.each do |library|
-          if registry = library.registry
-            library_store.add_registry(registry)
-            project_status.libraries.push(library)
-          end
-        end
         remove.each do |library|
           if registry = library_store.get_registry(library.id)
             library_store.remove_registry(registry)
             project_status.libraries.delete(library)
+          end
+        end
+        add.each do |library|
+          if registry = library.registry
+            library_store.add_registry(registry)
+            project_status.libraries.push(library)
           end
         end
         root_store.clear_cache
@@ -95,15 +95,13 @@ module Yoda
       attr_reader :adapter
 
       def local_store
-        @local_store ||= begin
-          Registry::Index::ComposerWrapper.new(composer: Registry::Composer.new(id: :local), index: Registry::Index.new)
-        end
+        @local_store ||= Registry::Index.new.wrap(Registry::Composer.new(id: :local))
       end
 
       def library_store
         @library_store ||= begin
           library_composer = Registry::Composer.new(id: :library, registries: project_status.registries)
-          Registry::Index::ComposerWrapper.new(composer: library_composer, index: library_store_index)
+          library_store_index.wrap(library_composer)
         end
       end
 
@@ -117,7 +115,7 @@ module Yoda
 
       def save
         library_store_index_content.save
-        adapter.put(LIBRARY_STORE_INDEX_KEY, library_store_index)
+        adapter.put(PROJECT_STATUS_KEY, project_status)
       end
 
       def inspect
