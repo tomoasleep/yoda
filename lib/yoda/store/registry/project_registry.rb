@@ -108,11 +108,15 @@ module Yoda
       end
 
       def library_store_index
-        @library_store_index ||= adapter.get(LIBRARY_STORE_INDEX_KEY) || Registry::Index.new
+        @library_store_index ||= Registry::Index.new(content: library_store_index_content, registry_ids: project_status.libraries.map(&:id))
+      end
+
+      def library_store_index_content
+        @library_store_index_content ||= Objects::Map.new(path: LIBRARY_STORE_INDEX_KEY, adapter: adapter)
       end
 
       def save
-        adapter.put(PROJECT_STATUS_KEY, project_status)
+        library_store_index_content.save
         adapter.put(LIBRARY_STORE_INDEX_KEY, library_store_index)
       end
 

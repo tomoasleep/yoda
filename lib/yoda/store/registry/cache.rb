@@ -8,7 +8,9 @@ module Yoda
     class Registry::Cache
       class RegistryWrapper
         extend Forwardable
-        delegate %i(has_key? keys) => :@registry
+        include MissingDelegatable
+
+        delegate_missing :registry
 
         attr_reader :registry
 

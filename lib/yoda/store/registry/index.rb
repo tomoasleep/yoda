@@ -6,14 +6,15 @@ module Yoda
     class Registry::Index
       class ComposerWrapper
         extend Forwardable
+        include MissingDelegatable
+
+        delegate_missing :composer
 
         # @return [Registry::Index]
         attr_reader :index
 
         # @return [Registry::Composer]
         attr_reader :composer
-
-        delegate id: :composer
 
         # @param index [Registry::Index]
         # @param composer [Registry::Composer]
@@ -48,8 +49,6 @@ module Yoda
         end
       end
 
-      include Objects::Serializable
-
       # @return [Hash]
       attr_reader :content
 
@@ -57,24 +56,20 @@ module Yoda
       attr_reader :registry_ids
 
       def initialize(content: {}, registry_ids: Set.new)
-        @content = content.map { |key, value| [key, Set.new(value)] }.to_h
+        @content = content
         @registry_ids = Set.new(registry_ids)
-      end
-
-      def to_h
-        { content: content.map { |key, value| [key, value.to_a] }.to_h, registry_ids: registry_ids.to_a }
       end
 
       # @param address [String, Symbol]
       # @return [Set<Symbol>]
       def get(address)
-        content[address.to_sym] ||= Set.new
+        content[address.to_sym] ||= Objects::SerializableSet.new
       end
 
       # @param address [String, Symbol]
       # @param registry_id [String, Symbol]
       def add(address, registry_id)
-        content[address.to_sym] ||= Set.new
+        content[address.to_sym] ||= Objects::SerializableSet.new
         content[address.to_sym].add(registry_id)
         content[address.to_sym].select! { |id| registry_ids.member?(id) }
       end
@@ -82,7 +77,7 @@ module Yoda
       # @param address [String, Symbol]
       # @param registry_id [String, Symbol]
       def remove(address, registry_id)
-        content[address.to_sym] ||= Set.new
+        content[address.to_sym] ||= Objects::SerializableSet.new
         content[address.to_sym].delete(registry_id)
       end
 

@@ -17,7 +17,7 @@ module Yoda
       end
 
       def remove_registry(registry)
-        registries.delete[registry.id]
+        registries.delete(registry.id)
       end
 
       def get(address, registry_ids: nil)
