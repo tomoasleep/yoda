@@ -4,11 +4,8 @@ module Yoda
   module Store
     module Actions
       class ImportGem
-        # @return [Project]
-        attr_reader :project
-
-        # @return [String]
-        attr_reader :gem_name, :gem_version
+        # @return [Project::Dependency::Library]
+        attr_reader :dep
 
         class << self
           # @return [true, false]
@@ -17,33 +14,20 @@ module Yoda
           end
         end
 
-        # @param project [Project]
-        # @param gem_name [String]
-        # @param gem_version [String]
-        def initialize(project:, gem_name:, gem_version:)
-          @project = project
-          @gem_name = gem_name
-          @gem_version = gem_version
+        # @param dep [Project::Dependency::Library]
+        def initialize(dep)
+          @dep = dep
         end
 
-        # @return [LibraryRegistry, nil]
+        # @return [Objects::Patch]
         def run
-          return unless gem_dependency
           create_dependency_doc
           if yardoc_file = yardoc_path
-            patch = load_yardoc(yardoc_file, gem_path)
-            lib = project.dependency.gem_dependency(name: gem_name, version: gem_version)
-            LibraryRegistry.create_from_patch(gem_dependency, patch)
+            load_yardoc(yardoc_file, gem_path)
           end
-          nil
         end
 
         private
-
-        # @return [Project::Dependency::Library]
-        def gem_dependency
-          @gem_dependency ||= project.dependency.gem_dependency(name: gem_name, version: gem_version)
-        end
 
         def create_dependency_doc
           if yardoc_path
@@ -89,9 +73,17 @@ module Yoda
           nil
         end
 
+        def gem_name
+          dep.name
+        end
+
+        def gem_version
+          dep.version
+        end
+
         # @return [String]
         def gem_path
-          gem_dependency.full_gem_path
+          dep.full_gem_path
         end
       end
     end
