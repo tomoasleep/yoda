@@ -51,7 +51,7 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the calling method' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [have_content(be_start_with('Sample3.class_method1("") # any')), have_content(be_start_with('**YodaFixture::Sample3.class_method1(String str) # any**'))]
+        expect(subject.contents).to match [have_content(be_start_with('Sample3.class_method1("") # any')), have_content(be_start_with('**YodaFixture::Sample3.class_method1(String str): any**'))]
         expect(subject.range).to have_attributes(start: { line: 17, character: 6 }, end: { line: 17, character: 31 })
       end
     end
@@ -62,7 +62,7 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the calling method' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [have_content(be_start_with('str.piyo # Integer')), have_content(be_start_with('**String#piyo # Integer**'))]
+        expect(subject.contents).to match [have_content(be_start_with('str.piyo # Integer')), have_content(be_start_with('**String#piyo: Integer**'))]
         expect(subject.range).to have_attributes(start: { line: 8, character: 8 }, end: { line: 8, character: 16 })
       end
     end
@@ -73,7 +73,7 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the calling method' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [have_content(be_start_with('str.piyo # Integer')), have_content(be_start_with('**String#piyo # Integer**'))]
+        expect(subject.contents).to match [have_content(be_start_with('str.piyo # Integer')), have_content(be_start_with('**String#piyo: Integer**'))]
         expect(subject.range).to have_attributes(start: { line: 8, character: 8 }, end: { line: 8, character: 16 })
       end
     end
@@ -84,7 +84,7 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the calling method' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [have_content(be_start_with('str.bytesize # Integer')), have_content(be_start_with('**String#bytesize # Integer**'))]
+        expect(subject.contents).to match [have_content(be_start_with('str.bytesize # Integer')), have_content(be_start_with('**String#bytesize: Integer**'))]
         expect(subject.range).to have_attributes(start: { line: 9, character: 8 }, end: { line: 9, character: 20 })
       end
     end
