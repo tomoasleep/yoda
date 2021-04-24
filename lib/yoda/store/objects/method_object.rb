@@ -58,7 +58,7 @@ module Yoda
         # @param overloads [Array<Overload>]
         # @param parameters [Array<(String, String)>, nil]
         def initialize(parameters: [], visibility: :public, overloads: [], **kwargs)
-          super(kwargs)
+          super(**kwargs)
           fail ArgumentError, visibility unless %i(public private protected)
           @visibility = visibility.to_sym
           @parameters = parameters

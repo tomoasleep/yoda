@@ -124,7 +124,7 @@ module Yoda
             end
           end
 
-          Model::TypeExpressions::FunctionType.new(func_options)
+          Model::TypeExpressions::FunctionType.new(**func_options)
         end
 
         class Param

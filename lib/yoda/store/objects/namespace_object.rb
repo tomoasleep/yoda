@@ -30,7 +30,7 @@ module Yoda
         # @param constant_addresses [Array<String>]
         # @param mixin_addresses [Array<String>]
         def initialize(instance_method_addresses: [], mixin_addresses: [], constant_addresses: [], **kwargs)
-          super(kwargs)
+          super(**kwargs)
           @instance_method_addresses = instance_method_addresses
           @mixin_addresses = mixin_addresses
           @constant_addresses = constant_addresses

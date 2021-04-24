@@ -26,8 +26,8 @@ module Yoda
         instrument.unsubscribe(self)
       end
 
-      def call(params)
-        callback.call(params)
+      def call(*params, **kwargs)
+        callback.call(*params, **kwargs)
       end
     end
 
@@ -100,10 +100,10 @@ module Yoda
     end
 
     # @param name [String]
-    # @param [String]
-    def emit(name, params)
+    # @param params [Hash]
+    def emit(name, **params)
       Logger.trace("#{name}: #{params}")
-      subscriptions.select { |subscription| subscription.name === name }.each { |subscription| subscription.call(params) }
+      subscriptions.select { |subscription| subscription.name === name }.each { |subscription| subscription.call(**params) }
     end
 
     # @param subscription [Subscription]

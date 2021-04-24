@@ -80,7 +80,7 @@ module Yoda
         # @param another [self]
         # @return [self]
         def merge(another)
-          self.class.new(merge_attributes(another))
+          self.class.new(**merge_attributes(another))
         end
 
         def hash

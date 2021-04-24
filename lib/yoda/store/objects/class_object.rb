@@ -13,7 +13,7 @@ module Yoda
         # @param path [String]
         # @param superclass_path [String, nil]
         def initialize(superclass_path: nil, **kwargs)
-          super(kwargs)
+          super(**kwargs)
 
           @superclass_path = Model::Path.new(superclass_path) if superclass_path
         end

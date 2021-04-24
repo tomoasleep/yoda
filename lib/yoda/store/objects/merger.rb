@@ -16,7 +16,7 @@ module Yoda
 
         # @return [Base]
         def merged_instance
-          class_to_generate.new(attributes.select { |k, v| class_to_generate.attr_names.include?(k) }.to_h)
+          class_to_generate.new(**attributes.select { |k, v| class_to_generate.attr_names.include?(k) })
         end
 
         private

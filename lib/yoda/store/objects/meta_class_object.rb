@@ -27,7 +27,7 @@ module Yoda
         # @param instance_method_paths [Array<String>]
         # @param instance_mixin_paths [Array<String>]
         def initialize(**kwargs)
-          super(kwargs)
+          super(**kwargs)
         end
 
         # @return [String]

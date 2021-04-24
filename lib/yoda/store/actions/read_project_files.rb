@@ -29,7 +29,7 @@ module Yoda
 
         # @return [Array<String>]
         def project_files
-          Dir.chdir(root_path) { Dir.glob("{lib,app}/**/*.rb\0ext/**/*.c\0.yoda/*.rb").map { |name| File.expand_path(name, root_path) } }
+          Dir.chdir(root_path) { Dir.glob(["{lib,app}/**/*.rb", "ext/**/*.c", ".yoda/*.rb"]).map { |name| File.expand_path(name, root_path) } }
         end
       end
     end

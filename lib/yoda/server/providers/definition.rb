@@ -44,7 +44,7 @@ module Yoda
           location = Parsing::Location.new(row: line - 1, column: column)
           LanguageServer::Protocol::Interface::Location.new(
             uri: session.uri_of_path(path),
-            range: LanguageServer::Protocol::Interface::Range.new(Parsing::Range.new(location, location).to_language_server_protocol_range),
+            range: LanguageServer::Protocol::Interface::Range.new(**Parsing::Range.new(location, location).to_language_server_protocol_range),
           )
         end
       end

@@ -9,7 +9,7 @@ module Yoda
 
           # @param params [Hash]
           def json_create(params)
-            new(params.map { |k, v| [k.to_sym, v] }.select { |(k, v)| %i(tag_name name yard_types text lexical_scope).include?(k) }.to_h)
+            new(**params.map { |k, v| [k.to_sym, v] }.select { |(k, v)| %i(tag_name name yard_types text lexical_scope).include?(k) }.to_h)
           end
         end
 

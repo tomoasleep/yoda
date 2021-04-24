@@ -34,10 +34,14 @@ module Yoda
 
         private
 
+        def ruby_version_major_minor
+          RUBY_VERSION.sub(/^(\d+)\.(\d+)\.\d+$/, '\\1.\\2')
+        end
+
         def download_core_index_file
           Zip.warn_invalid_date = false
 
-          open("https://cache.ruby-lang.org/pub/ruby/#{RUBY_VERSION.sub(/^(\d+)\.(\d+)\.\d+$/, '\\1.\\2')}/ruby-#{RUBY_VERSION}.zip") do |file|
+          URI.open("https://cache.ruby-lang.org/pub/ruby/#{ruby_version_major_minor}/ruby-#{RUBY_VERSION}.zip") do |file|
             Zip::File.open_buffer(file) do |zip_file|
               zip_file.each do |entry|
                 extracted_entry_path = File.join(SOURCE_PATH, entry.to_s)

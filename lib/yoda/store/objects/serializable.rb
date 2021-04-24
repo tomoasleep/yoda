@@ -9,7 +9,7 @@ module Yoda
 
           # @param params [Hash]
           def json_create(params)
-            new(params.reject { |k, _v| k.to_sym == :json_class }.map { |k, v| [k.to_sym, v] }.to_h)
+            new(**params.reject { |k, _v| k.to_sym == :json_class }.map { |k, v| [k.to_sym, v] }.to_h)
           end
         end
 
@@ -31,7 +31,7 @@ module Yoda
         # Create a new instance which has the original parameters and overrided parameters.
         # @param params [Hash{Symbol => Object}] parameters to override
         def derive(params = {})
-          self.class.new(to_h.merge(params))
+          self.class.new(**to_h.merge(params))
         end
 
         def eql?(another)

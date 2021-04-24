@@ -84,7 +84,7 @@ module Yoda
             documentation: completion_item.to_markdown,
             sort_text: completion_item.sort_text,
             text_edit: LanguageServer::Protocol::Interface::TextEdit.new(
-              range: LanguageServer::Protocol::Interface::Range.new(completion_item.language_server_range),
+              range: LanguageServer::Protocol::Interface::Range.new(**completion_item.language_server_range),
               new_text: completion_item.edit_text,
             ),
             data: {},

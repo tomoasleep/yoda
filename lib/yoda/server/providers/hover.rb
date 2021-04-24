@@ -43,7 +43,7 @@ module Yoda
         def create_hover(signature)
           LanguageServer::Protocol::Interface::Hover.new(
             contents: signature.descriptions.map { |value| create_hover_text(value) },
-            range: LanguageServer::Protocol::Interface::Range.new(signature.node_range.to_language_server_protocol_range),
+            range: LanguageServer::Protocol::Interface::Range.new(**signature.node_range.to_language_server_protocol_range),
           )
         end
 
