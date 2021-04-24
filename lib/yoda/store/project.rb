@@ -1,10 +1,15 @@
 require 'fileutils'
+require 'forwardable'
 
 module Yoda
   module Store
     class Project
-      require 'yoda/store/project/cache'
+      require 'yoda/store/project/files'
       require 'yoda/store/project/dependency'
+
+      extend Forwardable
+
+      delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :files
 
       # @return [String]
       attr_reader :root_path
@@ -26,20 +31,21 @@ module Yoda
         @dependency ||= Dependency.new(self)
       end
 
-      # @return [Cache]
-      def cache
-        @cache ||= Cache.build_for(self)
-      end
-
-      def yoda_dir
-        File.expand_path('.yoda', root_path)
-      end
-
       def setup
+        files.make_dir
         import_project_dependencies
         load_project_files
       end
       alias build_cache setup
+
+      def clear
+        files.clear_dir
+      end
+
+      def reset
+        clear
+        setup
+      end
 
       # @return [Array<BaseError>]
       def import_project_dependencies
@@ -57,14 +63,15 @@ module Yoda
 
       private
 
+      # @return [Files]
+      def files
+        @files ||= Files.new(self)
+      end
+
       def load_project_files
         Logger.debug('Loading current project files...')
         Instrument.instance.initialization_progress(phase: :load_project_files, message: 'Loading current project files')
         Actions::ReadProjectFiles.new(registry, root_path).run
-      end
-
-      def make_dir
-        File.exist?(yoda_dir) || FileUtils.mkdir(yoda_dir)
       end
     end
   end

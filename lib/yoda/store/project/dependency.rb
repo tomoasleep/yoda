@@ -56,23 +56,15 @@ module Yoda
           # @return [Bundler::LockfileParser, nil]
           def gemfile_lock_parser
             @gemfile_lock_parser ||= begin
-              return if !gemfile_lock_path || !File.exists?(gemfile_lock_path)
-              Dir.chdir(root_path) do
-                Bundler::LockfileParser.new(File.read(gemfile_lock_path))
+              return if !project.gemfile_lock_path || !File.exists?(project.gemfile_lock_path)
+              Dir.chdir(project.root_path) do
+                Bundler.locked_gems
               end
             end
           end
 
-          def gemfile_lock_path
-            Cache.gemfile_lock_path(root_path)
-          end
-
-          def root_path
-            project.root_path
-          end
-
           def self_spec?(spec)
-            spec.source.is_a?(Bundler::Source::Path) && (File.expand_path(spec.source.path) == File.expand_path(root_path))
+            spec.source.is_a?(Bundler::Source::Path) && (File.expand_path(spec.source.path) == File.expand_path(project.root_path))
           end
         end
       end

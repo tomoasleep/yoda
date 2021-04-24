@@ -4,10 +4,10 @@ RSpec.describe Yoda::Store::Project do
   let(:project) { described_class.new(root_path) }
   let(:root_path) { File.expand_path('../../support/fixtures', __dir__) }
 
-  after { project.clean }
+  after { project.clear }
 
-  describe '#rebuild_cache', heavy: true do
-    subject { project.rebuild_cache }
+  describe '#reset', heavy: true do
+    subject { project.reset }
 
     it 'completes' do
       expect { subject }.not_to raise_error

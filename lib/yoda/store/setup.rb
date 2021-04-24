@@ -1,4 +1,5 @@
 require "yoda/instrument"
+require "ruby-progressbar"
 
 module Yoda
   module Store
@@ -35,7 +36,7 @@ module Yoda
         if File.exist?(File.expand_path('Gemfile.lock', dir)) || force_build
           Logger.info 'Building index for the current project...'
           Instrument.instance.hear(initialization_progress: method(:on_progress), registry_dump: method(:on_progress)) do
-            force_build ? project.rebuild_cache : project.build_cache
+            force_build ? project.reset : project.setup
           end
         else
           Logger.info 'Skipped building project index because Gemfile.lock is not exist for the current dir'
