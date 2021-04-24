@@ -21,24 +21,24 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'yard', '~> 0.9.11'
-  spec.add_dependency 'thor', '~> 0.20.0'
-  spec.add_dependency 'parslet', '~> 1.8'
-  spec.add_dependency 'parser', '~> 2.0'
-  spec.add_dependency 'unparser', '~> 0.2.6'
-  spec.add_dependency 'language_server-protocol', '~> 3.12.0.0'
-  spec.add_dependency 'lmdb', '~> 0.4.8'
+  spec.add_dependency 'yard'
+  spec.add_dependency 'thor'
+  spec.add_dependency 'parslet'
+  spec.add_dependency 'parser'
+  spec.add_dependency 'unparser'
+  spec.add_dependency 'language_server-protocol'
+  spec.add_dependency 'lmdb'
   spec.add_dependency 'ruby-progressbar'
   spec.add_dependency 'concurrent-ruby', '~> 1.1.0'
   spec.add_dependency 'rubyzip', '>= 1.0.0'
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "rspec-benchmark", "~> 0.3"
+  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rspec-benchmark"
   spec.add_development_dependency "rubocop"
-  spec.add_development_dependency "pry", "~> 0.11"
-  spec.add_development_dependency "pry-rescue", "~> 1.4"
-  spec.add_development_dependency "pry-stack_explorer", "~> 0.4"
+  spec.add_development_dependency "pry"
+  spec.add_development_dependency "pry-rescue"
+  spec.add_development_dependency "pry-stack_explorer"
   spec.add_development_dependency "stackprof"
 end
