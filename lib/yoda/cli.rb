@@ -5,7 +5,6 @@ module Yoda
   module Cli
     require 'yoda/cli/base'
     require 'yoda/cli/file_cursor_parsable'
-    require 'yoda/cli/setup'
     require 'yoda/cli/infer'
     require 'yoda/cli/complete'
     require 'yoda/cli/console'
@@ -18,7 +17,7 @@ module Yoda
       option :force_build, type: :boolean, desc: "If enabled, (re)build current project's index forcibly"
       def setup
         process_class_options
-        Cli::Setup.run(force_build: options[:force_build])
+        Store.setup(dir: Dir.pwd, force_build: options[:force_build])
       end
 
       desc 'infer POSITION', 'Infer the type of value at the specified position'

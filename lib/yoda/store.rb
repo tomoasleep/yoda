@@ -8,7 +8,14 @@ module Yoda
     require 'yoda/store/project'
     require 'yoda/store/objects'
     require 'yoda/store/registry'
+    require 'yoda/store/setup'
     require 'yoda/store/query'
     require 'yoda/store/yard_importer'
+
+    class << self
+      def setup(**kwargs)
+        Setup.new(**kwargs).run
+      end
+    end
   end
 end

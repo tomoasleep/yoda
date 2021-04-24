@@ -1,8 +1,8 @@
-require 'ruby-progressbar'
+require "yoda/instrument"
 
 module Yoda
-  module Cli
-    class Setup < Base
+  module Store
+    class Setup
       # @return [String]
       attr_reader :dir
 
@@ -13,14 +13,25 @@ module Yoda
       attr_reader :bars
 
       # @param dir [String]
-      def initialize(dir: nil, force_build: false)
-        @dir = dir || Dir.pwd
+      # @param force_build [Boolean]
+      def initialize(dir:, force_build: false)
+        @dir = dir
         @force_build = force_build
         @bars = {}
       end
 
       def run
         build_core_index
+        build_project_cache
+      end
+
+      def project
+        @project ||= Store::Project.new(dir)
+      end
+
+      private
+
+      def build_project_cache
         if File.exist?(File.expand_path('Gemfile.lock', dir)) || force_build
           Logger.info 'Building index for the current project...'
           Instrument.instance.hear(initialization_progress: method(:on_progress), registry_dump: method(:on_progress)) do
@@ -31,14 +42,8 @@ module Yoda
         end
       end
 
-      def project
-        @project ||= Store::Project.new(dir)
-      end
-
-      private
-
       def build_core_index
-        Store::Actions::BuildCoreIndex.run unless Store::Actions::BuildCoreIndex.exists?
+        Actions::BuildCoreIndex.run unless Actions::BuildCoreIndex.exists?
       end
 
       def on_progress(phase: :save_keys, index: nil, length: nil, **params)
