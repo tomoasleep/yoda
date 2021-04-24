@@ -12,5 +12,17 @@ module Yoda
     require 'yoda/parsing/query'
     require 'yoda/parsing/type_parser'
     require 'yoda/parsing/traverser'
+
+    class << self
+      # @see {Parser#parse}
+      def parse(*args)
+        Parser.new.parse(*args)
+      end
+
+      # @see {Parser#parse_with_comments}
+      def parse_with_comments(*args)
+        Parser.new.parse_with_comments(*args)
+      end
+    end
   end
 end

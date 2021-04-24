@@ -30,7 +30,7 @@ module Yoda
         # @param position [{Symbol => Integer}]
         def calculate(uri, position)
           source = session.file_store.get(uri)
-          evaluator = Services::Evaluator.new(ast: Parsing::Parser.new.parse(source), registry: session.registry)
+          evaluator = Services::Evaluator.new(ast: Parsing.parse(source), registry: session.registry)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
           node_worker = Services::CurrentNodeExplain.new(evaluator: evaluator, location: location)

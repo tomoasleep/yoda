@@ -14,7 +14,7 @@ module Yoda
       # @return [CurrentNodeExplain]
       def self.from_source(registry:, source:, location:)
         new(
-          evaluator: Evaluator.new(registry: registry, ast: Parsing::Parser.new.parse(source)),
+          evaluator: Evaluator.new(registry: registry, ast: Parsing.parse(source)),
           location: location
         )
       end

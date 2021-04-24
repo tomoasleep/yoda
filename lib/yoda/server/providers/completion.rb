@@ -45,7 +45,7 @@ module Yoda
         # @param location [Parsing::Location]
         # @return [LanguageServerProtocol::Interface::CompletionList, nil]
         def comment_complete(source, location)
-          ast, comments = Parsing::Parser.new.parse_with_comments(source)
+          ast, comments = Parsing.parse_with_comments(source)
           return nil unless Parsing::Query::CurrentCommentQuery.new(comments, location).current_comment
           completion_worker = Services::CommentCompletion.new(session.registry, ast, comments, location)
           return nil unless completion_worker.available?

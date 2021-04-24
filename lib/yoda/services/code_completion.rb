@@ -62,7 +62,7 @@ module Yoda
 
       # @return [Yoda::AST::Vnode]
       def ast
-        @ast ||= Yoda::Parsing::Parser.new.parse(source)
+        @ast ||= Yoda::Parsing.parse(source)
       end
 
       # @return [Typing::Inferencer::Tracer]
