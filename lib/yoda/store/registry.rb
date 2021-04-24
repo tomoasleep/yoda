@@ -22,6 +22,12 @@ module Yoda
           digest.update(Adapters.default_adapter_class.type.to_s)
           digest.hexdigest
         end
+
+        # @param [Project]
+        # @return [Registry]
+        def for_project(project)
+          ProjectRegistry.for_project(project)
+        end
       end
     end
   end

@@ -23,7 +23,7 @@ module Yoda
       
       # @return [Registry::ProjectRegistry]
       def registry
-        @registry ||= Registry::ProjectRegistry.for_project(self)
+        @registry ||= Registry.for_project(self)
       end
 
       # @return [Dependency]
