@@ -27,7 +27,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'parser', '~> 2.0'
   spec.add_dependency 'unparser', '~> 0.2.6'
   spec.add_dependency 'language_server-protocol', '~> 3.12.0.0'
-  spec.add_dependency 'leveldb', '~> 0.1.9'
   spec.add_dependency 'lmdb', '~> 0.4.8'
   spec.add_dependency 'ruby-progressbar'
   spec.add_dependency 'concurrent-ruby', '~> 1.1.0'
