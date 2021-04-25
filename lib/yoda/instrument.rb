@@ -71,6 +71,10 @@ module Yoda
         local.value
       end
 
+      def clean
+        local.value = Instrument.new
+      end
+
       private
 
       # @return [Concurrent::ThreadLocalVar<Instrument>]
