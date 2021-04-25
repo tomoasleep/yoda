@@ -13,6 +13,7 @@ module Yoda
         start_progress(id: id, title: type)
         yield
       rescue => e
+        Logger.warn(e.full_message)
         failed = true
         raise e 
       ensure
@@ -104,6 +105,7 @@ module Yoda
       private
 
       def write(params)
+        Logger.trace("Notify: #{params}")
         @writer.write(params)
       end
 
