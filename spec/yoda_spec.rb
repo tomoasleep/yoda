@@ -24,7 +24,7 @@ RSpec.describe Yoda do
       end
 
       puts error
-      expect(messages[0]).to a_hash_including(error: nil)
+      expect(messages[0]).not_to have_key(:error)
     end
 
 
