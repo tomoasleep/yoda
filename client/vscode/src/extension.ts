@@ -4,10 +4,9 @@ import * as path from 'path';
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { ExtensionContext } from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { workspace, ExtensionContext } from 'vscode';
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import { worker } from 'cluster';
-import { workspace } from 'vscode';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
