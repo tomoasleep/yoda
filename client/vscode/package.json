@@ -4,8 +4,12 @@
     "description": "Static analytics tool for Ruby",
     "version": "0.0.1",
     "publisher": "tomoasleep",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tomoasleep/yoda"
+    },
     "engines": {
-        "vscode": "^1.23.0"
+        "vscode": "^1.34.0"
     },
     "categories": [
         "Other"
@@ -29,8 +33,8 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "dependencies": {
-        "vscode-test": "^0.4.3",
-        "vscode-languageclient": "^5.2.1"
+        "vscode-languageclient": "^5.2.1",
+        "vscode-test": "^0.4.3"
     },
     "devDependencies": {
         "@types/mocha": "^5.2.6",
