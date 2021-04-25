@@ -16,7 +16,7 @@ module Yoda
 
       # @param workspace_folders [Array<LanguageServer::Protocol::Interface::WorkspaceFolder>] an uri expression of project root path
       def self.from_workspace_folders(workspace_folders)
-        workspaces = Workspace.new(name: folder.name, root_uri: folder.uri)
+        workspaces = workspace_folders.map { |folder| Workspace.from_workspace_folder(folder) }
         new(workspaces: workspaces)
       end
 
@@ -37,6 +37,17 @@ module Yoda
           Store::Actions::BuildCoreIndex.run
         end
         workspaces.each(&:setup)
+      end
+
+      # @param new_workspace [Workspace]
+      def add_workspace(new_workspace)
+        return if workspaces.find { |workspace| workspace.id == new_workspace.id }
+        workspaces.push(new_workspace)
+      end
+
+      # @param id [String]
+      def remove_workspace(id:)
+        @workspaces = workspaces.reject { |workspace| workspace.id == id }
       end
 
       # @return [Store::Project, nil]

@@ -55,8 +55,13 @@ module Yoda
           send_warnings(@session.setup || [])
 
           LanguageServer::Protocol::Interface::InitializeResult.new(
+            server_info: {
+              name: "yoda",
+              version: Yoda::VERSION,
+            },
             capabilities: LanguageServer::Protocol::Interface::ServerCapabilities.new(
               text_document_sync: LanguageServer::Protocol::Interface::TextDocumentSyncOptions.new(
+                open_close: true,
                 change: LanguageServer::Protocol::Constant::TextDocumentSyncKind::FULL,
                 save: LanguageServer::Protocol::Interface::SaveOptions.new(
                   include_text: true,
@@ -71,6 +76,12 @@ module Yoda
               signature_help_provider: LanguageServer::Protocol::Interface::SignatureHelpOptions.new(
                 trigger_characters: ['(', ','],
               ),
+              workspace: {
+                workspaceFolders: LanguageServer::Protocol::Interface::WorkspaceFoldersServerCapabilities.new(
+                  supported: true,
+                  change_notifications: true,
+                ),
+              },
             ),
           )
         end

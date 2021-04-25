@@ -14,6 +14,12 @@ module Yoda
       # @return [String]
       attr_reader :root_uri
 
+      # @param folder [LanguageServer::Protocol::Interface::WorkspaceFolder]
+      # @return [Workspace]
+      def self.from_workspace_folder(folder)
+        new(name: folder.name, root_uri: folder.uri)
+      end
+
       # @param root_uri [Array<Project>]
       def initialize(name:, root_uri:)
         @name = name
