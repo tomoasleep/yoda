@@ -16,6 +16,7 @@ async function main() {
 
 		const extensionTestsEnv = {
 			"YODA_EXECUTABLE_PATH": path.resolve(packageRootPath, '../../exe/yoda'),
+			"YODA_DEBUG": "true",
 		}
 
 		// Download VS Code, unzip it and run the integration test
