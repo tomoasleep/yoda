@@ -29,6 +29,7 @@ module Yoda
       # @param params [Hash]
       # @return [Concurrent::Future, nil]
       def handle(id:, method:, params:)
+        Logger.trace("Request (#{id}): #{method}(#{params})")
         if lifecycle_handler.handle?(method)
           return write_response(id, lifecycle_handler.handle(method: method, params: params))
         end
@@ -87,6 +88,7 @@ module Yoda
       # @return [nil]
       def write_response(id, result)
         return if result == NO_RESPONSE
+        Logger.trace("Response (#{id}): #{result.to_json}")
         if result.is_a?(LanguageServer::Protocol::Interface::ResponseError)
           writer.write(id: id, error: result)
         else
