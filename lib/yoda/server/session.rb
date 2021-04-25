@@ -3,24 +3,27 @@ require 'uri'
 module Yoda
   class Server
     class Session
-      # @return [String]
-      attr_reader :root_uri
-
       # @return [FileStore]
       attr_reader :file_store
 
-      # @return [Store::Project]
-      attr_reader :project
+      # @return [Array<Workspace>]
+      attr_reader :workspaces
 
-      # @param root_uri [String] an uri expression of project root path
-      def initialize(root_uri)
-        @root_uri = root_uri
-        @file_store = FileStore.new
-        @project = Store::Project.new(root_path)
+      def self.from_root_uri(root_uri)
+        workspaces = [Workspace.new(name: 'root', root_uri: root_uri)]
+        new(workspaces: workspaces)
       end
 
-      def root_path
-        @root_path ||= FileStore.path_of_uri(root_uri)
+      # @param workspace_folders [Array<LanguageServer::Protocol::Interface::WorkspaceFolder>] an uri expression of project root path
+      def self.from_workspace_folders(workspace_folders)
+        workspaces = Workspace.new(name: folder.name, root_uri: folder.uri)
+        new(workspaces: workspaces)
+      end
+
+      # @param workspaces [Array<Workspace>]
+      def initialize(workspaces:)
+        @file_store = FileStore.new
+        @workspaces = workspaces
       end
 
       # @return [Store::Registry]
@@ -33,17 +36,16 @@ module Yoda
           Instrument.instance.initialization_progress(phase: :core, message: 'Downloading and building core index')
           Store::Actions::BuildCoreIndex.run
         end
-        project.build_cache
+        workspaces.each(&:setup)
       end
 
-      # @param path [String]
-      def uri_of_path(path)
-        FileStore.uri_of_path(File.expand_path(path, root_path))
+      # @return [Store::Project, nil]
+      def project
+        workspaces.first&.project
       end
 
       def reparse_doc(uri)
-        path = FileStore.path_of_uri(uri)
-        project.read_source(path)
+        workspaces.each { |workspace| workspace.reparse_doc(uri) }
       end
     end
   end

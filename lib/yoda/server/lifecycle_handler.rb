@@ -39,9 +39,19 @@ module Yoda
         }
       end
 
+      # @param params [LanguageServer::Protocol::Interface::InitializeParams]
       def handle_initialize(params)
         Instrument.instance.hear(initialization_progress: method(:notify_initialization_progress)) do
-          @session = Session.new(params[:root_uri])
+          @session = begin
+            if params[:workspace_folders]
+              Session.from_workspace_folders(params[:workspace_folders])
+            elsif params[:root_uri]
+              Session.from_root_uri(params[:root_uri])
+            else
+              Session.new(workspaces: [])
+            end
+          end
+
           send_warnings(@session.setup || [])
 
           LanguageServer::Protocol::Interface::InitializeResult.new(
@@ -65,6 +75,7 @@ module Yoda
           )
         end
       rescue => e
+        Logger.warn e.full_message
         LanguageServer::Protocol::Interface::ResponseError.new(
           message: "Failed to initialize yoda: #{e.class} #{e.message}",
           code: LanguageServer::Protocol::Constant::ErrorCodes::SERVER_ERROR_START,

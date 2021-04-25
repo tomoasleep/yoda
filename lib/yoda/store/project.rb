@@ -14,10 +14,15 @@ module Yoda
       # @return [String]
       attr_reader :root_path
 
-      # @param root_path [String]
-      def initialize(root_path)
-        fail ArgumentError, root_path unless root_path.is_a?(String)
+      # @return [String]
+      attr_reader :name
 
+      # @param name [String]
+      # @param root_path [String]
+      def initialize(name:, root_path:)
+        fail ArgumentError, "root_path (#{root_path}) is not string" unless root_path.is_a?(String)
+
+        @name = name
         @root_path = File.absolute_path(root_path)
       end
       

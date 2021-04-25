@@ -12,6 +12,7 @@ module Yoda
     require 'yoda/server/lifecycle_handler'
     require 'yoda/server/deserializer'
     require 'yoda/server/scheduler'
+    require 'yoda/server/workspace'
 
     # @return [::LanguageServer::Protocol::Transport::Stdio::Reader]
     attr_reader :reader
@@ -41,7 +42,7 @@ module Yoda
           root_handler.handle(id: request[:id], method: request[:method].to_sym, params: deserialize(request[:params]))
         rescue StandardError => ex
           Logger.warn ex
-          Logger.warn ex.backtrace
+          Logger.warn ex.full_message
         end
       end
     end

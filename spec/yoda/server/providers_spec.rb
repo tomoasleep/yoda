@@ -7,7 +7,7 @@ RSpec.describe Yoda::Server::Providers do
   describe '.build_provider' do
     subject { providers.build_provider(method: method, notifier: notifier, session: session) }
 
-    let(:session) { Yoda::Server::Session.new(fixture_root_uri) }
+    let(:session) { Yoda::Server::Session.from_root_uri(fixture_root_uri) }
     let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
     let(:notifier) { Yoda::Server::Notifier.new(writer) }
 

@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 RSpec.xdescribe Yoda::Store::Actions::ImportProjectDependencies do
-  let(:project) { Yoda::Store::Project.new }
+  let(:root_dir) { File.expand_path("../../..", __dir__) }
+  let(:project) { Yoda::Store::Project.new(name: 'yoda', root_path: root_dir) }
   let(:registry) { Yoda::Store::Registry.new(adapter) }
   let(:adapter) { Yoda::Store::Adapters::MemoryAdapter.new }
 

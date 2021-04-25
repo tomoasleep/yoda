@@ -8,7 +8,7 @@ RSpec.describe Yoda::Services::Evaluator do
   let(:current_node) { ast.positionally_nearest_child(location) }
 
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
-  let(:project) { Yoda::Store::Project.new(fixture_root) }
+  let(:project) { Yoda::Store::Project.new(name: 'fixture', root_path: fixture_root) }
   let(:registry) { project.registry }
 
   before do

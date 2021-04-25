@@ -27,7 +27,7 @@ module Yoda
       end
 
       def project
-        @project ||= Store::Project.new(Dir.pwd)
+        @project ||= Store::Project.new(name: 'root', root_path: Dir.pwd)
       end
 
       def filename

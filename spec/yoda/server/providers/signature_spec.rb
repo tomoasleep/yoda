@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Yoda::Server::Providers::Signature do
   include FileUriHelper
 
-  let(:session) { Yoda::Server::Session.new(fixture_root_uri) }
+  let(:session) { Yoda::Server::Session.from_root_uri(fixture_root_uri) }
   let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
   let(:notifier) { Yoda::Server::Notifier.new(writer) }
   let(:provider) { described_class.new(session: session, notifier: notifier) }
