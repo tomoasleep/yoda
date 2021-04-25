@@ -1,6 +1,6 @@
 {
   "name": "yoda",
-  "main": "./client/atom/main.js",
+  "main": "./main.js",
   "version": "0.0.0",
   "description": "Ruby completion engine",
   "keywords": [],
