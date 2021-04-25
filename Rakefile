@@ -6,12 +6,25 @@ RSpec::Core::RakeTask.new(:spec)
 task :default => :spec
 
 namespace :vscode do
-  desc "Build vscode extension"
-  task :build do
+  desc "Install dependencies of vscode extension"
+  task :deps do
     Dir.chdir(File.expand_path("./client/vscode", __dir__)) do
       sh "npm install"
+    end
+  end
+
+  desc "Build vscode extension"
+  task build: :deps do
+    Dir.chdir(File.expand_path("./client/vscode", __dir__)) do
       # See: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
       sh "npx vsce package"
+    end
+  end
+
+  desc "Test vscode extension"
+  task test: :deps do
+    Dir.chdir(File.expand_path("./client/vscode", __dir__)) do
+      sh "npm test"
     end
   end
 

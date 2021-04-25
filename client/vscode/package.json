@@ -24,17 +24,29 @@
                 "command": "extension.sayHello",
                 "title": "Hello World"
             }
-        ]
+        ],
+        "configuration": {
+            "title": "Yoda",
+            "properties": {
+                "yoda.path": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "default": null,
+                    "description": "Specifies the path of yoda."
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+        "test": "npm run compile && node ./out/test/runTest.js"
     },
     "dependencies": {
-        "vscode-languageclient": "^7.0",
-        "vscode-test": "^0.4.3"
+        "vscode-languageclient": "^7.0"
     },
     "devDependencies": {
         "@types/mocha": "^5.2.6",
@@ -42,6 +54,7 @@
         "@types/vscode": "^1.52.0",
         "glob": "^7.1.4",
         "mocha": "^6.1.4",
-        "typescript": "^4.2"
+        "typescript": "^4.2",
+        "vscode-test": "^1.5"
     }
 }

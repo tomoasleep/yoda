@@ -15,8 +15,15 @@ export function activate(context: ExtensionContext) {
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "yoda" is now active!');
 
+    const yodaPathEnv = process.env.YODA_EXECUTABLE_PATH
+    const yodaPathConfiguration = workspace.getConfiguration("yoda").get("path") as (string | null);
+
+    const command = yodaPathEnv || yodaPathConfiguration || 'yoda'
+
+    console.log(`Use yoda at ${command}`)
+
     let execOptions = {
-        command: 'yoda',
+        command,
         args: ['server'],
     }
 
