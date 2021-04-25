@@ -23,7 +23,7 @@ module Yoda
         define_method(level) do |content, tag: nil|
           return unless public_send("allow_#{level}?")
           prefix = "[#{level}]#{tag ? ' (' + tag + ')' : '' } "
-          io.puts(prefix + content.to_s.split("\n").join(prefix))
+          io.puts(prefix + content.to_s.lines.join(prefix))
         end
 
         define_method("allow_#{level}?") do
