@@ -44,7 +44,8 @@ module Yoda
         Instrument.instance.hear(initialization_progress: method(:notify_initialization_progress)) do
           @session = begin
             if params[:workspace_folders]
-              Session.from_workspace_folders(params[:workspace_folders])
+              workspace_folders = params[:workspace_folders].map { |hash| LanguageServer::Protocol::Interface::WorkspaceFolder.new(name: hash[:name], uri: hash[:uri]) }
+              Session.from_workspace_folders()
             elsif params[:root_uri]
               Session.from_root_uri(params[:root_uri])
             else
