@@ -19,12 +19,6 @@
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [
-            {
-                "command": "extension.sayHello",
-                "title": "Hello World"
-            }
-        ],
         "configuration": {
             "title": "Yoda",
             "properties": {
