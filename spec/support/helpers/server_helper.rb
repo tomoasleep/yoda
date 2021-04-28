@@ -21,8 +21,16 @@ module ServerHelper
   end
 
   def lsp_request(id:, method:, params:, kind: nil)
-    params_kind = kind ? "#{kind}_params" : "#{method}_params"
-    lsp(:request_message, jsonrpc: "2.0", id: id, method: method, params: lsp(params_kind, **params))
+    params = begin
+      if kind == Hash
+        params
+      else
+        params_kind = kind ? "#{kind}_params" : "#{method}_params"
+        lsp(params_kind, **params)
+      end
+    end
+    
+    lsp(:request_message, jsonrpc: "2.0", id: id, method: method, params: params)
   end
 
   def lsp(kind, **kwargs)
