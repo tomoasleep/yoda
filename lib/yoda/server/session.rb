@@ -58,6 +58,12 @@ module Yoda
       end
       alias reparse_doc read_source
 
+      # @param uri [String]
+      # @param source [String]
+      def store_source(uri:, source:)
+        workspaces_for(uri).each { |workspace| workspace.store_source(uri: uri, source: source) }
+      end
+
       def workspace_for(uri)
         workspaces_for(uri).first
       end

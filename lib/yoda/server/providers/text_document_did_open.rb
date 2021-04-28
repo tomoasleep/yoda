@@ -9,7 +9,7 @@ module Yoda
         def provide(params)
           uri = params[:text_document][:uri]
           text = params[:text_document][:text]
-          session.file_store.store(uri, text)
+          session.store_source(uri: uri, source: text)
 
           NO_RESPONSE
         end

@@ -29,11 +29,17 @@ module Yoda
         FileStore.uri_of_path(File.expand_path(path))
       end
 
-      def reparse_doc(uri)
+      def read_source(uri)
         path = FileStore.path_of_uri(uri)
         return unless subpath?(path)
         file_store.load(uri)
         project.read_source(path)
+      end
+
+      # @param uri [String]
+      # @param source [String]
+      def store_source(uri:, source:)
+        file_store.store(uri, source)
       end
 
       def suburi?(uri)

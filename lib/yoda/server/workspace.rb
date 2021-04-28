@@ -53,6 +53,12 @@ module Yoda
         project.read_source(path)
       end
 
+      # @param uri [String]
+      # @param source [String]
+      def store_source(uri:, source:)
+        file_store.store(uri, source)
+      end
+
       def suburi?(uri)
         path = FileStore.path_of_uri(uri)
         subpath?(path)
