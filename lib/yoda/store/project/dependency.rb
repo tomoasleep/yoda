@@ -47,18 +47,18 @@ module Yoda
           # @return [Array<Objects::Library::Gem>]
           def gems
             @libraries ||= begin
-              (gemfile_lock_parser&.specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Objects::Library::Gem.from_gem_spec(spec) }
+              (gem_specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Objects::Library::Gem.from_gem_spec(spec) }
             end
           end
 
           private
 
-          # @return [Bundler::LockfileParser, nil]
-          def gemfile_lock_parser
-            @gemfile_lock_parser ||= begin
+          # @return [Bundler::SpecSet, nil]
+          def gem_specs
+            @gem_specs ||= begin
               return if !project.gemfile_lock_path || !File.exists?(project.gemfile_lock_path)
               Dir.chdir(project.root_path) do
-                Bundler.locked_gems
+                Bundler.definition.specs
               end
             end
           end
