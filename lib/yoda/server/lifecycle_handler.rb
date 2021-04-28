@@ -45,7 +45,7 @@ module Yoda
           @session = begin
             if params[:workspace_folders]
               workspace_folders = params[:workspace_folders].map { |hash| LanguageServer::Protocol::Interface::WorkspaceFolder.new(name: hash[:name], uri: hash[:uri]) }
-              Session.from_workspace_folders()
+              Session.from_workspace_folders(workspace_folders)
             elsif params[:root_uri]
               Session.from_root_uri(params[:root_uri])
             else
