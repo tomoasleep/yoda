@@ -9,6 +9,7 @@ describe('Should do completion', () => {
     await testCompletion(docUri, new vscode.Position(0, 2), {
       items: [
         { label: 'Object', kind: vscode.CompletionItemKind.Class },
+        { label: 'ObjectSpace', kind: vscode.CompletionItemKind.Module },
       ]
     });
   })
