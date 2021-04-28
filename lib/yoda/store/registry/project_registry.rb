@@ -19,7 +19,7 @@ module Yoda
       class << self
         # @param project [Project]
         def for_project(project)
-          path = File.expand_path(project.registry_name, project.cache_dir_path)
+          path = project.root_path && File.expand_path(project.registry_name, project.cache_dir_path)
           new(Adapters.for(path))
         end
       end

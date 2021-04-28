@@ -11,19 +11,17 @@ module Yoda
 
       delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :files
 
-      # @return [String]
+      # @return [String, nil]
       attr_reader :root_path
 
       # @return [String]
       attr_reader :name
 
       # @param name [String]
-      # @param root_path [String]
+      # @param root_path [String, nil]
       def initialize(name:, root_path:)
-        fail ArgumentError, "root_path (#{root_path}) is not string" unless root_path.is_a?(String)
-
         @name = name
-        @root_path = File.absolute_path(root_path)
+        @root_path = root_path && File.absolute_path(root_path)
       end
       
       # @return [Registry::ProjectRegistry]
@@ -68,6 +66,10 @@ module Yoda
 
       private
 
+      def on_memory?
+        !root_path
+      end
+
       # @return [Files]
       def files
         @files ||= Files.new(self)
@@ -76,7 +78,7 @@ module Yoda
       def load_project_files
         Logger.debug('Loading current project files...')
         Instrument.instance.initialization_progress(phase: :load_project_files, message: 'Loading current project files')
-        Actions::ReadProjectFiles.new(registry, root_path).run
+        root_path && Actions::ReadProjectFiles.new(registry, root_path).run
       end
     end
   end

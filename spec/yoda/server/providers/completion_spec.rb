@@ -11,7 +11,7 @@ RSpec.describe Yoda::Server::Providers::Completion do
   describe '#provide' do
     before do
       session.setup
-      session.file_store.load(uri)
+      session.reparse_doc(uri)
     end
     let(:params) do
       {

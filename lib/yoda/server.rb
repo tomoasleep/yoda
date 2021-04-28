@@ -13,6 +13,7 @@ module Yoda
     require 'yoda/server/deserializer'
     require 'yoda/server/scheduler'
     require 'yoda/server/workspace'
+    require 'yoda/server/rootless_workspace'
 
     # @return [::LanguageServer::Protocol::Transport::Stdio::Reader]
     attr_reader :reader

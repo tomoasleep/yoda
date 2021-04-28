@@ -11,7 +11,7 @@ RSpec.describe Yoda::Server::Providers::Definition do
   describe '#provide' do
     before do
       session.setup
-      session.file_store.load(uri)
+      session.read_source(uri)
     end
     let(:params) do
       {

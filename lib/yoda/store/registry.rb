@@ -23,7 +23,8 @@ module Yoda
           digest.hexdigest
         end
 
-        # @param [Project]
+        # @param project [Project]
+        # @param memory [Boolean]
         # @return [Registry]
         def for_project(project)
           ProjectRegistry.for_project(project)

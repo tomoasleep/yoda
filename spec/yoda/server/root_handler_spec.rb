@@ -26,7 +26,7 @@ RSpec.describe Yoda::Server::RootHandler do
   end
 
   shared_context 'after file read' do
-    before { handler.session.file_store.load(uri) }
+    before { handler.session.read_source(uri) }
   end
 
   shared_context 'block thread execution' do

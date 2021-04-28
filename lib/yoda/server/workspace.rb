@@ -20,7 +20,8 @@ module Yoda
         new(name: folder.name, root_uri: folder.uri)
       end
 
-      # @param root_uri [Array<Project>]
+      # @param name [String]
+      # @param root_uri [String]
       def initialize(name:, root_uri:)
         @name = name
         @root_uri = root_uri
@@ -45,9 +46,10 @@ module Yoda
         FileStore.uri_of_path(File.expand_path(path, root_path))
       end
 
-      def reparse_doc(uri)
+      def read_source(uri)
         path = FileStore.path_of_uri(uri)
         return unless subpath?(path)
+        file_store.load(uri)
         project.read_source(path)
       end
 

@@ -10,8 +10,13 @@ module Yoda
         LmdbAdapter
       end
 
+      # @param path [String, nil]
       def self.for(path)
-        default_adapter_class.for(path)
+        if path
+          default_adapter_class.for(path)
+        else
+          MemoryAdapter.new
+        end
       end
     end
   end

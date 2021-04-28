@@ -3,9 +3,6 @@ require 'uri'
 module Yoda
   class Server
     class Session
-      # @return [FileStore]
-      attr_reader :file_store
-
       # @return [Array<Workspace>]
       attr_reader :workspaces
 
@@ -22,7 +19,6 @@ module Yoda
 
       # @param workspaces [Array<Workspace>]
       def initialize(workspaces:)
-        @file_store = FileStore.new
         @workspaces = workspaces
       end
 
@@ -42,6 +38,7 @@ module Yoda
       # @param new_workspace [Workspace]
       def add_workspace(new_workspace)
         return if workspaces.find { |workspace| workspace.id == new_workspace.id }
+        new_workspace.setup
         workspaces.push(new_workspace)
       end
 
@@ -55,8 +52,29 @@ module Yoda
         workspaces.first&.project
       end
 
-      def reparse_doc(uri)
-        workspaces.each { |workspace| workspace.reparse_doc(uri) }
+      def read_source(uri)
+        workspaces.each { |workspace| workspace.read_source(uri) }
+        temporal_workspaces[uri]&.read_source(uri)
+      end
+      alias reparse_doc read_source
+
+      def workspace_for(uri)
+        workspaces_for(uri).first
+      end
+
+      def workspaces_for(uri)
+        matched_workspaces = workspaces.select { |workspace| workspace.suburi?(uri) }
+        matched_workspaces.empty? ? [temporal_workspace_for(uri)] : matched_workspaces
+      end
+
+      def temporal_workspace_for(uri)
+        temporal_workspaces[uri] ||= RootlessWorkspace.new(name: uri).tap(&:setup)
+      end
+
+      private
+
+      def temporal_workspaces
+        @temporal_workspaces ||= {}
       end
     end
   end

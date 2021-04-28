@@ -22,16 +22,19 @@ module Yoda
 
         # @return [String]
         def yoda_dir_path
+          return nil unless project.root_path
           File.expand_path('.yoda', project.root_path)
         end
 
         # @return [String]
         def cache_dir_path
+          return nil unless project.root_path
           File.expand_path('.yoda/cache', project.root_path)
         end
 
         # @return [String]
         def gemfile_lock_path
+          return nil unless project.root_path
           File.absolute_path('Gemfile.lock', project.root_path)
         end
 
@@ -40,14 +43,14 @@ module Yoda
         end
 
         def clear_dir
-          File.exist?(yoda_dir_path) && FileUtils.rm_rf(yoda_dir_path)
+          yoda_dir_path && File.exist?(yoda_dir_path) && FileUtils.rm_rf(yoda_dir_path)
         end
 
         private
 
         # @param dir_path [String]
         def make_dir_at(dir_path)
-          File.exist?(dir_path) || FileUtils.mkdir_p(dir_path)
+          dir_path && (File.exist?(dir_path) || FileUtils.mkdir_p(dir_path))
         end
       end
     end

@@ -7,7 +7,8 @@ module ServerHelper
     yield requests
 
     sio = StringIO.new
-    requests.each { |request| lsp_write(sio, request) }
+    requests.each { |request| lsp_write(sio, request); sio.write("\n") }
+    puts sio.string
 
     Dir.chdir(fixture_path) do 
       output, error, status = Open3.capture3(command, stdin_data: sio.string)
@@ -19,16 +20,19 @@ module ServerHelper
     LanguageServer::Protocol::Transport::Io::Writer.new(io).write(response.to_hash)
   end
 
-  def lsp_request(id:, method:, params:)
-    lsp(:request_message, jsonrpc: "2.0", id: id, method: method, params: lsp("#{method}_params", **params))
+  def lsp_request(id:, method:, params:, kind: nil)
+    params_kind = kind ? "#{kind}_params" : "#{method}_params"
+    lsp(:request_message, jsonrpc: "2.0", id: id, method: method, params: lsp(params_kind, **params))
   end
 
   def lsp(kind, **kwargs)
-    LanguageServer::Protocol::Interface.const_get(camelize(kind)).new(**kwargs)
+    LanguageServer::Protocol::Interface.const_get(to_constant_name(kind)).new(**kwargs)
   end
 
-  def camelize(str)
-    str.to_s.sub(/^[a-z]*/) { |match| match.capitalize }.gsub(/(?:_)([a-z]*)/i) { $1.capitalize }
+  def to_constant_name(str)
+    str = str.to_s.split("/").last
+    # camelize
+    str.sub(/^[a-z]*/) { |match| match.capitalize }.gsub(/(?:_)([a-z]*)/i) { $1.capitalize }
   end
 
   def jsonrpc_to_requests(str)

@@ -31,23 +31,25 @@ module Yoda
         # @param uri      [String]
         # @param position [{Symbol => Integer}]
         def calculate(uri, position)
-          source = session.file_store.get(uri)
+          workspace = session.workspace_for(uri)
+          source = workspace.file_store.get(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-          if candidates = comment_complete(source, location)
+          if candidates = comment_complete(workspace, source, location)
             candidates
           else
-            complete_from_cut_source(source, location)
+            complete_from_cut_source(workspace, source, location)
           end
         end
 
+        # @param workspace [Workspace]
         # @param source   [String]
         # @param location [Parsing::Location]
         # @return [LanguageServerProtocol::Interface::CompletionList, nil]
-        def comment_complete(source, location)
+        def comment_complete(workspace, source, location)
           ast, comments = Parsing.parse_with_comments(source)
           return nil unless Parsing::Query::CurrentCommentQuery.new(comments, location).current_comment
-          completion_worker = Services::CommentCompletion.new(session.registry, ast, comments, location)
+          completion_worker = Services::CommentCompletion.new(workspace.project.registry, ast, comments, location)
           return nil unless completion_worker.available?
 
           completion_items = completion_worker.candidates
@@ -60,12 +62,13 @@ module Yoda
           nil
         end
 
+        # @param workspace [Workspace]
         # @param source   [String]
         # @param location [Parsing::Location]
         # @return [LanguageServerProtocol::Interface::CompletionList, nil]
-        def complete_from_cut_source(source, location)
+        def complete_from_cut_source(workspace, source, location)
           cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
-          method_completion_worker = Services::CodeCompletion.new(session.registry, cut_source, location)
+          method_completion_worker = Services::CodeCompletion.new(workspace.project.registry, cut_source, location)
           completion_items = method_completion_worker.candidates
 
           LanguageServer::Protocol::Interface::CompletionList.new(
