@@ -6,6 +6,7 @@ module Yoda
       # @return [Concurrent::ThreadPoolExecutor]
       attr_reader :thread_pool
 
+      # @return [Concurrent::Map{String => Concurrent::Future}]
       attr_reader :future_map
 
       # @return [Concurrent::ThreadPoolExecutor]
@@ -32,6 +33,12 @@ module Yoda
       # @param id [String]
       def cancel(id)
         future_map[id]&.cancel
+      end
+
+      # @param timeout [Integer] the maximum number of seconds to wait for shutdown to complete.
+      def wait_for_termination(timeout:)
+        thread_pool.shutdown
+        thread_pool.wait_for_termination(timeout)
       end
 
       def cancel_all

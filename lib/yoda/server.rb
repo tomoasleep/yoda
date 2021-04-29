@@ -38,6 +38,7 @@ module Yoda
     end
 
     def run
+      Logger.trace "Server initializing..."
       reader.read do |request|
         begin
           root_handler.handle(id: request[:id], method: request[:method].to_sym, params: deserialize(request[:params]))
@@ -46,6 +47,9 @@ module Yoda
           Logger.warn ex.full_message
         end
       end
+      Logger.trace "Waiting to finish all pending tasks..."
+      root_handler.wait_for_termination(timeout: 10)
+      Logger.trace "Server finishing..."
     end
 
     def deserialize(hash)

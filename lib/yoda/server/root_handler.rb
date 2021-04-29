@@ -52,6 +52,11 @@ module Yoda
         @notifier ||= Notifier.new(writer)
       end
 
+      # Wait pending requests
+      def wait_for_termination(timeout:)
+        scheduler.wait_for_termination(timeout: timeout)
+      end
+
       # @param id [String]
       def cancel_request(id)
         scheduler.cancel(id)
