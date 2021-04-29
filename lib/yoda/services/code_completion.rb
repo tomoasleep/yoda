@@ -65,7 +65,7 @@ module Yoda
         @ast ||= Yoda::Parsing.parse(source)
       end
 
-      # @return [Typing::Inferencer::Tracer]
+      # @return [Evaluator]
       def evaluator
         @evaluator ||= Evaluator.new(ast: ast, registry: registry)
       end
