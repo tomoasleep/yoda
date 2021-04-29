@@ -14,6 +14,12 @@ module Yoda
       end
 
       # @param uri_string [String]
+      # @return [String, nil]
+      def fetch(uri_string)
+        @cache.fetch(uri_string) { fail KeyError.new("File is not stored for #{uri_string}", key: uri_string, receiver: self) }
+      end
+
+      # @param uri_string [String]
       # @param text [String]
       def store(uri_string, text)
         return unless program_file_uri?(uri_string)
