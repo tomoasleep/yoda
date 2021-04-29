@@ -27,7 +27,7 @@ module Yoda
       # @param tracer [Tracer, nil]
       def initialize(context:, tracer: nil)
         @context = context
-        @tracer = tracer || Tracer.new(registry: context.registry, generator: generator)
+        @tracer = tracer || Tracer.new(registry: context.registry)
       end
 
       # @param node [AST::Vnode]

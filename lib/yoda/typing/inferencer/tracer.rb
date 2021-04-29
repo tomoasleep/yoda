@@ -5,9 +5,6 @@ module Yoda
         # @return [Store::Registry]
         attr_reader :registry
 
-        # @return [Types::Generator]
-        attr_reader :generator
-
         # @return [Hash{ AST::Node => Types::Base }]
         attr_reader :node_to_type
 
@@ -21,15 +18,18 @@ module Yoda
         attr_reader :node_to_method_candidates
 
         # @param registry [Store::Registry]
-        # @param generator [Types::Generator]
-        def initialize(registry:, generator:)
+        def initialize(registry:)
           @registry = registry
-          @generator = generator
 
           @node_to_type = {}
           @node_to_context = {}
           @node_to_method_candidates = {}
           @node_to_receiver_candidates = {}
+        end
+
+        # @return [Types::Generator]
+        def generator
+          @generator ||= Types::Generator.new(registry)
         end
 
         # @param node [AST::Node]
