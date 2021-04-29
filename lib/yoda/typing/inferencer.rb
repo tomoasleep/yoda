@@ -2,6 +2,7 @@ module Yoda
   module Typing
     class Inferencer
       require 'yoda/typing/inferencer/arguments_binder'
+      require 'yoda/typing/inferencer/arguments'
       require 'yoda/typing/inferencer/contexts'
       require 'yoda/typing/inferencer/environment'
       require 'yoda/typing/inferencer/constant_resolver'

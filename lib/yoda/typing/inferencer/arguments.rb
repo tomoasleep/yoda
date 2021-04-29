@@ -1,6 +1,6 @@
 module Yoda
   module Typing
-    module Inferencer
+    class Inferencer
       class Arguments
         # @param argument_nodes [Array<AST::Node>]
         # @param tracer [Tracer]
