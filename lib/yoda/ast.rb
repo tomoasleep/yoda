@@ -24,6 +24,7 @@ module Yoda
     require 'yoda/ast/hash_node'
     require 'yoda/ast/if_node'
     require 'yoda/ast/interpolation_text_node'
+    require 'yoda/ast/kwsplat_node'
     require 'yoda/ast/left_operator_node'
     require 'yoda/ast/literal_node'
     require 'yoda/ast/module_node'
@@ -116,6 +117,8 @@ module Yoda
           ClassNode
         when :sclass
           SingletonClassNode
+        when :kwsplat
+          KwsplatNode
         when :int, :float, :complex, :rational, :str, :string, :sym
           LiteralNode
         else
