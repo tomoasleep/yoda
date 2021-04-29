@@ -10,6 +10,9 @@ module Yoda
 
       # @return [Symbol]
       delegate type: :node
+
+      # @return [String]
+      delegate to_s: :node
       
       # @param node [Parser::AST::Node]
       # @param parent [Vnode]
