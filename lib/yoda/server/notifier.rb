@@ -26,6 +26,77 @@ module Yoda
         write(method: 'telemetry/event', params: params)
       end
 
+      # @param token [Integer, String]
+      # @param title [String]
+      # @param cancellable [Boolean, nil]
+      # @param message [String]
+      # @param percentage [Integer]
+      # @see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workDoneProgressBegin
+      def work_done_progress_begin(token:, title:, cancellable: nil, message: nil, percentage: nil)
+        write(
+          method: '$/progress',
+          params: LanguageServer::Protocol::Interface::ProgressParams.new(
+            token: token,
+            value: LanguageServer::Protocol::Interface::WorkDoneProgressBegin.new(
+              kind: "begin",
+              title: title,
+              cancellable: cancellable,
+              message: message,
+              percentage: percentage,
+            )
+          ),
+        )
+      end
+
+      # @param token [Integer, String]
+      # @param cancellable [Boolean, nil]
+      # @param message [String]
+      # @param percentage [Integer]
+      # @see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workDoneProgressReport
+      def work_done_progress_report(token:, cancellable: nil, message: nil, percentage: nil)
+        write(
+          method: '$/progress',
+          params: LanguageServer::Protocol::Interface::ProgressParams.new(
+            token: token,
+            value: LanguageServer::Protocol::Interface::WorkDoneProgressReport.new(
+              kind: "report",
+              cancellable: cancellable,
+              message: message,
+              percentage: percentage,
+            )
+          ),
+        )
+      end
+
+      # @param token [Integer, String]
+      # @param message [String]
+      # @see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workDoneProgressEnd
+      def work_done_progress_end(token:, message: nil)
+        write(
+          method: '$/progress',
+          params: LanguageServer::Protocol::Interface::ProgressParams.new(
+            token: token,
+            value: LanguageServer::Protocol::Interface::WorkDoneProgressEnd.new(
+              kind: "end",
+              message: message,
+            )
+          ),
+        )
+      end
+
+      # @param token [Integer, String]
+      # @param value [Object] The partial result to send. In most cases, the type of this becomes the result type of the request.
+      # @see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#partialResults
+      def partial_result(token:, value:)
+        write(
+          method: '$/progress',
+          params: LanguageServer::Protocol::Interface::ProgressParams.new(
+            token: token,
+            value: value,
+          ),
+        )
+      end
+
       # @param type [String, Symbol]
       # @param message [String]
       def show_message(type:, message:)
