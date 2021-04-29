@@ -35,11 +35,12 @@ module Yoda
           source = workspace.file_store.fetch(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-          if candidates = comment_complete(workspace, source, location)
-            candidates
-          else
-            complete_from_cut_source(workspace, source, location)
-          end
+          Logger.trace("Trying comment completion for #{uri}, #{position}")
+          candidates = comment_complete(workspace, source, location)
+          return candidates if candidates
+
+          Logger.trace("Trying code completion for #{uri}, #{position}")
+          complete_from_cut_source(workspace, source, location)
         end
 
         # @param workspace [Workspace]
