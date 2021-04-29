@@ -2,6 +2,7 @@ module Yoda
   module Typing
     module Types
       class Instance < Base
+        # @return [Stor::Objects::NamespaceObject]
         attr_reader :klass
 
         # @param klass [Store::Objects::NamespaceObject] class object for the instance.

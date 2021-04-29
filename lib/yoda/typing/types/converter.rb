@@ -30,7 +30,7 @@ module Yoda
             )
           when Model::TypeExpressions::SequenceType
             # @todo Implement sequence type
-            Instance.new(klass: generator.array_type)
+            generator.array_type
           when Model::TypeExpressions::DuckType
             # @todo Implement duck type
             generator.any_type
