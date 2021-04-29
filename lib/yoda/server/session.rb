@@ -53,8 +53,7 @@ module Yoda
       end
 
       def read_source(uri)
-        workspaces.each { |workspace| workspace.read_source(uri) }
-        temporal_workspaces[uri]&.read_source(uri)
+        workspaces_for(uri).each { |workspace| workspace.read_source(uri) }
       end
       alias reparse_doc read_source
 
@@ -74,7 +73,11 @@ module Yoda
       end
 
       def temporal_workspace_for(uri)
-        temporal_workspaces[uri] ||= RootlessWorkspace.new(name: uri).tap(&:setup)
+        temporal_workspaces[uri] ||= RootlessWorkspace.new(name: uri).tap do |workspace|
+          workspace.setup
+          # Store the file content to the temporally workspace
+          workspace.read_source(uri)
+        end
       end
 
       private
