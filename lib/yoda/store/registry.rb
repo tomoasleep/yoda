@@ -1,3 +1,5 @@
+require "digest"
+
 module Yoda
   module Store
     module Registry
