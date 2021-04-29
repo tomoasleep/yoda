@@ -47,6 +47,20 @@ module Yoda
         def keys
           index.keys
         end
+
+        # @return [Enumerator<Object>]
+        def items
+          Enumerator.new do |y|
+            keys.each do |key|
+              value = get(key)
+              if value
+                y << value
+              else
+                Logger.warn("Not found value in registry for the key: #{key}")
+              end
+            end
+          end
+        end
       end
 
       # @return [Hash]

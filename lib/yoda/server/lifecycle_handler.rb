@@ -77,6 +77,9 @@ module Yoda
               signature_help_provider: LanguageServer::Protocol::Interface::SignatureHelpOptions.new(
                 trigger_characters: ['(', ','],
               ),
+              workspace_symbol_provider: LanguageServer::Protocol::Interface::WorkspaceSymbolOptions.new(
+                work_done_progress: true,
+              ),
               workspace: {
                 workspaceFolders: LanguageServer::Protocol::Interface::WorkspaceFoldersServerCapabilities.new(
                   supported: true,

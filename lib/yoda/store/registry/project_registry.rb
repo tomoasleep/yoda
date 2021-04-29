@@ -88,15 +88,15 @@ module Yoda
       def project_status
         @project_status ||= adapter.get(PROJECT_STATUS_KEY) || Objects::ProjectStatus.new
       end
+      
+      def local_store
+        @local_store ||= Registry::Index.new.wrap(Registry::Composer.new(id: :local))
+      end
 
       private
 
       # @return [Adapters::LmdbAdapter, nil]
       attr_reader :adapter
-
-      def local_store
-        @local_store ||= Registry::Index.new.wrap(Registry::Composer.new(id: :local))
-      end
 
       def library_store
         @library_store ||= begin

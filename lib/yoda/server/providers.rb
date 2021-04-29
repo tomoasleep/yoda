@@ -13,6 +13,7 @@ module Yoda
       require 'yoda/server/providers/text_document_did_open'
       require 'yoda/server/providers/text_document_did_save'
       require 'yoda/server/providers/workspace_did_change_workspace_folders'
+      require 'yoda/server/providers/workspace_symbol'
 
       CLASSES = [
         Completion,
@@ -22,7 +23,8 @@ module Yoda
         TextDocumentDidChange,
         TextDocumentDidOpen,
         TextDocumentDidSave,
-        WorkspaceDidChangeWorkspaceFolders
+        WorkspaceDidChangeWorkspaceFolders,
+        WorkspaceSymbol,
       ].freeze
 
       class << self
