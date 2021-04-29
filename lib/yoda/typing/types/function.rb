@@ -57,6 +57,11 @@ module Yoda
             block_parameter: block_parameter&.to_expression,
           )
         end
+
+        def to_type_string
+          inspect
+          # "#{context.to_type_string}()"
+        end
       end
     end
   end

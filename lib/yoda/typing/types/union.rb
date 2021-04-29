@@ -28,6 +28,10 @@ module Yoda
         def to_expression
           Model::TypeExpressions::UnionType.new(types.map(&:to_expression))
         end
+
+        def to_type_string
+          types.map(&:to_type_string).join(" | ")
+        end
       end
     end
   end

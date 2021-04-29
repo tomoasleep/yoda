@@ -28,6 +28,10 @@ module Yoda
         def to_expression
           ref&.to_expression || Store::TypeExpressions::UnknownType.new
         end
+
+        def to_type_string
+          ref ? ref.to_type_string : "var(#{label}:#{id})"
+        end
       end
     end
   end

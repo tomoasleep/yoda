@@ -5,7 +5,7 @@ module Yoda
         # @return [::Hash{ String, Symbol => Base }]
         attr_reader :contents
 
-        # @param hash [::Hash{ String, Symbol => Base }]
+        # @param contents [::Hash{ String, Symbol => Base }]
         def initialize(contents:)
           @contents = contents
         end
@@ -16,6 +16,11 @@ module Yoda
 
         def visilibity
           @self_call ? [:private, :public, :protected] : [:public]
+        end
+
+        def to_type_string
+          inner = contents.map { |key, value| "#{key} => #{value.to_type_string}"}
+          "{#{inner.join(', ')}}"
         end
       end
     end

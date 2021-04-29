@@ -25,7 +25,9 @@ module Yoda
         # @return [Store::Types::Base]
         def traverse(node)
           bind_context(node: node, context: context)
+          Logger.trace("Traversing #{node}")
           type = infer_node(node)
+          Logger.trace("Traversed #{node} -> #{type.to_type_string}")
           bind_type(node: node, type: type, context: context)
 
           type

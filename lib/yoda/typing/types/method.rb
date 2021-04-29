@@ -29,6 +29,10 @@ module Yoda
         def visilibity
           @self_call ? [:private, :public, :protected] : [:public]
         end
+
+        def to_type_string
+          "#{callee.to_type_string}##{method_name}"
+        end
       end
     end
   end

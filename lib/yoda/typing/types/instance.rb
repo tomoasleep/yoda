@@ -19,6 +19,10 @@ module Yoda
             fail NotImplementedError
           end
         end
+
+        def to_type_string
+          klass.path
+        end
       end
     end
   end

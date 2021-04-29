@@ -18,6 +18,11 @@ module Yoda
         def to_expression
           base.to_expression
         end
+
+        def to_type_string
+          inner = type_args.map(&:to_type_string)
+          "#{base.to_type_string}<#{inner.join(', ')}>"
+        end
       end
     end
   end
