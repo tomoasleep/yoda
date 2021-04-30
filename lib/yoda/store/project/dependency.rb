@@ -47,7 +47,7 @@ module Yoda
           # @return [Array<Objects::Library::Gem>]
           def gems
             @libraries ||= begin
-              (gem_specs || []).reject { |spec| self_spec?(spec) }.map { |spec| Objects::Library::Gem.from_gem_spec(spec) }
+              (gem_specs || []).reject { |spec| self_spec?(spec) }.reject { |spec| project.config.ignored_gems.include?(spec.name) }.map { |spec| Objects::Library::Gem.from_gem_spec(spec) }
             end
           end
 

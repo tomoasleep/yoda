@@ -38,6 +38,12 @@ module Yoda
           File.absolute_path('Gemfile.lock', project.root_path)
         end
 
+        # @return [String]
+        def config_file_path
+          return nil unless project.root_path
+          File.absolute_path('.yoda.yml', project.root_path)
+        end
+
         def make_dir
           make_dir_at(cache_dir_path)
         end

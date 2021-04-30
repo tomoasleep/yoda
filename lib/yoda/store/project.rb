@@ -45,6 +45,12 @@ module Yoda
         files.clear_dir
       end
 
+      # @return [Config]
+      def config
+        content = files.config_file_path && File.read(files.config_file_path)
+        @config ||= Config.from_yaml_data(content || '')
+      end
+
       def reset
         clear
         setup
