@@ -17,15 +17,18 @@ export function activate(context: ExtensionContext) {
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "yoda" is now active!');
 
-    const isDebug = !!process.env.YODA_DEBUG?.length
-
     const yodaPathEnv = process.env.YODA_EXECUTABLE_PATH
+
     const yodaPathConfiguration = workspace.getConfiguration("yoda").get("path") as (string | null);
+    const yodaTraceConfiguration = workspace.getConfiguration("yoda").get("trace.server") as (string | null);
+
+    const isDebug = !!(process.env.YODA_DEBUG?.length)
+    const isTrace = isDebug || (yodaTraceConfiguration == "verbose")
 
     const command = yodaPathEnv || yodaPathConfiguration || 'yoda'
     console.log(`Use yoda at ${command}`)
 
-    const logLevelOption = isDebug ? '--log-level=trace' : '--log-level=info'
+    const logLevelOption = isTrace ? '--log-level=trace' : '--log-level=info'
     const serverOptions : ServerOptions = {
         run: { command, args: ['server', logLevelOption] },
         debug: { command, args: ['server', logLevelOption] },
