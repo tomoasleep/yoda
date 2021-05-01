@@ -60,6 +60,12 @@ module Yoda
           db.member?(address.to_s)
         end
 
+        # @param name [String]
+        # @return [MemoryAdapter]
+        def namespace(name)
+          namespaces[name.to_s] ||= MemoryAdapter.new
+        end
+
         # @return [Array<String>]
         def keys
           db.keys
@@ -74,6 +80,13 @@ module Yoda
         end
 
         def sync
+        end
+
+        private
+
+        # @return [Hash{String => MemoryAdapter}]
+        def namespaces
+          @namespaces ||= {}
         end
       end
     end

@@ -1,11 +1,14 @@
 require 'lmdb'
 require 'json'
 require 'fileutils'
+require 'forwardable'
 
 module Yoda
   module Store
     module Adapters
       class LmdbAdapter < Base
+        require 'yoda/store/adapters/lmdb_adapter/database_accessor'
+
         class << self
           def for(path)
             @pool ||= {}
@@ -17,96 +20,87 @@ module Yoda
           end
         end
 
+        attr_reader :maxdbs
+
+        extend Forwardable
+        delegate [:get, :batch_write, :put, :delete, :exists, :keys] => :main_namespace
+
         # @param path [String] represents the path to store db.
         def initialize(path)
           FileUtils.mkdir_p(path) unless Dir.exist?(path)
           @path = path
-          @env = LMDB.new(path)
-          @db = @env.database('main', create: true)
+          @maxdbs = 4
+          @env = LMDB.new(@path, **environment_options)
 
           at_exit { @env.close }
         end
 
-        # @param address [String]
-        # @return [any]
-        def get(address)
-          JSON.load(@db.get(address.to_s), symbolize_names: true)
-        end
-
-        # @param data [Enumerator<(String, Object)>]
-        # @param bar [#increment, nil]
-        def batch_write(data, bar)
-          env = LMDB.new(@path, mapsize: @env.info[:mapsize], writemap: true, mapasync: true, nosync: true)
-          db = env.database('main', create: true)
-          data.each do |(k, v)|
-            begin
-              db.put(k.to_s, v.to_json)
-            rescue LMDB::Error::MAP_FULL => _ex
-              @env.mapsize = @env.info[:mapsize] * 2
-              env.close
-              env = LMDB.new(@path, mapsize: @env.info[:mapsize], writemap: true, mapasync: true, nosync: true)
-              db = env.database('main', create: true)
-              db.put(k.to_s, v.to_json)
-            end
-            bar&.increment
-          end
-          env.close
-        end
-
-        # @param address [String]
-        # @param object [Object]
-        # @return [void]
-        def put(address, object)
-          do_put(address.to_s, object.to_json)
-        end
-
-        # @param address [String]
-        # @return [void]
-        def delete(address)
-          @db.delete(address.to_s)
-        end
-
-        # @param address [String]
-        # @return [true, false]
-        def exist?(address)
-          !!@db.get(address.to_s)
-        end
-
-        # @return [Array<String>]
-        def keys
-          Enumerator.new do |yielder|
-            @db.each { |(k, v)| yielder << k }
-          end.to_a
+        def reopen(maxdbs: nil, **kwargs)
+          info_options = @env.info.slice(:mapsize, :maxreaders)
+          @env.close
+          databases.clear
+          @maxdbs = maxdbs if maxdbs
+          @env = LMDB.new(@path, **environment_options, **info_options, **kwargs)
         end
 
         def stats
-          @db.stat
+          @env.stat
         end
 
         def clear
-          @db.clear
+          main_namespace.clear
+          # TOOD: Implement
         end
 
         def sync
-          # @env.sync(force: true)
+          # TOOD: Implement
+        end
+
+        # @param namespace [String]
+        # @return [DatabaseAccessor]
+        def namespace(name)
+          DatabaseAccessor.new(self, name)
+        end
+
+        def database_for(name)
+          with_auto_db_resize do
+            databases[name] ||= @env.database(name, create: true)
+          end
+        end
+
+        def with_auto_map_resize
+          yield
+        rescue LMDB::Error::MAP_FULL => _ex
+          # After once failed, transaction always fails, so reopen with the new config instead of updating mapsize.
+          # @env.mapsize = @env.info[:mapsize] * 2
+          reopen(mapsize: @env.info[:mapsize] * 2)
+          yield
+        end
+
+        def transaction(*args, &block)
+          @env.transaction(*args, &block)
         end
 
         private
 
-        # @param address [String]
-        # @param value [String]
-        # @return [void]
-        def do_put(address, value)
-          LMDB.new(@path, mapsize: @env.info[:mapsize]) do |env|
-            db = env.database('main', create: true)
-            db.put(address, value)
-          end
-        rescue LMDB::Error::MAP_FULL => _ex
-          @env.mapsize = @env.info[:mapsize] * 2
-          LMDB.new(@path, mapsize: @env.info[:mapsize]) do |env|
-            db = env.database('main', create: true)
-            db.put(address, value)
-          end
+        def main_namespace
+          namespace("main")
+        end
+
+        def environment_options
+          { writemap: true, mapasync: true, nosync: true, maxdbs: @maxdbs }
+        end
+
+        def with_auto_db_resize
+          yield
+        rescue LMDB::Error::DBS_FULL
+          reopen(maxdbs: maxdbs * 2)
+          yield
+        end
+
+        # @return [Hash{String => LMDB::Database}]
+        def databases
+          @databases ||= {}
         end
       end
     end
