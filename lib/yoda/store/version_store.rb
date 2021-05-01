@@ -47,19 +47,25 @@ module Yoda
       # @param version [String]
       # @return [String]
       def registry_path_for_gem(name:, version:)
-        File.join(registries_path, Registry.registry_name, name, version)
+        library_registry_path
       end
 
       # Return the path to store registry of the core library.
       # @return [String]
       def registry_path_for_core
-        File.join(registries_path, Registry.registry_name, "core")
+        library_registry_path
       end
 
       # Return the path to store registry of the standard library.
       # @return [String]
       def registry_path_for_stdlib
-        File.join(registries_path, Registry.registry_name, "stdlib")
+        library_registry_path
+      end
+
+      # Return the path to store registry of whole library
+      # @return [String]
+      def library_registry_path
+        File.join(registries_path, Registry.registry_name, "library")
       end
     end
   end
