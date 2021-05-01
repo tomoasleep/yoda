@@ -110,6 +110,8 @@ module Yoda
             generator.boolean_type
           when :module, :class
             infer_namespace_node(node)
+          when :sclass
+            infer_singleton_class_node(node)
           else
             type_for_literal_sexp(node.type)
           end
@@ -197,6 +199,18 @@ module Yoda
           derive(context: method_context).traverse(node.body)
 
           generator.symbol_type
+        end
+
+        # @param node [AST::SingletonClassNode]
+        # @return [Types::Base]
+        def infer_singleton_class_node(node)
+          receiver_type = traverse(node.receiver)
+          namespace_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(receiver_type)
+
+          new_context = Contexts::NamespaceBlockContext.new(objects: namespace_objects, parent: context, registry: context.registry, receiver: receiver_type)
+          derive(context: new_context).traverse(node.body)
+
+          generator.nil_type
         end
 
         # @param node [AST::ModuleNode, AST::ClassNode]

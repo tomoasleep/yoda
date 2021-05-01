@@ -256,5 +256,35 @@ RSpec.describe Yoda::Typing::Inferencer do
         end
       end
     end
+
+    context 'singleton class context' do
+      context 'send sqrt to Integer constant' do
+        let(:source) do
+          <<~RUBY
+            class << Integer
+              self
+            end
+          RUBY
+        end
+
+        it 'returns nil type' do
+          expect(subject).to have_attributes(
+            klass: have_attributes(
+              path: 'NilClass',
+            )
+          )
+        end
+
+        it 'binds metaclass type to the type of self' do
+          subject
+          expect(inferencer.tracer.type(node_traverser.query(type: :self).node)).to have_attributes(
+            klass: have_attributes(
+              path: 'Integer',
+              kind: :meta_class,
+            )
+          )
+        end
+      end
+    end
   end
 end

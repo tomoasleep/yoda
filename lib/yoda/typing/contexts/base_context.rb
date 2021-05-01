@@ -48,6 +48,7 @@ module Yoda
           end
         end
 
+        # Candidates of self objects
         # @return [Array<Store::Objects::NamespaceObject>]
         def current_objects
           parent&.current_objects || []
