@@ -2,28 +2,25 @@ module Yoda
   module Store
     class Registry::LibraryRegistry
       class << self
-        # @param library_dependency [Project::Dependnecy::Library]
-        def create_from_patch(library_dependency, patch)
-          if File.exists?(library_dependency.registry_path)
-            for_library(library_dependency, patch)
-          else
-            adapter = Adapters.for(library_dependency.registry_path)
-            compress_and_save(patch: patch, adapter: adapter)
-            new(id: library_dependency.id, adapter: adapter)
-          end
-        end
+        # @param library [Objects::Library]
+        def for_library(library)
+          adapter = Adapters.for(library.registry_path)
+          namespace = adapter.namespace(library.name)
 
-        # @param library_dependency [Project::Dependnecy::Library]
-        def for_library(library_dependency)
-          return unless File.exists?(library_dependency.registry_path)
-          adapter = Adapters.for(library_dependency.registry_path)
-          new(id: library_dependency.id, adapter: adapter)
+          if namespace.empty?
+            patch = library.create_patch
+            patch && compress_and_save(patch: patch, adapter: namespace)
+          end
+
+          new(id: library.id, adapter: namespace)
         end
 
         private
 
         # Store patch set data to the database.
         # old data in the database are discarded.
+        # @param patch [Objects::Patch]
+        # @param adapter [Adapters::Base]
         def compress_and_save(patch:, adapter:)
           el_keys = patch.keys
           progress = Instrument::Progress.new(el_keys.length) { |length:, index:| Instrument.instance.registry_dump(index: index, length: length) }
@@ -33,7 +30,6 @@ module Yoda
           end
 
           adapter.batch_write(data, progress)
-          adapter.sync
           Logger.info "saved #{el_keys.length} keys."
         end
       end
