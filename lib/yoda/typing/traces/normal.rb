@@ -5,7 +5,7 @@ module Yoda
       class Normal < Base
         attr_reader :context, :type
 
-        # @param context [Context]
+        # @param context [Contexts::BaseContext]
         # @param type    [Model::TypeExpressions::Base]
         def initialize(context, type)
           fail ArgumentError, type unless type.is_a?(Model::TypeExpressions::Base)

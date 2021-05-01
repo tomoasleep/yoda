@@ -53,7 +53,7 @@ module Yoda
 
       private
 
-      # @return [Inferencer::BaseContext]
+      # @return [Contexts::BaseContext]
       def context
         tracer.context(node)
       end

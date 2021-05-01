@@ -9,13 +9,13 @@ module Yoda
         # @return [Tracer]
         attr_reader :tracer
 
-        # @return [BaseContext]
+        # @return [ContextsBaseContext]
         attr_reader :context
 
         delegate [:bind_context, :bind_type, :bind_send] => :tracer
 
         # @param tracer [Tracer]
-        # @param context [BaseContext]
+        # @param context [ContextsBaseContext]
         def initialize(tracer:, context:)
           @tracer = tracer
           @context = context
@@ -40,7 +40,7 @@ module Yoda
           @generator ||= Types::Generator.new(context.registry)
         end
 
-        # @param context [Context]
+        # @param context [Contexts::BaseContext]
         # @return [self]
         def derive(context:)
           self.class.new(tracer: tracer, context: context)
@@ -205,7 +205,7 @@ module Yoda
           namespace_type = traverse(node.receiver)
           namespace_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(namespace_type)
 
-          block_context = NamespaceContext.new(objects: namespace_objects, parent: context, registry: context.registry, receiver: namespace_type)
+          block_context = Contexts::NamespaceContext.new(objects: namespace_objects, parent: context, registry: context.registry, receiver: namespace_type)
           derive(context: block_context).traverse(node.body)
 
           namespace_type

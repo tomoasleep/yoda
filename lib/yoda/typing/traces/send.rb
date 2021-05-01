@@ -3,7 +3,7 @@ module Yoda
     module Traces
       # Store evaluation result for each ast node.
       class Send < Base
-        # @return [Context]
+        # @return [Contexts::BaseContext]
         attr_reader :context
 
         # @return [Array<Model::FunctionSignatures::Base>]
@@ -12,7 +12,7 @@ module Yoda
         # @return [Model::TypeExpressions::Base]
         attr_reader :type
 
-        # @param context [Context]
+        # @param context [Contexts::BaseContext]
         # @param functions [Array<Model::FunctionSignatures::Base>]
         # @param type [Array<Model::TypeExpressions::Base>]
         def initialize(context, functions, type)

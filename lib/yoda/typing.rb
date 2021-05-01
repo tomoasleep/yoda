@@ -1,5 +1,6 @@
 module Yoda
   module Typing
+    require 'yoda/typing/contexts'
     require 'yoda/typing/environment'
     require 'yoda/typing/relation'
     require 'yoda/typing/traces'

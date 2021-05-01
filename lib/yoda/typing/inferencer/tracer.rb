@@ -34,20 +34,20 @@ module Yoda
 
         # @param node [AST::Node]
         # @param type [Types::Base]
-        # @param context [BaseContext]
+        # @param context [Contexts::BaseContext]
         def bind_type(node:, type:, context:)
           node_to_type[node.identifier] = type
         end
 
         # @param node [AST::Node]
-        # @param context [BaseContext]
+        # @param context [Contexts::BaseContext]
         def bind_context(node:, context:)
           node_to_context[node.identifier] = context
         end
 
         # @param variable [Symbol]
         # @param type [Types::Base]
-        # @param context [BaseContext]
+        # @param context [Contexts::BaseContext]
         def bind_local_variable(variable:, type:, context:)
           context.environment.bind(variable, type)
         end
@@ -100,7 +100,7 @@ module Yoda
         end
 
         # @param node [AST::Node]
-        # @return [BaseContext, nil]
+        # @return [Contexts::BaseContext, nil]
         def context(node)
           node_to_context[node.identifier]
         end

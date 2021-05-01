@@ -16,7 +16,7 @@ module Yoda
         end
 
         # @abstract
-        # @return [Context]
+        # @return [Contexts::BaseContext]
         def context
           fail NotImplementedError
         end
