@@ -54,13 +54,9 @@ module Yoda
             }
           end
 
-          private
-
-          def global_registry_dir_path
-            registry_path = File.join(doc_dir, '.yoda')
-            if File.writable?(doc_dir)
-              registry_path
-            end
+          # @note Implementation for {WithRegistry#registry_path}
+          def registry_path
+            VersionStore.for_current_version.registry_path_for_gem(name: name, version: version)
           end
         end
       end

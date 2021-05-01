@@ -2,8 +2,6 @@ module Yoda
   module Store
     class Project
       class Dependency
-        LOCAL_REGISTRY_ROOT = File.expand_path('~/.yoda/registry')
-
         attr_reader :project
 
         # @param project [Project]

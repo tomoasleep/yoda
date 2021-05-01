@@ -36,11 +36,16 @@ module Yoda
           end
 
           def doc_path
-            File.expand_path("~/.yoda/sources/ruby-#{RUBY_VERSION}/.yardoc-stdlib")
+            VersionStore.for_current_version.stdlib_yardoc_path
           end
 
           def create_patch
             Actions::ImportStdLibrary.run(self)
+          end
+
+          # @note Implementation for {WithRegistry#registry_path}
+          def registry_path
+            VersionStore.for_current_version.registry_path_for_stdlib
           end
         end
       end

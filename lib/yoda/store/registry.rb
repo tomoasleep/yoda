@@ -18,11 +18,13 @@ module Yoda
         end
 
         def registry_name
-          digest = Digest::SHA256.new
-          digest.update(RUBY_VERSION)
-          digest.update(REGISTRY_VERSION.to_s)
-          digest.update(Adapters.default_adapter_class.type.to_s)
-          digest.hexdigest
+          @registry_name ||= begin
+            digest = Digest::SHA256.new
+            digest.update(RUBY_VERSION)
+            digest.update(REGISTRY_VERSION.to_s)
+            digest.update(Adapters.default_adapter_class.type.to_s)
+            digest.hexdigest
+          end
         end
 
         # @param project [Project]

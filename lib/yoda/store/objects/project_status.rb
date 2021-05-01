@@ -17,9 +17,10 @@ module Yoda
           @libraries = libraries
         end
 
-        def registries
-          libraries.map(&:registry).compact
-        end
+          # @return [Array<Registry::LibraryRegistry>]
+          def registries
+            libraries.map(&:registry).compact
+          end
 
         def to_h
           { libraries: libraries }
