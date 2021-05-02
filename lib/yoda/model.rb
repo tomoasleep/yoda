@@ -9,5 +9,6 @@ module Yoda
     require 'yoda/model/values'
     require 'yoda/model/completion_item'
     require 'yoda/model/parameters'
+    require 'yoda/model/yard_type_parser'
   end
 end

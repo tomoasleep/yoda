@@ -39,7 +39,7 @@ module Yoda
         # @param type_tag [Store::Objects::Tag]
         # @return [TypeExpressions::FunctionType]
         def parse_type_tag(tag)
-          parsed_type = Parsing::TypeParser.new.safe_parse(tag.text).change_root(convert_lexical_scope_literals(tag.lexical_scope))
+          parsed_type = TypeParser.new(tag).type_of_type_tag
           parsed_type.is_a?(TypeExpressions::FunctionType) ? parsed_type : TypeExpressions::FunctionType.new(return_type: parsed_type)
         end
 
@@ -74,26 +74,50 @@ module Yoda
 
         # @return [Array<TypeExpressions::Base>]
         def return_types
-          @return_types ||= parse_yard_type_tags(return_tags)
-        end
-
-        # @param tags [Array<Store::Objects::Tag>]
-        # @return [Array<TypeExpressions::Base>]
-        def parse_yard_type_tags(tags)
-          tags.map do |tag|
-            tag.yard_types.empty? ? TypeExpressions::UnknownType.new('nodoc') : TypeExpressions.parse_type_strings(tag.yard_types).change_root(convert_lexical_scope_literals(tag.lexical_scope))
+          @return_types ||= return_tags.map do |tag|
+            TypeParser.new(tag).type
           end
         end
 
         # @return [{ String => TypeExpressions::Base }]
         def param_type_table
-          @param_type_table ||= param_tags.map(&:name).zip(parse_yard_type_tags(param_tags)).group_by(&:first).map { |k, v| [k, TypeExpressions::UnionType.new(v.map(&:last))] }.to_h
+          @param_type_table ||= begin
+            param_types = param_tags.map { |tag| TypeParser.new(tag).type }
+
+            name_to_types = param_tags.map(&:name).zip(param_types).group_by(&:first)
+            name_to_types.map { |k, v| [k, TypeExpressions::UnionType.new(v.map(&:last))] }.to_h
+          end
         end
 
-        # @param lexical_scope_literals [Array<String>]
-        # @param [Array<Path>]
-        def convert_lexical_scope_literals(lexical_scope_literals)
-          lexical_scope_literals.map { |literal| Path.new(literal) } + [Path.new('Object')]
+        class TypeParser
+          attr_reader :tag
+
+          # @param tag [Store::Objects::Tag]
+          def initialize(tag)
+            @tag = tag
+          end
+
+          # @return [TypeExpressions::Base]
+          def type
+            if tag.yard_types.empty?
+              TypeExpressions::UnknownType.new('nodoc') 
+            else
+              TypeExpressions.parse_type_strings(tag.yard_types).change_root(convert_lexical_scope_literals(tag.lexical_scope))
+            end
+          end
+
+          # @return [TypeExpressions::Base]
+          def type_of_type_tag
+            Parsing::TypeParser.new.safe_parse(tag.text).change_root(convert_lexical_scope_literals(tag.lexical_scope))
+          end
+
+          private
+
+          # @param lexical_scope_literals [Array<String>]
+          # @param [Array<Path>]
+          def convert_lexical_scope_literals(lexical_scope_literals)
+            lexical_scope_literals.map { |literal| Path.new(literal) } + [Path.new('Object')]
+          end
         end
       end
     end
