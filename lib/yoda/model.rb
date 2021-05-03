@@ -1,7 +1,9 @@
 module Yoda
   module Model
     require 'yoda/model/function_signatures'
+    require 'yoda/model/environment'
     require 'yoda/model/descriptions'
+    require 'yoda/model/lexical_context'
     require 'yoda/model/node_signatures'
     require 'yoda/model/path'
     require 'yoda/model/scoped_path'
