@@ -27,6 +27,11 @@ module Yoda
         def to_s
           'self'
         end
+
+        # @param env [Environment]
+        def to_rbs_type(env)
+          RBS::Types::Bases::Self.new(location: nil)
+        end
       end
     end
   end

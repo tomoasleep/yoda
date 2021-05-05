@@ -84,7 +84,7 @@ module Yoda
           ].hash
         end
 
-        # @param namespace [YARD::CodeObjects::Base]
+        # @param namespace [LexicalContext]
         # @return [UnionType]
         def change_root(namespace)
           self.class.new(
@@ -115,6 +115,21 @@ module Yoda
         def to_s
           params_str = all_parameters_to_s
           (params_str.empty? ? '' : "(#{params_str}) -> ") + "#{return_type}"
+        end
+
+        # @param env [Environment]
+        # @return [RBS::Types::Function]
+        def to_rbs_type(env)
+          RBS::Types::Function.new(
+            required_positonals: required_parameters.map { |type| RBS::Types::Param.new(type: type.to_rbs_type(env), name: nil) },
+            optional_positonals: optional_parameters.map { |type| RBS::Types::Param.new(type: type.to_rbs_type(env), name: nil) },
+            rest_positonals: rest_parameter ? RBS::Types::Param.new(type: rest_parameter.to_rbs_type(env)) : nil,
+            trailing_positonals: post_parameters.map { |type| RBS::Types::Param.new(type: type.to_rbs_type(env), name: nil) },
+            required_keywords: required_keyword_parameters.map { |(name, type)| RBS::Types::Param.new(type: type.to_rbs_type(env), name: name.to_sym) },
+            optional_keywords: optional_keyword_parameters.map { |(name, type)| RBS::Types::Param.new(type: type.to_rbs_type(env), name: name.to_sym) },
+            rest_keywords: keyword_rest_parameter ? RBS::Types::Param.new(type: keyword_rest_parameter.to_rbs_type(env)) : nil,
+            return_type: return_type.to_rbs_type(env),
+          )
         end
 
         # @return [self]

@@ -56,6 +56,11 @@ module Yoda
           "#{base_type}<#{type_arguments.map(&:to_s).join(', ')}>"
         end
 
+        # @param env [Environment]
+        def to_rbs_type(env)
+          RBS::Types::ClassInstance.new(name: lexical_scope.build_type_name(path), args: type_arguments.map { |t| t.to_rbs_type(env) }, location: nil)
+        end
+
         # @return [self]
         def map(&block)
           self.class.new(base_type.map(&block), type_arguments.map(&block))

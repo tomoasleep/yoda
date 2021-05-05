@@ -22,7 +22,8 @@ module Yoda
           []
         end
 
-        def to_rbs
+        # @param env [Environment]
+        def to_rbs_type(env)
           RBS::Types::Bases::Void.new(location: nil)
         end
 

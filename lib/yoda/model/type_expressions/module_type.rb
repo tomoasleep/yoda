@@ -32,6 +32,11 @@ module Yoda
           [Store::Query::FindMetaClass.new(registry).find(path)].compact
         end
 
+        # @param env [Environment]
+        def to_rbs_type(env)
+          RBS::Types::Interface.new(name: env.resolve_rbs_type_name(path), args: [], location: nil)
+        end
+
         # @return [String]
         def to_s
           "#{path.path.to_s}.module"

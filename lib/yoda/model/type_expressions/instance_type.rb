@@ -1,3 +1,5 @@
+require 'rbs'
+
 module Yoda
   module Model
     module TypeExpressions
@@ -20,7 +22,7 @@ module Yoda
           [self.class.name, path].hash
         end
 
-        # @param paths [Array<Path>]
+        # @param paths [LexicalContext]
         # @return [self]
         def change_root(paths)
           self.class.new(path.change_scope(paths))
@@ -35,6 +37,11 @@ module Yoda
         # @return [String]
         def to_s
           path.path.to_s
+        end
+
+        # @param env [Environment]
+        def to_rbs_type(env)
+          RBS::Types::ClassInstance.new(name: env.resolve_rbs_type_name(path), args: [], location: nil)
         end
       end
     end

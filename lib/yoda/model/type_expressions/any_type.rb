@@ -10,7 +10,7 @@ module Yoda
           [self.class.name].hash
         end
 
-        # @param paths [Array<Paths>]
+        # @param paths [LexicalContext]
         # @return [self]
         def change_root(paths)
           self
@@ -20,6 +20,10 @@ module Yoda
         # @return [Array<Store::Objects::Base>]
         def resolve(registry)
           []
+        end
+
+        def to_rbs_type(_env)
+          RBS::Types::Bases::Any.new(location: nil)
         end
 
         # @return [String]

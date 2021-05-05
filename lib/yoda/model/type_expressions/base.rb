@@ -8,9 +8,9 @@ module Yoda
         end
 
         # @abstract
-        # @param paths [Array<Path>]
+        # @param new_lexical_context [LexicalContext]
         # @return [Base]
-        def change_root(paths)
+        def change_root(new_lexical_context)
           fail NotImplementedError
         end
 
@@ -24,6 +24,13 @@ module Yoda
         # @abstract
         # @return [String]
         def to_s
+          fail NotImplementedError
+        end
+
+        # @abstract
+        # @param env [Environment]
+        # @return [RBS::Types::Bases::Base, RBS::Types::Variable, RBS::Types::ClassSingleton, RBS::Types::Interface, RBS::Types::ClassInstance, RBS::Types::Alias, RBS::Types::Tuple, RBS::Types::Record, RBS::Types::Optional, RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Function, RBS::Types::Block, RBS::Types::Proc, RBS::Types::Literal]
+        def to_rbs_type(env)
           fail NotImplementedError
         end
 

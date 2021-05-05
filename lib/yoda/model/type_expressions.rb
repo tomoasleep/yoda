@@ -3,6 +3,9 @@ require 'yoda/model/yard_type_parser'
 
 module Yoda
   module Model
+    # Each type expression represents type annotations.
+    # Unlike type for symbolic execution, each type expression has {LexicalScope}
+    # and the corresponding constants are not determined yet.
     module TypeExpressions
       require 'yoda/model/type_expressions/base'
       require 'yoda/model/type_expressions/any_type'

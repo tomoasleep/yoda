@@ -43,6 +43,11 @@ module Yoda
           "#{base_type}(#{types.map(&:to_s).join(', ')})"
         end
 
+        # @param env [Environment]
+        def to_rbs_type(env)
+          RBS::Types::Tuple.new(types: types.map { |t| t.to_rbs_type(env) }, location: nil)
+        end
+
         # @return [self]
         def map(&block)
           self.class.new(base_type.map(&block), types.map(&block))

@@ -48,6 +48,22 @@ module Yoda
           end
         end
 
+        # @param env [Environment]
+        def to_rbs_type(env)
+          case value_class
+          when '::TrueClass'
+            RBS::Types::Literal.new(literal: true, location: nil)
+          when '::FalseClass'
+            RBS::Types::Literal.new(literal: false, location: nil)
+          when '::NilClass'
+            RBS::Types::Bases::Nil.new(location: nil)
+          when '::Numeric'
+            RBS::Types::Literal.new(literal: value.to_i, location: nil)
+          else
+            RBS::Types::Literal.new(literal: value, location: nil)
+          end
+        end
+
         # @return [String]
         def to_s
           value

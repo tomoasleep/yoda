@@ -19,7 +19,7 @@ module Yoda
           [self.class.name, method_name].hash
         end
 
-        # @param paths [Array<Paths>]
+        # @param paths [LexicalContext]
         # @return [self]
         def change_root(paths)
           self
@@ -29,6 +29,12 @@ module Yoda
         # @return [Array<Store::Objects::Base>]
         def resolve(registry)
           []
+        end
+
+        # @param env [Environment]
+        def to_rbs_type(env)
+          # TODO: Implement as interface type
+          RBS::Types::Bases::Any.new(location: nil)
         end
 
         # @return [String]

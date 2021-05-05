@@ -34,6 +34,11 @@ module Yoda
         def to_s
           'any'
         end
+
+        # @param env [Environment]
+        def to_rbs_type(env)
+          RBS::Types::Bases::Any.new(location: nil)
+        end
       end
     end
   end
