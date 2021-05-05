@@ -2,6 +2,10 @@ module Yoda
   module Store
     module Objects
       class ValueObject < Base
+        class Connected < Base::Connected
+          delegate_to_object :value
+        end
+
         # @return [String]
         attr_reader :value
 

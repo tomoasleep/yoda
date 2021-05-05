@@ -2,6 +2,15 @@ module Yoda
   module Store
     module Objects
       class ClassObject < NamespaceObject
+        class Connected < NamespaceObject::Connected
+          delegate_to_object :superclass_path
+
+          # @return [NamespaceObject::Connected]
+          def superclass
+            ancestor_tree.superclass.with_connection(**connection_options)
+          end
+        end
+
         # @return [Path, nil]
         attr_reader :superclass_path
 

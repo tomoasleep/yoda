@@ -8,6 +8,7 @@ module Yoda
       require 'yoda/store/objects/addressable'
       require 'yoda/store/objects/patchable'
       require 'yoda/store/objects/base'
+      require 'yoda/store/objects/connected_delegation'
       require 'yoda/store/objects/namespace_object'
       require 'yoda/store/objects/class_object'
       require 'yoda/store/objects/value_object'

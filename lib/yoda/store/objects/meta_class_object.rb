@@ -3,6 +3,15 @@ module Yoda
     module Objects
       # @todo Rename to SingletonClassObject
       class MetaClassObject < NamespaceObject
+        class Connected < NamespaceObject::Connected
+          delegate_to_object :base_class_address
+
+          # @return [NamespaceObject::Connected]
+          def superclass
+            ancestor_tree.superclass.with_connection(**connection_options)
+          end
+        end
+
         # @param path [String]
         # @return [String]
         def self.address_of(path)

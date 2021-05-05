@@ -2,6 +2,10 @@ module Yoda
   module Store
     module Objects
       class MethodObject < Base
+        class Connected < Base::Connected
+          delegate_to_object :parameters, :visibility, :overloads, :sep, :namespace_path, :parent_address, :namespace_path
+        end
+
         # @return [Array<(String, String)>]
         attr_reader :parameters
 

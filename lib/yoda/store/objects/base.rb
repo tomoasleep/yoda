@@ -1,3 +1,5 @@
+require 'yoda/store/objects/connected_delegation'
+
 module Yoda
   module Store
     module Objects
@@ -11,6 +13,51 @@ module Yoda
           # @return [Array<Symbol>]
           def attr_names
             %i(path document tag_list sources primary_source)
+          end
+        end
+
+        # A wrapper class of {Objects::Base} to allow access to registry>
+        class Connected
+          extend ConnectedDelegation
+
+          # @return [Base]
+          attr_reader :object
+          
+          # @return [Registry]
+          attr_reader :registry
+
+          delegate_to_object :address, :path, :document, :tag_list, :sources, :primary_source, :json_class, :to_json, :derive
+          delegate_to_object :name, :kind, :address, :parent_adderss, :to_h, :hash, :eql?, :==, :namespace?, :meta_class_address
+          
+          # @param object [Base]
+          # @param registry [Registry]
+          def initialize(object, registry:)
+            @object = object
+            @registry = registry
+          end
+
+          def with_connection(**kwargs)
+            if kwargs == connection_options
+              self
+            else
+              object.with_connection(**kwargs)
+            end
+          end
+
+          def merge(another)
+            object.merge(another).with_connection(**connection_options)
+          end
+          
+          # @return [Objects::MetaClassObject::Connected]
+          def meta_class
+            registry.get(meta_class_address).with_connection(**connection_options)
+          end
+
+          private
+
+          # @return [Hash]
+          def connection_options
+            { registry: registry }
           end
         end
 
@@ -58,6 +105,11 @@ module Yoda
         end
 
         # @return [String]
+        def meta_class_address
+          MetaClassObject.address_of(address)
+        end
+
+        # @return [String]
         def parent_address
           @parent_address ||= begin
             sliced_address = address.slice(0, (path.rindex('::') || 0))
@@ -88,7 +140,7 @@ module Yoda
         end
 
         def eql?(another)
-          self.class == another.class && to_h == another.to_h
+          another.respond_to?(:kind) && self.kind == another.kind && to_h == another.to_h
         end
 
         def ==(another)
@@ -97,6 +149,11 @@ module Yoda
 
         def namespace?
           false
+        end
+
+        # @return [Connected]
+        def with_connection(**kwargs)
+          self.class.const_get(:Connected).new(self, **kwargs)
         end
 
         private

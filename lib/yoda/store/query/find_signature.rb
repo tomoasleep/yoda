@@ -5,7 +5,7 @@ module Yoda
         # @param namespace [Objects::NamespaceObject]
         # @param method_name [String, Regexp]
         # @param visibility [Array<Symbol>, nil]
-        # @return [Array<Objects::MethodObject>]
+        # @return [Array<Model::FunctionSignatures::Base>]
         def select(namespace, method_name, visibility: nil)
           FindMethod.new(registry).select(namespace, method_name, visibility: visibility).flat_map { |el| build(namespace, el) }
         end

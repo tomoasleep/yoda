@@ -3,6 +3,36 @@ module Yoda
     module Objects
       # @abstract
       class NamespaceObject < Base
+        class Connected < Base::Connected
+          delegate_to_object :instance_method_addresses, :mixin_addresses, :constant_addresses, :ancestors, :methods
+
+          # @return [Enumerator<NamespaceObject::Connected>]
+          def ancestors
+            ancestor_tree.ancestors.map { |object| object.with_connection(**connection_options) }
+          end
+
+          # @return [Enumerator<NamespaceObject::Connected>]
+          def mixins
+            ancestor_tree.mixins.map { |object| object.with_connection(**connection_options) }
+          end
+
+          # @return [Query::MethodMemberSet]
+          def method_members
+            @method_members ||= Query::MethodMemberSet.new(registry: registry, object: object)
+          end
+
+          # @return [Query::ConstantMemberSet]
+          def constant_members
+            @constant_members ||= Query::ConstantMemberSet.new(registry: registry, object: object)
+          end
+
+          private
+
+          def ancestor_tree
+            @ancestor_tree ||= Query::AncestorTree.new(registry: registry, object: object)
+          end
+        end
+
         # @return [Array<String>]
         attr_reader :instance_method_addresses
 
@@ -37,11 +67,13 @@ module Yoda
           @ancestors ||= []
         end
 
+        # @note Override of {Base#name}
         # @return [String]
         def name
           @name ||= path.match(MODULE_TAIL_PATTERN) { |md| md[1] || md[2] }
         end
 
+        # @note Override of {Base#to_h}
         def to_h
           super.merge(
             instance_method_addresses: instance_method_addresses,
@@ -50,6 +82,7 @@ module Yoda
           )
         end
 
+        # @note Override of {Base#namespace?}
         def namespace?
           true
         end

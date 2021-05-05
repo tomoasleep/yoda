@@ -24,13 +24,13 @@ module Yoda
         # @return [Base.class]
         def class_to_generate
           @class_to_generate ||= begin
-            if instances.any? { |el| el.is_a?(MetaClassObject) }
+            if instances.any? { |el| el.kind == :meta_class }
               MetaClassObject
-            elsif instances.any? { |el| el.is_a?(ClassObject) }
+            elsif instances.any? { |el| el.kind == :class }
               ClassObject
-            elsif instances.any? { |el| el.is_a?(ModuleObject) }
+            elsif instances.any? { |el| el.kind == :module }
               ModuleObject
-            elsif instances.any? { |el| el.is_a?(MethodObject) }
+            elsif instances.any? { |el| el.kind == :method }
               MethodObject
             else
               ValueObject

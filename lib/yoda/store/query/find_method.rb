@@ -2,7 +2,7 @@ module Yoda
   module Store
     module Query
       class FindMethod < Base
-        # @param namespace [Objects::Namespace]
+        # @param namespace [Objects::NamespaceObject]
         # @param method_name [String, Regexp]
         # @param visibility [Array<Symbol>, nil]
         # @return [Objects::MethodObject, nil]
