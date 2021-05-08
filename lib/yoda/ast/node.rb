@@ -36,6 +36,11 @@ module Yoda
         node.location
       end
 
+      # @return [Symbol]
+      def kind
+        node.type
+      end
+
       private
 
       def source_map_expression
