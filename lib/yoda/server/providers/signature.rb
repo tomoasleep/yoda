@@ -34,7 +34,7 @@ module Yoda
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
           cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
 
-          signature_worker = Services::SignatureDiscovery.from_source(registry: workspace.project.registry, source: cut_source, location: location)
+          signature_worker = Services::SignatureDiscovery.from_source(environment: workspace.project.environment, source: cut_source, location: location)
 
           functions = signature_worker.method_candidates
           argument_number = signature_worker.argument_number

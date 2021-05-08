@@ -106,7 +106,7 @@ module Yoda
 
             if decl
               length = decl.type_params.params.length
-              types = length.times.map { |i| type_args[i] || RBS::Types::Any.new(location: nil) }
+              types = length.times.map { |i| type_args[i] || RBS::Types::Bases::Any.new(location: nil) }
               RBS::Substitution.build(
                 decl.type_params.params.map(&:name),
                 types,

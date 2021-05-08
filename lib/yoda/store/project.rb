@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'forwardable'
+require 'rbs'
 
 module Yoda
   module Store
@@ -32,6 +33,19 @@ module Yoda
       # @return [Dependency]
       def dependency
         @dependency ||= Dependency.new(self)
+      end
+
+      # @return [RBS::Environment]
+      def rbs_environment
+        @rbs_environment ||= begin
+          loader = RBS::EnvironmentLoader.new
+          RBS::Environment.from_loader(loader).resolve_type_names
+        end
+      end
+
+      # @return [Model::Environment]
+      def environment
+        @environment ||= Model::Environment.from_project(self)
       end
 
       def setup

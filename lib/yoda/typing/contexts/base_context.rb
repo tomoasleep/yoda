@@ -1,67 +1,76 @@
+require 'forwardable'
+require 'yoda/typing/contexts/context_derivation'
+
 module Yoda
   module Typing
     module Contexts
       # @abstract
       class BaseContext
-        # @return [Store::Registry]
-        attr_reader :registry
+        extend Forwardable
+        include ContextDerivation
 
-        # @return [Types::Base]
+        # @return [Model::Environment]
+        attr_reader :environment
+
+        # @return [Types::Type]
         attr_reader :receiver
 
-        # @return [Store::Values::Base]
-        attr_reader :namespace
-
-        # @return [Environment]
-        attr_reader :environment
+        # @return [Types::Type]
+        attr_reader :constant_ref
 
         # @return [BaseContext, nil]
         attr_reader :parent
 
-        # @param registry      [Store::Registry]
-        # @param receiver      [Types::Base] represents who is self of the code.
-        # @param parent        [BaseContext, nil]
-        # @param binds         [Hash{Symbol => Types::Base}, nil]
-        # @param lexical_scope [Hash{Symbol => Types::Base}, nil]
-        def initialize(registry:, receiver:, parent: nil, binds: nil)
-          fail TypeError, receiver unless receiver.is_a?(Types::Base)
+        # @return [Inferencer::TypeBinding]
+        attr_reader :type_binding
 
-          @registry = registry
+        delegate [:resolve_value_by_rbs_type]
+
+        # @param environment   [Model::Environment]
+        # @param receiver      [Types::Type] represents who is self of the code.
+        # @param constant_ref  [Types::Type] represents who is self of the code.
+        # @param parent        [BaseContext, nil]
+        # @param binds         [Hash{Symbol => RBS::Types::t}, nil]
+        def initialize(environment:, receiver:, constant_ref:, parent: nil, binds: nil)
+          @environment = environment
           @receiver = receiver
+          @constant_ref = constant_ref
           @parent = parent
-          @environment = Inferencer::Environment.new(parent: parent_for_environment&.environment, binds: binds)
+          @type_binding = Inferencer::TypeBinding.new(parent: parent_variable_scope_context&.type_binding, binds: binds)
+        end
+
+        # @deprecated Use methods of {BaseContext} instead.
+        def registry
+          environment.registry
+        end
+
+        def method_receiver
+          constant_ref.instance_type
         end
 
         # @abstract
         # @return [Context, nil]
-        def parent_for_environment
+        def parent_variable_scope_context
           fail NotImplementedError
         end
 
-        def instance_type
-          if respond_to?(:path)
-
-          elsif parent
-            parent.instance_type
-          else
-            fail NotImplementedError
+        # @return [Array<Types::Type>]
+        def lexical_scope_types
+          @lexical_scope_types ||= begin
+            parent_types = parent&.lexical_scope_types || []
+            if parent.nil?
+              [constant_ref]
+            elsif parent && constant_ref != parent.constant_ref
+              parent_types + [constant_ref]
+            else
+              parent_types
+            end
           end
         end
 
-        # Candidates of self objects
-        # @return [Array<Store::Objects::NamespaceObject>]
-        def current_objects
-          parent&.current_objects || []
-        end
-
-        # @return [BaseContext]
-        def current_namespace_context
-          parent&.current_namespace_context
-        end
-
-        # @return [Array<Store::Objects::NamespaceObject>]
-        def lexical_scope_objects
-          (current_namespace_context.parent&.lexical_scope_objects || []) + current_objects
+        # @return [Types::Generator]
+        def generator
+          Types::Generator.new(environment: environment)
         end
       end
     end

@@ -59,7 +59,7 @@ module Yoda
         private
 
         def current_node
-          @current_nnode ||= source_analyzer.nodes_to_current_location_from_root.last
+          @current_node ||= source_analyzer.nodes_to_current_location_from_root.last
         end
       end
     end

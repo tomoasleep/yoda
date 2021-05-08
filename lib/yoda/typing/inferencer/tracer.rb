@@ -2,8 +2,14 @@ module Yoda
   module Typing
     class Inferencer
       class Tracer
-        # @return [Store::Registry]
-        attr_reader :registry
+        # @return [Model::Environment]
+        attr_reader :environment
+
+        # @return [Types::Generator]
+        attr_reader :generator
+
+        # @return [Hash{ AST::Node => Symbol }]
+        attr_reader :node_to_kind
 
         # @return [Hash{ AST::Node => Types::Base }]
         attr_reader :node_to_type
@@ -11,25 +17,45 @@ module Yoda
         # @return [Hash{ AST::Node => Context }]
         attr_reader :node_to_context
 
-        # @return [Hash{ AST::Node => Array<Store::Objects::NamespaceObject> }]
-        attr_reader :node_to_receiver_candidates
+        # @return [Hash{ AST::Node => Types::Type }]
+        attr_reader :node_to_receiver_type
 
         # @return [Hash{ AST::Node => Array<FunctionSignatures::Base> }]
         attr_reader :node_to_method_candidates
 
-        # @param registry [Store::Registry]
-        def initialize(registry:)
-          @registry = registry
+        class MaskedMap
+          def initialize
+            @content = {}
+          end
 
-          @node_to_type = {}
-          @node_to_context = {}
-          @node_to_method_candidates = {}
-          @node_to_receiver_candidates = {}
+          def [](key)
+            @content[key]
+          end
+
+          def []=(key, value)
+            @content[key] = value
+          end
+
+          def to_s
+            inspect
+          end
+
+          def inspect
+            "(#{@content.length} items)"
+          end
         end
 
-        # @return [Types::Generator]
-        def generator
-          @generator ||= Types::Generator.new(registry)
+        # @param environment [Model::Environment]
+        # @param generator [Types::Generator]
+        def initialize(environment:, generator:)
+          @environment = environment
+          @generator = generator
+
+          @node_to_kind = MaskedMap.new
+          @node_to_type = MaskedMap.new
+          @node_to_context = MaskedMap.new
+          @node_to_method_candidates = MaskedMap.new
+          @node_to_receiver_type = MaskedMap.new
         end
 
         # @param node [AST::Node]
@@ -49,24 +75,30 @@ module Yoda
         # @param type [Types::Base]
         # @param context [Contexts::BaseContext]
         def bind_local_variable(variable:, type:, context:)
-          context.environment.bind(variable, type)
+          # nop
         end
 
         # @param node [AST::Node]
         # @param receiver_candidates [Array<Store::Objects::NamespaceObject>]
         # @param method_candidates [Array<Model::FunctionSignatures::Base>]
-        def bind_send(node:, receiver_candidates:, method_candidates:)
-          fail TypeError, receiver_candidates unless receiver_candidates.all? { |candidate| candidate.is_a?(Store::Objects::NamespaceObject) }
-          fail TypeError, method_candidates unless method_candidates.all? { |candidate| candidate.is_a?(Model::FunctionSignatures::Base) }
+        def bind_send(node:, receiver_type:, method_candidates:)
+          fail TypeError, method_candidates unless method_candidates.all? { |candidate| candidate.is_a?(Model::FunctionSignatures::Wrapper) }
 
-          node_to_receiver_candidates[node.identifier] = receiver_candidates
+          node_to_kind[node.identifier] = :send
+          node_to_receiver_type[node.identifier] = receiver_type
           node_to_method_candidates[node.identifier] = method_candidates
         end
 
         # @param node [AST::Node]
-        # @return [Types::Base]
+        # @return [Symbol, nil]
+        def kind(node)
+          node_to_kind[node.identifier]
+        end
+
+        # @param node [AST::Node]
+        # @return [Types::Type]
         def type(node)
-          node_to_type[node.identifier] || Types::Any.new
+          node_to_type[node.identifier] || generator.unknown_type(reason: "not traced")
         end
 
         # @param node [AST::Node]
@@ -76,25 +108,19 @@ module Yoda
         end
 
         # @param node [AST::Node]
-        # @return [Model::TypeExpressions::Base]
-        def type_expression(node)
-          type(node).to_expression
-        end
-
-        # @param node [AST::Node]
         # @return [Array<Store::Objects::Base>]
         def objects(node)
-          ObjectResolver.new(registry: registry, generator: generator).call(type(node))
+          type(node).value.referred_objects
         end
 
         # @param node [AST::Node]
-        # @return [Array<Store::Objects::NamespaceObject>]
-        def receiver_candidates(node)
-          node_to_receiver_candidates[node.identifier] || []
+        # @return [Types::Type]
+        def receiver_type(node)
+          node_to_receiver_type[node.identifier] || generator.unknown_type(reason: "not traced")
         end
 
         # @param node [AST::Node]
-        # @return [Array<FunctionSignatures::Base>]
+        # @return [Array<FunctionSignatures::Wrapper>]
         def method_candidates(node)
           node_to_method_candidates[node.identifier] || []
         end
@@ -108,13 +134,13 @@ module Yoda
         # @param node [AST::Node]
         # @return [Hash{ Symbol => Types::Base }]
         def context_variable_types(node)
-          context(node)&.environment&.all_variables&.transform_values(&:to_expression)
+          context(node)&.type_binding&.all_variables || {}
         end
 
         # @param node [AST::Node]
         # @return [Hash{ Symbol => Store::Objects::Base }]
         def context_variable_objects(node)
-          context(node)&.environment&.all_variables&.transform_values { |value| ObjectResolver.new(registry: registry, generator: generator).call(value) }
+          context(node)&.type_binding&.all_variables&.transform_values { |type| type.value.referred_objects } || {}
         end
       end
     end

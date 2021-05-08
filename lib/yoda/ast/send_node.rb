@@ -91,7 +91,7 @@ module Yoda
       end
 
       # @param location [Parsing::Location]
-      # @return Integer
+      # @return [Integer]
       def offset_in_selector(location)
         location.offset_from_begin(source_map.selector)[:column]
       end

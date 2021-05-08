@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Services::Evaluator do
-  let(:evaluator) { described_class.new(registry: registry, ast: ast) }
+  let(:evaluator) { described_class.new(environment: project.environment, ast: ast) }
   let(:source) { File.read(File.expand_path(path, fixture_root)) }
   let(:source_string) { nil }
   let(:ast) { Yoda::Parsing::Parser.new.parse(source_string || source) }
@@ -9,15 +9,14 @@ RSpec.describe Yoda::Services::Evaluator do
 
   let(:fixture_root) { File.expand_path('../../support/fixtures', __dir__) }
   let(:project) { Yoda::Store::Project.new(name: 'fixture', root_path: fixture_root) }
-  let(:registry) { project.registry }
 
   before do
     project.build_cache
     ReadSourceHelper.read_source(project: project, source: source_string) if source_string
   end
 
-  describe '#type_expression' do
-    subject { evaluator.type_expression(current_node) }
+  describe '#type' do
+    subject { evaluator.type(current_node) }
 
     context 'when in a instance method definition' do
       context 'request information on constant node in sample function' do
@@ -25,7 +24,7 @@ RSpec.describe Yoda::Services::Evaluator do
         let(:location) { Yoda::Parsing::Location.new(row: 23, column: 10) }
 
         it 'returns evaluation result of constant node' do
-          expect(subject).to eq(Yoda::Model::TypeExpressions::ModuleType.new('YodaFixture::Sample2'))
+          expect(subject.to_s).to eq('singleton(::YodaFixture::Sample2)')
         end
       end
     end
@@ -36,7 +35,7 @@ RSpec.describe Yoda::Services::Evaluator do
         let(:location) { Yoda::Parsing::Location.new(row: 9, column: 10) }
 
         it 'contains constant type' do
-          expect(subject).to eq(Yoda::Model::TypeExpressions::ModuleType.new('YodaFixture'))
+          expect(subject.to_s).to eq('singleton(::YodaFixture)')
         end
       end
     end
@@ -48,7 +47,7 @@ RSpec.describe Yoda::Services::Evaluator do
         let(:location) { Yoda::Parsing::Location.new(row: 4, column: 20) }
 
         it 'contains symbol type' do
-          expect(subject).to eq(Yoda::Model::TypeExpressions::InstanceType.new('Symbol'))
+          expect(subject.to_s).to eq(':content')
         end
       end
 
@@ -57,7 +56,7 @@ RSpec.describe Yoda::Services::Evaluator do
           let(:location) { Yoda::Parsing::Location.new(row: 31, column: 9) }
 
           it 'contains type of self' do
-            expect(subject).to eq(Yoda::Model::TypeExpressions::ModuleType.new('YodaFixture::EvaluatorSpecFixture'))
+            expect(subject.to_s).to eq('singleton(::YodaFixture::EvaluatorSpecFixture)')
           end
         end
 
@@ -65,9 +64,7 @@ RSpec.describe Yoda::Services::Evaluator do
           let(:location) { Yoda::Parsing::Location.new(row: 31, column: 20) }
 
           it 'contains type of the variable' do
-            expect(subject).to eq(
-              Yoda::Model::TypeExpressions::InstanceType.new('String')
-            )
+            expect(subject.to_s).to eq("::String")
           end
         end
       end
@@ -79,9 +76,7 @@ RSpec.describe Yoda::Services::Evaluator do
         let(:location) { Yoda::Parsing::Location.new(row: 27, column: 10) }
 
         it 'returns evaluation result of send node' do
-          expect(subject).to eq(
-            Yoda::Model::TypeExpressions::InstanceType.new('YodaFixture::Sample2')
-          )
+          expect(subject.to_s).to eq('::YodaFixture::Sample2')
         end
       end
 
@@ -90,9 +85,7 @@ RSpec.describe Yoda::Services::Evaluator do
         let(:location) { Yoda::Parsing::Location.new(row: 43, column: 56) }
 
         it 'returns evaluation result of send node' do
-          expect(subject).to eq(
-            Yoda::Model::TypeExpressions::InstanceType.new('String')
-          )
+          expect(subject.to_s).to eq("::String")
         end
       end
     end

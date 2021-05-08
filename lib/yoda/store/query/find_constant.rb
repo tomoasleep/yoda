@@ -19,6 +19,13 @@ module Yoda
           end
         end
 
+        # @param base [Store::Object]
+        # @param pattern [RegExp]
+        # @return [Enumerator<Objects::Base>]
+        def select_by_base_and_pattern(base:, pattern:)
+          select_constants_from_ancestors(base, pattern)
+        end
+
         # @param path [String, Model::Path, Model::ScopedPath]
         # @return [Array<Objects::Base>]
         def select_with_prefix(path)

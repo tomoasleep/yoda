@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-RSpec.xdescribe Yoda::Services::CodeCompletion::LocalVariableProvider do
-  include TypeHelper
+RSpec.describe Yoda::Services::CodeCompletion::LocalVariableProvider do
+  let(:provider) { described_class.new(environment, ast, location, evaluator) }
 
-  let(:provider) { described_class.new(registry, source_analyzer) }
-  let(:registry) { Yoda::Store::Registry.instance }
-  let(:source_analyzer) { Yoda::Parsing::SourceAnalyzer.from_source(source, location) }
+  let(:environment) { Yoda::Model::Environment.build }
+  let(:ast) { Yoda::Parsing.parse(source) }
+  let(:evaluator) { Yoda::Services::Evaluator.new(environment: environment, ast: ast) }
 
   describe '#candidates' do
     subject { provider.candidates }
@@ -24,9 +24,9 @@ RSpec.xdescribe Yoda::Services::CodeCompletion::LocalVariableProvider do
 
       it 'returns the matched variables' do
         expect(subject).to contain_exactly(
-          have_attributes(name: 'varaible_a'),
-          have_attributes(name: 'varaible_b'),
-          have_attributes(name: 'varaible_c'),
+          have_attributes(edit_text: 'variable_a', title: 'variable_a: 1'),
+          have_attributes(edit_text: 'variable_b', title: 'variable_b: 1'),
+          have_attributes(edit_text: 'variable_c', title: 'variable_c: "string"'),
         )
       end
     end

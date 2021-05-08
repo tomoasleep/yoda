@@ -9,13 +9,14 @@ module Yoda
       # @return [Parsing::Location]
       attr_reader :location
 
+      # @param environment [Model::Environment]
       # @param registry [Store::Registry]
       # @param source   [String]
       # @param location [Parsing::Location]
       # @return [SignatureDiscovery]
-      def self.from_source(registry:, source:, location:)
+      def self.from_source(environment:, source:, location:)
         new(
-          evaluator: Evaluator.new(registry: registry, ast: Parsing.parse(source)),
+          evaluator: Evaluator.new(environment: environment, ast: Parsing.parse(source)),
           location: location
         )
       end
@@ -31,10 +32,10 @@ module Yoda
         !!nearest_send_node
       end
 
-      # @return [Array<Store::Objects::MethodObject>]
+      # @return [Array<Model::FunctionSignatures::Warpper>]
       def method_candidates
         return [] unless valid?
-        Store::Query::FindSignature.new(evaluator.registry).select_on_multiple(receiver_objects, /\A#{Regexp.escape(index_word)}/)
+        nearest_send_node_info.method_candidates
       end
 
       # @return [Integer, nil]
@@ -47,12 +48,6 @@ module Yoda
       # @return [String, nil]
       def index_word
         nearest_send_node&.selector_name
-      end
-
-      # @return [Array<Store::Objects::Base>]
-      def receiver_objects
-        return [] unless valid?
-        @receiver_objects ||= nearest_send_node_info.receiver_candidates
       end
 
       # @return [AST::SendNode, nil]

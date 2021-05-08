@@ -11,7 +11,7 @@ module Yoda
         # @param callee [Base]
         # @param method_name [String]
         # @param with_receiver [true, false]
-        def initailize(callee, method_name, with_receiver: false)
+        def initialize(callee, method_name, with_receiver: false)
           @callee = callee
           @method_name = method_name
         end

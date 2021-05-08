@@ -3,11 +3,11 @@ require 'spec_helper'
 RSpec.describe Yoda::Typing::Inferencer do
   include AST::Sexp
 
-  let(:registry) { Yoda::Store::Registry.new(Yoda::Store::Adapters::MemoryAdapter.new) }
+  let(:environment) { Yoda::Model::Environment.build }
+  let(:registry) { environment.registry }
   let(:receiver_type) { Yoda::Typing::Types::Instance.new(klass: registry.get('Object')) }
-  let(:context) { Yoda::Typing::Contexts::NamespaceContext.root_scope(registry) }
 
-  let(:inferencer) { described_class.new(context: context) }
+  let(:inferencer) { described_class.create_for_root(environment: environment) }
 
   let(:patch) do
     Yoda::Store::Objects::Patch.new(:test).tap do |patch|
@@ -18,9 +18,17 @@ RSpec.describe Yoda::Typing::Inferencer do
 
   let(:objects) do
     [
+      # Inferencer requires metaclass to search constants
+      Yoda::Store::Objects::MetaClassObject.new(
+        path: 'Object',
+      ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'Integer',
         superclass_path: 'Object',
+      ),
+      # Inferencer requires metaclass to search constants
+      Yoda::Store::Objects::MetaClassObject.new(
+        path: 'Integer',
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#+',
@@ -87,6 +95,38 @@ RSpec.describe Yoda::Typing::Inferencer do
           Yoda::Store::Objects::Tag.new(tag_name: 'yieldparam', name: 'object', yard_types: ['self']),
         ],
       ),
+      Yoda::Store::Objects::MethodObject.new(
+        path: 'Object#is_a?',
+        parameters: [['mod', nil]],
+        tag_list: [
+          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Boolean']),
+          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'mod', yard_types: ['Module']),
+        ],
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'NilClass',
+        superclass_path: 'Object',
+      ),
+      # Inferencer requires metaclass to search constants
+      Yoda::Store::Objects::MetaClassObject.new(
+        path: 'NilClass',
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'String',
+        superclass_path: 'Object',
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'Module',
+        superclass_path: 'Object',
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'TrueClass',
+        superclass_path: 'Object',
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'FalseClass',
+        superclass_path: 'Object',
+      ),
     ]
   end
   let(:integer) do
@@ -105,7 +145,7 @@ RSpec.describe Yoda::Typing::Inferencer do
         RUBY
       end
 
-      it 'returns the type of the method' do
+      it 'returns the type of the literal' do
         expect(subject).to have_attributes(
           klass: have_attributes(
             path: 'Integer',
@@ -130,20 +170,34 @@ RSpec.describe Yoda::Typing::Inferencer do
       end
     end
 
-    context 'class constant' do
-      let(:source) do
-        <<~RUBY
-          Integer
-        RUBY
+    describe 'constant' do
+      context 'with unknown constant' do
+        let(:source) do
+          <<~RUBY
+            Unknwon
+          RUBY
+        end
+
+        it 'returns the type of the class' do
+          expect(subject).to have_attributes(to_s: "untyped")
+        end
       end
 
-      it 'returns the type of the class' do
-        expect(subject).to have_attributes(
-          klass: have_attributes(
-            path: 'Integer',
-            kind: :meta_class,
+      context 'with known class constant' do
+        let(:source) do
+          <<~RUBY
+            Integer
+          RUBY
+        end
+
+        it 'returns the type of the class' do
+          expect(subject).to have_attributes(
+            klass: have_attributes(
+              path: 'Integer',
+              kind: :meta_class,
+            )
           )
-        )
+        end
       end
     end
 
@@ -250,8 +304,8 @@ RSpec.describe Yoda::Typing::Inferencer do
           expect(inferencer.tracer.context_variable_types(node_traverser.query(type: :class).node)).to be_empty
           expect(inferencer.tracer.context_variable_types(node_traverser.query(type: :def, name: :modulo).node)).to be_empty
           expect(inferencer.tracer.context_variable_types(node_traverser.query(type: :send, name: :-).node)).to a_hash_including(
-            n: have_attributes(path: Yoda::Model::ScopedPath.build('Integer')),
-            multipled_quotient: have_attributes(path: Yoda::Model::ScopedPath.build('Integer')),
+            n: have_attributes(to_s: "::Integer"),
+            multipled_quotient: have_attributes(to_s: "::Integer"),
           )
         end
       end
@@ -262,7 +316,9 @@ RSpec.describe Yoda::Typing::Inferencer do
         let(:source) do
           <<~RUBY
             class << Integer
-              self
+              def sqrt(n)
+                self
+              end
             end
           RUBY
         end
@@ -271,6 +327,7 @@ RSpec.describe Yoda::Typing::Inferencer do
           expect(subject).to have_attributes(
             klass: have_attributes(
               path: 'NilClass',
+              kind: :class
             )
           )
         end
@@ -283,6 +340,150 @@ RSpec.describe Yoda::Typing::Inferencer do
               kind: :meta_class,
             )
           )
+        end
+      end
+    end
+
+    describe 'class method calls' do
+      context 'in instance method context' do
+        context 'call class method in method' do
+          let(:source) do
+            <<~RUBY
+              class Integer
+                def modulo(n)
+                  Integer.sqrt(n)
+                end
+              end
+            RUBY
+          end
+
+          it 'binds return type of the class method' do
+            subject
+            node = node_traverser.query(type: :send).node
+            expect(inferencer.tracer.type(node)).to have_attributes(to_s: "::Integer")
+            expect(inferencer.tracer.method_candidates(node)).to contain_exactly(
+              have_attributes(to_s: "sqrt(::Integer) -> ::Integer"),
+            )
+          end
+
+          pending 'binds method candidates with parameter name' do
+            subject
+            node = node_traverser.query(type: :send).node
+            expect(inferencer.tracer.method_candidates(node)).to contain_exactly(
+              have_attributes(to_s: "sqrt(::Integer n) -> ::Integer"),
+            )
+          end
+        end
+      end
+    end
+
+    describe 'super calls' do
+      context 'in instance method context' do
+        context 'call class method in method' do
+          let(:source) do
+            <<~RUBY
+              class Integer
+                def is_a?(mod)
+                  super(mod)
+                end
+              end
+            RUBY
+          end
+
+          pending 'binds return type of the method of the superclass' do
+            subject
+            node = node_traverser.query(type: :super).node
+            expect(inferencer.tracer.type(node)).to have_attributes(to_s: "::TrueClass | ::FalseClass")
+          end
+
+          it 'does not fails' do
+            expect { subject }.not_to raise_error
+          end
+        end
+      end
+    end
+
+    describe 'operators' do
+      describe 'with or operator' do
+        let(:source) do
+          <<~RUBY
+          1 || "string"
+          RUBY
+        end
+
+        it 'returns' do
+          expect(subject).to have_attributes(to_s: '1 | "string"')
+        end
+      end
+
+      describe 'with or operator' do
+        let(:source) do
+          <<~RUBY
+          1 && "string"
+          RUBY
+        end
+
+        it 'returns' do
+          expect(subject).to have_attributes(to_s: '1 | "string"')
+        end
+      end
+    end
+
+    describe 'hash literal' do
+      describe 'with symbol keys' do
+        let(:source) do
+          <<~RUBY
+          { key: :value, another_key: "hoge", key2: 1 }
+          RUBY
+        end
+
+        it 'returns a record type with symbol key' do
+          # RBS's type does not use shorthand key expression if the key includes number.
+          expect(subject).to have_attributes(to_s: '{ key: :value, another_key: "hoge", :key2 => 1 }')
+        end
+      end
+
+      describe 'with string keys' do
+        let(:source) do
+          <<~RUBY
+          { "key" => :value, "key2" => 1 }
+          RUBY
+        end
+
+        it 'returns a record type with string key' do
+          expect(subject).to have_attributes(to_s: '{ "key" => :value, "key2" => 1 }')
+        end
+      end
+    end
+
+    describe 'string literal' do
+      describe 'without any interpolation' do
+        let(:source) do
+          <<~RUBY
+          "string"
+          RUBY
+        end
+
+        it 'returns a literal type' do
+          expect(subject).to have_attributes(to_s: '"string"')
+        end
+      end
+
+      describe 'with interpolations' do
+        let(:source) do
+          <<~RUBY
+          "prefix\#{1}suffix"
+          RUBY
+        end
+
+        it 'returns a string type' do
+          expect(subject).to have_attributes(to_s: '::String')
+        end
+
+        it 'evaluate each interpolation' do
+          subject
+          node = node_traverser.query(type: :int).node
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: '1')
         end
       end
     end

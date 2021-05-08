@@ -17,7 +17,7 @@ module Yoda
 
         # @param node_info [Typing::NodeInfo]
         def signature_type_for_node_info(node_info)
-          case node_info.type
+          case node_info.kind
           when :send
             Send
           when :const

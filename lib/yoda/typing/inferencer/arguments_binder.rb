@@ -10,13 +10,13 @@ module Yoda
           @generator = generator
         end
 
-        # @param types [Array<Types::Function>]
+        # @param types [Array<RBS::MethodTypej>]
         # @param arguments [Model::Parameters]
-        # @return [Hash{ Symbol => Types::Base }]
+        # @return [Hash{ Symbol => Types::Type }]
         def bind(types:, arguments:)
-          binds = types.map { |type| Model::Parameters::Binder.new(arguments).bind(type: type, generator: generator) }
+          binds = types.map { |type| ParameterBinder.new(arguments).bind(type: type, generator: generator) }
           # @todo Select only one signature to bind arguments
-          binds.reduce({}) { |memo, bind| memo.merge!(bind) { |_key, v1, v2| Types::Union.new(v1, v2) } }
+          binds.reduce({}) { |memo, bind| memo.merge!(bind.to_h) { |_key, v1, v2| generator.union_type(v1, v2) } }
         end
       end
     end

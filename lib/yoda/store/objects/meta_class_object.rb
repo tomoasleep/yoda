@@ -10,6 +10,11 @@ module Yoda
           def superclass
             ancestor_tree.superclass.with_connection(**connection_options)
           end
+
+          # @return [Base::Connected, nil]
+          def instance
+            registry.get(path)&.with_connection(**connection_options)
+          end
         end
 
         # @param path [String]

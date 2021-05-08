@@ -8,13 +8,13 @@ module Yoda
       # @return [Parsing::Location]
       attr_reader :location
 
-      # @param registry [Store::Registry]
+      # @param environment [Model::Environment]
       # @param source   [String]
       # @param location [Parsing::Location]
       # @return [CurrentNodeExplain]
-      def self.from_source(registry:, source:, location:)
+      def self.from_source(environment:, source:, location:)
         new(
-          evaluator: Evaluator.new(registry: registry, ast: Parsing.parse(source)),
+          evaluator: Evaluator.new(environment: environment, ast: Parsing.parse(source)),
           location: location
         )
       end

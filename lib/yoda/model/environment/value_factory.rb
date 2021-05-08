@@ -52,7 +52,7 @@ module Yoda
             )
           when RBS::Types::Optional
             Values::UnionValue.new(
-              resolve_instance_by_rbs_type_name(type.type.name, args: type.args),
+              resolve_value_by_rbs_type(type.type),
               resolve_instance_by_rbs_type_name(TypeName("::NilClass")),
             )
           when RBS::Types::Intersection

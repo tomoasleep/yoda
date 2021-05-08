@@ -12,7 +12,7 @@ module Yoda
       # @return [Inferencer::Tracer]
       attr_reader :tracer
 
-      delegate %i(type location range) => :node
+      delegate %i(location range) => :node
 
       # @param node [AST::Node]
       # @param tracer [Inferencer::Tracer]
@@ -21,9 +21,14 @@ module Yoda
         @tracer = tracer
       end
 
-      # @return [Array<Store::Objects::NamespaceObject>]
-      def receiver_candidates
-        tracer.receiver_candidates(node)
+      # @return [Symbol]
+      def kind
+        tracer.kind(node) || node.type
+      end
+
+      # @return [Types::Type]
+      def receiver_type
+        tracer.receiver_type(node)
       end
 
       # @return [Array<FunctionSignatures::Base>]
@@ -31,9 +36,9 @@ module Yoda
         tracer.method_candidates(node)
       end
 
-      # @return [Model::TypeExpressions::Base]
-      def type_expression
-        tracer.type_expression(node)
+      # @return [Types::Type]
+      def type
+        tracer.type(node)
       end
 
       # @return [Array<Store::Objects::Base>]
@@ -47,8 +52,8 @@ module Yoda
       end
 
       # @return [Array<Store::Objects::NamespaceObject>]
-      def scope_nestings
-        context.lexical_scope_objects
+      def lexical_scope_types
+        context&.lexical_scope_types || []
       end
 
       private

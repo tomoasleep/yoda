@@ -3,9 +3,9 @@ require 'spec_helper'
 RSpec.xdescribe Yoda::Services::CodeCompletion do
   include TypeHelper
 
-  let(:service) { described_class.new(registry, source, location) }
-  let(:registry) { Yoda::Store::Registry.instance }
-  let(:root) { registry.at(:root) }
+  let(:service) { described_class.new(environment, source, location) }
+  let(:environment) { Model::Environment.build }
+  let(:root) { environment.registry.at(:root) }
 
   shared_context 'define a class to root' do
     let!(:class_object) do

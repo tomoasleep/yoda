@@ -1,10 +1,13 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Typing::Inferencer::ArgumentsBinder do
-  let(:registry) { Yoda::Store::Registry.new(Yoda::Store::Adapters::MemoryAdapter.new) }
-  let(:generator) { Yoda::Typing::Types::Generator.new(registry) }
-
+  let(:environment) { Yoda::Model::Environment.build }
+  let(:generator) { Yoda::Typing::Types::Generator.new(environment: environment) }
   let(:binder) { described_class.new(generator: generator) }
+
+  before do
+    environment.registry.add_file_patch(Yoda::Store::Objects::Library.core.create_patch)
+  end
 
   describe '#bind' do
     subject { binder.bind(types: types, arguments: arguments) }
@@ -21,13 +24,13 @@ RSpec.describe Yoda::Typing::Inferencer::ArgumentsBinder do
       end
       let(:types) do
         [
-          Yoda::Typing::Types::Function.new(
-            parameters: [
+          generator.rbs_method_type(
+            required_parameters: [
               generator.string_type,
               generator.symbol_type,
               generator.integer_type,
             ],
-            return_type: Yoda::Typing::Types::Any.new,
+            return_type: generator.any_type,
           ),
         ]
       end
@@ -53,14 +56,14 @@ RSpec.describe Yoda::Typing::Inferencer::ArgumentsBinder do
       end
       let(:types) do
         [
-          Yoda::Typing::Types::Function.new(
-            parameters: [
+          generator.rbs_method_type(
+            required_parameters: [
               generator.string_type,
               generator.symbol_type,
               generator.integer_type,
             ],
-            return_type: Yoda::Typing::Types::Any.new,
-          ),
+            return_type: generator.any_type,
+          )
         ]
       end
 

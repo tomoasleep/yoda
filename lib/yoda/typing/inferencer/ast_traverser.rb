@@ -14,6 +14,9 @@ module Yoda
 
         delegate [:bind_context, :bind_type, :bind_send] => :tracer
 
+        # @return [Types::Generator]
+        delegate [:generator] => :context
+
         # @param tracer [Tracer]
         # @param context [ContextsBaseContext]
         def initialize(tracer:, context:)
@@ -22,23 +25,18 @@ module Yoda
         end
 
         # @param node [AST::Vnode]
-        # @return [Store::Types::Base]
+        # @return [RBS::Types::t]
         def traverse(node)
           bind_context(node: node, context: context)
           Logger.trace("Traversing #{node}")
           type = infer_node(node)
-          Logger.trace("Traversed #{node} -> #{type.to_type_string}")
+          Logger.trace("Traversed #{node} -> #{type.to_s}")
           bind_type(node: node, type: type, context: context)
 
           type
         end
 
         private
-
-        # @return [Types::Generator]
-        def generator
-          @generator ||= Types::Generator.new(context.registry)
-        end
 
         # @param context [Contexts::BaseContext]
         # @return [self]
@@ -47,7 +45,7 @@ module Yoda
         end
 
         # @param node [AST::Vnode]
-        # @return [Store::Types::Base]
+        # @return [Types::Type]
         def infer_node(node)
           case node.type
           when :lvasgn, :ivasgn, :cvasgn, :gvasgn
@@ -63,7 +61,7 @@ module Yoda
             traverse(node.content)
           when :and, :or, :not
             # TODO
-            Types::Union.new(node.children.map { |node| traverse(node) })
+            generator.union_type(*node.children.map { |node| traverse(node) })
           when :if
             infer_branch_nodes(node.children.first, node.children.slice(1..2).compact)
           when :while, :until, :while_post, :until_post
@@ -76,7 +74,7 @@ module Yoda
             infer_case_node(node)
           when :super, :zsuper, :yield
             # TODO
-            type_for_literal_sexp(node.type)
+            type_for_literal_sexp(node)
           when :return, :break, :next
             # TODO
             node.arguments[0] ? traverse(node.arguments[0]) : generator.nil_type
@@ -87,17 +85,15 @@ module Yoda
             infer_send_node(node)
           when :block
             infer_block_call_node(node)
-          when :cbase
-            infer_const_base_node(node)
           when :const
             infer_const_node(node)
           when :lvar, :cvar, :ivar, :gvar
-            context.environment.resolve(node.name) || generator.any_type
+            context.type_binding.resolve(node.name) || generator.any_type
           when :begin, :kwbegin, :block
             node.children.map { |node| traverse(node) }.last
           when :dstr, :dsym, :xstr
             node.children.each { |node| traverse(node) }
-            type_for_literal_sexp(node.type)
+            type_for_literal_sexp(node)
           when :def
             infer_method_node(node)
           when :defs
@@ -113,7 +109,7 @@ module Yoda
           when :sclass
             infer_singleton_class_node(node)
           else
-            type_for_literal_sexp(node.type)
+            type_for_literal_sexp(node)
           end
         end
 
@@ -121,7 +117,7 @@ module Yoda
         # @return [Store::Types::Base]
         def infer_assignment_node(node)
           body_type = traverse(node.content)
-          context.environment.bind(node.assignee.name, body_type)
+          context.type_binding.bind(node.assignee.name, body_type)
           body_type
         end
 
@@ -132,7 +128,7 @@ module Yoda
 
           case object
           when Store::Objects::NamespaceObject
-            generator.singleton_type_of(object.path)
+            generator.singleton_type_at(object.path)
           when Store::Objects::ValueObject
             # TODO
             generator.any_type
@@ -144,70 +140,75 @@ module Yoda
         # @param node [AST::ConstantNode]
         # @return [Types::Base]
         def infer_const_node(node)
-          object = 
-            if node.base.present?
-              base_type = traverse(node.base)
-              base_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(base_type)
-              # TODO: Support multiple candidate
-              Store::Query::FindConstant.new(context.registry).find(Model::Path.from_names([base_objects.first.path, node.name.name]))
-            else
-              Store::Query::FindConstant.new(context.registry).find(Model::ScopedPath.new(context.lexical_scope_objects.map(&:path), node.name.name.to_s))
+          case node.base.type
+          when :cbase
+            generator.singleton_type_at("::#{node.name.name}")
+          when :empty
+            lexical_values = context.lexical_scope_types.map(&:value)
+            relative_path = node.name.name.to_s
+
+            # Search nearest lexical scope first
+            found_paths = lexical_values.reverse.reduce(nil) do |found_paths, value|
+              found_paths || begin
+                current_found_paths = value.select_constant_paths(relative_path)
+                current_found_paths.empty? ? nil : current_found_paths
+              end
             end
 
-          case object
-          when Store::Objects::NamespaceObject
-            generator.singleton_type_of(object.path)
-          when Store::Objects::ValueObject
-            # TODO
-            generator.any_type
+            # test
+
+            if found_paths
+              generator.singleton_type_at(found_paths.first)
+            else
+              generator.any_type
+            end
           else
-            generator.any_type
+            base_type = traverse(node.base)
+
+            generator.wrap_rbs_type(base_type.value.select_constant_type(node.name.name.to_s))
           end
         end
 
         # @param node [AST::DefNode]
         # @return [Types::Base]
         def infer_method_node(node)
-          receiver_type = generator.union(context.current_objects.map { |object| generator.instance_type(object) })
-
-          method_definition_provider = MethodDefinitionResolver.new(
-            receiver_type: receiver_type,
-            name: node.name,
-            registry: context.registry,
-            generator: generator,
-          )
-
-          method_context = method_definition_provider.generate_method_context(context: context, params_node: node.parameters)
-          derive(context: method_context).traverse(node.body)
-
-          generator.symbol_type
+          traverse_method(node, receiver_type: context.method_receiver)
         end
 
         # @param node [AST::DefSingletonNode]
         # @return [Types::Base]
         def infer_smethod_node(node)
-          receiver_type = traverse(node.receiver)
+          traverse_method(node, receiver_type: traverse(node.receiver))
+        end
 
-          method_definition_provider = MethodDefinitionResolver.new(
-            receiver_type: receiver_type,
-            name: node.name,
-            registry: context.registry,
-            generator: generator,
-          )
+        # @param node [AST::DefNode, AST::DefSingletonNode]
+        # @param receiver_type [Types::Type]
+        # @return [Types::Base]
+        def traverse_method(node, receiver_type:)
+          method_candidates = receiver_type.value.select_method(node.name.to_s, visibility: %i(private protected public))
+          method_types = method_candidates.map(&:rbs_type)
 
-          method_context = method_definition_provider.generate_method_context(context: context, params_node: node.parameters)
+          # TODO: Support overloads
+          method_bind = method_types.reduce({}) do |all_bind, method_type|
+            bind = ParameterBinder.new(node.parameters.parameter).bind(type: method_type, generator: generator)
+            all_bind.merge(bind.to_h) { |_key, v1, v2| generator.union_type(v1, v2) }
+          end
+
+          Logger.trace("method_candidates: [#{method_candidates.join(', ')}]")
+          Logger.trace("bind arguments: #{method_bind}")
+
+          method_context = context.derive_method_context(receiver_type: receiver_type, binds: method_bind)
           derive(context: method_context).traverse(node.body)
 
-          generator.symbol_type
+          generator.symbol_type(node.name.to_sym)
         end
 
         # @param node [AST::SingletonClassNode]
         # @return [Types::Base]
         def infer_singleton_class_node(node)
           receiver_type = traverse(node.receiver)
-          namespace_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(receiver_type)
 
-          new_context = Contexts::NamespaceBlockContext.new(objects: namespace_objects, parent: context, registry: context.registry, receiver: receiver_type)
+          new_context = context.derive_class_context(class_type: receiver_type.singleton_type)
           derive(context: new_context).traverse(node.body)
 
           generator.nil_type
@@ -217,10 +218,9 @@ module Yoda
         # @return [Types::Base]
         def infer_namespace_node(node)
           namespace_type = traverse(node.receiver)
-          namespace_objects = ObjectResolver.new(registry: context.registry, generator: generator).call(namespace_type)
 
-          block_context = Contexts::NamespaceContext.new(objects: namespace_objects, parent: context, registry: context.registry, receiver: namespace_type)
-          derive(context: block_context).traverse(node.body)
+          new_context = context.derive_class_context(class_type: namespace_type)
+          derive(context: new_context).traverse(node.body)
 
           namespace_type
         end
@@ -232,7 +232,9 @@ module Yoda
             case node.type
             when :pair
               case node.key.type
-              when :sym, :str
+              when :sym
+                memo[node.key.value.to_sym] = traverse(node.value)
+              when :str
                 memo[node.key.value.to_s] = traverse(node.value)
               else
                 # TODO: Support other key types.
@@ -243,7 +245,7 @@ module Yoda
             end
           end
 
-          Types::AssociativeArray.new(contents: hash)
+          generator.record_type(hash)
         end
 
         # @param node [AST::BlockCallNode]
@@ -260,25 +262,27 @@ module Yoda
           receiver_type = node.implicit_receiver? ? context.receiver : traverse(node.receiver)
           argument_types = infer_argument_nodes(node.arguments)
 
-          # argument_types = node.arguments.map { |node| traverse(node) }
-          # arguments = Arguments.new(node.arguments, tracer)
-
-          method_resolver = MethodResolver.new(
-            registry: context.registry,
-            receiver_type: receiver_type,
-            name: node.selector_name,
-            argument_types: argument_types,
-            generator: generator,
-            implicit_receiver: node.implicit_receiver?,
-          )
+          visibility = node.implicit_receiver? ? %i(private protected public) : %i(public)
+          # TODO: Support overloads
+          method_candidates = receiver_type.value.select_method(node.selector_name, visibility: visibility)
+          method_types = method_candidates.map(&:rbs_type)
 
           if block_node
-            new_context = method_resolver.generate_block_context(context: context, block_param_node: block_param_node)
+            # TODO: Resolve type variables by matching argument_types with arguments
+            binds = ArgumentsBinder.new(generator: generator).bind(types: method_types, arguments: block_param_node.parameter)
+            new_context = context.derive_block_context(binds: binds)
             derive(context: new_context).traverse(block_node)
           end
 
-          bind_send(node: node, method_candidates: method_resolver.method_candidates, receiver_candidates: method_resolver.receiver_candidates)
-          method_resolver.return_type
+          Logger.trace("method_candidates: [#{method_candidates.join(', ')}]")
+          Logger.trace("receiver_type: #{receiver_type}")
+
+          bind_send(node: node, method_candidates: method_candidates, receiver_type: receiver_type)
+          if method_types.empty?
+            generator.unknown_type(reason: "method not found")
+          else
+            generator.union_type(*method_types.map { |method_type| method_type.type.return_type })
+          end
         end
 
         # @param nodes [Array<::AST::Node>]
@@ -303,7 +307,7 @@ module Yoda
         # @return [Types::Base]
         def infer_branch_nodes(condition_node, branch_nodes)
           traverse(condition_node)
-          Types::Union.new(branch_nodes.map { |node| traverse(node) })
+          generator.union_type(*branch_nodes.map { |node| traverse(node) })
         end
 
         # @param node [::AST::Node]
@@ -312,17 +316,21 @@ module Yoda
           # TODO
           subject_node, *when_nodes, else_node = node.children
           when_body_nodes = when_nodes.map { |node| node.children.last }
-          Types::Union.new([*when_body_nodes, else_node].compact.map { |node| traverse(node) })
+          generator.union_type(*[*when_body_nodes, else_node].compact.map { |node| traverse(node) })
         end
 
-        # @param sexp_type [::Symbol, nil]
+        # @param [AST::LiteralNode]
         # @return [Types::Base]
-        def type_for_literal_sexp(sexp_type)
-          case sexp_type
-          when :dstr, :str, :xstr, :string
+        def type_for_literal_sexp(node)
+          case node.type
+          when :dstr, :xstr
             generator.string_type
-          when :dsym, :sym
+          when :str, :string
+            generator.string_type(node.value.to_s)
+          when :dsym
             generator.symbol_type
+          when :sym
+            generator.symbol_type(node.value.to_sym)
           when :array, :splat
             generator.array_type
           when :hash
@@ -338,7 +346,7 @@ module Yoda
           when :nil
             generator.nil_type
           when :int
-            generator.integer_type
+            generator.integer_type(node.value.to_i)
           when :float
             generator.float_type
           when :complex

@@ -2,18 +2,18 @@ module Yoda
   module Typing
     class Inferencer
       # Bindings of local variables
-      class Environment
-        # @return [Environment, nil]
+      class TypeBinding
+        # @return [TypeBinding, nil]
         attr_reader :parent
 
-        # @return [Hash{ Symbol => Store::Types::Base}]
+        # @return [Hash{ Symbol => Types::Type}]
         attr_reader :binds
 
         # @param parent [Environment, nil]
-        # @param binds [Hash{ Symbol => Store::Types::Base}, nil]
+        # @param binds [Hash{ Symbol => Types::Type}, nil]
         def initialize(parent: nil, binds: nil)
           @parent = parent
-          @binds = binds || {}
+          @binds = (binds || {}).to_h
         end
 
         # @param key  [String, Symbol]
@@ -22,7 +22,7 @@ module Yoda
         end
 
         # @param key  [String, Symbol]
-        # @param type [Symbol, Store::Types::Base]
+        # @param type [Symbol, Types::Type]
         def bind(key, type)
           key = key.to_sym
           type = (type.is_a?(Symbol) && resolve(type)) || type
@@ -31,7 +31,12 @@ module Yoda
           self
         end
 
-        # @return [Hash{ Symbol => Store::Types::Base }]
+        # @return [Hash{ Symbol => Types::Type }]
+        def to_h
+          all_variables
+        end
+
+        # @return [Hash{ Symbol => Types::Type }]
         def all_variables
           (parent&.all_variables || {}).merge(binds)
         end

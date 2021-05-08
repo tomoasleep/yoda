@@ -21,8 +21,7 @@ module Yoda
         end
 
         def eql?(another)
-          another.is_a?(UnionType) &&
-          Set.new(types) == Set.new(another.types)
+          another.is_a?(UnionType) && Set.new(types) == Set.new(another.types)
         end
 
         def hash

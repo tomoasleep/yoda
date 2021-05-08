@@ -8,21 +8,26 @@ module Yoda
       # @return [AST::Vnode]
       attr_reader :ast
 
-      # @return [Store::Registry]
-      attr_reader :registry
+      # @return [Model::Environment]
+      attr_reader :environment
 
       # @return [Typing::Inferencer]
       attr_reader :inferencer
 
-      delegate %i(type type_expression context_variable_types receiver_candidates method_candidates node_info) => :tracer
+      delegate %i(type context_variable_types receiver_type method_candidates node_info) => :tracer
 
       # @param ast [::Parser::AST::Node]
-      # @param registry [Store::Registry]
-      def initialize(ast:, registry:)
+      # @param registry [Model::Environment]
+      def initialize(ast:, environment:)
         @ast = ast
-        @registry = registry
-        @inferencer = Typing::Inferencer.create_for_root(registry)
+        @environment = environment
+        @inferencer = Typing::Inferencer.create_for_root(environment: environment)
         @lock = Concurrent::ReadWriteLock.new
+      end
+
+      # @return [void]
+      def evaluate
+        tracer
       end
 
       # @return [Typing::Inferencer::Tracer]

@@ -21,11 +21,13 @@ module Yoda
         @bars = {}
       end
 
+      # @return [Project]
       def run
         build_core_index
         build_project_cache
       end
 
+      # @return [Project]
       def project
         @project ||= Store::Project.new(name: 'root', root_path: dir)
       end

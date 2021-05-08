@@ -14,7 +14,7 @@ module Yoda
           # @param obj [Object::Base]
           # @return [Enumerator<Objects::MethodObject>]
           def associate(obj)
-            if obj.is_a?(Objects::NamespaceObject)
+            if obj.namespace?
               Enumerator.new do |yielder|
                 name_set = Set.new
 

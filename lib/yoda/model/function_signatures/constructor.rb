@@ -17,6 +17,17 @@ module Yoda
           type_builder.type
         end
 
+        # @param env [Environment]
+        # @return [RBS::MethodType]
+        def rbs_type(env)
+          RBS::MethodType.new(
+            type_params: [],
+            type: type.to_rbs_type(env),
+            block: nil,
+            location: nil,
+          )
+        end
+
         def name
           'new'
         end

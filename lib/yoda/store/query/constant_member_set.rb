@@ -25,8 +25,7 @@ module Yoda
         # @param name [String]
         # @return [Enumerator<Objects::Base>]
         def select(name, **kwargs)
-          scoped_path = Model::ScopedPath.new([object.path], name)
-          [FindConstant.new(registry).find(scoped_path, **kwargs)].compact
+          FindConstant.new(registry).select_by_base_and_pattern(base: object, pattern: name)
         end
       end
     end

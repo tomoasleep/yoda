@@ -10,6 +10,13 @@ module Yoda
         end
 
         # @abstract
+        # @param env [Environment]
+        # @return [RBS::MethodType]
+        def rbs_type(env)
+          fail NotImplementedError
+        end
+
+        # @abstract
         # @return [Symbol]
         def visibility
           fail NotImplementedError
@@ -51,9 +58,16 @@ module Yoda
         end
 
         # @abstract
+        # @param param [String]
         # @return [TypeExpressions::Base, nil]
         def parameter_type_of(param)
           fail NotImplementedError
+        end
+
+        # @param env [Environment]
+        # @return [Wrapper]
+        def wrap(env)
+          Wrapper.new(environment: env, signature: self)
         end
 
         private

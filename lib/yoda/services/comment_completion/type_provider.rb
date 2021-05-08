@@ -19,7 +19,7 @@ module Yoda
           return [] unless available?
           return [] unless namespace
           scoped_path = Model::ScopedPath.new(lexical_scope(namespace), index_word)
-          Store::Query::FindConstant.new(registry).select_with_prefix(scoped_path).map { |obj| Model::Descriptions::ValueDescription.new(obj) }
+          Store::Query::FindConstant.new(environment.registry).select_with_prefix(scoped_path).map { |obj| Model::Descriptions::ValueDescription.new(obj) }
         end
 
         # @return [Parsing::Range, nil]
@@ -51,7 +51,7 @@ module Yoda
         # @param namespace [AST::Namespace]
         # @return [Array<Path>]
         def lexical_scope(namespace)
-          evaluator.node_info(namespace).scope_nestings.reverse.map(&:path)
+          evaluator.node_info(namespace).lexical_scope_types.reverse.flat_map { |type| type.value.referred_objects.map(&:path) }
         end
       end
     end

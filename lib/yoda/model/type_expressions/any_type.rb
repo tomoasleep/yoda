@@ -28,7 +28,7 @@ module Yoda
 
         # @return [String]
         def to_s
-          'any'
+          'untyped'
         end
       end
     end

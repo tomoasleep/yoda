@@ -5,6 +5,23 @@ module Yoda
         # @return [Array<(String, String)>]
         attr_reader :parameters
 
+        # @param type [RBS::MethodType]
+        def self.from_rbs_method_type(type)
+          func = type.type
+
+          parameters = []
+          parameters += func.required_positionals.map { |param| [param.name, ""] }
+          parameters += func.optional_positionals.map { |param| [param.name, ""] }
+          parameters += ["*#{type.rest_positionals.name}", ""] if func.rest_positionals
+          parameters += func.trailing_positionals.map { |param| [param.name, ""] }
+          parameters += func.required_keywords.map { |param| ["#{param.name}:", ""] }
+          parameters += func.optional_keywords.map { |param| ["#{param.name}:", ""] }
+          parameters += ["**#{func.rest_keywords.name}", ""] if func.rest_keywords
+          parameters += ["&block", ""] if type.block
+
+          new(parameters)
+        end
+
         # @param parameters [Array<(String, String)>]
         def initialize(parameters)
           fail ArgumentError, parameters unless parameters.all? { |param| param.is_a?(Array) }

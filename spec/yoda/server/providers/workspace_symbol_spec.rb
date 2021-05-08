@@ -39,9 +39,12 @@ RSpec.describe Yoda::Server::Providers::WorkspaceSymbol do
 
       it 'returns infomation including appropriate labels' do
         expect(subject).to be_a(Array)
-
-        # TODO: Compare values
-        # expect(partial_results).to eq([])
+        
+        expect(partial_results.flatten).to include(
+          have_attributes(name: "initialize"),
+          have_attributes(name: "method1"),
+          have_attributes(name: "method6"),
+        )
       end
     end
   end

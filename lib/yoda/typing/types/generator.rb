@@ -1,152 +1,275 @@
 module Yoda
   module Typing
     module Types
+      # Generator provides construction methods for various type classes.
       class Generator
-        # @return [Registry]
-        attr_reader :registry
+        # @return [Model::Environment]
+        attr_reader :environment
 
-        # @param registry [Registry]
-        def initialize(registry)
-          @registry = registry
+        # @param registry [Contexts::BaseContext]
+        def initialize(environment:)
+          @environment = environment
         end
 
-        # @return [Union]
+        # @param [RBS::Types::t]
+        # @return [Type]
+        def wrap_rbs_type(rbs_type)
+          Type.new(environment: environment, rbs_type: rbs_type)
+        end
+
+        # @return [Type<RBS::Types::Bases::Bool>]
         def boolean_type
-          Union.new(true_type, false_type)
+          wrap_rbs_type(RBS::Types::Bases::Bool.new(location: nil))
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::Literal>]
         def true_type
-          @true_type ||= instance_type_of('TrueClass')
+          literal_type(true)
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::Literal>]
         def false_type
-          @false_type ||= instance_type_of('FalseClass')
+          literal_type(false)
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::Bases::Nil>]
         def nil_type
-          @nil_type ||= instance_type_of('NilClass')
+          wrap_rbs_type(RBS::Types::Bases::Nil.new(location: nil))
         end
 
-        # @return [Instance]
-        def string_type
-          @string_type ||= instance_type_of('String')
+        # @param literal [Integer, Symbol, String, TrueClass, FalseClass]
+        # @return [Type<RBS::Types::Literal, RBS::Types::ClassInstance>]
+        def string_type(literal = nil)
+          if literal
+            literal_type(literal.to_s)
+          else
+            instance_type_at('::String')
+          end
         end
 
-        # @return [Instance]
-        def symbol_type
-          @symbol_type ||= instance_type_of('Symbol')
+        # @param literal [Integer, Symbol, String, TrueClass, FalseClass]
+        # @return [Type<RBS::Types::Literal, RBS::Types::ClassInstance>]
+        def symbol_type(literal = nil)
+          if literal
+            literal_type(literal.to_sym)
+          else
+            instance_type_at('::Symbol')
+          end
         end
 
-        # @return [Instance]
+        # @param literal [Integer, Symbol, String, TrueClass, FalseClass]
+        # @return [Type<RBS::Types::Literal>]
+        def literal_type(literal)
+          wrap_rbs_type(RBS::Types::Literal.new(literal: literal, location: nil))
+        end
+
+        # @return [Type<RBS::Types::ClassInstance>]
         def array_type
-          @array_type ||= instance_type_of('Array')
+          instance_type_at('::Array')
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def hash_type
-          @hash_type ||= instance_type_of('Hash')
+          instance_type_at('::Hash')
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def range_type
-          @range_type ||= instance_type_of('Range')
+          instance_type_at('::Range')
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def regexp_type
-          @regexp_type ||= instance_type_of('RegExp')
+          instance_type_at('::RegExp')
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def proc_type
-          @proc_type ||= instance_type_of('Proc')
+          instance_type_at('::Proc')
         end
 
-        # @return [Instance]
-        def integer_type
-          @integer_type ||= instance_type_of('Integer')
+        # @return [Type<RBS::Types::Literal, RBS::Types::ClassInstance>]
+        def integer_type(literal = nil)
+          if literal
+            literal_type(literal.to_i)
+          else
+            instance_type_at('::Integer')
+          end
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def float_type
-          @float_type ||= instance_type_of('Float')
+          instance_type_at('::Float')
         end
 
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def numeric_type
-          @numeric_type ||= instance_type_of('Numeric')
+          instance_type_at('::Numeric')
+        end
+
+        # @return [Type<RBS::Types::ClassInstance>]
+        def object_type
+          instance_type_at('::Object')
         end
 
         # @param object_class [Store::Objects::NamespaceObject]
-        # @return [Instance]
-        def object_type(object_class)
-          Instance.new(klass: object_class)
+        # @return [Type<RBS::Types::ClassInstance>]
+        def singleton_type(object_class)
+          singleton_type_at(object_class.path)
         end
 
         # @param object_class [Store::Objects::NamespaceObject]
-        # @return [Instance]
+        # @return [Type<RBS::Types::ClassInstance>]
         def instance_type(object_class)
-          instance_type_of(object_class.path)
+          instance_type_at(object_class.path)
         end
 
-        # @return [Any]
+        # @param record [Hash{Symbol => RBS::Types::t}]
+        # @return [Type<RBS::Types::Record>]
+        def record_type(record)
+          wrap_rbs_type(RBS::Types::Record.new(fields: record, location: nil))
+        end
+
+        # @return [Type<RBS::Types::Bases::Any>]
         def any_type
-          Any.new
+          wrap_rbs_type(RBS::Types::Bases::Any.new(location: nil))
         end
 
+        # @param reason [String, nil]
+        # @return [Type<RBS::Types::Bases::Any>]
+        def unknown_type(reason: nil)
+          Logger.trace("Use unknown type because #{reason}") if reason
+          any_type
+        end
+
+        # @return [Type<RBS::Types::ClassInstance>]
         def class_class
-          @class_class ||= find_or_build('Class')
+          singleton_type_at('::Class')
         end
 
+        # @return [Type<RBS::Types::ClassInstance>]
         def module_class
-          @module_class ||= find_or_build('Module')
+          singleton_type_at('::Module')
         end
 
+        # @return [Type<RBS::Types::ClassInstance>]
         def object_class
-          @object_class ||= find_or_build('Object')
+          singleton_type_at('::Object')
         end
 
-        # @return [Instance]
-        def instance_type_of(path)
-          Instance.new(klass: find_or_build(path))
+        # @param args [Array<Type, RBS::Types::t>]
+        # @return [Type<RBS::Types::ClassInstance>]
+        def instance_type_at(path, args: [])
+          name = to_type_name(path)
+          name ? wrap_rbs_type(RBS::Types::ClassInstance.new(name: name, args: args.map(&method(:unwrap)), location: nil)) : unknown_type(reason: "#{path} does not exists")
         end
 
-        # @return [Instance]
-        def singleton_type_of(path)
-          Instance.new(klass: find_or_singleton_class(path))
+        # @return [Type<RBS::Types::ClassSingleton>]
+        def singleton_type_at(path)
+          name = to_type_name(path)
+          name ? wrap_rbs_type(RBS::Types::ClassSingleton.new(name: name, location: nil)) : unknown_type(reason: "#{path} does not exists")
         end
 
         # @param types [Array<Base>]
-        # @return [Union]
-        def union(*types)
-          Union.new(*types)
+        # @return [Type<RBS::Types::Union>]
+        def union_type(*types)
+          wrap_rbs_type(RBS::Types::Union.new(types: types.map(&method(:unwrap)), location: nil))
         end
 
-        # @return [Generator]
-        def build_converter(**kwargs)
-          Converter.new(self, **kwargs)
+        # @param required_parameters [Array<Base>]
+        # @param optional_parameters [Array<Base>]
+        # @param rest_parameter [Base, nil]
+        # @param post_parameters [Array<Base>]
+        # @param required_keyword_parameters [Array<(String, Base)>]
+        # @param optional_keyword_parameters [Array<(String, Base)>]
+        # @param keyword_rest_parameter [Base, nil]
+        # @param return_type [Base]
+        # @return [Type<RBS::Types::Function>]
+        def function_type(
+          return_type:,
+          required_parameters: [],
+          optional_parameters: [],
+          rest_parameter: nil,
+          post_parameters: [],
+          required_keyword_parameters: [],
+          optional_keyword_parameters: [],
+          keyword_rest_parameter: nil
+        )
+          build_param = lambda { |type| RBS::Types::Function::Param.new(type: unwrap(type), name: nil) }
+          build_keyword = lambda { |(name, type)| [name.to_sym, RBS::Types::Function::Param.new(type: unwrap(type), name: name.to_sym)] }
+          function_type = RBS::Types::Function.new(
+            required_positionals: required_parameters.map(&build_param),
+            optional_positionals: optional_parameters.map(&build_param),
+            rest_positionals: rest_parameter&.yield_self(&build_param),
+            trailing_positionals: post_parameters.map(&build_param),
+            required_keywords: required_keyword_parameters.map(&build_keyword).to_h,
+            optional_keywords: optional_keyword_parameters.map(&build_keyword).to_h,
+            rest_keywords: keyword_rest_parameter&.yield_self(&build_param),
+            return_type: unwrap(return_type),
+          )
+          wrap_rbs_type(function_type)
         end
 
-        def find(path)
-          Yoda::Store::Query::FindConstant.new(registry).find(path)
+        # @param required_parameters [Array<Base>]
+        # @param optional_parameters [Array<Base>]
+        # @param rest_parameter [Base, nil]
+        # @param post_parameters [Array<Base>]
+        # @param required_keyword_parameters [Array<(String, Base)>]
+        # @param optional_keyword_parameters [Array<(String, Base)>]
+        # @param keyword_rest_parameter [Base, nil]
+        # @param return_type [Base]
+        # @return [RBS::MethodType]
+        def rbs_method_type(**kwargs)
+          RBS::MethodType.new(
+            type_params: [],
+            type: unwrap(function_type(**kwargs)),
+            block: nil,
+            location: nil,
+          )
         end
 
-        def find_meta_class(path)
-          Yoda::Store::Query::FindMetaClass.new(registry).find(path)
-        end
+        # @param method_type [RBS::MethodType]
+        # @return [RBS::MethodType]
+        def fresh_params_of_method_type(method_type)
+          new_type_params = method_type.type_params.map(&method(:append_id_to_type_var))
+          new_type_variables = RBS::Types::Variable.build(new_type_params)
 
-        def find_or_build(path)
-          find(path) || Yoda::Store::Objects::ClassObject.new(path: normalize_path(path), superclass_path: 'Object')
-        end
+          subst = RBS::Substitution.build(method_type.type_params, new_type_variables)
 
-        def find_or_singleton_class(path)
-          find_meta_class(path) || Yoda::Store::Objects::MetaClassObject.new(path: normalize_path(path))
+          method_type.update(
+            type_params: new_type_params,
+            type: method_type.type.sub(subst),
+            block: method_type.block&.sub(subst),
+          )
         end
 
         private
+
+        def unwrap(type)
+          if type.respond_to?(:rbs_type)
+            type.rbs_type
+          else
+            type
+          end
+        end
+          
+
+        # @param var [Symbol]
+        # @return [Symbol]
+        def append_id_to_type_var(var)
+          "#{var}##{object_id}-#{new_id}".to_sym
+        end
+
+        # @param path [String, Path, ScopedPath]
+        # @return [RBS::TypeName, nil]
+        def to_type_name(path)
+          environment.resolve_rbs_type_name(path)
+        end
+
+        # @return [Converter]
+        def build_converter(**kwargs)
+          Converter.new(self, **kwargs)
+        end
 
         def normalize_path(path)
           case path
@@ -159,6 +282,12 @@ module Yoda
           else
             fail TypeError, path
           end
+        end
+
+        # @return [Integer]
+        def new_id
+          @id ||= 0
+          @id += 1
         end
       end
     end

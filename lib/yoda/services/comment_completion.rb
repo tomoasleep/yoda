@@ -6,8 +6,8 @@ module Yoda
       require 'yoda/services/comment_completion/tag_provider'
       require 'yoda/services/comment_completion/type_provider'
 
-      # @type Store::Registry
-      attr_reader :registry
+      # @return [Model::Environment]
+      attr_reader :environment
 
       # @type ::Parser::AST::Node
       attr_reader :ast
@@ -18,12 +18,12 @@ module Yoda
       # @type Location
       attr_reader :location
 
-      # @param registry [Store::Registry]
+      # @param environment [Model::Environment]
       # @param ast      [::Parser::AST::Node]
       # @param comments [Array<::Parser::Source::Comment>]
       # @param location [Location]
-      def initialize(registry, ast, comments, location)
-        @registry = registry
+      def initialize(environment, ast, comments, location)
+        @environment = environment
         @ast = ast
         @comments = comments
         @location = location
@@ -48,17 +48,17 @@ module Yoda
 
       # @return [ParamProvider]
       def param_provider
-        @param_provider ||= ParamProvider.new(registry, ast, comments, location)
+        @param_provider ||= ParamProvider.new(environment, ast, comments, location)
       end
 
       # @return [TagProvider]
       def tag_provider
-        @tag_provider ||= TagProvider.new(registry, ast, comments, location)
+        @tag_provider ||= TagProvider.new(environment, ast, comments, location)
       end
 
       # @return [TypeProvider]
       def type_provider
-        @type_provider ||= TypeProvider.new(registry, ast, comments, location)
+        @type_provider ||= TypeProvider.new(environment, ast, comments, location)
       end
 
       def comment?

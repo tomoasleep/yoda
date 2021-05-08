@@ -22,11 +22,11 @@ module Yoda
         end
 
         def core
-          @core ||= Objects::Library::Core.current_version
+          @core ||= Objects::Library.core
         end
 
         def std
-          @std ||= Objects::Library::Std.current_version
+          @std ||= Objects::Library.std
         end
 
         def builder

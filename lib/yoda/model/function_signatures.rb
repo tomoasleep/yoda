@@ -8,6 +8,8 @@ module Yoda
       require 'yoda/model/function_signatures/parameter_list'
       require 'yoda/model/function_signatures/type_builder'
       require 'yoda/model/function_signatures/formatter'
+      require 'yoda/model/function_signatures/rbs_method'
+      require 'yoda/model/function_signatures/wrapper'
     end
   end
 end

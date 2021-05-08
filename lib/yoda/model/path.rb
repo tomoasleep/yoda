@@ -21,8 +21,14 @@ module Yoda
         @name = name
       end
 
+      # @return [Boolean]
       def absolute?
         name.start_with?('::')
+      end
+
+      # @return [Path]
+      def absolute!
+        absolute? ? self : Path.new("::#{to_s}")
       end
 
       # @return [String]
@@ -69,6 +75,16 @@ module Yoda
       # @return [Array<String>]
       def namespaces
         name.split('::')
+      end
+
+      # @return [Array<Path>]
+      def absolute_paths
+        [self.absolute!]
+      end
+
+      # @return [Array<Path>]
+      def paths
+        [self]
       end
 
       # @return [Array<Path>]

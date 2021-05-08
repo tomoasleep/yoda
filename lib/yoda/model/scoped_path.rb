@@ -3,8 +3,9 @@ module Yoda
     # ScopedPath represents a path name written in namespaces.
     # ScopedPath owns lexical scopes where the path is written.
     class ScopedPath
-      # @return [Array<Path>] represents namespaces in order of nearness.
+      # @return [LexicalContext] represents namespaces in order of nearness.
       attr_reader :scopes
+      alias lexical_context scopes
 
       # @return [Path]
       attr_reader :path
@@ -18,7 +19,7 @@ module Yoda
       # @param scopes [Array<Path>] represents namespaces in order of nearness.
       # @param path [Path]
       def initialize(scopes, path)
-        @scopes = scopes.map { |pa| Path.build(pa) }
+        @scopes = LexicalContext.build(scopes)
         @path = Path.build(path)
       end
 
@@ -38,6 +39,11 @@ module Yoda
 
       def eql?(another)
         another.is_a?(ScopedPath) && path == another.path && scopes == another.scopes
+      end
+
+      # @return [Array<Path>]
+      def absolute_paths
+        scopes.map { |scope| Path.from_names([scope, path]).absolute! }
       end
 
       # @return [Array<Path>]

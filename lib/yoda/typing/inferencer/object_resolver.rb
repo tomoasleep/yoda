@@ -37,6 +37,18 @@ module Yoda
             []
           end
         end
+
+        # @param receiver_value [Model::Values::Base]
+        # @param parent [Contexts::Base]
+        # @return [Contexts::Base]
+        def generate_class_context(instance_type, parent:)
+          Contexts::NamespaceContext.new(
+            receiver_value: instance_value.singleton_class_value,
+            parent: parent,
+            registry: registry,
+          )
+        end
+
       end
     end
   end

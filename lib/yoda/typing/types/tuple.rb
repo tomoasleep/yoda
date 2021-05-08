@@ -6,7 +6,7 @@ module Yoda
         attr_reader :types
 
         # @param types [Array<Base>]
-        def initailize(*types)
+        def initialize(*types)
           @types = types
         end
 

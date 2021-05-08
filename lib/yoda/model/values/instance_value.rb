@@ -1,63 +1,44 @@
+require 'forwardable'
+
 module Yoda
   module Model
     module Values
       class InstanceValue < Base
-        # @type Registry
-        attr_reader :registry
+        extend Forwardable
 
-        # @type ::YARD::CodeObjects::ClassObject | ::YARD::CodeObjects::Proxy
-        attr_reader :class_object
+        # @return [Environment::AccessorInterface]
+        attr_reader :class_accessor
 
-        # @param registry [Registry]
-        # @param class_object [::YARD::CodeObjects::ClassObject, ::YARD::CodeObjects::Proxy]
-        def initialize(registry, class_object)
-          fail ArgumentError, registry unless registry.is_a?(Registry)
-          fail ArgumentError, class_object unless class_object.is_a?(::YARD::CodeObjects::NamespaceObject) || class_object.is_a?(::YARD::CodeObjects::Proxy)
-          @registry = registry
-          @class_object = class_object
+        delegate [:select_constant_type, :select_constant_paths, :select_method] => :class_accessor_members
+
+        # @param class_accessor [Environment::AccessorInterface]
+        def initialize(class_accessor)
+          @class_accessor = class_accessor
         end
 
-        # @return [Array<Functions::Base>]
-        def methods(visibility: nil)
-          return [] if class_object.type == :proxy
-          opts = { scope: :instance, visibility: visibility }.compact
-          class_object.meths(opts).map { |meth| Functions::Method.new(meth) } + object_methods(visibility: visibility)
+        def referred_objects
+          [class_accessor.class_object]
         end
 
-        # @return [String]
-        def path
-          namespace.path
+        # @return [InstanceValue]
+        def singleton_class_value
+          InstanceValue.new(class_accessor.singleton_accessor)
         end
 
-        def namespace
-          class_object
-        end
-
-        # @param [String]
-        def docstring
-          class_object.docstring
-        end
-
-        # @return [Array<[String, Integer]>]
-        def defined_files
-          namespace.files
+        # @return [InstanceValue, EmptyValue]
+        def instance_value
+          if class_accessor.instance_accessor
+            InstanceValue.new(class_accessor.instance_accessor)
+          else
+            EmptyValue.new
+          end
         end
 
         private
 
-        # @return [Array<Functions::Base>]
-        def object_methods(visibility: nil)
-          return [] if class_object.type == :proxy
-          opts = { scope: :instance, visibility: visibility }.compact
-          method_names = Set.new(class_object.meths(opts).map(&:name))
-          if object = registry.get('::Object')
-            object.meths(opts)
-              .reject { |o| ![visibility].flatten.include?(:private) && o.namespace.name == :Kernel }
-              .reject { |o| method_names.include?(o.name) }
-              .map { |meth| Functions::Method.new(meth) }
-          else
-            []
-          end
+        # @return [Environment::NamespaceMembers]
+        def class_accessor_members
+          class_accessor.members
         end
       end
     end

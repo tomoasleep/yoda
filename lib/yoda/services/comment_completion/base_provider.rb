@@ -3,8 +3,8 @@ module Yoda
     class CommentCompletion
       # @abstract
       class BaseProvider
-        # @type Store::Registry
-        attr_reader :registry
+        # @type Model::Environment
+        attr_reader :environment
 
         # @type ::Parser::AST::Node
         attr_reader :ast
@@ -15,12 +15,12 @@ module Yoda
         # @type Location
         attr_reader :location
 
-        # @param registry [Store::Registry]
+        # @param environment [Model::Environment]
         # @param ast      [::Parser::AST::Node]
         # @param comments [Array<::Parser::Source::Comment>]
         # @param location [Location]
-        def initialize(registry, ast, comments, location)
-          @registry = registry
+        def initialize(environment, ast, comments, location)
+          @environment = environment
           @ast = ast
           @comments = comments
           @location = location
@@ -42,7 +42,7 @@ module Yoda
 
         # @return [Evaluator]
         def evaluator
-          @evaluator ||= Evaluator.new(ast: ast, registry: registry)
+          @evaluator ||= Evaluator.new(ast: ast, environment: environment)
         end
 
         # @return [Parsing::Query::CurrentCommentTokenQuery]

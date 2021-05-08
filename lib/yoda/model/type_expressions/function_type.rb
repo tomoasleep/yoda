@@ -121,13 +121,14 @@ module Yoda
         # @return [RBS::Types::Function]
         def to_rbs_type(env)
           RBS::Types::Function.new(
-            required_positonals: required_parameters.map { |type| RBS::Types::Param.new(type: type.to_rbs_type(env), name: nil) },
-            optional_positonals: optional_parameters.map { |type| RBS::Types::Param.new(type: type.to_rbs_type(env), name: nil) },
-            rest_positonals: rest_parameter ? RBS::Types::Param.new(type: rest_parameter.to_rbs_type(env)) : nil,
-            trailing_positonals: post_parameters.map { |type| RBS::Types::Param.new(type: type.to_rbs_type(env), name: nil) },
-            required_keywords: required_keyword_parameters.map { |(name, type)| RBS::Types::Param.new(type: type.to_rbs_type(env), name: name.to_sym) },
-            optional_keywords: optional_keyword_parameters.map { |(name, type)| RBS::Types::Param.new(type: type.to_rbs_type(env), name: name.to_sym) },
-            rest_keywords: keyword_rest_parameter ? RBS::Types::Param.new(type: keyword_rest_parameter.to_rbs_type(env)) : nil,
+            required_positionals: required_parameters.map { |type| RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil) },
+            optional_positionals: optional_parameters.map { |type| RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil) },
+            rest_positionals: rest_parameter ? RBS::Types::Function::Param.new(type: rest_parameter.to_rbs_type(env), name: nil) : nil,
+            trailing_positionals: post_parameters.map { |type| RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil) },
+            # Not include keyword name to parameter object because if its string expression becomes redundunt.
+            required_keywords: required_keyword_parameters.map { |(name, type)| [name.to_sym, RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil)] }.to_h,
+            optional_keywords: optional_keyword_parameters.map { |(name, type)| [name.to_sym, RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil)] }.to_h,
+            rest_keywords: keyword_rest_parameter ? RBS::Types::Function::Param.new(type: keyword_rest_parameter.to_rbs_type(env), name: nil) : nil,
             return_type: return_type.to_rbs_type(env),
           )
         end

@@ -36,7 +36,7 @@ module Yoda
           session.workspaces.each do |workspace|
             next unless workspace.suburi?(uri)
 
-            node_worker = Services::CurrentNodeExplain.from_source(registry: workspace.project.registry, source: source, location: location)
+            node_worker = Services::CurrentNodeExplain.from_source(environment: workspace.project.environment, source: source, location: location)
 
             references = node_worker.current_node_signature.defined_files
             locations = references.map { |(path, line, column)| create_location(workspace.uri_of_path(path), line, column) }

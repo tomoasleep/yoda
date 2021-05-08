@@ -15,8 +15,11 @@ module Yoda
     require 'yoda/store/yard_importer'
 
     class << self
+      # @return [Project]
       def setup(**kwargs)
-        Setup.new(**kwargs).run
+        worker = Setup.new(**kwargs)
+        worker.run
+        worker.project.tap(&:setup)
       end
     end
   end

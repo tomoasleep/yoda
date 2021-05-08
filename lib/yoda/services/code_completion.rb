@@ -6,8 +6,8 @@ module Yoda
       require 'yoda/services/code_completion/local_variable_provider'
       require 'yoda/services/code_completion/const_provider'
 
-      # @return [Store::Registry]
-      attr_reader :registry
+      # @return [Model::Environment]
+      attr_reader :environment
 
       # @return [String]
       attr_reader :source
@@ -15,11 +15,11 @@ module Yoda
       # @return [Parsing::Location]
       attr_reader :location
 
-      # @param registry [Store::Registry]
+      # @param environment [Model::Environment]
       # @param source   [String]
       # @param location [Parsing::Location]
-      def initialize(registry, source, location)
-        @registry = registry
+      def initialize(environment, source, location)
+        @environment = environment
         @source = source
         @location = location
       end
@@ -47,17 +47,17 @@ module Yoda
 
       # @return [MethodProvider]
       def method_provider
-        @method_provider ||= MethodProvider.new(registry, ast, location, evaluator)
+        @method_provider ||= MethodProvider.new(environment, ast, location, evaluator)
       end
 
       # @return [LocalVariableProvider]
       def local_variable_provider
-        @local_variable_provider ||= LocalVariableProvider.new(registry, ast, location, evaluator)
+        @local_variable_provider ||= LocalVariableProvider.new(environment, ast, location, evaluator)
       end
 
       # @return [ConstantProvider]
       def const_provider
-        @constant_provider ||= ConstProvider.new(registry, ast, location, evaluator)
+        @constant_provider ||= ConstProvider.new(environment, ast, location, evaluator)
       end
 
       # @return [Yoda::AST::Vnode]
@@ -67,7 +67,7 @@ module Yoda
 
       # @return [Evaluator]
       def evaluator
-        @evaluator ||= Evaluator.new(ast: ast, registry: registry)
+        @evaluator ||= Evaluator.new(ast: ast, environment: environment)
       end
     end
   end

@@ -54,7 +54,7 @@ module Yoda
 
       # Return {RBS::TypeName} for the instance of the given path.
       # @param path [ScopedPath, Path, String]
-      # @return [RBS::TypeName]
+      # @return [RBS::TypeName, nil]
       def resolve_rbs_type_name(path)
         scoped_path = ScopedPath.build(path)
         # TODO: ask both registry in lexical priority

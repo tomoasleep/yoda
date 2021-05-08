@@ -5,8 +5,8 @@ module Yoda
       # Base class of completion candidates providers for code completion.
       # This class bridges analysis features such as syntastic analysis {#source_analyzer} and symbolic execiton {#evaluator}.
       class BaseProvider
-        # @return [Store::Registry]
-        attr_reader :registry
+        # @return [Model::Environment]
+        attr_reader :environment
 
         # @return [AST::Vnode]
         attr_reader :ast
@@ -17,12 +17,12 @@ module Yoda
         # @return [Evaluator]
         attr_reader :evaluator
 
-        # @param registry [Store::Registry]
+        # @param environment [Model::Environment]
         # @param ast [AST::Vnode]
         # @param location [Parsing::Location]
         # @param evaluator [Evaluator]
-        def initialize(registry, ast, location, evaluator)
-          @registry = registry
+        def initialize(environment, ast, location, evaluator)
+          @environment = environment
           @ast = ast
           @location = location
           @evaluator = evaluator

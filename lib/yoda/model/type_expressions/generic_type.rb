@@ -58,7 +58,17 @@ module Yoda
 
         # @param env [Environment]
         def to_rbs_type(env)
-          RBS::Types::ClassInstance.new(name: lexical_scope.build_type_name(path), args: type_arguments.map { |t| t.to_rbs_type(env) }, location: nil)
+          type_args = type_arguments.map { |t| t.to_rbs_type(env) }
+          case base_type
+          when InstanceType
+            name = env.resolve_rbs_type_name(base_type.path)
+            name ? RBS::Types::ClassInstance.new(name: name, args: type_args, location: nil) : RBS::Types::Bases::Any.new(location: nil)
+          when ModuleType
+            name = env.resolve_rbs_type_name(base_type.path)
+            name ? RBS::Types::Interface.new(name: name, args: type_args, location: nil) : RBS::Types::Bases::Any.new(location: nil)
+          else
+            inner_type = base_type.to_rbs_type(env)
+          end
         end
 
         # @return [self]

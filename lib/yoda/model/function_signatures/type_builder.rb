@@ -99,7 +99,8 @@ module Yoda
 
           # @return [TypeExpressions::Base]
           def type
-            if tag.yard_types.empty?
+            # yard tag may not have any type literals.
+            if (tag.yard_types || []).empty?
               TypeExpressions::UnknownType.new('nodoc') 
             else
               TypeExpressions.parse_type_strings(tag.yard_types).change_root(convert_lexical_scope_literals(tag.lexical_scope))

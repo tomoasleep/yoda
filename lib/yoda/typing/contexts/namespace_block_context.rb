@@ -19,13 +19,8 @@ module Yoda
           objects
         end
 
-        # @return [BaseContext]
-        def current_namespace_context
-          self
-        end
-
         # @return [Context, nil]
-        def parent_for_environment
+        def parent_variable_scope_context
           parent
         end
       end

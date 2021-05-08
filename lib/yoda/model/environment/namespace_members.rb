@@ -53,13 +53,18 @@ module Yoda
           paths = select_constant_paths(name)
 
           types = paths.flat_map do |path|
-            RBS::Types::ClassSingleton.new(
-              name: accessor.environment.resolve_rbs_type_name(path),
+            name = accessor.environment.resolve_rbs_type_name(path)
+            name && RBS::Types::ClassSingleton.new(
+              name: name,
               location: nil,
             )
-          end
+          end.compact
 
-          RBS::Types::Union.new(types: types, location: nil)
+          if types.empty?
+            RBS::Types::Bases::Any.new(location: nil)
+          else
+            RBS::Types::Union.new(types: types, location: nil)
+          end
         end
 
         private

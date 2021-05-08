@@ -1,26 +1,39 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Typing::Types::Generator do
-  let(:registry) { Yoda::Store::Registry.new(adapter) }
-  let(:generator) { described_class.new(registry) }
-  let(:adapter) do
-    Yoda::Store::Adapters::MemoryAdapter.new.tap do |adapter|
-      objects.each { |object| adapter.put(object.address, object) }
+  let(:environment) { Yoda::Model::Environment.build }
+  let(:registry) { environment.registry }
+  let(:generator) { described_class.new(environment: environment) }
+
+  before do
+    patch = Yoda::Store::Objects::Patch.new(:test).tap do |patch|
+      objects.each { |object| patch.register(object) }
     end
+    registry.add_file_patch(patch)
   end
 
-  let(:objects) { [] }
+  let(:objects) do
+    [
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'Object',
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'Integer',
+        superclass_path: 'Object',
+      ),
+    ]
+  end
 
   describe '#integer_type' do
     subject { generator.integer_type }
 
     context 'when integer type is not defined' do
-      it { is_expected.to have_attributes(klass: have_attributes(path: 'Integer')) }
+      it { is_expected.to have_attributes(to_s: "::Integer") }
     end
 
     context 'when integer type is defined' do
       let(:objects) { [Yoda::Store::Objects::ClassObject.new(path: 'Integer')] }
-      it { is_expected.to have_attributes(klass: have_attributes(path: 'Integer')) }
+      it { is_expected.to have_attributes(to_s: "::Integer") }
     end
   end
 end

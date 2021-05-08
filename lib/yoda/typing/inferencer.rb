@@ -4,11 +4,11 @@ module Yoda
       require 'yoda/typing/inferencer/arguments_binder'
       require 'yoda/typing/inferencer/arguments'
       require 'yoda/typing/inferencer/ast_traverser'
-      require 'yoda/typing/inferencer/environment'
       require 'yoda/typing/inferencer/method_resolver'
-      require 'yoda/typing/inferencer/method_definition_resolver'
       require 'yoda/typing/inferencer/object_resolver'
+      require 'yoda/typing/inferencer/parameter_binder'
       require 'yoda/typing/inferencer/tracer'
+      require 'yoda/typing/inferencer/type_binding'
 
       # @return [Contexts::BaseContext]
       attr_reader :context
@@ -16,17 +16,18 @@ module Yoda
       # @return [Tracer]
       attr_reader :tracer
 
-      # @param registry [Store::Registry]
+      # @param environment [Model::Environment]
       # @return [Inferencer]
-      def self.create_for_root(registry)
-        new(context: Contexts::NamespaceContext.root_scope(registry))
+      def self.create_for_root(environment:)
+        context = Contexts.root_scope(environment: environment)
+        new(context: context)
       end
 
       # @param context [Contexts::BaseContext]
       # @param tracer [Tracer, nil]
       def initialize(context:, tracer: nil)
         @context = context
-        @tracer = tracer || Tracer.new(registry: context.registry)
+        @tracer = tracer || Tracer.new(environment: context.environment, generator: context.generator)
       end
 
       # @param node [AST::Vnode]

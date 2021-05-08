@@ -5,7 +5,7 @@ module Yoda
     module Contexts
       class MethodContext < BaseContext
         # @return [Context, nil]
-        def parent_for_environment
+        def parent_variable_scope_context
           nil
         end
       end

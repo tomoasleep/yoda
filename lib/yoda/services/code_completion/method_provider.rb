@@ -27,36 +27,30 @@ module Yoda
           nil
         end
 
-        # @return [Array<FunctionSignatures::Base>]
+        # @return [Array<FunctionSignatures::Wrapper>]
         def method_candidates
           return [] unless providable?
-          @method_candidates ||= receiver_values.flat_map do |receiver|
-            Store::Query::FindSignature.new(registry).select(receiver, /\A#{Regexp.escape(index_word)}/, visibility: method_visibility)
-          end
+          @method_candidates ||= receiver_type.value.select_method(/\A#{Regexp.escape(index_word)}/, visibility: method_visibility)
         end
 
         # @return [Array<Symbol>]
         def method_visibility
           if current_send.implicit_receiver?
-            %i(public)
-          else
             %i(public private protected)
+          else
+            %i(public)
           end
         end
 
-        # @return [Array<Store::Objects::Base>]
-        def receiver_values
-          @receiver_values ||= evaluator.receiver_candidates(current_send) || []
+        # @return [Typing::Types::Type, nil]
+        def receiver_type
+          return nil unless current_send
+          @receiver_type ||= evaluator.receiver_type(current_send)
         end
 
         # @return [AST::SendNode, nil]
         def current_send
           @current_send ||= current_node&.type == :send ? current_node : nil
-        end
-
-        # @return [AST::Node, nil]
-        def current_receiver_node
-          current_send&.receiver
         end
 
         # @return [String, nil]

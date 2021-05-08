@@ -48,9 +48,9 @@ module Yoda
             object.merge(another).with_connection(**connection_options)
           end
           
-          # @return [Objects::MetaClassObject::Connected]
+          # @return [Objects::MetaClassObject::Connected, nil]
           def meta_class
-            registry.get(meta_class_address).with_connection(**connection_options)
+            registry.get(meta_class_address)&.with_connection(**connection_options)
           end
 
           private

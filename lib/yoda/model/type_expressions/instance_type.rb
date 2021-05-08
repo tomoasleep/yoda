@@ -41,7 +41,8 @@ module Yoda
 
         # @param env [Environment]
         def to_rbs_type(env)
-          RBS::Types::ClassInstance.new(name: env.resolve_rbs_type_name(path), args: [], location: nil)
+          name = env.resolve_rbs_type_name(path)
+          name ? RBS::Types::ClassInstance.new(name: name, args: [], location: nil) : RBS::Types::Bases::Any.new(location: nil)
         end
       end
     end

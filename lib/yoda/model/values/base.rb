@@ -4,26 +4,41 @@ module Yoda
       # @abstract
       class Base
         # @abstract
-        # @return [Array<Functions::Base>]
-        def methods
+        # @return [Array<Store::Objects::Base>]
+        def referred_objects
           fail NotImplementedError
         end
 
         # @abstract
-        # @return [String]
-        def path
+        # @param name [String, Symbol]
+        # @return [Enumerator<Functions::Wrapper>]
+        def select_method(name)
           fail NotImplementedError
         end
 
         # @abstract
-        # @return [String]
-        def docstring
+        # @param name [String, Symbol]
+        # @return [RBS::Types::t]
+        def select_constant_type(name)
           fail NotImplementedError
         end
 
         # @abstract
-        # @return [Array<[String, Integer]>]
-        def defined_files
+        # @param name [String, Symbol]
+        # @return [Array<Symbol>]
+        def select_constant_paths(name)
+          fail NotImplementedError
+        end
+
+        # @abstract
+        # @return [Base]
+        def singleton_class_value
+          fail NotImplementedError
+        end
+
+        # @abstract
+        # @return [Base]
+        def instance_value
           fail NotImplementedError
         end
       end

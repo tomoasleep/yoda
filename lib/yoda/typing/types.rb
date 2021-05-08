@@ -14,6 +14,11 @@ module Yoda
 
       require 'yoda/typing/types/generator'
       require 'yoda/typing/types/converter'
+
+      require 'yoda/typing/types/instance_type'
+      require 'yoda/typing/types/rbs_type_wrapper_interface'
+      require 'yoda/typing/types/singleton_type'
+      require 'yoda/typing/types/type'
     end
   end
 end

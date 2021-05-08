@@ -29,7 +29,7 @@ module Yoda
 
         # @return [Descriptions::Base]
         def node_type_description
-          Descriptions::NodeDescription.new(node_info.node, node_info.type_expression)
+          Descriptions::NodeDescription.new(node_info.node, node_info.type)
         end
 
         # @return [Array<Descriptions::Base>]

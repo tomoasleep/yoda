@@ -42,6 +42,17 @@ module Yoda
           @type = type_builder.type
         end
 
+        # @param env [Environment]
+        # @return [RBS::MethodType]
+        def rbs_type(env)
+          RBS::MethodType.new(
+            type_params: [],
+            type: type.to_rbs_type(env),
+            block: nil,
+            location: nil,
+          )
+        end
+
         # @return [Array<(String, Integer, Integer)>]
         def sources
           method_object.sources

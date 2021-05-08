@@ -7,7 +7,7 @@ module Yoda
 
         # @param function [FunctionSignatures::Base]
         def initialize(function)
-          fail ArgumentError, function unless function.is_a?(FunctionSignatures::Base)
+          fail ArgumentError, function unless function.is_a?(FunctionSignatures::Wrapper)
           @function = function
         end
 

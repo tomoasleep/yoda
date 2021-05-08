@@ -76,17 +76,21 @@ module Yoda
         def superclass
           return @superclass if instance_variable_defined?(:@superclass)
           @superclass = begin
-            if object.respond_to?(:base_class_address)
-              base_class_superclass
-            elsif object.respond_to?(:superclass_path)
-              if object.superclass_path
-                FindConstant.new(registry).find(object.superclass_path)
+            found_object = begin
+              if object.respond_to?(:base_class_address)
+                base_class_superclass
+              elsif object.respond_to?(:superclass_path)
+                if object.superclass_path
+                  FindConstant.new(registry).find(object.superclass_path)
+                else
+                  nil
+                end
               else
                 nil
               end
-            else
-              nil
             end
+
+            found_object&.namespace? ? found_object : nil
           end
         end
 

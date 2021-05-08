@@ -47,7 +47,7 @@ module Yoda
 
         def to_expression
           Model::TypeExpressions::FunctionType.new(
-            context: context.to_expression,
+            context: context&.to_expression,
             return_type: return_type.to_expression,
             parameters: parameters.map(&:to_expression),
             rest_parameter: rest_parameter&.to_expression,
