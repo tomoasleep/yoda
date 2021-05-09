@@ -37,6 +37,11 @@ module Yoda
           overload.document || method_object.document
         end
 
+        # @return [Array<Store::Objects::Tag>]
+        def tags
+          overload.tag_list || method_object.tag_list
+        end
+
         # @return [TypeExpressions::FunctionType]
         def type
           @type = type_builder.type

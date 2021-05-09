@@ -41,6 +41,12 @@ module Yoda
         end
 
         # @abstract
+        # @return [Array<Store::Objects::Tag>]
+        def tags
+          fail NotImplementedError
+        end
+
+        # @abstract
         # @return [ParameterList]
         def parameters
           fail NotImplementedError

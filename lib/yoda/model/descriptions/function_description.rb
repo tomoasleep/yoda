@@ -36,7 +36,20 @@ module Yoda
           **#{title}**
 
           #{function.document}
+          #{tag_documents}
           EOS
+        end
+
+        private
+
+        def tag_documents
+          function.tags.map do |tag|
+            str = "@#{tag.tag_name}"
+            str += " `#{tag.name}`" if tag.name
+            str += " [#{tag.yard_types.map { |name| "`#{name}`" }.join(', ')}]" if tag.yard_types && !(tag.yard_types.empty?)
+            str += " #{tag.text.chomp}" if tag.text
+            str
+          end.join("  \n") # Commonmark requires 2 spaces for line breaking
         end
       end
     end

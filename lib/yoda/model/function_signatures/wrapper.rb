@@ -14,7 +14,7 @@ module Yoda
         # @return [FunctionSignature::Base]
         attr_reader :signature
 
-        delegate [:name, :visibility, :sep, :namespace_path, :document, :sources, :parameters, :primary_source] => :signature
+        delegate [:name, :visibility, :sep, :namespace_path, :document, :tags, :sources, :parameters, :primary_source] => :signature
 
         # @param environment [Environment]
         # @param signature [FunctionSignature::Base]

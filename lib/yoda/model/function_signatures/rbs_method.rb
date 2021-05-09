@@ -54,6 +54,11 @@ module Yoda
           rbs_method_typedef.comment.string
         end
 
+        # @return [Array<Store::Objects::Tag>]
+        def tags
+          []
+        end
+
         # @abstract
         # @return [ParameterList]
         def parameters

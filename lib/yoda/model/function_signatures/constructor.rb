@@ -49,6 +49,11 @@ module Yoda
           initialize_method.document
         end
 
+        # @return [Array<Store::Objects::Tag>]
+        def tags
+          initialize_method.tag_list
+        end
+
         # @return [Array<(String, Integer, Integer)>]
         def sources
           initialize_method.sources
