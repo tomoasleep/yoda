@@ -16,6 +16,11 @@ module Yoda
           @object = object
         end
 
+        # @return [Enumerator<Objects::MethodObject>]
+        def to_enum(**kwargs)
+          FindMethod.new(registry).all(object, **kwargs)
+        end
+
         # @param method_name [String, Regexp]
         # @return [Objects::MethodObject, nil]
         def find(method_name, **kwargs)

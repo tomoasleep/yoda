@@ -18,6 +18,13 @@ module Yoda
           lazy_select(namespace, method_name, visibility: nil).to_a
         end
 
+        # @param namespace [Objects::Namespace]
+        # @param visibility [Array<Symbol>, nil]
+        # @return [Enumerator<Objects::MethodObject>]
+        def all(namespace, visibility: nil)
+          lazy_select(namespace, //, visibility: nil)
+        end
+
         private
 
         # @param namespace [Objects::Namespace]
