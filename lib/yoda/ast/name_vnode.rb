@@ -10,10 +10,9 @@ module Yoda
       attr_reader :name
 
       # @param name [Symbol]
-      # @param parent [Vnode]
-      def initialize(name, parent: nil)
+      def initialize(name, **kwargs)
         @name = name
-        super(parent: parent)
+        super(**kwargs)
       end
 
       # @return [Array<Node>, nil]

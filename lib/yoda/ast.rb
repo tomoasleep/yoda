@@ -45,12 +45,13 @@ module Yoda
     class << self
       # @param node [::AST::Node]
       # @param parent [Vnode]
+      # @param comment_by_node [Hash{Parser::AST::Node => Array<Parser::Source::Comment>}]
       # @return [Yoda::AST::Node]
-      def wrap(node, parent: nil)
+      def wrap(node, parent: nil, comments_by_node: {})
         if parent
-          wrapper_class_for(node).new(node, parent: parent)
+          wrapper_class_for(node).new(node, parent: parent, comments_by_node: comments_by_node)
         else
-          RootVnode.new(node).content
+          RootVnode.new(node, comments_by_node: comments_by_node).content
         end
       end
 

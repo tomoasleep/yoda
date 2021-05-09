@@ -1,8 +1,8 @@
 module Yoda
   module AST
     class EmptyVnode < Vnode
-      def initialize(_el = nil, parent: nil)
-        super(parent: parent)
+      def initialize(_el = nil, **kwargs)
+        super(**kwargs)
       end
 
       # @return [Symbol]

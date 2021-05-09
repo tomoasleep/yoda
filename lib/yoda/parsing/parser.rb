@@ -13,7 +13,14 @@ module Yoda
       # @return [(AST::Vnode, Array<::Parser::Source::Comment>)]
       def parse_with_comments(string)
         node, comments = ::Parser::CurrentRuby.parse_with_comments(string)
-        [AST.wrap(node), comments]
+        comments_by_node = begin
+          if ::Parser::Source::Comment.respond_to?(:associate_by_identity)
+            ::Parser::Source::Comment.associate_by_identity(node, comments)
+          else
+            ::Parser::Source::Comment.associate(node, comments)
+          end
+        end
+        [AST.wrap(node, comments_by_node: comments_by_node), comments]
       end
 
       # @param string [String]

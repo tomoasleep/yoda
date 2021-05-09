@@ -7,8 +7,10 @@ module Yoda
       attr_reader :node
 
       # @param node [Parser::AST::Node]
-      def initialize(node)
+      # @param comment_by_node [Hash{Parser::AST::Node => Array<Parser::Source::Comment>}]
+      def initialize(node, comments_by_node: {})
         @node = node
+        @comments_by_node = comments_by_node
       end
 
       # @return [nil]

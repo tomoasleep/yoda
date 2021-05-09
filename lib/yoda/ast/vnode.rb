@@ -9,9 +9,14 @@ module Yoda
       # @return [Vnode, nil]
       attr_reader :parent
 
+      # @return [Hash{Parser::AST::Node => Array<Parser::Source::Comment>}]
+      attr_reader :comments_by_node
+
       # @param parent [Vnode, nil]
-      def initialize(parent: nil)
+      # @param comment_by_node [Hash{Parser::AST::Node => Array<Parser::Source::Comment>}]
+      def initialize(parent: nil, comments_by_node: {})
         @parent = parent
+        @comments_by_node = comments_by_node
       end
 
       # @return [Array<Vnode>] all nodes between root and self.
@@ -22,7 +27,7 @@ module Yoda
       # @param [Parser::AST::Node]
       # @return [Vnode]
       def wrap_child(child_node)
-        AST.wrap(child_node, parent: self)
+        AST.wrap(child_node, parent: self, comments_by_node: comments_by_node)
       end
 
       # @return [Array<Vnode>]
@@ -90,6 +95,11 @@ module Yoda
         # @return [Enumerable<Vnode>]
         def all_nodes_lazy
           [self, *children].lazy.flat_map { |el| self == el ? self : el.all_nodes_lazy }
+        end
+
+        # @param comment_by_node [Array<Parser::Source::Comment>]
+        def comments
+          @comments ||= comments_by_node[node] || []
         end
       end
       include CommentAssociation
