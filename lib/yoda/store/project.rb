@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'forwardable'
 require 'rbs'
+require 'pathname'
 
 module Yoda
   module Store
@@ -38,7 +39,22 @@ module Yoda
       # @return [RBS::Environment]
       def rbs_environment
         @rbs_environment ||= begin
-          loader = RBS::EnvironmentLoader.new
+          repository = RBS::Repository.new
+          config.rbs_repository_paths.each do |repo_path|
+            pathname = Pathname(repo_path).expand_path(root_path)
+            repository.add(pathname)
+          end
+          
+          loader = RBS::EnvironmentLoader.new(repository: repository)
+          config.rbs_signature_paths.each do |sig_path|
+            pathname = Pathname(sig_path).expand_path(root_path)
+            loader.add(path: pathname)
+          end
+
+          config.rbs_libraries.each do |library|
+            loader.add(library: library)
+          end
+
           RBS::Environment.from_loader(loader).resolve_type_names
         end
       end
@@ -51,6 +67,7 @@ module Yoda
       def setup
         files.make_dir
         import_project_dependencies
+        rbs_environment
         load_project_files
       end
       alias build_cache setup
@@ -61,7 +78,7 @@ module Yoda
 
       # @return [Config]
       def config
-        content = files.config_file_path && File.read(files.config_file_path)
+        content = files.config_file_path && File.exists?(files.config_file_path) && File.read(files.config_file_path)
         @config ||= Config.from_yaml_data(content || '')
       end
 

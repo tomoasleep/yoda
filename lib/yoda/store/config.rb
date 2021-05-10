@@ -18,6 +18,21 @@ module Yoda
       def ignored_gems
         @ignored_gems ||= (@contents[:gems] || []).select { |gem_data| gem_data[:ignore] }.map { |gem_data| gem_data[:name] }
       end
+
+      # @return [Array<String>]
+      def rbs_signature_paths
+        @contents.dig(:rbs, :signature) || []
+      end
+
+      # @return [Array<String>]
+      def rbs_repository_paths
+        @contents.dig(:rbs, :repository) || []
+      end
+
+      # @return [Array<String>]
+      def rbs_libraries
+        @contents.dig(:rbs, :library) || []
+      end
     end
   end
 end
