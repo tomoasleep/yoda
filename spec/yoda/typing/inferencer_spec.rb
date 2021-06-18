@@ -361,12 +361,9 @@ RSpec.describe Yoda::Typing::Inferencer do
             subject
             node = node_traverser.query(type: :send).node
             expect(inferencer.tracer.type(node)).to have_attributes(to_s: "::Integer")
-            expect(inferencer.tracer.method_candidates(node)).to contain_exactly(
-              have_attributes(to_s: "sqrt(::Integer) -> ::Integer"),
-            )
           end
 
-          pending 'binds method candidates with parameter name' do
+          it 'binds method candidates with parameter name' do
             subject
             node = node_traverser.query(type: :send).node
             expect(inferencer.tracer.method_candidates(node)).to contain_exactly(

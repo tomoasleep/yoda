@@ -101,26 +101,26 @@ module Yoda
             when :required
               if func_options[:rest_parameter]
                 func_options[:post_parameters] ||= []
-                func_options[:post_parameters].push(param.type)
+                func_options[:post_parameters].push(param.to_paramter)
               else
                 func_options[:required_parameters] ||= []
-                func_options[:required_parameters].push(param.type)
+                func_options[:required_parameters].push(param.to_paramter)
               end
             when :optional
               func_options[:optional_parameters] ||= []
-              func_options[:optional_parameters].push(param.type)
+              func_options[:optional_parameters].push(param.to_paramter)
             when :rest
-              func_options[:rest_parameter] = param.type
+              func_options[:rest_parameter] = param.to_paramter
             when :required_keyword
               func_options[:required_keyword_parameters] ||= []
-              func_options[:required_keyword_parameters].push(param.keyword, param.type)
+              func_options[:required_keyword_parameters].push(param.to_paramter)
             when :optional_keyword
               func_options[:optional_keyword_parameters] ||= []
-              func_options[:optional_keyword_parameters].push(param.keyword, param.type)
+              func_options[:optional_keyword_parameters].push(param.to_paramter)
             when :keyword_rest
-              func_options[:keyword_rest_parameter] = param.type
+              func_options[:keyword_rest_parameter] = param.to_paramter
             when :block
-              func_options[:block_parameter] = param.type
+              func_options[:block_parameter] = param.to_paramter
             end
           end
 
@@ -133,6 +133,10 @@ module Yoda
             @kind = kind
             @keyword = keyword
             @type = type
+          end
+
+          def to_paramter
+            Model::TypeExpressions::FunctionType::Parameter.new(name: keyword, type: type)
           end
         end
       end

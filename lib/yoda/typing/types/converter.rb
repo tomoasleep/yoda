@@ -50,12 +50,12 @@ module Yoda
             Function.new(
               context: type_expression.context && convert_from_expression(type_expression.context),
               return_type: convert_from_expression(type_expression.return_type),
-              parameters: type_expression.required_parameters.map(&method(:convert_from_expression)),
-              rest_parameter: type_expression.rest_parameter && convert_from_expression(type_expression.rest_parameter),
-              post_parameters: type_expression.post_parameters.map(&method(:convert_from_expression)),
-              keyword_parameters: (type_expression.required_keyword_parameters + type_expression.optional_keyword_parameters).map { |keyword, type| [keyword, convert_from_expression(type)] },
-              keyword_rest_parameter: type_expression.keyword_rest_parameter && convert_from_expression(type_expression.keyword_rest_parameter),
-              block_parameter: type_expression.block_parameter && convert_from_expression(type_expression.block_parameter),
+              parameters: type_expression.required_parameters.map(&:type).map(&method(:convert_from_expression)),
+              rest_parameter: type_expression.rest_parameter && convert_from_expression(type_expression.rest_parameter.type),
+              post_parameters: type_expression.post_parameters.map(&:type).map(&method(:convert_from_expression)),
+              keyword_parameters: (type_expression.required_keyword_parameters + type_expression.optional_keyword_parameters).map { |param| [param.name, convert_from_expression(param.type)] },
+              keyword_rest_parameter: type_expression.keyword_rest_parameter && convert_from_expression(type_expression.keyword_rest_parameter.type),
+              block_parameter: type_expression.block_parameter && convert_from_expression(type_expression.block_parameter.type),
             )
           else
             fail ArgumentError, type_expression

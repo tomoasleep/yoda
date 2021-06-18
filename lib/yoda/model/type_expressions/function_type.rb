@@ -2,19 +2,21 @@ module Yoda
   module Model
     module TypeExpressions
       class FunctionType < Base
+        require 'yoda/model/type_expressions/function_type/parameter'
+
         # @return [Base, nil]
         attr_reader :context
 
-        # @return [Array<Base>]
+        # @return [Array<Parameter>]
         attr_reader :required_parameters, :optional_parameters, :post_parameters
 
-        # @return [Array<(String, Base)>]
+        # @return [Array<Parameter>]
         attr_reader :required_keyword_parameters
 
-        # @return [Array<(String, Base)>]
+        # @return [Array<Parameter>]
         attr_reader :optional_keyword_parameters
 
-        # @return [Base, nil]
+        # @return [Parameter, nil]
         attr_reader :rest_parameter, :keyword_rest_parameter, :block_parameter
 
         # @return [Base]
@@ -32,15 +34,15 @@ module Yoda
         # @param return_type [Base]
         def initialize(context: nil, return_type:, required_parameters: [], optional_parameters: [], rest_parameter: nil, post_parameters: [], optional_keyword_parameters: [], required_keyword_parameters: [], keyword_rest_parameter: nil, block_parameter: nil)
           fail TypeError, return_type unless return_type.is_a?(Base)
-          fail TypeError, context if context && !context.is_a?(Base)
-          fail TypeError, rest_parameter if rest_parameter && !rest_parameter.is_a?(Base)
-          fail TypeError, keyword_rest_parameter if keyword_rest_parameter && !keyword_rest_parameter.is_a?(Base)
-          fail TypeError, block_parameter if block_parameter && !block_parameter.is_a?(Base)
-          fail TypeError, required_parameters unless required_parameters.all? { |type| type.is_a?(Base) }
-          fail TypeError, optional_parameters unless optional_parameters.all? { |type| type.is_a?(Base) }
-          fail TypeError, post_parameters unless post_parameters.all? { |type| type.is_a?(Base) }
-          fail TypeError, optional_keyword_parameters unless optional_keyword_parameters.all? { |name, type| name.is_a?(String) && type.is_a?(Base) }
-          fail TypeError, required_keyword_parameters unless required_keyword_parameters.all? { |name, type| name.is_a?(String) && type.is_a?(Base) }
+          fail TypeError, context if context && !context.is_a?(Parameter)
+          fail TypeError, rest_parameter if rest_parameter && !rest_parameter.is_a?(Parameter)
+          fail TypeError, keyword_rest_parameter if keyword_rest_parameter && !keyword_rest_parameter.is_a?(Parameter)
+          fail TypeError, block_parameter if block_parameter && !block_parameter.is_a?(Parameter)
+          fail TypeError, required_parameters unless required_parameters.all? { |param| param.is_a?(Parameter) }
+          fail TypeError, optional_parameters unless optional_parameters.all? { |param| param.is_a?(Parameter) }
+          fail TypeError, post_parameters unless post_parameters.all? { |param| param.is_a?(Parameter) }
+          fail TypeError, optional_keyword_parameters unless optional_keyword_parameters.all? { |param| param.is_a?(Parameter) }
+          fail TypeError, required_keyword_parameters unless required_keyword_parameters.all? { |param| param.is_a?(Parameter) }
 
           @context = context
           @required_parameters = required_parameters
@@ -85,20 +87,9 @@ module Yoda
         end
 
         # @param namespace [LexicalContext]
-        # @return [UnionType]
+        # @return [FunctionType]
         def change_root(namespace)
-          self.class.new(
-            context: context&.change_root(namespace),
-            return_type: return_type.change_root(namespace),
-            required_parameters: required_parameters.map { |param| param.change_root(namespace) },
-            optional_parameters: optional_parameters.map { |param| param.change_root(namespace) },
-            rest_parameter: rest_parameter&.change_root(namespace),
-            post_parameters: post_parameters.map { |param| param.change_root(namespace) },
-            required_keyword_parameters: required_keyword_parameters.map { |name, param| [name, param.change_root(namespace)] },
-            optional_keyword_parameters: required_keyword_parameters.map { |name, param| [name, param.change_root(namespace)] },
-            keyword_rest_parameter: keyword_rest_parameter&.change_root(namespace),
-            block_parameter: block_parameter&.change_root(namespace),
-          )
+          map { |type| type.change_root(namespace) }
         end
 
         # @param registry [Registry]
@@ -120,32 +111,37 @@ module Yoda
         # @param env [Environment]
         # @return [RBS::Types::Function]
         def to_rbs_type(env)
+          make_param = -> (param) { param&.to_rbs_param(env) }
+          make_key_and_param = -> (param) { [param.name.to_sym, make_param.call(param)] }
+
           RBS::Types::Function.new(
-            required_positionals: required_parameters.map { |type| RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil) },
-            optional_positionals: optional_parameters.map { |type| RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil) },
-            rest_positionals: rest_parameter ? RBS::Types::Function::Param.new(type: rest_parameter.to_rbs_type(env), name: nil) : nil,
-            trailing_positionals: post_parameters.map { |type| RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil) },
+            required_positionals: required_parameters.map(&make_param),
+            optional_positionals: optional_parameters.map(&make_param),
+            rest_positionals: make_param.call(rest_parameter),
+            trailing_positionals: post_parameters.map(&make_param),
             # Not include keyword name to parameter object because if its string expression becomes redundunt.
-            required_keywords: required_keyword_parameters.map { |(name, type)| [name.to_sym, RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil)] }.to_h,
-            optional_keywords: optional_keyword_parameters.map { |(name, type)| [name.to_sym, RBS::Types::Function::Param.new(type: type.to_rbs_type(env), name: nil)] }.to_h,
-            rest_keywords: keyword_rest_parameter ? RBS::Types::Function::Param.new(type: keyword_rest_parameter.to_rbs_type(env), name: nil) : nil,
-            return_type: return_type.to_rbs_type(env),
+            required_keywords: required_keyword_parameters.map(&make_key_and_param).to_h,
+            optional_keywords: optional_keyword_parameters.map(&make_key_and_param).to_h,
+            rest_keywords: make_param.call(keyword_rest_parameter),
+            return_type: return_type&.to_rbs_type(env),
           )
         end
 
         # @return [self]
         def map(&block)
+          call_map_type = -> (param) { param&.map_type(&block) }
+
           self.class.new(
             context: context&.map(&block),
             return_type: return_type.map(&block),
-            required_parameters: required_parameters.map { |param| param.map(&block) },
-            optional_parameters: optional_parameters.map { |param| param.map(&block) },
-            rest_parameter: rest_parameter&.map(&block),
-            post_parameters: post_parameters.map { |param| param.map(&block) },
-            required_keyword_parameters: required_keyword_parameters.map { |name, param| [name, param.map(&block)] },
-            optional_keyword_parameters: required_keyword_parameters.map { |name, param| [name, param.map(&block)] },
-            keyword_rest_parameter: keyword_rest_parameter&.map(&block),
-            block_parameter: block_parameter&.map(&block),
+            required_parameters: required_parameters.map(&call_map_type),
+            optional_parameters: optional_parameters.map(&call_map_type),
+            rest_parameter: call_map_type.call(rest_parameter),
+            post_parameters: post_parameters.map(&call_map_type),
+            required_keyword_parameters: required_keyword_parameters.map(&call_map_type),
+            optional_keyword_parameters: required_keyword_parameters.map(&call_map_type),
+            keyword_rest_parameter: call_map_type.call(keyword_rest_parameter),
+            block_parameter: call_map_type.call(block_parameter),
           )
         end
 
@@ -153,48 +149,15 @@ module Yoda
 
         def all_parameters_to_s
           [
-            required_parameters_to_s,
-            optional_parameters_to_s,
-            rest_parameter_to_s,
-            post_parameters_to_s,
-            keyword_parameters_to_s,
-            keyword_rest_parameter_to_s,
-            block_parameter_to_s
-          ].reject { |str| str.empty? }.join(', ')
-        end
-
-        def required_parameters_to_s
-          required_parameters.map { |type| type.to_s }.join(', ')
-        end
-
-        def optional_parameters_to_s
-          optional_parameters.map { |type| "?#{type}" }.join(', ')
-        end
-
-        def required_keyword_parameters_to_s
-          return '' if required_keyword_parameters.empty?
-          required_keyword_parameters.map { |(name, type)| "#{name}: #{type}" }.join(', ')
-        end
-
-        def optional_keyword_parameters_to_s
-          return '' if optional_keyword_parameters.empty?
-          optional_keyword_parameters.map { |(name, type)| "?#{name}: #{type}" }.join(', ')
-        end
-
-        def post_parameters_to_s
-          post_parameters.map { |type| type.to_s }.join(', ')
-        end
-
-        def rest_parameter_to_s
-          rest_parameter ? "*#{rest_parameter}" : ''
-        end
-
-        def keyword_rest_parameter_to_s
-          keyword_rest_parameter ? "**#{keyword_rest_parameter}" : ''
-        end
-
-        def block_parameter_to_s
-          block_parameter ? "&#{block_parameter}" : ''
+            *required_parameters.map(&:positonal_expression),
+            *optional_parameters.map(&:optional_expression),
+            rest_parameter&.rest_expression,
+            *post_parameters.map(&:positional_expression),
+            *keyword_parameters.map(&:keyword_expression),
+            *optional_keyword_parameters.map(&:optional_keyword_expression),
+            keyword_rest_parameter&.keyword_rest_expression,
+            block_parameter&.block_expression,
+          ].compact.join(', ')
         end
       end
     end

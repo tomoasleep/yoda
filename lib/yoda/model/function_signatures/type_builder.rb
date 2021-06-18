@@ -1,6 +1,7 @@
 module Yoda
   module Model
     module FunctionSignatures
+      # TypeBuilder builds {TypeExpression::FunctionType} instance from YARD tags and parameter list.
       class TypeBuilder
         # @return [ParameterList]
         attr_reader :parameters
@@ -34,6 +35,12 @@ module Yoda
           param_type_table[param] || TypeExpressions::UnknownType.new('nodoc')
         end
 
+        # @param param [String]
+        # @return [TypeExpressions::FunctionType::Parameter]
+        def parameter_of(name)
+          TypeExpressions::FunctionType::Parameter.new(name: name, type: type_of(name))
+        end
+
         private
 
         # @param type_tag [Store::Objects::Tag]
@@ -46,14 +53,14 @@ module Yoda
         # @return [Hash]
         def parameter_options
           @parameter_options ||= {
-            required_parameters: parameters.required_parameters.map(&method(:type_of)),
-            optional_parameters: parameters.optional_parameters.map(&:first).map(&method(:type_of)),
-            rest_parameter: parameters.rest_parameter ? type_of(parameters.rest_parameter) : nil,
-            post_parameters: parameters.post_parameters.map(&method(:type_of)),
-            required_keyword_parameters: parameters.required_keyword_parameters.map { |keyword| [keyword, type_of(keyword)] },
-            optional_keyword_parameters: parameters.optional_keyword_parameters.map(&:first).map { |keyword| [keyword, type_of(keyword)] },
-            keyword_rest_parameter: parameters.keyword_rest_parameter ? type_of(parameters.keyword_rest_parameter) : nil,
-            block_parameter: parameters.block_parameter ? type_of(parameters.block_parameter) : nil,
+            required_parameters: parameters.required_parameters.map(&method(:parameter_of)),
+            optional_parameters: parameters.optional_parameters.map(&:first).map(&method(:parameter_of)),
+            rest_parameter: parameters.rest_parameter ? parameter_of(parameters.rest_parameter) : nil,
+            post_parameters: parameters.post_parameters.map(&method(:parameter_of)),
+            required_keyword_parameters: parameters.required_keyword_parameters.map(&method(:parameter_of)),
+            optional_keyword_parameters: parameters.optional_keyword_parameters.map(&:first).map(&method(:parameter_of)),
+            keyword_rest_parameter: parameters.keyword_rest_parameter ? parameter_of(parameters.keyword_rest_parameter) : nil,
+            block_parameter: parameters.block_parameter ? parameter_of(parameters.block_parameter) : nil,
           }
         end
 

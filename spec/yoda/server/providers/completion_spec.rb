@@ -33,14 +33,6 @@ RSpec.describe Yoda::Server::Providers::Completion do
           expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
           expect(subject.is_incomplete).to be_falsy
           expect(subject.items).to include(
-            have_attributes(label: 'method1(::String) -> untyped'),
-            have_attributes(label: 'method2() -> untyped'),
-            have_attributes(label: 'method3() -> untyped'),
-          )
-        end
-
-        pending 'returns information with parameter names' do
-          expect(subject.items).to include(
             have_attributes(label: 'method1(::String str) -> untyped'),
             have_attributes(label: 'method2() -> untyped'),
             have_attributes(label: 'method3() -> untyped'),

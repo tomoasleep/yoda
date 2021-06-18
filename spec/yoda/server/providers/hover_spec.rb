@@ -51,12 +51,8 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the calling method' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [have_content(be_start_with('Sample3.class_method1("") # untyped')), have_content(be_start_with('**YodaFixture::Sample3.class_method1(::String) -> untyped**'))]
-        expect(subject.range).to have_attributes(start: { line: 17, character: 6 }, end: { line: 17, character: 31 })
-      end
-
-      pending 'returns descriptions which contains argument names' do
         expect(subject.contents).to match [have_content(be_start_with('Sample3.class_method1("") # untyped')), have_content(be_start_with('**YodaFixture::Sample3.class_method1(::String str) -> untyped**'))]
+        expect(subject.range).to have_attributes(start: { line: 17, character: 6 }, end: { line: 17, character: 31 })
       end
     end
 

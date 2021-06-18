@@ -3,6 +3,10 @@ require 'spec_helper'
 RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
   include TypeHelper
 
+  def parameter(type:, name: nil)
+    Yoda::Model::TypeExpressions::FunctionType::Parameter.new(type: type, name: name)
+  end
+
   let(:builder) { described_class.new(parameter_list, tag_list) }
   let(:parameter_list) { Yoda::Model::FunctionSignatures::ParameterList.new(parameters) }
   let(:tag_list) { [] }
@@ -27,7 +31,7 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
       it 'returns empty parameter function type' do
         expect(subject).to eq(
           Yoda::Model::TypeExpressions::FunctionType.new(
-            required_parameters: [unknown_type],
+            required_parameters: [parameter(name: 'x', type: unknown_type)],
             return_type: unknown_type,
           )
         )
@@ -40,8 +44,8 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
       it 'returns empty parameter function type' do
         expect(subject).to eq(
           Yoda::Model::TypeExpressions::FunctionType.new(
-            required_parameters: [unknown_type],
-            optional_parameters: [unknown_type],
+            required_parameters: [parameter(name: 'x', type: unknown_type)],
+            optional_parameters: [parameter(name: 'y', type: unknown_type)],
             return_type: unknown_type,
           )
         )
@@ -61,8 +65,8 @@ RSpec.describe Yoda::Model::FunctionSignatures::TypeBuilder do
       it 'returns empty parameter function type' do
         expect(subject).to eq(
           Yoda::Model::TypeExpressions::FunctionType.new(
-            required_parameters: [instance_type('Integer').change_root(['Object'])],
-            optional_parameters: [instance_type('String').change_root(['Object'])],
+            required_parameters: [parameter(name: 'x', type: instance_type('Integer').change_root(['Object']))],
+            optional_parameters: [parameter(name: 'y', type: instance_type('String').change_root(['Object']))],
             return_type: instance_type('Array').change_root(['Object']),
           )
         )

@@ -31,18 +31,6 @@ RSpec.describe Yoda::Server::Providers::Signature do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::SignatureHelp)
         expect(subject.signatures).to include(
           have_attributes(
-            label: include('method1(::String)'),
-            parameters: contain_exactly(
-              have_attributes(label: 'str'),
-            ),
-          ),
-        )
-      end
-
-      pending 'returns infomation of method1 with parametr name' do
-        expect(subject).to be_a(LanguageServer::Protocol::Interface::SignatureHelp)
-        expect(subject.signatures).to include(
-          have_attributes(
             label: include('method1(::String str)'),
             parameters: contain_exactly(
               have_attributes(label: 'str'),
