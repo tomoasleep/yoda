@@ -167,7 +167,7 @@ module Yoda
       end
 
       def notify_initialization_progress(phase: nil, message: nil, index:, length:)
-        if length
+        if length && length > 0
           percentage = (index || 0) * 100 / length
           if index <= 0
             notifier.start_progress(id: phase, title: phase, message: message, percentage: percentage)
