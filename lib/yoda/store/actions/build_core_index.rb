@@ -41,7 +41,7 @@ module Yoda
             Zip::File.open_buffer(file) do |zip_file|
               zip_file.each do |entry|
                 # entry path already include `ruby-#{RUBY_VERSION}/``
-                extracted_entry_path = File.join(VersionStore.for_current_version, "../", entry.to_s)
+                extracted_entry_path = File.join(VersionStore.for_current_version.ruby_source_path, "../", entry.to_s)
                 FileUtils.mkdir_p(File.dirname(extracted_entry_path))
                 zip_file.extract(entry, extracted_entry_path) { true }
               end
