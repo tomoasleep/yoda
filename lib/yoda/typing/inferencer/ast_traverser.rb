@@ -142,6 +142,10 @@ module Yoda
         def infer_const_node(node)
           case node.base.type
           when :cbase
+            # Remember constant candidates
+            constants = [context.environment.resolve_constant(node.name.name.to_s)].compact
+            tracer.bind_constants(node: node, constants: constants)
+
             generator.singleton_type_at("::#{node.name.name}")
           when :empty
             lexical_values = context.lexical_scope_types.map(&:value)
@@ -155,15 +159,22 @@ module Yoda
               end
             end
 
-            # test
-
             if found_paths
+              # Remember constant candidates
+              constants = [context.environment.resolve_constant(found_paths.first)].compact
+              tracer.bind_constants(node: node, constants: constants)
+            
               generator.singleton_type_at(found_paths.first)
             else
               generator.any_type
             end
           else
             base_type = traverse(node.base)
+
+            # Remember constant candidates
+            paths = base_type.value.select_constant_paths(node.name.name.to_s)
+            constants = paths.map { |path| context.environment.resolve_constant(path) }.compact
+            tracer.bind_constants(node: node, constants: constants)
 
             generator.wrap_rbs_type(base_type.value.select_constant_type(node.name.name.to_s))
           end

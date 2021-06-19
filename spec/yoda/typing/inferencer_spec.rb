@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'tempfile'
 
 RSpec.describe Yoda::Typing::Inferencer do
   include AST::Sexp
@@ -15,6 +16,14 @@ RSpec.describe Yoda::Typing::Inferencer do
     end
   end
   before { registry.add_file_patch(patch) }
+
+  def read_source(source)
+    Tempfile.create do |file|
+      file.write(source)
+      file.close
+      Yoda::Store::Actions::ReadFile.run(registry, file.path)
+    end
+  end
 
   let(:objects) do
     [
@@ -449,6 +458,60 @@ RSpec.describe Yoda::Typing::Inferencer do
 
         it 'returns a record type with string key' do
           expect(subject).to have_attributes(to_s: '{ "key" => :value, "key2" => 1 }')
+        end
+      end
+    end
+
+    describe 'constant' do
+      context 'with a not nested constant' do
+        let(:source) do
+          <<~RUBY
+          Integer
+          RUBY
+        end
+
+        it 'returns singleton class' do
+          expect(subject).to have_attributes(to_s: 'singleton(::Integer)')
+        end
+
+        it 'binds constant resolution' do
+          subject
+          node = node_traverser.query(type: :const).node
+          expect(inferencer.tracer.constants(node)).to contain_exactly(
+            have_attributes(path: "Integer"),
+          )
+        end
+      end
+
+      context 'with a nested constant' do
+        let(:source) do
+          <<~RUBY
+          Hoge::Fuga
+          RUBY
+        end
+
+        before do
+          read_source <<~RUBY
+          class Hoge
+            class Fuga
+            end
+          end
+          RUBY
+        end
+
+        it 'returns singleton class' do
+          expect(subject).to have_attributes(to_s: 'singleton(::Hoge::Fuga)')
+        end
+
+        it 'binds constant resolution' do
+          subject
+          node = node_traverser.query(type: :const).node
+          expect(inferencer.tracer.constants(node)).to contain_exactly(
+            have_attributes(path: "Hoge::Fuga"),
+          )
+          expect(inferencer.tracer.constants(node.base)).to contain_exactly(
+            have_attributes(path: "Hoge"),
+          )
         end
       end
     end

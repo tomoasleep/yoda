@@ -36,6 +36,11 @@ module Yoda
         tracer.method_candidates(node)
       end
 
+      # @return [Array<Store::Objects::Base>]
+      def constants
+        tracer.constants(node)
+      end
+
       # @return [Types::Type]
       def type
         tracer.type(node)

@@ -23,6 +23,9 @@ module Yoda
         # @return [Hash{ AST::Node => Array<FunctionSignatures::Base> }]
         attr_reader :node_to_method_candidates
 
+        # @return [Hash{ AST::Node => Array<Store::Objects::Base> }]
+        attr_reader :node_to_constants
+
         class MaskedMap
           def initialize
             @content = {}
@@ -56,6 +59,7 @@ module Yoda
           @node_to_context = MaskedMap.new
           @node_to_method_candidates = MaskedMap.new
           @node_to_receiver_type = MaskedMap.new
+          @node_to_constants = MaskedMap.new
         end
 
         # @param node [AST::Node]
@@ -87,6 +91,12 @@ module Yoda
           node_to_kind[node.identifier] = :send
           node_to_receiver_type[node.identifier] = receiver_type
           node_to_method_candidates[node.identifier] = method_candidates
+        end
+
+        # @param node [AST::Node]
+        # @param constants [Array<Store::Objects::Base>]
+        def bind_constants(node:, constants:)
+          node_to_constants[node.identifier] = constants
         end
 
         # @param node [AST::Node]
@@ -123,6 +133,12 @@ module Yoda
         # @return [Array<FunctionSignatures::Wrapper>]
         def method_candidates(node)
           node_to_method_candidates[node.identifier] || []
+        end
+
+        # @param node [AST::Node]
+        # @return [Array<Store::Objects::Base>]
+        def constants(node)
+          node_to_constants[node.identifier] || []
         end
 
         # @param node [AST::Node]
