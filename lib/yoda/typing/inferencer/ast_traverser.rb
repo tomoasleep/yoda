@@ -104,7 +104,9 @@ module Yoda
             context.receiver
           when :defined
             generator.boolean_type
-          when :module, :class
+          when :class
+            infer_class_node(node)
+          when :module
             infer_namespace_node(node)
           when :sclass
             infer_singleton_class_node(node)
@@ -223,6 +225,16 @@ module Yoda
           derive(context: new_context).traverse(node.body)
 
           generator.nil_type
+        end
+
+        # @param node [AST::ClassNode]
+        # @return [Types::Base]
+        def infer_class_node(node)
+          if super_class_node = node.super_class
+            traverse(super_class_node)
+          end
+
+          infer_namespace_node(node)
         end
 
         # @param node [AST::ModuleNode, AST::ClassNode]
