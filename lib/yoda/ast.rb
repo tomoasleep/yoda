@@ -20,6 +20,7 @@ module Yoda
     require 'yoda/ast/def_node'
     require 'yoda/ast/def_singleton_node'
     require 'yoda/ast/empty_vnode'
+    require 'yoda/ast/ensure_node'
     require 'yoda/ast/for_node'
     require 'yoda/ast/hash_node'
     require 'yoda/ast/if_node'
@@ -34,6 +35,7 @@ module Yoda
     require 'yoda/ast/pair_node'
     require 'yoda/ast/parameter_node'
     require 'yoda/ast/parameters_node'
+    require 'yoda/ast/rescue_node'
     require 'yoda/ast/rescue_clause_node'
     require 'yoda/ast/root_vnode'
     require 'yoda/ast/send_node'
@@ -80,6 +82,10 @@ module Yoda
           ForNode
         when :super, :zsuper, :yield, :return, :break, :next, :self, :defined?, :redo, :undef
           SpecialCallNode
+        when :ensure
+          EnsureNode
+        when :rescue
+          RescueNode
         when :resbody
           RescueClauseNode
         when :csend, :send

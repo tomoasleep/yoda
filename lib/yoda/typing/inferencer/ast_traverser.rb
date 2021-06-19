@@ -78,9 +78,12 @@ module Yoda
           when :return, :break, :next
             # TODO
             node.arguments[0] ? traverse(node.arguments[0]) : generator.nil_type
+          when :ensure
+            infer_ensure_node(node)
+          when :rescue
+            infer_rescue_node(node)
           when :resbody
-            # TODO
-            traverse(node.children[2])
+            infer_resbody_node(node)
           when :csend, :send
             infer_send_node(node)
           when :block
@@ -276,7 +279,6 @@ module Yoda
           infer_send_node(node.send_clause, node.parameters, node.body)
         end
 
-
         # @param node [AST::SendNode]
         # @param block_param_node [AST::ParametersNode, nil]
         # @param block_node [AST::Vnode, nil]
@@ -340,6 +342,56 @@ module Yoda
           subject_node, *when_nodes, else_node = node.children
           when_body_nodes = when_nodes.map { |node| node.children.last }
           generator.union_type(*[*when_body_nodes, else_node].compact.map { |node| traverse(node) })
+        end
+
+        # @param node [AST::EnsureNode]
+        # @return [Types::Base]
+        def infer_ensure_node(node)
+          type = traverse(node.body)
+          traverse(node.ensure_body)
+          type
+        end
+
+        # @param node [AST::RescueNode]
+        # @return [Types::Base]
+        def infer_rescue_node(node)
+          type = traverse(node.body)
+          node.rescue_clauses.each { |rescue_clause| traverse(rescue_clause) }
+          traverse(node.else_clause)
+          type
+        end
+
+        # @param node [AST::RescueClauseNode]
+        # @return [Types::Base]
+        def infer_resbody_node(node)
+          binds = {}
+
+          exception_type = begin
+            if node.match_clause
+              case node.match_clause.type
+              when :array
+                generator.union_type(*node.match_clause.contents.map { |content| traverse(content).instance_type })
+              when :empty
+                generator.standard_error_type
+              else
+                # Unexpected
+                generator.standard_error_type
+              end
+            else
+              generator.standard_error_type
+            end
+          end
+
+
+          if node.assignee
+            case node.assignee.type
+            when :lvasgn
+              binds[node.assignee.assignee.name] = exception_type
+            end
+          end
+
+          new_context = context.derive_block_context(binds: binds)
+          derive(context: new_context).traverse(node.body)
         end
 
         # @param [AST::LiteralNode]

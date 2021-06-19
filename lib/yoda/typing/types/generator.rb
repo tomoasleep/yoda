@@ -157,6 +157,11 @@ module Yoda
           singleton_type_at('::Object')
         end
 
+        # @return [Type<RBS::Types::ClassInstance>]
+        def standard_error_type
+          instance_type_at('::StandardError')
+        end
+
         # @param args [Array<Type, RBS::Types::t>]
         # @return [Type<RBS::Types::ClassInstance>]
         def instance_type_at(path, args: [])

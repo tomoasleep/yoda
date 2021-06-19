@@ -136,6 +136,14 @@ RSpec.describe Yoda::Typing::Inferencer do
         path: 'FalseClass',
         superclass_path: 'Object',
       ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'Exception',
+        superclass_path: 'Object',
+      ),
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'StandardError',
+        superclass_path: 'Exception',
+      ),
     ]
   end
   let(:integer) do
@@ -409,6 +417,37 @@ RSpec.describe Yoda::Typing::Inferencer do
       end
     end
 
+    describe 'subclass' do
+      before do
+        # sub class is not pre-defined
+        read_source(source)
+      end
+
+      context 'call class method in method' do
+        let(:source) do
+          <<~RUBY
+            class SubInteger < Integer
+              def div(int)
+                int / 2
+              end
+            end
+          RUBY
+        end
+
+        it 'binds return type of the superclass' do
+          subject
+          node = node_traverser.query(type: :class).node
+          expect(inferencer.tracer.type(node.super_class)).to have_attributes(to_s: "singleton(::Integer)")
+        end
+
+        pending 'binds argument types of an inherited method' do
+          subject
+          node = node_traverser.query(type: :send).node
+          expect(inferencer.tracer.type(node.receiver)).to have_attributes(to_s: "::Integer")
+        end
+      end
+    end
+
     describe 'operators' do
       describe 'with or operator' do
         let(:source) do
@@ -464,22 +503,53 @@ RSpec.describe Yoda::Typing::Inferencer do
 
     describe 'constant' do
       context 'with a not nested constant' do
-        let(:source) do
-          <<~RUBY
-          Integer
-          RUBY
+        context 'a class is given' do
+          let(:source) do
+            <<~RUBY
+            Integer
+            RUBY
+          end
+
+          it 'returns singleton class' do
+            expect(subject).to have_attributes(to_s: 'singleton(::Integer)')
+          end
+
+          it 'binds constant resolution' do
+            subject
+            node = node_traverser.query(type: :const).node
+            expect(inferencer.tracer.constants(node)).to contain_exactly(
+              have_attributes(path: "Integer"),
+            )
+          end
         end
 
-        it 'returns singleton class' do
-          expect(subject).to have_attributes(to_s: 'singleton(::Integer)')
-        end
+        context 'a constant value is given' do
+          let(:source) do
+            <<~RUBY
+            MAGIC_NUMBER
+            RUBY
+          end
 
-        it 'binds constant resolution' do
-          subject
-          node = node_traverser.query(type: :const).node
-          expect(inferencer.tracer.constants(node)).to contain_exactly(
-            have_attributes(path: "Integer"),
-          )
+          before do
+            read_source <<~RUBY
+            # It's a magical number.
+            MAGIC_NUMBER = 1
+            RUBY
+          end
+
+          it 'returns singleton class' do
+            pending("For now, the inferred type becomes singleton(::MAGIC_NUMBER)")
+
+            expect(subject).to have_attributes(to_s: 'singleton(::Integer)')
+          end
+
+          it 'binds constant resolution' do
+            subject
+            node = node_traverser.query(type: :const).node
+            expect(inferencer.tracer.constants(node)).to contain_exactly(
+              have_attributes(path: "MAGIC_NUMBER", document: "It's a magical number."),
+            )
+          end
         end
       end
 
@@ -514,6 +584,33 @@ RSpec.describe Yoda::Typing::Inferencer do
           )
         end
       end
+
+      context 'in a singleton class of constant value' do
+        let(:source) do
+          <<~RUBY
+          class Hoge
+            class << self
+              Fuga
+            end
+          end
+          RUBY
+        end
+
+        before do
+          read_source <<~RUBY
+          class Hoge; class Fuga; end; end
+          RUBY
+        end
+
+        it 'binds the constants' do
+          subject
+          node = node_traverser.query(type: :sclass).node.body.query(type: :const)
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: 'singleton(::Hoge::Fuga)')
+          expect(inferencer.tracer.constants(node)).to contain_exactly(
+            have_attributes(path: "Hoge::Fuga"),
+          )
+        end
+      end
     end
 
     describe 'string literal' do
@@ -544,6 +641,77 @@ RSpec.describe Yoda::Typing::Inferencer do
           subject
           node = node_traverser.query(type: :int).node
           expect(inferencer.tracer.type(node)).to have_attributes(to_s: '1')
+        end
+      end
+    end
+
+    describe 'rescue' do
+      context 'with exception specification' do
+        let(:source) do
+          <<~RUBY
+          begin
+            1
+          rescue Exception => e
+            e
+          end
+          RUBY
+        end
+
+        it 'returns type of body' do
+          expect(subject).to have_attributes(to_s: '1')
+        end
+
+        it 'returns type of variable' do
+          subject
+          node = node_traverser.query(type: :lvar).node
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: "::Exception")
+        end
+      end
+
+      context 'without exception specification' do
+        let(:source) do
+          <<~RUBY
+          begin
+            1
+          rescue => e
+            e
+          end
+          RUBY
+        end
+
+        it 'returns type of body' do
+          expect(subject).to have_attributes(to_s: '1')
+        end
+
+        it 'returns type of variable' do
+          subject
+          node = node_traverser.query(type: :lvar).node
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: "::StandardError")
+        end
+      end
+    end
+
+    describe 'rescue' do
+      context 'with exception specification' do
+        let(:source) do
+          <<~RUBY
+          begin
+            1
+          ensure
+            i = 2
+            i
+          end
+          RUBY
+        end
+
+        it 'returns type of body' do
+          expect(subject).to have_attributes(to_s: '1')
+        end
+
+        it 'also evaluates ensure clause' do
+          subject
+          node = node_traverser.query(type: :lvar).node
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: "2")
         end
       end
     end
