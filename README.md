@@ -33,7 +33,9 @@ apm install tomoasleep/yoda
 
 ### VSCode
 
-TBW
+```
+rake vscode:install
+```
 
 ### Vim/NeoVim
 
