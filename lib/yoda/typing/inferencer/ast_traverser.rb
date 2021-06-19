@@ -9,7 +9,7 @@ module Yoda
         # @return [Tracer]
         attr_reader :tracer
 
-        # @return [ContextsBaseContext]
+        # @return [Contexts::BaseContext]
         attr_reader :context
 
         delegate [:bind_context, :bind_type, :bind_send] => :tracer
