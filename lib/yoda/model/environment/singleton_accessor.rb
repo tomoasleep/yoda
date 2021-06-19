@@ -49,14 +49,14 @@ module Yoda
 
         # @return [Store::Objects::MetaClassObject::Connected, nil]
         def class_object
-          with_cache(:object) do
+          with_cache(:class_object) do
             instance_accessor.class_object&.meta_class
           end
         end
 
         # @return [Store::Objects::MetaClassObject::Connected, nil]
         def self_object
-          with_cache(:object) do
+          with_cache(:self_object) do
             instance_accessor.class_object
           end
         end
