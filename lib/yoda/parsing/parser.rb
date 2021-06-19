@@ -26,7 +26,7 @@ module Yoda
       # @param string [String]
       # @return [(::Parser::AST::Node, Array<::Parser::Source::Comment>), nil]
       def parse_with_comments_if_valid(string)
-        parse_with_comments(source)
+        parse_with_comments(string)
       rescue ::Parser::SyntaxError
         nil
       end
