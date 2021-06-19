@@ -4,6 +4,7 @@ module Yoda
       require 'yoda/model/node_signatures/base'
       require 'yoda/model/node_signatures/node'
       require 'yoda/model/node_signatures/send'
+      require 'yoda/model/node_signatures/method_definition'
       require 'yoda/model/node_signatures/const'
 
       class << self
@@ -18,6 +19,8 @@ module Yoda
         # @param node_info [Typing::NodeInfo]
         def signature_type_for_node_info(node_info)
           case node_info.kind
+          when :def, :defs
+            MethodDefinition
           when :send
             Send
           when :const

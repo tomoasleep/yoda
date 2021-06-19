@@ -211,7 +211,9 @@ module Yoda
           end
 
           Logger.trace("method_candidates: [#{method_candidates.join(', ')}]")
-          Logger.trace("bind arguments: #{method_bind}")
+          Logger.trace("bind arguments: #{method_bind.map { |key, value| [key, value.to_s] }.to_h }")
+
+          tracer.bind_method_definition(node: node, method_candidates: method_candidates)
 
           method_context = context.derive_method_context(receiver_type: receiver_type, binds: method_bind)
           derive(context: method_context).traverse(node.body)

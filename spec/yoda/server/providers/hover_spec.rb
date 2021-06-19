@@ -103,5 +103,16 @@ RSpec.describe Yoda::Server::Providers::Hover do
         expect(subject.range).to have_attributes(start: { line: 13, character: 8 }, end: { line: 13, character: 16 })
       end
     end
+
+    context 'on method definition' do
+      let(:uri) { file_uri('lib/sample2.rb') }
+      let(:position) { { line: 17, character: 13} }
+
+      it 'returns the description of the calling method' do
+        expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
+        expect(subject.contents).to match [have_content(be_start_with('def method3(obj);  obj.method2;end # :method3')), have_content(be_start_with('**YodaFixture::Sample2#method3(::YodaFixture::Sample2 obj) -> ::YodaFixture::Sample2**'))]
+        expect(subject.range).to have_attributes(start: { line: 17, character: 4 }, end: { line: 19, character: 7 })
+      end
+    end
   end
 end

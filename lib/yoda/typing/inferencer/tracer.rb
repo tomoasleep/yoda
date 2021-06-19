@@ -94,6 +94,15 @@ module Yoda
         end
 
         # @param node [AST::Node]
+        # @param method_candidates [Array<Model::FunctionSignatures::Base>]
+        def bind_method_definition(node:, method_candidates:)
+          fail TypeError, method_candidates unless method_candidates.all? { |candidate| candidate.is_a?(Model::FunctionSignatures::Wrapper) }
+
+          node_to_kind[node.identifier] = :send
+          node_to_method_candidates[node.identifier] = method_candidates
+        end
+
+        # @param node [AST::Node]
         # @param constants [Array<Store::Objects::Base>]
         def bind_constants(node:, constants:)
           node_to_constants[node.identifier] = constants
