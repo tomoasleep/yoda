@@ -36,7 +36,7 @@ module Yoda
       # @return [Array<(Symbol, (String, ::Parser::Source::Range))>]
       def tokens_of_source
         @tokens_of_source ||= begin
-          _, _, tokens = ::Parser::CurrentRuby.new.tokenize(::Parser::Source::Buffer.new("(string)").tap { |b| b.source = source }, true)
+          _, _, tokens = Parser.new.tokenize(source, recover: true)
           tokens
         end
       end
@@ -103,7 +103,7 @@ module Yoda
         # @return [Symbol, nil]
         def diagnostic
           begin
-            ::Parser::CurrentRuby.parse(to_s)
+            Parsing::Parser.new.parse(to_s)
             nil
           rescue ::Parser::SyntaxError => ex
             fail CannotRecoverError, "Cannot recover: #{ex.diagnostic.render}" unless ex.diagnostic.reason == :unexpected_token
