@@ -22,7 +22,8 @@ module Yoda
         def run
           BuildCoreIndex.run unless BuildCoreIndex.exists?
           return unless File.exist?(dep.doc_path)
-          YardImporter.import(dep.doc_path)
+          patch = YardImporter.import(dep.doc_path)
+          Transformers::CoreVisibility.transform(patch)
         end
       end
     end

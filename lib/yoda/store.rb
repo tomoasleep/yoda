@@ -11,6 +11,7 @@ module Yoda
     require 'yoda/store/registry'
     require 'yoda/store/setup'
     require 'yoda/store/query'
+    require 'yoda/store/transformers'
     require 'yoda/store/version_store'
     require 'yoda/store/yard_importer'
 
