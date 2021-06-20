@@ -15,5 +15,11 @@ module YodaFixture
     def method3
       self.method1(str)
     end
+
+    private
+
+    def method4
+      method3
+    end
   end
 end

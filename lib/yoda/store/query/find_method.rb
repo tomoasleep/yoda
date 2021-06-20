@@ -15,14 +15,14 @@ module Yoda
         # @param visibility [Array<Symbol>, nil]
         # @return [Array<Objects::MethodObject>]
         def select(namespace, method_name, visibility: nil)
-          lazy_select(namespace, method_name, visibility: nil).to_a
+          lazy_select(namespace, method_name, visibility: visibility).to_a
         end
 
         # @param namespace [Objects::Namespace]
         # @param visibility [Array<Symbol>, nil]
         # @return [Enumerator<Objects::MethodObject>]
         def all(namespace, visibility: nil)
-          lazy_select(namespace, //, visibility: nil)
+          lazy_select(namespace, //, visibility: visibility)
         end
 
         private

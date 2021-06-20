@@ -48,6 +48,29 @@ RSpec.describe Yoda::Server::Providers::Completion do
             have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
           )
         end
+
+        it 'does not include private methods' do
+          expect(subject.items).not_to include(
+            have_attributes(text_edit: have_attributes(new_text: "method4")),
+          )
+        end
+      end
+
+      context 'request information with implicit receiver' do
+        let(:uri) { file_uri('lib/sample.rb') }
+        let(:position) { { line: 21, character: 11 } }
+        let(:text_edit_range) { { start: { line: 21, character: 6 }, end: { line: 21, character: 13 } } }
+
+        it 'returns infomation of methods including a private method' do
+          expect(subject).to be_a(LanguageServer::Protocol::Interface::CompletionList)
+          expect(subject.is_incomplete).to be_falsy
+          expect(subject.items).to include(
+            have_attributes(text_edit: have_attributes(new_text: "method1", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method2", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method3", range: have_attributes(text_edit_range))),
+            have_attributes(text_edit: have_attributes(new_text: "method4", range: have_attributes(text_edit_range))),
+          )
+        end
       end
 
       context 'request information on the dot of a send node' do
