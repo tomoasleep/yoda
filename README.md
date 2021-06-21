@@ -6,6 +6,15 @@ Yoda is a Language Server (http://langserver.org/) for Ruby and provides autocom
 
 ## Instation and Usage
 
+## Getting Started
+
+```bash
+rake install # Install language server
+rake vscode:install # Install vscode plugin
+```
+
+### Install language server
+
 Yoda is hosted on RubyGems.
 
 ```
@@ -23,9 +32,9 @@ $ yoda infer path-to-your-code:line_num:char_num # Show information of the code 
 $ yoda complete <path-to-your-code>:<line-num>:<char-num> # Show completion at the specified position.
 ```
 
-## Installation of Editor Plugin
+### Installation of Editor Plugin
 
-### Atom
+#### Atom
 
 ```
 apm install tomoasleep/yoda
@@ -37,7 +46,7 @@ apm install tomoasleep/yoda
 rake vscode:install
 ```
 
-### Vim/NeoVim
+#### Vim/NeoVim
 
 Please use language server client such as [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim).
 Here is a configuration example for LanguageClient-neovim.
@@ -48,7 +57,7 @@ let g:LanguageClient_serverCommands = {
     \ }
 ```
 
-### Emacs
+#### Emacs
 
 TBW
 
@@ -70,16 +79,16 @@ Your project codes are parsed at startup but does not stored in indexes.
 - autocompletion
   - [x] method completion
   - [x] constant completion
-  - [ ] (local, class, instance) variable completion
-  - :small_red_triangle: comment completion
+  - [x] (local, class, instance) variable completion
+  - comment completion
     - [x] YARD tag completion
     - [x] YARD type literal completion
-    - [ ] parameter completion
+    - [x] parameter completion
 - [x] jump to definition
 - [x] hover
 - [x] signature help
-- [ ] find references
-- [ ] workspace symbols
+- [x] find references
+- [x] workspace symbols
 - [ ] diagnostics
 
 ## Development
