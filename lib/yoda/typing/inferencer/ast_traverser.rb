@@ -12,7 +12,7 @@ module Yoda
         # @return [Contexts::BaseContext]
         attr_reader :context
 
-        delegate [:bind_context, :bind_type, :bind_send] => :tracer
+        delegate [:bind_context, :bind_send] => :tracer
 
         # @return [Types::Generator]
         delegate [:generator] => :context
@@ -31,7 +31,7 @@ module Yoda
           Logger.trace("Traversing #{node}")
           type = infer_node(node)
           Logger.trace("Traversed #{node} -> #{type.to_s}")
-          bind_type(node: node, type: type, context: context)
+          bind_type(node: node, type: type)
 
           type
         end
@@ -42,6 +42,12 @@ module Yoda
         # @return [self]
         def derive(context:)
           self.class.new(tracer: tracer, context: context)
+        end
+
+        # @param node [AST::Node]
+        # @param type [Types::Base]
+        def bind_type(node:, type:)
+          tracer.bind_type(node: node, type: type, context: context)
         end
 
         # @param node [AST::Vnode]
@@ -147,41 +153,23 @@ module Yoda
         def infer_const_node(node)
           case node.base.type
           when :cbase
-            # Remember constant candidates
-            constants = [context.environment.resolve_constant(node.name.name.to_s)].compact
-            tracer.bind_constants(node: node, constants: constants)
+            type = Types::ConstantAccess.new(infer_const_base_node(node.base), node.name.name.to_s)
 
-            generator.singleton_type_at("::#{node.name.name}")
+            # tracer.bind_constants(node: node, constants: constants)
+
+            type
           when :empty
-            lexical_values = context.lexical_scope_types.map(&:value)
-            relative_path = node.name.name.to_s
+            type = Types::LexicalScope.new(context, node.name.name.to_s)
 
-            # Search nearest lexical scope first
-            found_paths = lexical_values.reverse.reduce(nil) do |found_paths, value|
-              found_paths || begin
-                current_found_paths = value.select_constant_paths(relative_path)
-                current_found_paths.empty? ? nil : current_found_paths
-              end
-            end
+            # tracer.bind_constants(node: node, constants: constants)
 
-            if found_paths
-              # Remember constant candidates
-              constants = [context.environment.resolve_constant(found_paths.first)].compact
-              tracer.bind_constants(node: node, constants: constants)
-            
-              generator.singleton_type_at(found_paths.first)
-            else
-              generator.any_type
-            end
+            type
           else
-            base_type = traverse(node.base)
+            type = Types::ConstantAccess.new(traverse(node.base), node.name.name.to_s)
 
-            # Remember constant candidates
-            paths = base_type.value.select_constant_paths(node.name.name.to_s)
-            constants = paths.map { |path| context.environment.resolve_constant(path) }.compact
-            tracer.bind_constants(node: node, constants: constants)
+            # tracer.bind_constants(node: node, constants: constants)
 
-            generator.wrap_rbs_type(base_type.value.select_constant_type(node.name.name.to_s))
+            type
           end
         end
 
@@ -201,24 +189,25 @@ module Yoda
         # @param receiver_type [Types::Type]
         # @return [Types::Base]
         def traverse_method(node, receiver_type:)
-          method_candidates = receiver_type.value.select_method(node.name.to_s, visibility: %i(private protected public))
-          method_types = method_candidates.map(&:rbs_type)
+          method_access_type = Types::MethodAccess.new(receiver_type, node.name.to_s, with_receiver: true, generator: generator)
 
-          # TODO: Support overloads
-          method_bind = method_types.reduce({}) do |all_bind, method_type|
-            bind = ParameterBinder.new(node.parameters.parameter).bind(type: method_type, generator: generator)
-            all_bind.merge(bind.to_h) { |_key, v1, v2| generator.union_type(v1, v2) }
-          end
+          # # TODO: Support overloads
+          # method_bind = method_types.reduce({}) do |all_bind, method_type|
+          #   bind = ParameterBinder.new(node.parameters.parameter).bind(type: method_type, generator: generator)
+          #   all_bind.merge(bind.to_h) { |_key, v1, v2| generator.union_type(v1, v2) }
+          # end
 
-          Logger.trace("method_candidates: [#{method_candidates.join(', ')}]")
-          Logger.trace("bind arguments: #{method_bind.map { |key, value| [key, value.to_s] }.to_h }")
+          # tracer.bind_method_definition(node: node, method_candidates: method_candidates)
 
-          tracer.bind_method_definition(node: node, method_candidates: method_candidates)
+          binder = method_access_type.parameter_binder
+          # TODO: Resolve type variables by matching argument_types with arguments
+          method_binds = binder.bind(types: method_types, arguments: block_param_node.parameter)
+          Logger.trace("bind arguments: #{method_binds.map { |key, value| [key, value.to_s] }.to_h }")
 
-          method_context = context.derive_method_context(receiver_type: receiver_type, binds: method_bind)
+          method_context = context.derive_method_context(receiver_type: receiver_type, binds: method_binds)
           derive(context: method_context).traverse(node.body)
 
-          generator.symbol_type(node.name.to_sym)
+          method_access_type
         end
 
         # @param node [AST::SingletonClassNode]
@@ -289,27 +278,17 @@ module Yoda
           receiver_type = node.implicit_receiver? ? context.receiver : traverse(node.receiver)
           argument_types = infer_argument_nodes(node.arguments)
 
-          visibility = node.implicit_receiver? ? %i(private protected public) : %i(public)
-          # TODO: Support overloads
-          method_candidates = receiver_type.value.select_method(node.selector_name, visibility: visibility)
-          method_types = method_candidates.map(&:rbs_type)
+          method_call_type = Types::MethodCall.new(receiver_type, node.selector_name, argument_types, implicit_receiver: node.implicit_receiver?, genertor: generator)
 
           if block_node
+            binder = method_call_type.block_binder
             # TODO: Resolve type variables by matching argument_types with arguments
-            binds = ArgumentsBinder.new(generator: generator).bind(types: method_types, arguments: block_param_node.parameter)
+            binds = binder.bind(types: method_types, arguments: block_param_node.parameter)
             new_context = context.derive_block_context(binds: binds)
             derive(context: new_context).traverse(block_node)
           end
 
-          Logger.trace("method_candidates: [#{method_candidates.join(', ')}]")
-          Logger.trace("receiver_type: #{receiver_type}")
-
-          bind_send(node: node, method_candidates: method_candidates, receiver_type: receiver_type)
-          if method_types.empty?
-            generator.unknown_type(reason: "method not found")
-          else
-            generator.union_type(*method_types.map { |method_type| method_type.type.return_type })
-          end
+          method_call_type
         end
 
         # @param nodes [Array<::AST::Node>]

@@ -1,10 +1,10 @@
 module Yoda
   module Model
     module TypeExpressions
-      class SelfType < Base
+      class SelfInstanceType < Base
         # @param another [Object]
         def eql?(another)
-          another.is_a?(SelfType)
+          another.is_a?(SelfInstanceType)
         end
 
         def hash
@@ -25,12 +25,12 @@ module Yoda
 
         # @return [String]
         def to_s
-          'instance'
+          'self'
         end
 
         # @param env [Environment]
         def to_rbs_type(env)
-          RBS::Types::Bases::Self.new(location: nil)
+          RBS::Types::Bases::Instance.new(nil)
         end
       end
     end

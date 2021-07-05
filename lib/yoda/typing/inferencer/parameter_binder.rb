@@ -2,7 +2,7 @@ module Yoda
   module Typing
     class Inferencer
       class ParameterBinder
-        # @return [Base]
+        # @return [Model::Parameters::Base]
         attr_reader :parameter
 
         # @param parameter [Base]

@@ -1,9 +1,14 @@
 module Yoda
   module Typing
-    class Inferencer
-      class ArgumentsBinder
+    module Types
+      class Arguments
         # @return [Types::Generator]
         attr_reader :generator
+
+        # @param generator [Types::Generator]
+        def from_parameters(generator:)
+          @generator = generator
+        end
 
         # @param generator [Types::Generator]
         def initialize(generator:)
