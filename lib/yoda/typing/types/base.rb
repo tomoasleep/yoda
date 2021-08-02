@@ -15,6 +15,12 @@ module Yoda
         end
 
         # @abstract
+        # @return [Types::Base]
+        def resolve
+          fail NotImplemetedError
+        end
+
+        # @abstract
         # @return [String]
         def to_type_string
           fail NotImplemetedError

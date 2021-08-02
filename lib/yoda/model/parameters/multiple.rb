@@ -30,6 +30,18 @@ module Yoda
         def kind
           :multiple
         end
+
+        # @return [Array<Symbol>]
+        def names
+          [
+            *parameters.flat_map(&:names),
+            *keyword_parameters.flat_map(&:names),
+            *post_parameters.flat_map(&:names),
+            *(rest_parameter&.names || []),
+            *(keyword_rest_parameter&.names || []),
+            *(block_parameter&.names || []),
+          ]
+        end
       end
     end
   end

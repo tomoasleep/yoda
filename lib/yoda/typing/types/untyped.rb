@@ -1,7 +1,7 @@
 module Yoda
   module Typing
     module Types
-      class Any < Base
+      class Untyped < Base
         def to_expression
           Model::TypeExpressions::AnyType.new
         end
@@ -11,7 +11,7 @@ module Yoda
         end
 
         def to_type_string
-          "any"
+          "untyped"
         end
       end
     end

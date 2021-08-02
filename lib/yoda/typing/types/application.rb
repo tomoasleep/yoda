@@ -1,12 +1,12 @@
 module Yoda
   module Typing
     module Types
-      class MethodCall < Base
+      class Application < Base
         # @return [Base]
         attr_reader :callee
 
         # @return [String]
-        attr_reader :method_name
+        attr_reader :arguments
 
         # @param callee [Base]
         # @param method_name [String]

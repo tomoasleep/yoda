@@ -1,0 +1,12 @@
+gems:
+  - name: google-api-client
+    ignore: true
+rbs:
+  signature:
+    - sig
+  repository:
+    - vendor/rbs/gem_rbs_collection/gems/
+  library:
+    - pathname
+    - set
+    - ast

@@ -14,6 +14,11 @@ module Yoda
         def kind
           :named
         end
+
+        # @return [Array<Symbol>]
+        def names
+          [name]
+        end
       end
     end
   end

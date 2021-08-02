@@ -1,9 +1,11 @@
 module Yoda
   module Typing
     module Types
-      class Any < Base
-        def to_expression
-          Model::TypeExpressions::AnyType.new
+      class Literal < Base
+        attr_reader :value
+
+        def initialize(value)
+          @value = value
         end
 
         def resolve
@@ -11,7 +13,7 @@ module Yoda
         end
 
         def to_type_string
-          "any"
+          value.to_s
         end
       end
     end
