@@ -1,6 +1,7 @@
 # Yoda [![Build Status](https://travis-ci.org/tomoasleep/yoda.svg?branch=master)](https://travis-ci.org/tomoasleep/yoda)
 
-Yoda is a Language Server (http://langserver.org/) for Ruby and provides autocompletion and code analysis (go-to-definition, code information, etc...).  
+Yoda is a Language Server (http://langserver.org/) for Ruby.
+Yoda infers signatures of your Ruby program and its dependencies from various data sources (RBS and YARD documentation) and provides autocompletion and code analysis (go-to-definition, code information, etc...).  
 
 **Note: Yoda is alpha version. Please use with caution. Contributions are welcome!**
 
