@@ -75,8 +75,8 @@ module Yoda
         def filter_rbs_methods(pattern, visibility:)
           return [] unless rbs_methods
           if pattern.is_a?(Regexp)
-            rbs_methods.select do |(key, value)|
-              key.to_s.match?(pattern) && visibility.include?(value.accesibility)
+            rbs_methods.select do |key, value|
+              key.to_s.match?(pattern) && visibility.include?(value.accessibility)
             end.map { |(key, value)| value }
           else
             meth = rbs_methods[pattern.to_sym]

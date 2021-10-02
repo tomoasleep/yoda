@@ -51,7 +51,7 @@ module Yoda
 
         # @return [String]
         def document
-          rbs_method_typedef.comment.string
+          rbs_method_typedef.comment&.string || ""
         end
 
         # @return [Array<Store::Objects::Tag>]
