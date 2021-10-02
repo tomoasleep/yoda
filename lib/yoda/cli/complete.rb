@@ -24,7 +24,7 @@ module Yoda
       end
 
       def worker
-        @worker ||= Services::CodeCompletion.new(project.registry, source, position)
+        @worker ||= Services::CodeCompletion.new(project.environment, source, position)
       end
 
       def project
