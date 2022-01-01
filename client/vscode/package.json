@@ -4,6 +4,7 @@
     "description": "Static analytics tool for Ruby",
     "version": "0.0.1",
     "publisher": "tomoasleep",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/tomoasleep/yoda"
@@ -17,7 +18,7 @@
     "activationEvents": [
         "onLanguage:ruby"
     ],
-    "main": "./out/extension",
+    "main": "./out/extension.js",
     "contributes": {
         "configuration": {
             "title": "Yoda",
@@ -37,7 +38,8 @@
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
-        "test": "npm run compile && node ./out/test/runTest.js"
+        "test": "npm run compile && node ./out/test/runTest.js",
+        "package": "vsce package"
     },
     "dependencies": {
         "vscode-languageclient": "^7.0"
@@ -49,6 +51,7 @@
         "glob": "^7.1.4",
         "mocha": "^6.1.4",
         "typescript": "^4.2",
+        "vsce": "^2.6.0",
         "vscode-test": "^1.5"
     }
 }

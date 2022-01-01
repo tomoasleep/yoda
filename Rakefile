@@ -17,7 +17,7 @@ namespace :vscode do
   task build: :deps do
     Dir.chdir(File.expand_path("./client/vscode", __dir__)) do
       # See: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
-      sh "npx vsce package"
+      sh "npm run package"
     end
   end
 
