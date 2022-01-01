@@ -44,6 +44,12 @@ module Yoda
         Server.new.run
       end
 
+      desc 'version', 'show current version'
+      def version
+        process_class_options
+        say "#{Yoda::VERSION}"
+      end
+
       private
 
       def process_class_options
