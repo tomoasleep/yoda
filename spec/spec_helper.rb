@@ -1,5 +1,8 @@
 require "bundler/setup"
 require 'rspec-benchmark'
+require 'simplecov'
+SimpleCov.start
+
 require "yoda"
 
 RSpec.configure do |config|
