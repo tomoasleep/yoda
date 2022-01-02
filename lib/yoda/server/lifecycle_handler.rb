@@ -124,7 +124,7 @@ module Yoda
 
         notifier.show_message(
           type: :warning,
-          message: "Failed to load some libraries (Please check console for details)",
+          message: warning_summary(core_import_errors, gem_import_errors),
         )
 
         if gem_message = gem_import_warnings(gem_import_errors)
@@ -140,6 +140,17 @@ module Yoda
             message: core_message,
           )
         end
+      end
+
+      def warning_summary(core_import_errors, gem_import_errors)
+        error_list = []
+        error_list += ["- core library"] unless core_import_errors.empty?
+        error_list += gem_import_errors.map { |error| "- #{error.name} (#{error.version})" }
+
+        <<~EOS
+        Failed to load some libraries
+        #{error_list.join("\n")}
+        EOS
       end
 
       # @param gem_import_errors [Array<GemImportError>]

@@ -28,6 +28,7 @@ module Yoda
         @file_store = FileStore.new
       end
 
+      # @return [Array<Exception>] errors on setup
       def setup
         project.setup
       end

@@ -27,12 +27,13 @@ module Yoda
         project.registry
       end
 
+      # @return [Array<Exception>] errors on setup
       def setup
         unless Store::Actions::BuildCoreIndex.exists?
           Instrument.instance.initialization_progress(phase: :core, message: 'Downloading and building core index')
           Store::Actions::BuildCoreIndex.run
         end
-        workspaces.each(&:setup)
+        workspaces.flat_map(&:setup)
       end
 
       # @param new_workspace [Workspace]
