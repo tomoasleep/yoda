@@ -25,7 +25,7 @@ module Yoda
         @name = name
         @root_path = root_path && File.absolute_path(root_path)
       end
-      
+
       # @return [Registry::ProjectRegistry]
       def registry
         @registry ||= Registry.for_project(self)
@@ -44,7 +44,7 @@ module Yoda
             pathname = Pathname(repo_path).expand_path(root_path)
             repository.add(pathname)
           end
-          
+
           loader = RBS::EnvironmentLoader.new(repository: repository)
           config.rbs_signature_paths.each do |sig_path|
             pathname = Pathname(sig_path).expand_path(root_path)
@@ -64,11 +64,13 @@ module Yoda
         @environment ||= Model::Environment.from_project(self)
       end
 
+      # @return [Array<BaseError>]
       def setup
         files.make_dir
-        import_project_dependencies
+        errors = import_project_dependencies
         rbs_environment
         load_project_files
+        errors
       end
       alias build_cache setup
 
