@@ -87,7 +87,6 @@ RSpec.describe Yoda::Server::Providers::Hover do
         expect(subject.contents).to match [
           have_content(be_start_with('str.bytesize # ::Integer')),
           have_content(be_start_with('**::String#bytesize() -> ::Integer**')),
-          have_content(be_start_with('**String#bytesize() -> ::Integer**'))
         ]
         expect(subject.range).to have_attributes(start: { line: 9, character: 8 }, end: { line: 9, character: 20 })
       end
