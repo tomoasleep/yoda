@@ -7,7 +7,7 @@ module ServerHelper
     yield requests
 
     sio = StringIO.new
-    requests.each { |request| lsp_write(sio, request); sio.write("\n") }
+    requests.each { |request| lsp_write(sio, request); sio.write("") }
     puts sio.string
 
     Dir.chdir(fixture_path) do 
@@ -29,7 +29,7 @@ module ServerHelper
         lsp(params_kind, **params)
       end
     end
-    
+
     lsp(:request_message, jsonrpc: "2.0", id: id, method: method, params: params)
   end
 
