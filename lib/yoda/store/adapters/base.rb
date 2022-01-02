@@ -57,6 +57,7 @@ module Yoda
         # @param bar [#increment, nil]
         # @abstract
         def batch_write(data, bar)
+          fail NotImplementedError
         end
 
         def inspect
