@@ -48,9 +48,10 @@ module Yoda
         # @return [CommentTokenizer::Sequence, nil]
         def tokenize
           return @tokenize if instance_variable_defined?(:@tokenized)
-          @tokenize = CommentTokenizer.new.parse(line_to_current_position)
-        rescue Parslet::ParseFailed
-          @tokenize = nil
+          @tokenize = begin
+            tokens = CommentTokenizer.new.parse(line_to_current_position)
+            tokens.first.is_a?(CommentTokenizer::Sequence) ? tokens.first : nil
+          end
         end
 
         # @return [String]
