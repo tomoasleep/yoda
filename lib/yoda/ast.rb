@@ -6,6 +6,7 @@ module Yoda
     require 'yoda/ast/namespace'
     require 'yoda/ast/vnode'
     require 'yoda/ast/node'
+    require 'yoda/ast/comment_block'
 
     require 'yoda/ast/array_node'
     require 'yoda/ast/assignment_node'
