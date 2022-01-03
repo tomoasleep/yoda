@@ -137,6 +137,34 @@ module Yoda
         end
       end
       include Positional
+
+      module CommentPositional
+        # @return [Hash{Vnode => CommentBlock}]
+        def comments_by_vnode
+          @comments_by_vnode ||= begin
+            node_map = all_nodes_lazy.map { |vnode| vnode.respond_to?(:node) ? [vnode.node, vnode] : nil }.to_a.compact.to_h
+            comments_by_node.map do |node, comments|
+              vnode = node_map[node]
+              vnode ? [vnode, CommentBlock.new(comments, node: vnode)] : nil
+            end.compact.to_h
+          end
+        end
+
+        # @param location [Location]
+        # @return [CommentBlock, nil]
+        def positionally_nearest_comment(location)
+          comments_by_vnode.find do |(node, comment_block)|
+            comment_block.range.include?(location)
+          end&.last
+        end
+
+        # @param location [Location]
+        # @return [Vnode, nil]
+        def positionally_nearest_commenting_node(location)
+          positionally_nearest_comment(location)&.node
+        end
+      end
+      include CommentPositional
     end
   end
 end
