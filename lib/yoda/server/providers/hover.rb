@@ -31,13 +31,17 @@ module Yoda
         def calculate(uri, position)
           workspace = session.workspace_for(uri)
           source = workspace.file_store.get(uri)
-          evaluator = Services::Evaluator.new(ast: Parsing.parse(source), environment: workspace.project.environment)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
-          node_worker = Services::CurrentNodeExplain.new(evaluator: evaluator, location: location)
+          node_worker = Services::CurrentNodeExplain.from_source(environment: workspace.project.environment, source: source, location: location)
 
-          current_node_signature = node_worker.current_node_signature
-          create_hover(current_node_signature) if current_node_signature
+          if current_comment_signature = node_worker.current_comment_signature
+            create_hover(current_comment_signature)
+          elsif current_node_signature = node_worker.current_node_signature
+            create_hover(current_node_signature)
+          else
+            nil
+          end
         end
 
         # @param signature [Model::NodeSignatures::Base]

@@ -38,10 +38,19 @@ module Yoda
 
             node_worker = Services::CurrentNodeExplain.from_source(environment: workspace.project.environment, source: source, location: location)
 
-            references = node_worker.current_node_signature.defined_files
-            locations = references.map { |(path, line, column)| create_location(workspace.uri_of_path(path), line, column) }
+            if current_comment_signature = node_worker.current_comment_signature
+              references = current_comment_signature.defined_files
+              locations = references.map { |(path, line, column)| create_location(workspace.uri_of_path(path), line, column) }
 
-            return locations unless locations.empty?
+              return locations unless locations.empty?
+            elsif current_node_signature = node_worker.current_node_signature
+              references = current_node_signature.defined_files
+              locations = references.map { |(path, line, column)| create_location(workspace.uri_of_path(path), line, column) }
+
+              return locations unless locations.empty?
+            else
+              nil
+            end
           end
 
           []

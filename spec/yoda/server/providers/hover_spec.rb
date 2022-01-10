@@ -113,5 +113,16 @@ RSpec.describe Yoda::Server::Providers::Hover do
         expect(subject.range).to have_attributes(start: { line: 17, character: 4 }, end: { line: 19, character: 7 })
       end
     end
+
+    context 'on type part of comment' do
+      let(:uri) { file_uri('lib/hoge/sig.rb') }
+      let(:position) { { line: 6, character: 23 }}
+
+      it 'returns the description of the constant' do
+        expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
+        expect(subject.contents).to match [have_content(be_start_with('String # singleton(::String)'))]
+        expect(subject.range).to have_attributes(start: { line: 6, character: 21 }, end: { line: 6, character: 27 })
+      end
+    end
   end
 end
