@@ -52,5 +52,20 @@ RSpec.describe Yoda::Server::Providers::Definition do
         )
       end
     end
+
+    context 'request information on type part of comment' do
+      let(:uri) { file_uri('lib/sample2.rb') }
+      let(:position) { { line: 15, character: 21 }}
+
+      it 'returns information of the constant' do
+        expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
+        expect(subject).to contain_exactly(
+          have_attributes(
+            uri: uri,
+            range: have_attributes(start: { line: 0, character: 0 }, end: { line: 0, character: 0 })
+          ),
+        )
+      end
+    end
   end
 end
