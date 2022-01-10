@@ -145,44 +145,7 @@ module Yoda
         # @param node [AST::ConstantNode]
         # @return [Types::Base]
         def infer_const_node(node)
-          case node.base.type
-          when :cbase
-            # Remember constant candidates
-            constants = [context.environment.resolve_constant(node.name.name.to_s)].compact
-            tracer.bind_constants(node: node, constants: constants)
-
-            generator.singleton_type_at("::#{node.name.name}")
-          when :empty
-            lexical_values = context.lexical_scope_types.map(&:value)
-            relative_path = node.name.name.to_s
-
-            # Search nearest lexical scope first
-            found_paths = lexical_values.reverse.reduce(nil) do |found_paths, value|
-              found_paths || begin
-                current_found_paths = value.select_constant_paths(relative_path)
-                current_found_paths.empty? ? nil : current_found_paths
-              end
-            end
-
-            if found_paths
-              # Remember constant candidates
-              constants = [context.environment.resolve_constant(found_paths.first)].compact
-              tracer.bind_constants(node: node, constants: constants)
-            
-              generator.singleton_type_at(found_paths.first)
-            else
-              generator.any_type
-            end
-          else
-            base_type = traverse(node.base)
-
-            # Remember constant candidates
-            paths = base_type.value.select_constant_paths(node.name.name.to_s)
-            constants = paths.map { |path| context.environment.resolve_constant(path) }.compact
-            tracer.bind_constants(node: node, constants: constants)
-
-            generator.wrap_rbs_type(base_type.value.select_constant_type(node.name.name.to_s))
-          end
+          context.constant_resolver.resolve_node(node, tracer: tracer)
         end
 
         # @param node [AST::DefNode]
