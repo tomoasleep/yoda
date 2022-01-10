@@ -72,6 +72,11 @@ module Yoda
         def generator
           Types::Generator.new(environment: environment)
         end
+
+        # @return [ConstantResolver]
+        def constant_resolver
+          ConstantResolver.new(context: self)
+        end
       end
     end
   end

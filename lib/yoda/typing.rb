@@ -1,5 +1,6 @@
 module Yoda
   module Typing
+    require 'yoda/typing/constant_resolver'
     require 'yoda/typing/contexts'
     require 'yoda/typing/environment'
     require 'yoda/typing/relation'

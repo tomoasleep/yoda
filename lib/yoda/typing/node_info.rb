@@ -61,6 +61,12 @@ module Yoda
         context&.lexical_scope_types || []
       end
 
+      # @param path_expr [String]
+      # @return [Types::Type, nil]
+      def resolve_constant(path_expr)
+        context&.constant_resolver&.resolve_path(path_expr.to_s)
+      end
+
       private
 
       # @return [Contexts::BaseContext]
