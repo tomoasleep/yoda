@@ -4,7 +4,7 @@ module Yoda
   module Store
     module Actions
       class ImportGem
-        # @return [Project::Dependency::Library]
+        # @return [Objects::Library::Gem]
         attr_reader :dep
 
         class << self
@@ -14,7 +14,7 @@ module Yoda
           end
         end
 
-        # @param dep [Project::Dependency::Library]
+        # @param dep [Objects::Library::Gem]
         def initialize(dep)
           @dep = dep
         end
@@ -30,11 +30,40 @@ module Yoda
         private
 
         def create_dependency_doc
-          if yardoc_path
-            Logger.info "Gem docs for #{gem_name} #{gem_version} already exist"
-            return true
+          if dep.managed_by_rubygems?
+            if yardoc_path
+              Logger.info "Gem docs for #{gem_name} #{gem_version} already exist"
+              return true
+            end
+            Logger.info "Building gem docs for #{gem_name} #{gem_version}"
+            yard_gem_command
+          elsif yardoc_local_path
+            Logger.info "Building gem docs for #{gem_name} #{gem_version}"
+            yard_local_doc_command
+          else
+            Logger.info "Cannot build gem docs for #{gem_name} #{gem_version}"
           end
-          Logger.info "Building gem docs for #{gem_name} #{gem_version}"
+        end
+
+        def yard_local_doc_command
+          begin
+            o, e = Dir.chdir(gem_path) do
+              Open3.capture2e("yard --no-stats -no-output -c")
+            end
+            Logger.debug o unless o.empty?
+            if e.success?
+              Logger.info "Done building gem docs for #{gem_name} #{gem_version}"
+            else
+              Logger.warn "Failed to build #{gem_name} #{gem_version}"
+            end
+          rescue => ex
+            Logger.debug ex
+            Logger.debug ex.backtrace
+            Logger.warn "Failed to build #{gem_name} #{gem_version}"
+          end
+        end
+
+        def yard_gem_command
           begin
             o, e = Open3.capture2e("yard gems #{gem_name} #{gem_version}")
             Logger.debug o unless o.empty?
@@ -64,8 +93,26 @@ module Yoda
           end
         end
 
-        # @return [String, nil]
         def yardoc_path
+          if dep.managed_by_rubygems?
+            yardoc_gem_path
+          else
+            yardoc_local_path
+          end
+        end
+
+        # @return [String, nil]
+        def yardoc_local_path
+          return nil unless gem_path && File.exist?(gem_path)
+
+          candidate = File.expand_path('.yardoc', gem_path)
+          if File.writable?(candidate) || (!File.directory?(candidate) && File.writable?(gem_path))
+            candidate
+          end
+        end
+
+        # @return [String, nil]
+        def yardoc_gem_path
           YARD::Registry.yardoc_file_for_gem(gem_name, gem_version)
         rescue Bundler::BundlerError => ex
           Logger.debug ex

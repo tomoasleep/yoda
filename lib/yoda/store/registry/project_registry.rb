@@ -14,7 +14,7 @@ module Yoda
       delegate %i(get has_key? keys) => :root_store
 
       PROJECT_STATUS_KEY = '%project_status'
-      LIBRARY_STORE_INDEX_KEY = '%library_store_index'
+      PERSISTABLE_LIBRARY_STORE_INDEX_KEY = '%persistable_library_store_index'
 
       class << self
         # @param project [Project]
@@ -32,21 +32,26 @@ module Yoda
       def root_store
         @root_store ||= begin
           Registry::Cache::RegistryWrapper.new(
-            Registry::Composer.new(id: :root, registries: [local_store, library_store])
+            Registry::Composer.new(id: :root, registries: [local_store, persistable_library_store, volatile_library_store]),
           )
         end
       end
 
       def modify_libraries(add:, remove:)
         remove.each do |library|
-          if registry = library_store.get_registry(library.id)
-            library_store.remove_registry(registry)
+          if registry = library.registry
+            persistable_library_store.remove_registry(registry)
+            volatile_library_store.remove_registry(registry)
             project_status.libraries.delete(library)
           end
         end
         add.each do |library|
           if registry = library.registry
-            library_store.add_registry(registry)
+            if registry.persistable?
+              persistable_library_store.add_registry(registry)
+            else
+              volatile_library_store.add_registry(registry)
+            end
             project_status.libraries.push(library)
           end
         end
@@ -68,13 +73,19 @@ module Yoda
 
       def add_library_registry(registry)
         root_store.clear_cache
-        library_store.add_registry(registry)
+        if registry.persistable?
+          persistable_library_store.add_registry(registry)
+        else
+          volatile_library_store.add_registry(registry)
+        end
+
         save
       end
 
       def remove_library_registry(registry)
         root_store.clear_cache
-        library_store.remove_registry(registry)
+        persistable_library_store.remove_registry(registry)
+        volatile_library_store.remove_registry(registry)
         save
       end
 
@@ -98,23 +109,29 @@ module Yoda
       # @return [Adapters::LmdbAdapter, nil]
       attr_reader :adapter
 
-      def library_store
-        @library_store ||= begin
-          library_composer = Registry::Composer.new(id: :library, registries: project_status.registries)
-          library_store_index.wrap(library_composer)
+      def persistable_library_store
+        @persistable_library_store ||= begin
+          library_composer = Registry::Composer.new(id: :persistable_library, registries: project_status.registries.select(&:persistable?))
+          persistable_library_store_index.wrap(library_composer)
         end
       end
 
-      def library_store_index
-        @library_store_index ||= Registry::Index.new(content: library_store_index_content, registry_ids: project_status.libraries.map(&:id))
+      def persistable_library_store_index
+        @persistable_library_store_index ||= Registry::Index.new(content: persistable_library_store_index_content, registry_ids: project_status.libraries.map(&:id))
       end
 
-      def library_store_index_content
-        @library_store_index_content ||= Objects::Map.new(path: LIBRARY_STORE_INDEX_KEY, adapter: adapter)
+      def persistable_library_store_index_content
+        @persistable_library_store_index_content ||= Objects::Map.new(path: PERSISTABLE_LIBRARY_STORE_INDEX_KEY, adapter: adapter)
+      end
+
+      def volatile_library_store
+        @volatile_library_store ||= begin
+          Registry::Composer.new(id: :volatile_library, registries: project_status.registries.reject(&:persistable?))
+        end
       end
 
       def save
-        library_store_index_content.save
+        persistable_library_store_index_content.save
         adapter.put(PROJECT_STATUS_KEY, project_status)
       end
 

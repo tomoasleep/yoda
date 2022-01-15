@@ -94,7 +94,11 @@ module Yoda
 
           # @note Implementation for {WithRegistry#registry_path}
           def registry_path
-            VersionStore.for_current_version.registry_path_for_gem(name: name, version: version)
+            if managed_by_rubygems?
+              VersionStore.for_current_version.registry_path_for_gem(name: name, version: version)
+            else
+              nil
+            end
           end
 
           # @return [Boolean]

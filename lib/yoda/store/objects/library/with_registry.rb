@@ -5,12 +5,12 @@ module Yoda
         module WithRegistry
           # @return [Boolean]
           def registry_exists?
-            File.exists?(registry_path)
+            registry_path && File.exists?(registry_path)
           end
 
           # Return the path of registry for the library.
           # @abstract
-          # @return [String]
+          # @return [String, nil]
           def registry_path
             fail NotImplementedError
           end

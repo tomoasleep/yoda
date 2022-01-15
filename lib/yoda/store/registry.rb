@@ -10,7 +10,7 @@ module Yoda
       require 'yoda/store/registry/project_registry'
 
       # @note This number must be updated when breaking change is added.
-      REGISTRY_VERSION = 4
+      REGISTRY_VERSION = 5
 
       class << self
         def new(adapter)
