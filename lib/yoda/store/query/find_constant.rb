@@ -15,7 +15,11 @@ module Yoda
             # When the path does not contain separator (`::`)
             base_namespace
           else
-            find_constant(constant_names.join('::'), base_namespace)
+            if base_namespace
+              find_constant(constant_names.join('::'), base_namespace)
+            else
+              nil
+            end
           end
         end
 
