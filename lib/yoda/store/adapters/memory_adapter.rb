@@ -71,6 +71,10 @@ module Yoda
           db.keys
         end
 
+        def empty?
+          db.empty?
+        end
+
         def stats
           "No stats"
         end
@@ -80,6 +84,10 @@ module Yoda
         end
 
         def sync
+        end
+
+        def persistable?
+          false
         end
 
         private

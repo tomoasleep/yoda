@@ -23,7 +23,7 @@ module Yoda
         attr_reader :maxdbs
 
         extend Forwardable
-        delegate [:get, :batch_write, :put, :delete, :exists, :keys] => :main_namespace
+        delegate [:get, :batch_write, :put, :delete, :exists, :keys, :empty?, :persistable?] => :main_namespace
 
         # @param path [String] represents the path to store db.
         def initialize(path)

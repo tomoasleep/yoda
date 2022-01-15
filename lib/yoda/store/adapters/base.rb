@@ -53,6 +53,16 @@ module Yoda
           fail NotImplementedError
         end
 
+        # @abstract
+        def empty?
+          fail NotImplementedError
+        end
+
+        # @abstract
+        def persistable?
+          fail NotImplementedError
+        end
+
         # @param data [Enumerator<(String, Object)>]
         # @param bar [#increment, nil]
         # @abstract

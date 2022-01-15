@@ -74,6 +74,10 @@ module Yoda
             database.clear
           end
 
+          def persistable?
+            true
+          end
+
           private
 
           # @return [LMDB::Database]

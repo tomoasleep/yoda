@@ -57,6 +57,10 @@ module Yoda
         adapter.exists?(path)
       end
 
+      def persistable?
+        adapter.persistable?
+      end
+
       def keys
         @keys ||= Set.new(adapter.keys.map(&:to_s) || [])
       end
