@@ -41,6 +41,7 @@ module Yoda
     require 'yoda/ast/send_node'
     require 'yoda/ast/singleton_class_node'
     require 'yoda/ast/special_call_node'
+    require 'yoda/ast/value_vnode'
     require 'yoda/ast/variable_node'
     require 'yoda/ast/when_node'
 
@@ -61,6 +62,7 @@ module Yoda
       def wrapper_class_for(node)
         return EmptyVnode unless node
         return NameVnode if node.is_a?(Symbol)
+        return ValueVnode unless node.respond_to?(:type)
         case node.type
         when :lvasgn, :ivasgn, :cvasgn, :gvasgn, :masgn, :op_asgn, :or_asgn, :and_asgn
           AssignmentNode
