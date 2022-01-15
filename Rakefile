@@ -9,7 +9,7 @@ namespace :vscode do
   desc "Install dependencies of vscode extension"
   task :deps do
     Dir.chdir(File.expand_path("./client/vscode", __dir__)) do
-      sh "npm install"
+      sh "npm ci"
     end
   end
 
