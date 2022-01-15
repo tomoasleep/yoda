@@ -17,7 +17,7 @@ module Yoda
         end
 
         def referred_objects
-          [class_accessor.class_object]
+          [class_accessor.class_object].compact
         end
 
         # @return [InstanceValue]
