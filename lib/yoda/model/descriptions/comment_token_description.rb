@@ -28,7 +28,9 @@ module Yoda
         # @return [String]
         def to_markdown
           <<~EOS
-          #{title.gsub("\n", ";")}: #{type}
+          **#{title}**
+
+          #{value.document}
           EOS
         end
 

@@ -27,7 +27,7 @@ module Yoda
 
         # @return [Array<Descriptions::Base>]
         def descriptions
-          [node_type_description].compact
+          [node_type_description, *type_descriptions].compact
         end
 
         # @return [Array<String>]
