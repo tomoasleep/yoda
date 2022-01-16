@@ -20,12 +20,17 @@ module Yoda
           @node_info = node_info
         end
 
+        # @return [Boolean]
+        def providable?
+          node_range
+        end
+
         # @return [Range, nil]
         def node_range
           current_comment_token&.range
         end
 
-        # @return [Array<Descriptions::Base>]
+        # @return [Array<Model::Descriptions::Base>]
         def descriptions
           [node_type_description, *type_descriptions].compact
         end
@@ -35,7 +40,7 @@ module Yoda
           objects.map { |value| value.primary_source || value.sources.first }.compact
         end
 
-        # @return [Descriptions::Base]
+        # @return [Model::Descriptions::Base, nil]
         def node_type_description
           if constants_type
             Model::Descriptions::CommentTokenDescription.new(current_comment_token, constants_type)

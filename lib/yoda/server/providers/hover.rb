@@ -35,7 +35,7 @@ module Yoda
 
           node_worker = Services::CurrentNodeExplain.from_source(environment: workspace.project.environment, source: source, location: location)
 
-          if current_comment_signature = node_worker.current_comment_signature
+          if current_comment_signature = node_worker.current_comment_signature&.providable?
             create_hover(current_comment_signature)
           elsif current_node_signature = node_worker.current_node_signature
             create_hover(current_node_signature)
