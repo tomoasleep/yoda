@@ -84,7 +84,7 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the calling method' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [
+        expect(subject.contents[0..1]).to match [
           have_content(be_start_with('str.bytesize # ::Integer')),
           have_content(be_start_with('**::String#bytesize() -> ::Integer**')),
         ]
@@ -120,7 +120,7 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
       it 'returns the description of the constant' do
         expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
-        expect(subject.contents).to match [have_content(be_start_with('String # singleton(::String)'))]
+        expect(subject.contents).to match [have_content(be_start_with('String # singleton(::String)')), be_start_with('**String**')]
         expect(subject.range).to have_attributes(start: { line: 6, character: 21 }, end: { line: 6, character: 27 })
       end
     end

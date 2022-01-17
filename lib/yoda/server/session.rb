@@ -64,10 +64,12 @@ module Yoda
         workspaces_for(uri).each { |workspace| workspace.store_source(uri: uri, source: source) }
       end
 
+      # @return [Workspace, nil]
       def workspace_for(uri)
         workspaces_for(uri).first
       end
 
+      # @return [Array<Workspace>]
       def workspaces_for(uri)
         matched_workspaces = workspaces.select { |workspace| workspace.suburi?(uri) }
         matched_workspaces.empty? ? [temporal_workspace_for(uri)] : matched_workspaces

@@ -37,6 +37,7 @@ RSpec.describe Yoda::Services::CurrentNodeExplain do
         expect(subject.node_range).to have_attributes(begin_location: have_attributes(row: 2, column: 18), end_location: have_attributes(row: 2, column: 24))
         expect(subject.descriptions).to contain_exactly(
           have_attributes(title: 'String', markup_content: { language: 'ruby', value: 'String # singleton(::String)' }),
+          have_attributes(title: 'String', markup_content: be_start_with("**String**")),
         )
         expect(subject.defined_files.length).to be(1)
       end
