@@ -361,6 +361,29 @@ RSpec.describe Yoda::Typing::Inferencer do
       end
     end
 
+    describe 'block calls' do
+      context 'in block context of instance method' do
+        let(:source) do
+          <<~RUBY
+          a = 2
+          1.tap { |i| i + a }
+          RUBY
+        end
+
+        xit 'binds the type of the block argument' do
+          subject
+          node = node_traverser.query(type: :lvar, name: :i).node
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: '1')
+        end
+
+        it 'can infer variable defined from outer context' do
+          subject
+          node = node_traverser.query(type: :lvar, name: :a).node
+          expect(inferencer.tracer.type(node)).to have_attributes(to_s: '2')
+        end
+      end
+    end
+
     describe 'class method calls' do
       context 'in instance method context' do
         context 'call class method in method' do

@@ -18,7 +18,7 @@ module Yoda
 
         # @param key  [String, Symbol]
         def resolve(key)
-          @binds[key.to_sym]
+          all_variables[key.to_sym]
         end
 
         # @param key  [String, Symbol]
