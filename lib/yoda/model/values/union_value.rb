@@ -2,10 +2,10 @@ module Yoda
   module Model
     module Values
       class UnionValue < Base
-        # @return [Environment::AccessorInterface]
+        # @return [Array<Values::Base>]
         attr_reader :values
 
-        # @param values [Array<Value>]
+        # @param values [Array<Values::Base>]
         def initialize(*values)
           @values = values
         end
@@ -15,7 +15,7 @@ module Yoda
         end
 
         # @param name [String, Symbol]
-        # @return [Array<Functions::Base>]
+        # @return [Array<FunctionSignatures::Wrapper>]
         def select_method(name, **kwargs)
           # Choose methods of shared ancestors
           values.first&.select_method(name, **kwargs) || []

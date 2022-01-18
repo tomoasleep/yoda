@@ -11,7 +11,7 @@ module Yoda
 
         # @abstract
         # @param name [String, Symbol]
-        # @return [Enumerator<Functions::Wrapper>]
+        # @return [Enumerator<FunctionSignatures::Wrapper>]
         def select_method(name)
           fail NotImplementedError
         end

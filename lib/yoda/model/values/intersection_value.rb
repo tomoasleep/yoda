@@ -15,7 +15,7 @@ module Yoda
         end
 
         # @param name [String, Symbol]
-        # @return [Array<Functions::Base>]
+        # @return [Array<FunctionSignatures::Base>]
         def select_method(name, **kwargs)
           values.flat_map { |value| select_method(name, **kwargs) }
         end

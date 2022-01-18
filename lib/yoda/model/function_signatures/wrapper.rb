@@ -3,7 +3,7 @@ require 'forwardable'
 module Yoda
   module Model
     module FunctionSignatures
-      # Wrap {FUnctionSignature::Base} and allow it access to environment.
+      # Wrap {FunctionSignature::Base} and allow it access to environment.
       # TODO: Merge this with connected store
       class Wrapper
         extend Forwardable
