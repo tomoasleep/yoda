@@ -37,7 +37,7 @@ module Yoda
 
         # @return [Array<String>]
         def defined_files
-          objects.map { |value| value.primary_source || value.sources.first }.compact
+          objects.map { |value| Model::PrimarySourceInferencer.new.infer_for_object(value) }.compact
         end
 
         # @return [Model::Descriptions::Base, nil]

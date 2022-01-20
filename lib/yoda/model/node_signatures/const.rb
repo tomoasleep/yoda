@@ -7,7 +7,7 @@ module Yoda
         end
 
         def defined_files
-          node_info.objects.map { |value| value.primary_source || value.sources.first }.compact
+          node_info.objects.map { |value| PrimarySourceInferencer.new.infer_for_object(value) }.compact
         end
 
         # @return [Array<Descriptions::Base>]

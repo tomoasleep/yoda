@@ -6,6 +6,7 @@ module Yoda
     require 'yoda/model/lexical_context'
     require 'yoda/model/node_signatures'
     require 'yoda/model/path'
+    require 'yoda/model/primary_source_inferencer'
     require 'yoda/model/scoped_path'
     require 'yoda/model/type_expressions'
     require 'yoda/model/values'
