@@ -34,7 +34,8 @@ module Yoda
         # @return [Store::Objects::NamespaceObject::Connected, nil]
         def class_object
           with_cache(:class_object) do
-            environment.resolve_constant(path)&.with_connection(registry: environment.registry)
+            object = environment.resolve_constant(path)&.with_connection(registry: environment.registry)
+            object&.namespace? ? object : nil
           end
         end
 

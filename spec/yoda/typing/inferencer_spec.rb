@@ -549,27 +549,32 @@ RSpec.describe Yoda::Typing::Inferencer do
         context 'a constant value is given' do
           let(:source) do
             <<~RUBY
-            MAGIC_NUMBER
+            MAGIC_NUMBER.modulo(3)
             RUBY
           end
 
           before do
             read_source <<~RUBY
             # It's a magical number.
-            MAGIC_NUMBER = 1
+            MAGIC_NUMBER = 4
             RUBY
           end
 
-          it 'returns singleton class' do
-            pending("For now, the inferred type becomes singleton(::MAGIC_NUMBER)")
+          it 'infers the type of constant' do
+            pending("For now, the inferred type becomes untyped")
 
-            expect(subject).to have_attributes(to_s: 'singleton(::Integer)')
+            node = node_traverser.query(type: :send).node
+            expect(inferencer.tracer.type(node.receiver)).to have_attributes(to_s: '4')
+          end
+
+          it 'does not failure on method inference' do
+            expect { subject }.not_to raise_error
           end
 
           it 'binds constant resolution' do
             subject
-            node = node_traverser.query(type: :const).node
-            expect(inferencer.tracer.constants(node)).to contain_exactly(
+            node = node_traverser.query(type: :send).node
+            expect(inferencer.tracer.constants(node.receiver)).to contain_exactly(
               have_attributes(path: "MAGIC_NUMBER", document: "It's a magical number."),
             )
           end
