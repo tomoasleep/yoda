@@ -27,12 +27,12 @@ RSpec.describe Yoda::Server::Providers::Definition do
       let(:uri) { file_uri('lib/sample2.rb') }
       let(:position) { { line: 22, character: 10 } }
 
-      it 'returns infomation of method1' do
+      it 'returns the location of Sample2 class' do
         expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
         expect(subject).to contain_exactly(
           have_attributes(
             uri: uri,
-            range: have_attributes(start: { line: 0, character: 0 }, end: { line: 0, character: 0 })
+            range: have_attributes(start: { line: 1, character: 0 }, end: { line: 1, character: 0 })
           ),
         )
       end
@@ -42,12 +42,12 @@ RSpec.describe Yoda::Server::Providers::Definition do
       let(:uri) { file_uri('lib/sample2.rb') }
       let(:position) { { line: 26, character: 10 } }
 
-      it 'returns infomation of method1' do
+      it 'returns the location of method2' do
         expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
         expect(subject).to contain_exactly(
           have_attributes(
             uri: uri,
-            range: have_attributes(start: { line: 10, character: 0 }, end: { line: 10, character: 0 })
+            range: have_attributes(start: { line: 11, character: 0 }, end: { line: 11, character: 0 })
           ),
         )
       end
@@ -57,12 +57,12 @@ RSpec.describe Yoda::Server::Providers::Definition do
       let(:uri) { file_uri('lib/sample2.rb') }
       let(:position) { { line: 15, character: 21 }}
 
-      it 'returns information of the constant' do
+      it 'returns location of Sample2 referred by the comment' do
         expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
         expect(subject).to contain_exactly(
           have_attributes(
             uri: uri,
-            range: have_attributes(start: { line: 0, character: 0 }, end: { line: 0, character: 0 })
+            range: have_attributes(start: { line: 1, character: 0 }, end: { line: 1, character: 0 })
           ),
         )
       end

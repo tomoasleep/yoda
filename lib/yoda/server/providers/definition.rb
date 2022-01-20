@@ -60,7 +60,7 @@ module Yoda
         # @param line [Integer]
         # @param column [Integer]
         def create_location(uri, line, column)
-          location = Parsing::Location.new(row: line - 1, column: column)
+          location = Parsing::Location.new(row: line, column: column)
           LanguageServer::Protocol::Interface::Location.new(
             uri: uri,
             range: LanguageServer::Protocol::Interface::Range.new(**Parsing::Range.new(location, location).to_language_server_protocol_range),
