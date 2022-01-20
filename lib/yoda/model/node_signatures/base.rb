@@ -22,7 +22,7 @@ module Yoda
           fail NotImplementedError
         end
 
-        # @return [Array<String>]
+        # @return [Array<String, Integer, Integer>]
         def defined_files
           []
         end
