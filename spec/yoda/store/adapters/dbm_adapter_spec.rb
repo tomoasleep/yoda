@@ -1,9 +1,13 @@
 require 'spec_helper'
 require 'securerandom'
 
-RSpec.describe Yoda::Store::Adapters::MemoryAdapter do
+RSpec.describe Yoda::Store::Adapters::DbmAdapter do
+  include TmpdirHelper
+
   let(:adapter) { described_class.for(adapter_path) }
-  let(:adapter_path) { SecureRandom.hex(10) }
+  let(:adapter_path) { File.join(tmpdir, SecureRandom.hex(10)) }
+  let(:namespace) { adapter.namespace(namespace_name) }
+  let(:namespace_name) { SecureRandom.hex(10) }
 
   describe '.for' do
     subject { described_class.for(for_parameter) }
@@ -18,7 +22,7 @@ RSpec.describe Yoda::Store::Adapters::MemoryAdapter do
       end
 
       context 'and the given path is not the same path' do
-        let(:for_parameter) { SecureRandom.hex(12) }
+        let(:for_parameter) { File.join(tmpdir, SecureRandom.hex(12)) }
         it { is_expected.not_to be(adapter) }
       end
     end
@@ -39,6 +43,23 @@ RSpec.describe Yoda::Store::Adapters::MemoryAdapter do
 
     context 'when an object is not set for the path' do
       it { is_expected.to be_nil }
+    end
+
+    context 'when using namespace' do
+      subject { namespace.get(object_path) }
+
+      context 'when an object is set for the path' do
+        before { namespace.put(object_path, object) }
+        let(:object) { { a: 1 } }
+
+        it 'returns the object' do
+          is_expected.to eq("a" => 1)
+        end
+      end
+
+      context 'when an object is not set for the path' do
+        it { is_expected.to be_nil }
+      end
     end
   end
 
