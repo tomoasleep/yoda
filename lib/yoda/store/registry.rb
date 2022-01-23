@@ -8,6 +8,7 @@ module Yoda
       require 'yoda/store/registry/index'
       require 'yoda/store/registry/library_registry_set'
       require 'yoda/store/registry/library_registry'
+      require 'yoda/store/registry/local_store'
       require 'yoda/store/registry/project_registry'
 
       # @note This number must be updated when breaking change is added.

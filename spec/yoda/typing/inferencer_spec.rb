@@ -15,7 +15,7 @@ RSpec.describe Yoda::Typing::Inferencer do
       objects.each { |object| patch.register(object) }
     end
   end
-  before { registry.add_file_patch(patch) }
+  before { registry.local_store.add_file_patch(patch) }
 
   def read_source(source)
     Tempfile.create do |file|

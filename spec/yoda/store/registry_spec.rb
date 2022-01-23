@@ -27,7 +27,7 @@ RSpec.describe Yoda::Store::Registry do
     end
 
     before do
-      registry.add_file_patch(patch)
+      registry.local_store.add_file_patch(patch)
     end
 
     it 'get the given objects' do

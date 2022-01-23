@@ -13,7 +13,7 @@ module Yoda
         # @param query [String]
         # @return [Enumerator::Lazy<Objects::Base>]
         def lazy_select(query)
-          registry.local_store.items.lazy.select do |item|
+          registry.local_store.registry.items.lazy.select do |item|
             item.primary_source && fuzzy_match?(item.name, query)
           end
         end

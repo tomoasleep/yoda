@@ -9,7 +9,7 @@ RSpec.describe Yoda::Typing::Types::Generator do
     patch = Yoda::Store::Objects::Patch.new(:test).tap do |patch|
       objects.each { |object| patch.register(object) }
     end
-    registry.add_file_patch(patch)
+    registry.local_store.add_file_patch(patch)
   end
 
   let(:objects) do

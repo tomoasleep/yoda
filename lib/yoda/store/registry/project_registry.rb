@@ -30,7 +30,7 @@ module Yoda
       def root_store
         @root_store ||= begin
           Registry::Cache::RegistryWrapper.new(
-            Registry::Composer.new(id: :root, registries: [local_store, libraries.registry]),
+            Registry::Composer.new(id: :root, registries: [local_store.registry, libraries.registry]),
           )
         end
       end
@@ -40,14 +40,9 @@ module Yoda
         @libraries ||= Registry::LibraryRegistrySet.new(adapter, on_change: -> { clear_cache })
       end
 
-      # @param patch [Objects::Patch]
-      def add_file_patch(patch)
-        clear_cache
-        local_store.add_registry(patch)
-      end
-
+      # @return [LocalStore]
       def local_store
-        @local_store ||= Registry::Index.new.wrap(Registry::Composer.new(id: :local))
+        @local_store ||= Registry::LocalStore.new(on_change: -> { clear_cache })
       end
 
       private
