@@ -5,8 +5,6 @@ RSpec.describe Yoda::Store::Registry do
   let(:adapter) { Yoda::Store::Adapters::MemoryAdapter.new }
   
   describe '#get' do
-    let(:library_registry) { Yoda::Store::Registry::LibraryRegistry.new(id: library_id, adapter: library_adapter) }
-    let(:library_adapter) { Yoda::Store::Adapters::MemoryAdapter.new }
     let(:library_id) { :library }
 
     let(:patch) do
@@ -29,8 +27,7 @@ RSpec.describe Yoda::Store::Registry do
     end
 
     before do
-      patch.keys.each { |key| library_adapter.put(key, patch.get(key)) }
-      registry.add_library_registry(library_registry)
+      registry.add_file_patch(patch)
     end
 
     it 'get the given objects' do

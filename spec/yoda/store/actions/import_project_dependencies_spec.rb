@@ -34,11 +34,11 @@ RSpec.xdescribe Yoda::Store::Actions::ImportProjectDependencies do
     shared_context 'set initial status' do |core_present:, std_present:|
       before { registry.save_project_status(project_status) }
       let(:project_status) do
-        Yoda::Store::Objects::ProjectStatus.new(
+        Yoda::Store::Objects::LibrariesStatus.new(
           version: 1,
-          bundle: Yoda::Store::Objects::ProjectStatus::BundleStatus.new(
+          bundle: Yoda::Store::Objects::LibrariesStatus::BundleStatus.new(
             gem_statuses: gem_specs,
-            std_status: Yoda::Store::Objects::ProjectStatus::StdStatus.new(
+            std_status: Yoda::Store::Objects::LibrariesStatus::StdStatus.new(
               version: '2.5.0', core_present: core_present, std_present: std_present,
             ),
           ),
@@ -85,8 +85,8 @@ RSpec.xdescribe Yoda::Store::Actions::ImportProjectDependencies do
     context 'when gem_specs are not empty' do
       let(:gem_specs) do
         [
-          Yoda::Store::Objects::ProjectStatus::GemStatus.new(name: 'yard', version: '1.0.0', present: true),
-          Yoda::Store::Objects::ProjectStatus::GemStatus.new(name: 'rspec', version: '1.0.0', present: false),
+          Yoda::Store::Objects::LibrariesStatus::GemStatus.new(name: 'yard', version: '1.0.0', present: true),
+          Yoda::Store::Objects::LibrariesStatus::GemStatus.new(name: 'rspec', version: '1.0.0', present: false),
         ]
       end
 

@@ -20,7 +20,7 @@ module Yoda
       require 'yoda/store/objects/patch'
       require 'yoda/store/objects/patch_set'
       require 'yoda/store/objects/tag'
-      require 'yoda/store/objects/project_status'
+      require 'yoda/store/objects/libraries_status'
       require 'yoda/store/objects/library'
       require 'yoda/store/objects/serializable_set'
       require 'yoda/store/objects/map'

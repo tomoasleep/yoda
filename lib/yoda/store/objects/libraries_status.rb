@@ -1,7 +1,7 @@
 module Yoda
   module Store
     module Objects
-      class ProjectStatus
+      class LibrariesStatus
         include Serializable
 
         # @return [Array<CoreStatus, StdStatus, GemStatus, LocalLibraryStatus>]
@@ -12,15 +12,15 @@ module Yoda
           [dependency.core, dependency.std, *dependency.gems]
         end
 
-        # @param bundle [Array<Library::Core, Library::Std, Library::Gem>]
+        # @param libraries [Array<Library::Core, Library::Std, Library::Gem>]
         def initialize(libraries: [])
           @libraries = libraries
         end
 
-          # @return [Array<Registry::LibraryRegistry>]
-          def registries
-            libraries.map(&:registry).compact
-          end
+        # @return [Array<Registry::LibraryRegistry>]
+        def registries
+          libraries.map(&:registry).compact
+        end
 
         def to_h
           { libraries: libraries }
