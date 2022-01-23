@@ -99,6 +99,12 @@ module Yoda
         Actions::ReadFile.run(registry, source_path)
       end
 
+      # @param source_path [String]
+      def unread_source(source_path)
+        patch = registry.local_store.find_file_patch(Actions::ReadFile.patch_id_for_file(source_path))
+        registry.local_store.remove_file_patch(patch) if patch
+      end
+
       def registry_name
         @registry_name ||= Registry.registry_name
       end

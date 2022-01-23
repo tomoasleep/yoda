@@ -60,6 +60,14 @@ module Yoda
         file_store.store(uri, source)
       end
 
+      # @param uri [String]
+      def remove_source(uri:)
+        file_store.remove(uri)
+
+        path = FileStore.path_of_uri(uri)
+        project.unread_source(path)
+      end
+
       def suburi?(uri)
         path = FileStore.path_of_uri(uri)
         subpath?(path)

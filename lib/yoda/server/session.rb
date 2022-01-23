@@ -64,6 +64,11 @@ module Yoda
         workspaces_for(uri).each { |workspace| workspace.store_source(uri: uri, source: source) }
       end
 
+      # @param uri [String]
+      def remove_source(uri:)
+        workspaces_for(uri).each { |workspace| workspace.remove_source(uri: uri) }
+      end
+
       # @return [Workspace, nil]
       def workspace_for(uri)
         workspaces_for(uri).first

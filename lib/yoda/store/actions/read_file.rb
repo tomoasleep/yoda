@@ -15,6 +15,12 @@ module Yoda
           self.new(registry, file, root_path: root_path).run
         end
 
+        # @param file [String]
+        # @return [String]
+        def self.patch_id_for_file(file)
+          YardImporter.patch_id_for_file(file)
+        end
+
         # @param registry [Registry]
         # @param file [String]
         def initialize(registry, file, root_path: nil)

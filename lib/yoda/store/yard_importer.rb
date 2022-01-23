@@ -16,7 +16,13 @@ module Yoda
         store = YARD::RegistryStore.new
         store.load(file)
         root_path ||= File.expand_path('..', file)
-        new(file, root_path: root_path).import(store.values).patch
+        new(patch_id_for_file(file), root_path: root_path).import(store.values).patch
+      end
+
+      # @param file [String]
+      # @return [String]
+      def self.patch_id_for_file(file)
+        file
       end
 
       # @param id [String]

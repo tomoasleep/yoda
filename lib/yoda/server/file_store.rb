@@ -27,15 +27,26 @@ module Yoda
       end
 
       # @param uri_string [String]
-      def load(uri_string)
-        store(uri_string, read(uri_string))
+      def remove(uri_string)
+        return unless program_file_uri?(uri_string)
+        @cache.delete(uri_string)
       end
 
       # @param uri_string [String]
+      def load(uri_string)
+        if source = read(uri_string)
+          store(uri_string, source)
+        end
+      end
+
+      # @param uri_string [String]
+      # @return [String, nil]
       def read(uri_string)
         path = self.class.path_of_uri(uri_string)
         fail ArgumentError unless path
-        File.read(path)
+        if File.file?(path)
+          File.read(path)
+        end
       end
 
       # @param path [String]
