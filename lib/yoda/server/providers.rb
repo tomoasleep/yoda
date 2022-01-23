@@ -13,6 +13,9 @@ module Yoda
       require 'yoda/server/providers/text_document_did_open'
       require 'yoda/server/providers/text_document_did_save'
       require 'yoda/server/providers/workspace_did_change_workspace_folders'
+      require 'yoda/server/providers/workspace_did_create_files'
+      require 'yoda/server/providers/workspace_did_delete_files'
+      require 'yoda/server/providers/workspace_did_rename_files'
       require 'yoda/server/providers/workspace_symbol'
 
       CLASSES = [
@@ -24,6 +27,9 @@ module Yoda
         TextDocumentDidOpen,
         TextDocumentDidSave,
         WorkspaceDidChangeWorkspaceFolders,
+        WorkspaceDidCreateFiles,
+        WorkspaceDidDeleteFiles,
+        WorkspaceDidRenameFiles,
         WorkspaceSymbol,
       ].freeze
 

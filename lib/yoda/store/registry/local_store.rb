@@ -18,13 +18,13 @@ module Yoda
         # @param patch [Objects::Patch]
         def add_file_patch(patch)
           registry.add_registry(patch)
-          on_change
+          on_change&.call
         end
 
         # @param patch [Objects::Patch, String, Symbol]
         def remove_file_patch(patch)
-          registry.add_registry(patch)
-          on_change
+          registry.remove_registry(patch)
+          on_change&.call
         end
 
         # @param patch [String, Symbol]

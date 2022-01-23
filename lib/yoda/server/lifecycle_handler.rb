@@ -85,6 +85,35 @@ module Yoda
                   supported: true,
                   change_notifications: true,
                 ),
+                fileOperations: {
+                  didCreate: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
+                    filters: [
+                      LanguageServer::Protocol::Interface::FileOperationFilter.new(
+                        pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
+                          glob: "**/*",
+                        ),
+                      ),
+                    ],
+                  ),
+                  didRename: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
+                    filters: [
+                      LanguageServer::Protocol::Interface::FileOperationFilter.new(
+                        pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
+                          glob: "**/*",
+                        ),
+                      ),
+                    ],
+                  ),
+                  didDelete: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
+                    filters: [
+                      LanguageServer::Protocol::Interface::FileOperationFilter.new(
+                        pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
+                          glob: "**/*",
+                        ),
+                      ),
+                    ],
+                  ),
+                },
               },
             ),
           )
