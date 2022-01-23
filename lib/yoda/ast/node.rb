@@ -16,7 +16,6 @@ module Yoda
       
       # @param node [Parser::AST::Node]
       # @param parent [Vnode]
-      # @param node [Array<Parser::Source::Comments>]
       # @param comment_by_node [Hash{Parser::AST::Node => Array<Parser::Source::Comment>}]
       def initialize(node, parent: nil, comments_by_node: {})
         @node = node
