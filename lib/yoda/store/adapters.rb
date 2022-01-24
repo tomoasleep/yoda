@@ -4,11 +4,12 @@ module Yoda
       require 'yoda/store/adapters/base'
       require 'yoda/store/adapters/lmdb_adapter'
       require 'yoda/store/adapters/dbm_adapter'
+      require 'yoda/store/adapters/gdbm_adapter'
       require 'yoda/store/adapters/memory_adapter'
 
       # @return [Class<Base>]
       def self.default_adapter_class
-        DbmAdapter
+        GdbmAdapter
       end
 
       # @param path [String, nil]
