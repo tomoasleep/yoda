@@ -28,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'unparser'
   spec.add_dependency 'language_server-protocol'
   spec.add_dependency 'rbs', "~> 2.0"
-  spec.add_dependency 'lmdb'
   spec.add_dependency 'gdbm'
   spec.add_dependency 'ruby-progressbar'
   spec.add_dependency 'concurrent-ruby', '~> 1.1.0'
