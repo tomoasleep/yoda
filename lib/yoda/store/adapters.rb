@@ -3,7 +3,6 @@ module Yoda
     module Adapters
       require 'yoda/store/adapters/base'
       require 'yoda/store/adapters/lmdb_adapter'
-      require 'yoda/store/adapters/dbm_adapter'
       require 'yoda/store/adapters/gdbm_adapter'
       require 'yoda/store/adapters/memory_adapter'
 
