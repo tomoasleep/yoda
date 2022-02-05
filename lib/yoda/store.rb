@@ -6,6 +6,7 @@ module Yoda
     require 'yoda/store/actions'
     require 'yoda/store/adapters'
     require 'yoda/store/config'
+    require 'yoda/store/file_tree'
     require 'yoda/store/project'
     require 'yoda/store/objects'
     require 'yoda/store/registry'
