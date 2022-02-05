@@ -1,12 +1,12 @@
 module Yoda
   module Store
     class FileTree
-      # @return [String]
+      # @return [String, nil]
       attr_reader :base_path
 
-      # @param base_path [String]
+      # @param base_path [String, nil]
       def initialize(base_path:)
-        @base_path = base_path
+        @base_path = base_path ? File.absolute_path(base_path) : nil
       end
 
       # @param path [String]
@@ -58,13 +58,21 @@ module Yoda
       # @param path [String]
       # @return [String]
       def normalize_path(path)
-        File.expand_path(path, base_path)
+        if base_path
+          File.expand_path(path, base_path)
+        else
+          File.absolute_path(path)
+        end
       end
 
       # @param path [String]
       # @return [Boolean]
       def subpath?(path)
-        File.fnmatch("#{base_path}/**/*", path)
+        if base_path
+          File.fnmatch("#{base_path}/**/*", path)
+        else
+          false
+        end
       end
 
       # @yield [path:, content:]

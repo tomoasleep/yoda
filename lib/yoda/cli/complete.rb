@@ -28,7 +28,7 @@ module Yoda
       end
 
       def project
-        @project ||= Store::Project.new(name: 'root', root_path: Dir.pwd)
+        @project ||= Store::Project.for_path(Dir.pwd)
       end
 
       def source

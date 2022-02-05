@@ -11,19 +11,34 @@ module Yoda
 
       extend Forwardable
 
+      class << self
+        # @param name [String]
+        # @param root_path [String, nil]
+        def for_path(root_path, name: nil)
+          file_tree = FileTree.new(base_path: root_path)
+          name ||= root_path ? File.basename(root_path) : "root"
+          new(name: name, file_tree: file_tree)
+        end
+      end
+
       delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :files
 
-      # @return [String, nil]
-      attr_reader :root_path
+      # @return [FileTree]
+      attr_reader :file_tree
 
       # @return [String]
       attr_reader :name
 
       # @param name [String]
-      # @param root_path [String, nil]
-      def initialize(name:, root_path:)
+      # @param file_tree [FileTree]
+      def initialize(name:, file_tree:)
         @name = name
-        @root_path = root_path && File.absolute_path(root_path)
+        @file_tree = file_tree
+      end
+
+      # @return [String, nil]
+      def root_path
+        file_tree.base_path
       end
 
       # @return [Registry::ProjectRegistry]

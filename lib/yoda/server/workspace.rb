@@ -35,7 +35,7 @@ module Yoda
 
       # @return [Store::Project, nil]
       def project
-        @project ||= Store::Project.new(name: name, root_path: root_path)
+        @project ||= Store::Project.for_path(root_path)
       end
 
       def root_path

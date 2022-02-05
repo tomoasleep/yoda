@@ -29,7 +29,7 @@ module Yoda
 
       # @return [Project]
       def project
-        @project ||= Store::Project.new(name: 'root', root_path: dir)
+        @project ||= Store::Project.for_path(dir)
       end
 
       private

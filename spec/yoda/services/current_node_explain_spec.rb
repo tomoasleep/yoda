@@ -6,7 +6,7 @@ RSpec.describe Yoda::Services::CurrentNodeExplain do
   let(:environment) { Yoda::Model::Environment.build }
   let(:ast) { Yoda::Parsing.parse_with_comments(source).first }
   let(:evaluator) { Yoda::Services::Evaluator.new(environment: project.environment, ast: ast) }
-  let(:project) { Yoda::Store::Project.new(name: 'spec', root_path: nil) }
+  let(:project) { Yoda::Store::Project.for_path(nil) }
 
   before do
     project.setup

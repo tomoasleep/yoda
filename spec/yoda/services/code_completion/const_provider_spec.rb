@@ -4,7 +4,7 @@ require 'spec_helper'
 RSpec.describe Yoda::Services::CodeCompletion::ConstProvider do
   let(:provider) { described_class.new(project.environment, ast, location, evaluator) }
 
-  let(:project) { Yoda::Store::Project.new(name: 'spec', root_path: nil) }
+  let(:project) { Yoda::Store::Project.for_path(nil) }
   let(:ast) { Yoda::Parsing.parse(source) }
   let(:evaluator) { Yoda::Services::Evaluator.new(environment: project.environment, ast: ast) }
 
