@@ -4,7 +4,6 @@ require 'securerandom'
 module Yoda
   class Server
     require 'yoda/server/session'
-    require 'yoda/server/file_store'
     require 'yoda/server/concurrent_writer'
     require 'yoda/server/notifier'
     require 'yoda/server/providers'
@@ -13,6 +12,7 @@ module Yoda
     require 'yoda/server/deserializer'
     require 'yoda/server/scheduler'
     require 'yoda/server/workspace'
+    require 'yoda/server/uri_decoder'
     require 'yoda/server/rootless_workspace'
 
     # @return [::LanguageServer::Protocol::Transport::Stdio::Reader]

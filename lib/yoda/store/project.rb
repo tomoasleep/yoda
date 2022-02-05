@@ -34,6 +34,7 @@ module Yoda
       def initialize(name:, file_tree:)
         @name = name
         @file_tree = file_tree
+        register_file_tree_events
       end
 
       # @return [String, nil]
@@ -109,6 +110,22 @@ module Yoda
         Actions::ImportProjectDependencies.new(self).run.errors
       end
 
+      def registry_name
+        @registry_name ||= Registry.registry_name
+      end
+
+      private
+
+      def register_file_tree_events
+        file_tree.on_change do |path:, content:|
+          if content
+            read_source(path)
+          else
+            unread_source(path)
+          end
+        end
+      end
+
       # @param source_path [String]
       def read_source(source_path)
         Actions::ReadFile.run(registry, source_path)
@@ -119,12 +136,6 @@ module Yoda
         patch = registry.local_store.find_file_patch(Actions::ReadFile.patch_id_for_file(source_path))
         registry.local_store.remove_file_patch(patch) if patch
       end
-
-      def registry_name
-        @registry_name ||= Registry.registry_name
-      end
-
-      private
 
       def on_memory?
         !root_path

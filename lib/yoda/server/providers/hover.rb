@@ -30,7 +30,7 @@ module Yoda
         # @param position [{Symbol => Integer}]
         def calculate(uri, position)
           workspace = session.workspace_for(uri)
-          source = workspace.file_store.get(uri)
+          source = workspace.read_at(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
           node_worker = Services::CurrentNodeExplain.from_source(environment: workspace.project.environment, source: source, location: location)

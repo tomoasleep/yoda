@@ -5,7 +5,7 @@ module ReadSourceHelper
 
   def read_source(project:, source:)
     source_path = create_tempfile(source)
-    project.read_source(source_path)
+    project.file_tree.open_at(source_path)
     source_path
   end
 

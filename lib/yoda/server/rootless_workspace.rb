@@ -3,16 +3,12 @@ require 'uri'
 module Yoda
   class Server
     class RootlessWorkspace
-      # @return [FileStore]
-      attr_reader :file_store
-
       # @return [String]
       attr_reader :name
 
       # @param name [String]
       def initialize(name:)
         @name = name
-        @file_store = FileStore.new
       end
 
       def setup
@@ -29,17 +25,24 @@ module Yoda
         FileStore.uri_of_path(File.expand_path(path))
       end
 
+      # @param uri [String]
+      # @return [String, nil]
+      def read_at(uri)
+        path = UriDecoder.path_of_uri(uri)
+        path && file_tree.read_at(path)
+      end
+
+      # @param path []
       def read_source(uri)
-        path = FileStore.path_of_uri(uri)
-        return unless subpath?(path)
-        file_store.load(uri)
-        project.read_source(path)
+        path = UriDecoder.path_of_uri(uri)
+        file_tree.clear_editing_at(path)
       end
 
       # @param uri [String]
       # @param source [String]
       def store_source(uri:, source:)
-        file_store.store(uri, source)
+        path = UriDecoder.path_of_uri(uri)
+        file_tree.set_editing_at(path, source)
       end
 
       def suburi?(uri)
@@ -48,6 +51,11 @@ module Yoda
 
       def subpath?(path)
         true
+      end
+
+      # @return [Store::FileTree]
+      def file_tree
+        project.file_tree
       end
     end
   end

@@ -32,7 +32,7 @@ module Yoda
         # @param position [{Symbol => Integer}]
         def calculate(uri, position)
           workspace = session.workspace_for(uri)
-          source = workspace.file_store.fetch(uri)
+          source = workspace.read_at(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
           Logger.trace("Trying comment completion for #{uri}, #{position}")

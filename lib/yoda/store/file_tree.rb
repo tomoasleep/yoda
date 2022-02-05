@@ -9,6 +9,13 @@ module Yoda
         @base_path = base_path ? File.absolute_path(base_path) : nil
       end
 
+      def open_at(path)
+        normalized_path = normalize_path(path)
+        content = read_at(normalized_path)
+        notify_changed(path: normalized_path, content: content)
+        content
+      end
+
       # @param path [String]
       # @return [String, nil]
       def read_at(path)

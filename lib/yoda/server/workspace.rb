@@ -1,18 +1,22 @@
 require 'uri'
+require 'forwardable'
 
 module Yoda
   class Server
     # Denotes workspace folder in LSP.
     # @see: https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_workspaceFolders
     class Workspace
-      # @return [FileStore]
-      attr_reader :file_store
+      extend Forwardable
 
       # @return [String]
       attr_reader :name
 
       # @return [String]
       attr_reader :root_uri
+
+      delegate [:subpath?] => :file_tree
+
+      delegate [:uri_of_path] => :uri_encoder
 
       # @param folder [LanguageServer::Protocol::Interface::WorkspaceFolder]
       # @return [Workspace]
@@ -25,7 +29,6 @@ module Yoda
       def initialize(name:, root_uri:)
         @name = name
         @root_uri = root_uri
-        @file_store = FileStore.new
       end
 
       # @return [Array<Exception>] errors on setup
@@ -38,43 +41,76 @@ module Yoda
         @project ||= Store::Project.for_path(root_path)
       end
 
+      # @return [String]
       def root_path
-        FileStore.path_of_uri(root_uri)
+        UriDecoder.path_of_uri(root_uri)
       end
 
-      # @param path [String]
-      def uri_of_path(path)
-        FileStore.uri_of_path(File.expand_path(path, root_path))
+      # @param uri [String]
+      # @return [String, nil]
+      def read_at(uri)
+        path = UriDecoder.path_of_uri(uri)
+        path && file_tree.read_at(path)
       end
 
+      # @param uri [String]
       def read_source(uri)
-        path = FileStore.path_of_uri(uri)
-        return unless subpath?(path)
-        file_store.load(uri)
-        project.read_source(path)
+        path = UriDecoder.path_of_uri(uri)
+        return if !path || !program_file?(path)
+        file_tree.clear_editing_at(path)
       end
 
       # @param uri [String]
       # @param source [String]
       def store_source(uri:, source:)
-        file_store.store(uri, source)
+        path = UriDecoder.path_of_uri(uri)
+        return if !path || !program_file?(path)
+        file_tree.set_editing_at(path, source)
       end
 
       # @param uri [String]
       def remove_source(uri:)
-        file_store.remove(uri)
-
-        path = FileStore.path_of_uri(uri)
-        project.unread_source(path)
+        path = UriDecoder.path_of_uri(uri)
+        file_tree.mark_deleted(path)
       end
 
       def suburi?(uri)
-        path = FileStore.path_of_uri(uri)
-        subpath?(path)
+        path = UriDecoder.path_of_uri(uri)
+        path && subpath?(path)
       end
 
-      def subpath?(path)
-        File.fnmatch("#{root_path}/**/*", path)
+      private
+
+      # @return [Store::FileTree]
+      def file_tree
+        project.file_tree
+      end
+
+      # @return [UriEncoder]
+      def uri_encoder
+        @uri_encoder ||= UriEncoder.new(root_path)
+      end
+
+      # @param path [String]
+      # @return [Boolean]
+      def program_file?(path)
+        %w(.c .rb).include?(File.extname(path))
+      end
+
+      class UriEncoder
+        # @return [String]
+        attr_reader :base_path
+
+        # @param base_path [String]
+        def initialize(base_path)
+          @base_path = base_path
+        end
+
+        # @param path [String]
+        # @return [String]
+        def uri_of_path(path)
+          "file://#{File.expand_path(path, base_path)}"
+        end
       end
     end
   end

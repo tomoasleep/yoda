@@ -30,7 +30,7 @@ module Yoda
         # @param include_declaration [Boolean]
         def calculate(uri, position, include_declaration = false)
           workspace = session.workspace_for(uri)
-          source = workspace.file_store.get(uri)
+          source = workspace.read_at(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
 
           session.workspaces.each do |workspace|
