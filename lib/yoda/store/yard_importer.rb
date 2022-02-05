@@ -9,6 +9,9 @@ module Yoda
       # @return [String, nil]
       attr_reader :root_path
 
+      # @return [String, nil]
+      attr_reader :source_path
+
       # @param file [String]
       # @param root_path [String, nil]
       # @return [Objects::Patch]
@@ -26,9 +29,10 @@ module Yoda
       end
 
       # @param id [String]
-      def initialize(id, root_path: nil)
+      def initialize(id, root_path: nil, source_path: nil)
         @patch = Objects::Patch.new(id)
         @root_path = root_path
+        @source_path = source_path
         @registered = Set.new
       end
 
@@ -257,6 +261,7 @@ module Yoda
       # @return [(String, Integer, Integer)]
       def convert_source(source)
         file, line = source
+        file = source_path if source_path && file == "(stdin)"
         [root_path ? File.expand_path(file, root_path) : file, line, 0]
       end
 

@@ -119,16 +119,11 @@ module Yoda
       def register_file_tree_events
         file_tree.on_change do |path:, content:|
           if content
-            read_source(path)
+            Actions::ReadFile.run(registry, path, content: content)
           else
             unread_source(path)
           end
         end
-      end
-
-      # @param source_path [String]
-      def read_source(source_path)
-        Actions::ReadFile.run(registry, source_path)
       end
 
       # @param source_path [String]

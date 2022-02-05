@@ -23,6 +23,11 @@ module Yoda
       def parse_with_comments(*args)
         Parser.new.parse_with_comments(*args)
       end
+
+      # @see {Parser#parse_with_comments_if_valid}
+      def parse_with_comments_if_valid(*args)
+        Parser.new.parse_with_comments_if_valid(*args)
+      end
     end
   end
 end
