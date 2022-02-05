@@ -63,7 +63,7 @@ module Yoda
             tokens_from_bracket = token.all_tokens.drop_while { |token| token.to_s != "[" }
             tokens = tokens_from_bracket.slice_after { |token| token.to_s == "]" }.first
 
-            tokens.last&.to_s == "]" ? tokens : []
+            tokens&.last&.to_s == "]" ? tokens : []
           end
         end
 
