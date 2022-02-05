@@ -41,7 +41,7 @@ module Yoda
 
         # @param name [String, Symbol]
         # @return [Array<Symbol>]
-        def select_constant_paths(name)
+        def select_constant_paths(name, **)
           # TODO: Search RBS
           stored_consts = stored_constant_members&.select(name) || []
           stored_consts.map(&:path)
@@ -49,7 +49,7 @@ module Yoda
 
         # @param name [String, Symbol]
         # @return [RBS::Types::t]
-        def select_constant_type(name)
+        def select_constant_type(name, **)
           paths = select_constant_paths(name)
 
           types = paths.flat_map do |path|
