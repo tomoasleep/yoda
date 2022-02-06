@@ -8,6 +8,7 @@ module Yoda
     class Project
       # Find registry file for the current project settings.
       class FileFinder
+        # @return [Project]
         attr_reader :project
 
         # @param project [Project]

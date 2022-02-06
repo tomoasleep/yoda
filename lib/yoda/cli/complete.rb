@@ -11,7 +11,7 @@ module Yoda
       end
 
       def run
-        project.build_cache
+        project.setup
         puts create_completions(worker.candidates)
       end
 

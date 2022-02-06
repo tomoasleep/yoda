@@ -11,7 +11,7 @@ RSpec.describe Yoda::Services::Evaluator do
   let(:project) { Yoda::Store::Project.for_path(fixture_root) }
 
   before do
-    project.build_cache
+    project.setup
     ReadSourceHelper.read_source(project: project, source: source_string) if source_string
   end
 

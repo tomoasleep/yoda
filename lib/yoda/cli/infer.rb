@@ -9,7 +9,7 @@ module Yoda
       end
 
       def run
-        project.build_cache
+        project.setup
         puts create_signature_help(worker.current_node_signature)
       end
 

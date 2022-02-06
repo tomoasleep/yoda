@@ -8,6 +8,12 @@ module Yoda
         # @return [String]
         attr_reader :root_path
 
+        # @param project [Project]
+        # @return [ReadProjectFiles]
+        def self.for_project(project)
+          new(project.registry, project.root_path)
+        end
+
         def initialize(registry, root_path)
           @registry = registry
           @root_path = root_path

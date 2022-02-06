@@ -10,7 +10,6 @@ module Yoda
     require 'yoda/store/project'
     require 'yoda/store/objects'
     require 'yoda/store/registry'
-    require 'yoda/store/setup'
     require 'yoda/store/query'
     require 'yoda/store/transformers'
     require 'yoda/store/version_store'
@@ -18,10 +17,10 @@ module Yoda
 
     class << self
       # @return [Project]
-      def setup(**kwargs)
-        worker = Setup.new(**kwargs)
-        worker.run
-        worker.project.tap(&:setup)
+      def setup(dir: Dir.pwd, force_build: false)
+        project = Project.for_path(dir)
+        project.setup(rebuild: force_build)
+        project
       end
     end
   end

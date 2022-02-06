@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'forwardable'
-require 'rbs'
 require 'pathname'
 
 module Yoda
@@ -8,6 +7,8 @@ module Yoda
     class Project
       require 'yoda/store/project/file_finder'
       require 'yoda/store/project/dependency'
+      require 'yoda/store/project/setuper'
+      require 'yoda/store/project/rbs_loader'
 
       extend Forwardable
 
@@ -22,6 +23,8 @@ module Yoda
       end
 
       delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :file_finder
+      delegate [:rbs_environment] => :rbs_loader
+      delegate [:clear, :reset] => :setuper
 
       # @return [FileTree]
       attr_reader :file_tree
@@ -53,26 +56,8 @@ module Yoda
       end
 
       # @return [RBS::Environment]
-      def rbs_environment
-        @rbs_environment ||= begin
-          repository = RBS::Repository.new
-          config.rbs_repository_paths.each do |repo_path|
-            pathname = Pathname(repo_path).expand_path(root_path)
-            repository.add(pathname)
-          end
-
-          loader = RBS::EnvironmentLoader.new(repository: repository)
-          config.rbs_signature_paths.each do |sig_path|
-            pathname = Pathname(sig_path).expand_path(root_path)
-            loader.add(path: pathname)
-          end
-
-          config.rbs_libraries.each do |library|
-            loader.add(library: library)
-          end
-
-          RBS::Environment.from_loader(loader).resolve_type_names
-        end
+      def rbs_loader
+        @rbs_loader ||= RbsLoader.new(self)
       end
 
       # @return [Model::Environment]
@@ -81,17 +66,8 @@ module Yoda
       end
 
       # @return [Array<BaseError>]
-      def setup
-        file_finder.make_dir
-        errors = import_project_dependencies
-        rbs_environment
-        load_project_files
-        errors
-      end
-      alias build_cache setup
-
-      def clear
-        file_finder.clear_dir
+      def setup(rebuild: false)
+        setuper.run(rebuild: rebuild)
       end
 
       # @return [Config]
@@ -99,21 +75,20 @@ module Yoda
         @config ||= Config.from_yaml_data(file_finder.config_content || '')
       end
 
-      def reset
-        clear
-        setup
-      end
-
-      # @return [Array<BaseError>]
-      def import_project_dependencies
-        Actions::ImportProjectDependencies.new(self).run.errors
-      end
-
       def registry_name
         @registry_name ||= Registry.registry_name
       end
 
+      # @return [FileFinder]
+      def file_finder
+        @file_finder ||= FileFinder.new(self)
+      end
+
       private
+
+      def setuper
+        Setuper.new(self)
+      end
 
       def register_file_tree_events
         file_tree.on_change do |path:, content:|
@@ -133,17 +108,6 @@ module Yoda
 
       def on_memory?
         !root_path
-      end
-
-      # @return [FileFinder]
-      def file_finder
-        @file_finder ||= FileFinder.new(self)
-      end
-
-      def load_project_files
-        Logger.debug('Loading current project files...')
-        Instrument.instance.initialization_progress(phase: :load_project_files, message: 'Loading current project files')
-        root_path && Actions::ReadProjectFiles.new(registry, root_path).run
       end
     end
   end

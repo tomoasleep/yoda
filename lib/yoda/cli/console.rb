@@ -2,7 +2,7 @@ module Yoda
   module Cli
     class Console < Base
       def run
-        project.build_cache
+        project.setup
         require "pry"
         project.pry
       end
