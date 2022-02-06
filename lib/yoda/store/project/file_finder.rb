@@ -7,7 +7,7 @@ module Yoda
   module Store
     class Project
       # Find registry file for the current project settings.
-      class Files
+      class FileFinder
         attr_reader :project
 
         # @param project [Project]
@@ -42,6 +42,11 @@ module Yoda
         def config_file_path
           return nil unless project.root_path
           File.absolute_path('.yoda.yml', project.root_path)
+        end
+
+        # @return [String, nil]
+        def config_content
+          config_file_path && File.exists?(config_file_path) && File.read(config_file_path)
         end
 
         def make_dir

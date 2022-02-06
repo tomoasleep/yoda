@@ -6,7 +6,7 @@ require 'pathname'
 module Yoda
   module Store
     class Project
-      require 'yoda/store/project/files'
+      require 'yoda/store/project/file_finder'
       require 'yoda/store/project/dependency'
 
       extend Forwardable
@@ -21,7 +21,7 @@ module Yoda
         end
       end
 
-      delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :files
+      delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :file_finder
 
       # @return [FileTree]
       attr_reader :file_tree
@@ -82,7 +82,7 @@ module Yoda
 
       # @return [Array<BaseError>]
       def setup
-        files.make_dir
+        file_finder.make_dir
         errors = import_project_dependencies
         rbs_environment
         load_project_files
@@ -91,13 +91,12 @@ module Yoda
       alias build_cache setup
 
       def clear
-        files.clear_dir
+        file_finder.clear_dir
       end
 
       # @return [Config]
       def config
-        content = files.config_file_path && File.exists?(files.config_file_path) && File.read(files.config_file_path)
-        @config ||= Config.from_yaml_data(content || '')
+        @config ||= Config.from_yaml_data(file_finder.config_content || '')
       end
 
       def reset
@@ -136,9 +135,9 @@ module Yoda
         !root_path
       end
 
-      # @return [Files]
-      def files
-        @files ||= Files.new(self)
+      # @return [FileFinder]
+      def file_finder
+        @file_finder ||= FileFinder.new(self)
       end
 
       def load_project_files
