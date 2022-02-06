@@ -93,6 +93,18 @@ module Yoda
         environment.rbs_environment.constant_decls[type_name]&.decl
       end
 
+      # @param pp [PP]
+      def pretty_print(pp)
+        pp.object_group(self) do
+          pp.breakable
+          pp.text "@rbs_environment="
+          pp.pp rbs_environment
+          pp.comma_breakable
+          pp.text "@registry="
+          pp.pp registry
+        end
+      end
+
       private
 
       # @param scoped_path [ScopedPath]

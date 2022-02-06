@@ -43,6 +43,10 @@ module Yoda
             inspect
           end
 
+          def to_h
+            @content
+          end
+
           def inspect
             "(#{@content.length} items)"
           end

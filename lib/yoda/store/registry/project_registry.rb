@@ -45,6 +45,15 @@ module Yoda
         @local_store ||= Registry::LocalStore.new(on_change: -> { clear_cache })
       end
 
+      # @param pp [PP]
+      def pretty_print(pp)
+        pp.object_group(self) do
+          pp.breakable
+          pp.text "@adapter="
+          pp.pp adapter
+        end
+      end
+
       private
 
       # @return [Adapters::Base, nil]
@@ -52,10 +61,6 @@ module Yoda
 
       def clear_cache
         root_store.clear_cache
-      end
-
-      def inspect
-        "#<#{self.class.name}: @adapter=#{adapter.inspect}>"
       end
     end
   end

@@ -35,6 +35,18 @@ module Yoda
       def infer(node)
         AstTraverser.new(tracer: tracer, context: context).traverse(node)
       end
+
+      # @param pp [PP]
+      def pretty_print(pp)
+        pp.object_group(self) do
+          pp.breakable
+          pp.text "@context="
+          pp.pp context
+          pp.comma_breakable
+          pp.text "@tracer="
+          pp.pp tracer
+        end
+      end
     end
   end
 end

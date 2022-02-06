@@ -45,6 +45,15 @@ module Yoda
           rbs_type.to_s
         end
 
+        # @param pp [PP]
+        def pretty_print(pp)
+          pp.object_group(self) do
+            pp.breakable
+            pp.text "@rbs_type="
+            pp.pp rbs_type.to_s
+          end
+        end
+
         private
 
         # @param rbs_type [RBS::Types::t]
