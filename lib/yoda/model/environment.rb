@@ -9,6 +9,7 @@ module Yoda
       require 'yoda/model/environment/namespace_members'
       require 'yoda/model/environment/singleton_accessor'
       require 'yoda/model/environment/value_factory'
+      require 'yoda/model/environment/value_resolve_context'
       require 'yoda/model/environment/with_cache'
 
 

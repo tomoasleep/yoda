@@ -12,6 +12,7 @@ module Yoda
 
         # @param type [RBS::MethodType]
         # @param generator [Types::Generator]
+        # @param self_type [RBS::Types::t]
         # @return [TypeBinding]
         def bind(type:, generator:)
           method_type = generator.fresh_params_of_method_type(type)
@@ -165,6 +166,7 @@ module Yoda
           end
 
           def wrap_rbs_type(rbs_type)
+            rbs_type = type.propage_context_to(rbs_type) if type.respond_to?(:act_as_type_wrapper?)
             generator.wrap_rbs_type(rbs_type)
           end
         end

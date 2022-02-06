@@ -18,9 +18,11 @@ module Yoda
           @environment = environment
         end
 
-        # @param type [RBS::Types::Bases::Base, RBS::Types::Variable, RBS::Types::ClassSingleton, RBS::Types::Interface, RBS::Types::ClassInstance, RBS::Types::Alias, RBS::Types::Tuple, RBS::Types::Record, RBS::Types::Optional, RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Function, RBS::Types::Block, RBS::Types::Proc, RBS::Types::Literal]
+        # @param type [RBS::Types::Bases::Base, RBS::Types::Variable, RBS::Types::ClassSingleton, RBS::Types::Interface, RBS::Types::ClassInstance, RBS::Types::Alias, RBS::Types::Tuple, RBS::Types::Record, RBS::Types::Optional, RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Function, RBS::Types::Block, RBS::Types::Proc, RBS::Types::Literal, ValueResolveContext::WrappedType]
         # @return [Values::Base, nil]
-        def resolve_value_by_rbs_type(type)
+        def resolve_value_by_rbs_type(type, context: ValueResolveContext.empty)
+          return resolve_value_by_rbs_type(type.wrapped_type, context: type.context) if type.respond_to?(:act_as_type_wrapper?)
+
           case type
           when RBS::Types::Bases::Any
             Values::EmptyValue.new
@@ -43,12 +45,12 @@ module Yoda
           when RBS::Types::ClassInstance
             resolve_instance_by_rbs_type_name(type.name, args: type.args)
           when RBS::Types::Interface
-            args = type.args.map {|arg| resolve_value_by_rbs_type(arg) }
+            args = type.args.map {|arg| resolve_value_by_rbs_type(arg, context: context) }
 
             resolve_interface_by_rbs_type_name(type.name, args: type.args)
           when RBS::Types::Union
             Values::UnionValue.new(
-              *type.types.flat_map { |ty| resolve_value_by_rbs_type(ty) }
+              *type.types.flat_map { |ty| resolve_value_by_rbs_type(ty, context: context) }
             )
           when RBS::Types::Optional
             Values::UnionValue.new(
@@ -57,7 +59,7 @@ module Yoda
             )
           when RBS::Types::Intersection
             Values::IntersectionValue.new(
-              *type.types.map { |ty| resolve_value_by_rbs_type(ty) }
+              *type.types.map { |ty| resolve_value_by_rbs_type(ty, context: context) }
             )
           when RBS::Types::Literal
             literal_instance(type.literal)
@@ -85,9 +87,27 @@ module Yoda
           when RBS::Types::Variable
             Logger.warn("Value factory does not has proper information to convert #{type}.")
             Values::EmptyValue.new
-          when RBS::Types::Bases::Self, RBS::Types::Bases::Class, RBS::Types::Bases::Instance
-            Logger.warn("Value factory does not has proper information to convert #{type}.")
-            Values::EmptyValue.new
+          when RBS::Types::Bases::Self
+            if context.self_type
+              resolve_value_by_rbs_type(context.self_type)
+            else
+              Logger.warn("Value factory does not has proper information to convert #{type}.")
+              Values::EmptyValue.new
+            end
+          when RBS::Types::Bases::Class
+            if context.self_type
+              resolve_value_by_rbs_type(context.self_type).singleton_class_value
+            else
+              Logger.warn("Value factory does not has proper information to convert #{type}.")
+              Values::EmptyValue.new
+            end
+          when RBS::Types::Bases::Instance
+            if context.self_type
+              resolve_value_by_rbs_type(context.self_type).instance_value
+            else
+              Logger.warn("Value factory does not has proper information to convert #{type}.")
+              Values::EmptyValue.new
+            end
           else
             raise "Unexpected type given: #{type}"
           end

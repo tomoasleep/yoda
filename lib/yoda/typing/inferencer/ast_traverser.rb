@@ -164,8 +164,10 @@ module Yoda
         # @param receiver_type [Types::Type]
         # @return [Types::Base]
         def traverse_method(node, receiver_type:)
+          value_resolve_context = generator.value_resolve_context(self_type: receiver_type)
+
           method_candidates = receiver_type.value.select_method(node.name.to_s, visibility: %i(private protected public))
-          method_types = method_candidates.map(&:rbs_type)
+          method_types = method_candidates.map(&:rbs_type).map { |type| value_resolve_context.wrap(type) }
 
           # TODO: Support overloads
           method_bind = method_types.reduce({}) do |all_bind, method_type|
@@ -251,11 +253,12 @@ module Yoda
         def infer_send_node(node, block_param_node = nil, block_node = nil)
           receiver_type = node.implicit_receiver? ? context.receiver : traverse(node.receiver)
           argument_types = infer_argument_nodes(node.arguments)
+          value_resolve_context = generator.value_resolve_context(self_type: receiver_type)
 
           visibility = node.implicit_receiver? ? %i(private protected public) : %i(public)
           # TODO: Support overloads
           method_candidates = receiver_type.value.select_method(node.selector_name, visibility: visibility)
-          method_types = method_candidates.map(&:rbs_type)
+          method_types = method_candidates.map(&:rbs_type).map { |type| value_resolve_context.wrap(type) }
 
           if block_node
             # TODO: Resolve type variables by matching argument_types with arguments
@@ -271,7 +274,7 @@ module Yoda
           if method_types.empty?
             generator.unknown_type(reason: "method not found")
           else
-            generator.union_type(*method_types.map { |method_type| method_type.type.return_type })
+            generator.union_type(*method_types.map { |method_type| value_resolve_context.wrap(method_type.type.return_type) })
           end
         end
 

@@ -187,6 +187,25 @@ RSpec.describe Yoda::Typing::Inferencer do
       end
     end
 
+    describe 'instance method call' do
+      context 'when the method returns self' do
+        let(:source) do
+          <<~RUBY
+          1.tap
+          RUBY
+        end
+
+        it "returns the receiver's type" do
+          pending("Fow now, type is resolved as self")
+          expect(subject).to have_attributes(to_s: "1")
+        end
+
+        it "resolves the constant as receiver's constant" do
+          expect(subject.klass).to have_attributes(path: "Integer")
+        end
+      end
+    end
+
     describe 'constant' do
       context 'with unknown constant' do
         let(:source) do

@@ -11,6 +11,12 @@ module Yoda
           @environment = environment
         end
 
+        # @param self_type [Type]
+        # @return [Model::Environment::ValueResolveContext]
+        def value_resolve_context(self_type:)
+          Model::Environment::ValueResolveContext.new(self_type: self_type.rbs_type)
+        end
+
         # @param [RBS::Types::t]
         # @return [Type]
         def wrap_rbs_type(rbs_type)
