@@ -32,7 +32,7 @@ module Yoda
           workspace = session.workspace_for(uri)
           source = workspace.read_at(uri)
           location = Parsing::Location.of_language_server_protocol_position(line: position[:line], character: position[:character])
-          cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
+          cut_source = Parsing.fix_parse_error(source: source, location: location)
 
           signature_worker = Services::SignatureDiscovery.from_source(environment: workspace.project.environment, source: cut_source, location: location)
 

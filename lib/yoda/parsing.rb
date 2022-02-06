@@ -27,6 +27,15 @@ module Yoda
       def parse_with_comments_if_valid(*args)
         Parser.new.parse_with_comments_if_valid(*args)
       end
+
+      # Fix parse errors of the given source and return the modified source.
+      # @param source [String]
+      # @param location [Location]
+      # @return [String] Modified source to fix parse errors.
+      # @raise [SourceCutter::CannotRecoverError]
+      def fix_parse_error(source:, location:)
+        SourceCutter.new(source, location).error_recovered_source
+      end
     end
   end
 end

@@ -1,9 +1,13 @@
 module Yoda
   module Parsing
+    # SourceCutter modifies the given source to fix parse errors around the location.
     class SourceCutter
       class CannotRecoverError < StandardError; end
 
       attr_reader :source, :current_location
+
+      # @param source [String]
+      # @param current_location [Location]
       def initialize(source, current_location)
         @source = source
         @current_location = current_location

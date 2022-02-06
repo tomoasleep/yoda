@@ -32,7 +32,7 @@ module Yoda
       end
 
       def source
-        Parsing::SourceCutter.new(File.read(filename), position).error_recovered_source
+        Parsing.fix_parse_error(source: File.read(filename), location: position)
       end
     end
   end

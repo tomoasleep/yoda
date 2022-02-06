@@ -68,7 +68,7 @@ module Yoda
         # @param location [Parsing::Location]
         # @return [LanguageServerProtocol::Interface::CompletionList, nil]
         def complete_from_cut_source(workspace, source, location)
-          cut_source = Parsing::SourceCutter.new(source, location).error_recovered_source
+          cut_source = Parsing.fix_parse_error(source: source, location: location)
           method_completion_worker = Services::CodeCompletion.new(workspace.project.environment, cut_source, location)
           completion_items = method_completion_worker.candidates
 

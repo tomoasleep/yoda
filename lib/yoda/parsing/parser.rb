@@ -6,8 +6,7 @@ module Yoda
       # @param string [String]
       # @return [AST::Vnode]
       def parse(string)
-        source_buffer = create_source_buffer(source: string)
-        AST.wrap(parser.parse(source_buffer))
+        parse_with_comments(string).first
       end
 
       # @param string [String]
