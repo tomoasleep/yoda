@@ -18,13 +18,13 @@ module Yoda
           @rbs_environment ||= begin
             repository = RBS::Repository.new
             project.config.rbs_repository_paths.each do |repo_path|
-              pathname = Pathname(repo_path).expand_path(root_path)
+              pathname = Pathname(repo_path).expand_path(project.root_path)
               repository.add(pathname)
             end
 
             loader = RBS::EnvironmentLoader.new(repository: repository)
             project.config.rbs_signature_paths.each do |sig_path|
-              pathname = Pathname(sig_path).expand_path(root_path)
+              pathname = Pathname(sig_path).expand_path(project.root_path)
               loader.add(path: pathname)
             end
 

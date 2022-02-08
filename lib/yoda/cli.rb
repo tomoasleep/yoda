@@ -19,7 +19,9 @@ module Yoda
       def setup
         process_class_options
         return self.class.command_help(shell, __method__) if options[:help]
-        Store.setup(dir: Dir.pwd, force_build: options[:force_build])
+        Instrument.instance.hear(initialization_progress: method(:on_progress), registry_dump: method(:on_progress)) do
+          Store.setup(dir: Dir.pwd, force_build: options[:force_build])
+        end
       end
 
       desc 'infer POSITION', 'Infer the type of value at the specified position'
@@ -82,6 +84,12 @@ module Yoda
             Logger.fatal("Dumped file to: #{tmpfile_path}")
           end
         end
+      end
+
+      def on_progress(phase: :save_keys, index: nil, length: nil, **params)
+        return unless index
+        bar = bars[phase] ||= ProgressBar.create(format: "%t: %c/%C |%w>%i| %e ", title: phase.to_s.gsub('_', ' '), starting_at: index, total: length)
+        bar.progress = index if index <= bar.total
       end
     end
   end
