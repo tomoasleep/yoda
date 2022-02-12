@@ -1,3 +1,5 @@
+require 'open3'
+
 module Yoda
   module Store
     class Project
@@ -21,10 +23,12 @@ module Yoda
           libraries.find { |library| library.name == name && library.version == version }
         end
 
+        # @return [Objects::Library::Core]
         def core
           @core ||= Objects::Library.core
         end
 
+        # @return [Objects::Library::Std]
         def std
           @std ||= Objects::Library.std
         end
@@ -44,30 +48,33 @@ module Yoda
 
           # @return [Array<Objects::Library::Gem>]
           def gems
-            @libraries ||= begin
-              (gem_specs || []).reject { |spec| self_spec?(spec) || metadata?(spec) }.reject { |spec| project.config.ignored_gems.include?(spec.name) }.map { |spec| Objects::Library::Gem.from_gem_spec(spec) }
+            @gems ||= begin
+              dependencies
+                .map { |attrs| Objects::Library::Gem.new(**attrs) }
+                .reject { |spec| project.config.ignored_gems.include?(spec.name) }
             end
           end
 
           private
 
-          # @return [Bundler::SpecSet, nil]
-          def gem_specs
-            @gem_specs ||= begin
-              return if !project.gemfile_lock_path || !File.exists?(project.gemfile_lock_path)
-              Dir.chdir(project.root_path) do
-                Bundler.definition.specs
-              end
+          # @return [Array<Hash>]
+          def dependencies
+            analyzed_deps[:dependencies] || []
+          end
+
+          # @return [Hash]
+          def analyzed_deps
+            @analyzed_deps ||= begin
+              return {} if !project.gemfile_lock_path || !File.exists?(project.gemfile_lock_path)
+
+              # Bundler pollutes environment variables in the current process, so analyze in another process.
+              stdout, stderr, status = Open3.capture3(Yoda::Cli.yoda_exe, "analyze-deps", project.root_path)
+
+              fail stderr unless status.success?
+
+              Logger.trace("Analysis Result: #{stdout}")
+              JSON.parse(stdout, symbolize_names: true)
             end
-          end
-
-          # @param [Gem::Specification]
-          def metadata?(spec)
-            spec.source.is_a?(Bundler::Source::Metadata)
-          end
-
-          def self_spec?(spec)
-            spec.source.is_a?(Bundler::Source::Path) && (File.expand_path(spec.source.path) == File.expand_path(project.root_path))
           end
         end
       end

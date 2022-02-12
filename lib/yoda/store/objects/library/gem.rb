@@ -15,7 +15,6 @@ module Yoda
           class << self
             # @param spec [Bundler::LazySpecification]
             def from_gem_spec(spec)
-              fail "#{spec} is not installed" unless spec.respond_to?(:full_gem_path)
               if spec.respond_to?(:full_gem_path)
                 # Installed
                 new(

@@ -3,11 +3,24 @@ require 'thor'
 module Yoda
   # Cli module has handler for each cli command.
   module Cli
+    require 'yoda/cli/analyze_deps'
     require 'yoda/cli/base'
     require 'yoda/cli/file_cursor_parsable'
     require 'yoda/cli/infer'
     require 'yoda/cli/complete'
     require 'yoda/cli/console'
+
+    class << self
+      # @return [String]
+      def exe_dir
+        File.expand_path('../../exe', __dir__)
+      end
+
+      # @return [String]
+      def yoda_exe
+        File.expand_path('./yoda', exe_dir)
+      end
+    end
 
     class Top < Thor
       class_option :log_level, type: :string, desc: 'Set log level (debug info warn error fatal)'
@@ -50,6 +63,13 @@ module Yoda
         process_class_options
         return self.class.command_help(shell, __method__) if options[:help]
         Server.new.run
+      end
+
+      desc 'analyze-deps PATH', 'Analyze dependencies of the given path'
+      def analyze_deps(path)
+        process_class_options
+        return self.class.command_help(shell, __method__) if options[:help]
+        Cli::AnalyzeDeps.run(path)
       end
 
       desc 'version', 'show current version'
