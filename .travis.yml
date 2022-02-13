@@ -1,8 +1,0 @@
-sudo: false
-language: ruby
-rvm:
-  - 2.4.1
-before_script: ./scripts/build_core_index.sh
-script:
-  - bundle exec ruby scripts/benchmark.rb
-  - bundle exec rake
