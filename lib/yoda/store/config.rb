@@ -8,6 +8,11 @@ module Yoda
         new(YAML.load(yaml_str, symbolize_names: true) || {})
       end
 
+      # @param path [String]
+      def self.at(path)
+        new(YAML.load(File.read(path), symbolize_names: true) || {})
+      end
+
       # @param contents [Hash]
       def initialize(contents)
         @contents = contents

@@ -1,7 +1,5 @@
 require 'fileutils'
-require 'bundler'
 require 'tmpdir'
-require 'digest'
 
 module Yoda
   module Store

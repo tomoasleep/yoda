@@ -5,7 +5,6 @@ module Yoda
       SOURCE_PATH_BASE = File.expand_path("~/.yoda/sources")
       REGISTRY_PATH_BASE = File.expand_path('~/.yoda/registry')
 
-
       # @return [VersionStore]
       def self.for_current_version
         new(RUBY_VERSION)

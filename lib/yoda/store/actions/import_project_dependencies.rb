@@ -20,7 +20,11 @@ module Yoda
 
           if !library_to_add.empty? || !library_to_remove.empty?
             Logger.info 'Constructing database for the current project.'
+            Logger.trace 'Adding libraries: ' + library_to_add.map(&:name).join(', ')
+            Logger.trace 'Removing libraries: ' + library_to_remove.map(&:name).join(', ')
             project.registry.libraries.modify(add: library_to_add, remove: library_to_remove)
+          else
+            Logger.info 'No library changes to the current project.'
           end
 
           self
@@ -29,8 +33,10 @@ module Yoda
         private
 
         # @param libraries_status [Object::LibrariesStatus]
+        # @return [Array(Array<Object::Library::Core, Objects::Library::Std, Objects::Library::Gem>, Array<Object::Library::Core, Objects::Library::Std, Objects::Library::Gem>)]
         def calculate_dependency(libraries_status)
           libraries = Objects::LibrariesStatus.libraies_from_dependency(project.dependency)
+          Logger.trace 'Requested libraries: ' + libraries.map(&:name).join(', ')
           library_to_add = libraries - libraries_status.libraries
           library_to_remove = libraries_status.libraries - libraries
           [library_to_add, library_to_remove]

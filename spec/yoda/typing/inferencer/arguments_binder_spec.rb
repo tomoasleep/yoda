@@ -6,7 +6,7 @@ RSpec.describe Yoda::Typing::Inferencer::ArgumentsBinder do
   let(:binder) { described_class.new(generator: generator) }
 
   before do
-    environment.registry.local_store.add_file_patch(Yoda::Store::Objects::Library.core.create_patch)
+    environment.registry.project.setup
   end
 
   describe '#bind' do

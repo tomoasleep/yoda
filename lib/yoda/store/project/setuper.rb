@@ -28,10 +28,11 @@ module Yoda
           project.file_finder.make_dir
 
           Logger.info 'Building index for the current project...'
-          errors = Actions::ImportProjectDependencies.new(project).run.errors
+          dependency_importer.run
           project.rbs_environment
           load_project_files
-          errors
+
+          dependency_importer.errors
         end
 
         def clear
@@ -44,14 +45,22 @@ module Yoda
 
         private
 
+        def build_core_index
+          unless Store::Actions::BuildCoreIndex.exists?
+            Instrument.instance.initialization_progress(phase: :core, message: 'Downloading and building core index')
+            Store::Actions::BuildCoreIndex.run
+          end
+        end
+
         def load_project_files
           Logger.debug('Loading current project files...')
           Instrument.instance.initialization_progress(phase: :load_project_files, message: 'Loading current project files')
           project.root_path && Actions::ReadProjectFiles.for_project(project).run
         end
 
-        def build_core_index
-          Actions::BuildCoreIndex.run unless Actions::BuildCoreIndex.exists?
+        # @return [Actions::ImportProjectDependencies]
+        def dependency_importer
+          Actions::ImportProjectDependencies.new(project)
         end
       end
     end

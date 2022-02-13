@@ -2,8 +2,8 @@ module Yoda
   module Cli
     class Console < Base
       def run
-        project.setup
         require "pry"
+        project.setup
         project.pry
       end
 

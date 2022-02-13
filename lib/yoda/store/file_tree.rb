@@ -76,7 +76,7 @@ module Yoda
       # @return [Boolean]
       def subpath?(path)
         if base_path
-          File.fnmatch("#{base_path}/**/*", path)
+          File.fnmatch(File.join(base_path, "**/*"), path)
         else
           false
         end

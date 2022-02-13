@@ -16,7 +16,7 @@ module Yoda
           end
         end
 
-        # A wrapper class of {Objects::Base} to allow access to registry>
+        # A wrapper class of {Objects::Base} to allow access to registry.
         class Connected
           extend ConnectedDelegation
 

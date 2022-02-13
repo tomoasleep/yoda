@@ -8,6 +8,7 @@ module Yoda
 
       def self.from_root_uri(root_uri)
         workspaces = [Workspace.new(name: 'root', root_uri: root_uri)]
+        Logger.trace("Setting up session for #{root_uri}")
         new(workspaces: workspaces)
       end
 
@@ -29,10 +30,6 @@ module Yoda
 
       # @return [Array<Exception>] errors on setup
       def setup
-        unless Store::Actions::BuildCoreIndex.exists?
-          Instrument.instance.initialization_progress(phase: :core, message: 'Downloading and building core index')
-          Store::Actions::BuildCoreIndex.run
-        end
         workspaces.flat_map(&:setup)
       end
 
@@ -82,6 +79,7 @@ module Yoda
 
       def temporal_workspace_for(uri)
         temporal_workspaces[uri] ||= RootlessWorkspace.new(name: uri).tap do |workspace|
+          Logger.trace "Setting up temporal workspace for #{uri}"
           workspace.setup
           # Store the file content to the temporally workspace
           workspace.read_source(uri)

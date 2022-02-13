@@ -20,8 +20,10 @@ module Yoda
       #   @!method allow_$1?
       #     @return [true, false]
       def define_logging_method(level)
-        define_method(level) do |content, tag: nil|
+        define_method(level) do |content = nil, tag: nil|
           return unless public_send("allow_#{level}?")
+          content = yield if block_given?
+          content ||= ""
           prefix = "[#{level}]#{tag ? ' (' + tag + ')' : '' } "
           io.puts(prefix + content.to_s.lines.join(prefix))
         end

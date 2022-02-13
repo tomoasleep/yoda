@@ -76,11 +76,13 @@ module Yoda
 
       # @return [Config]
       def config
-        @config ||= Config.from_yaml_data(file_finder.config_content || '')
-      end
-
-      def registry_name
-        @registry_name ||= Registry.registry_name
+        @config ||= begin
+          if readable_config_file_path
+            Config.at(readable_config_file_path)
+          else
+            Config.from_yaml_data('')
+          end
+        end
       end
 
       # @return [FileFinder]

@@ -45,10 +45,6 @@ module Yoda
           patch = YardImporter.new(file, source_path: file).import(YARD::Registry.all + [YARD::Registry.root]).patch
           registry.local_store.add_file_patch(patch)
         end
-
-        # @return [String]
-        def hoge
-        end
       end
     end
   end

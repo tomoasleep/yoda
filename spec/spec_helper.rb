@@ -20,6 +20,10 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  config.before(:each) do
+    Yoda::Logger.log_level = :error
+  end
+
   config.after(:each) do
     Yoda::Instrument.clean
   end
