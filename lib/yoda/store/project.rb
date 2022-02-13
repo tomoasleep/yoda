@@ -26,7 +26,20 @@ module Yoda
         end
       end
 
-      delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :file_finder
+      delegate(
+        [
+          :yoda_dir_path,
+          :cache_dir_path,
+          :library_registry_dir_path,
+          :gemfile_lock_path,
+          :config_file_path,
+          :readable_config_file_path,
+          :library_local_yardoc_path,
+          :library_registry_path,
+          :project_registry_path,
+        ] => :file_finder,
+      )
+
       delegate [:rbs_environment] => :rbs_loader
       delegate [:clear, :reset] => :setuper
 
