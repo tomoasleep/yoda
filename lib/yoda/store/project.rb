@@ -20,6 +20,10 @@ module Yoda
           name ||= root_path ? File.basename(root_path) : "root"
           new(name: name, file_tree: file_tree)
         end
+
+        def temporal(name: "temporal")
+          new(name: name, file_tree: FileTree.new(base_path: nil))
+        end
       end
 
       delegate [:cache_dir_path, :yoda_dir_path, :gemfile_lock_path] => :file_finder

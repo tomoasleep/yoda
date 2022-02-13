@@ -23,7 +23,7 @@ module Yoda
       # @return [Environment]
       def self.build(registry: nil, rbs_environment: nil)
         # TODO: Allow to make registry parameter empty
-        registry ||= Yoda::Store::Registry.new(Yoda::Store::Adapters::MemoryAdapter.new)
+        registry ||= Yoda::Store::Project.temporal.registry
         rbs_environment ||= RBS::Environment.new
         new(registry: registry, rbs_environment: rbs_environment)
       end

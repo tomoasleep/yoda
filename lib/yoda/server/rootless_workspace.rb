@@ -17,7 +17,7 @@ module Yoda
 
       # @return [Store::Project, nil]
       def project
-        @project ||= Store::Project.for_path(nil, name: name)
+        @project ||= Store::Project.temporal(name: name)
       end
 
       # @param path [String]
