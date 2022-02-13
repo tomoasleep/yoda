@@ -108,8 +108,9 @@ module Yoda
 
       def on_progress(phase: :save_keys, index: nil, length: nil, **params)
         return unless index
-        bar = bars[phase] ||= ProgressBar.create(format: "%t: %c/%C |%w>%i| %e ", title: phase.to_s.gsub('_', ' '), starting_at: index, total: length)
-        bar.progress = index if index <= bar.total
+        @bars ||= {}
+        @bar = @bars[phase] ||= ProgressBar.create(format: "%t: %c/%C |%w>%i| %e ", title: phase.to_s.gsub('_', ' '), starting_at: index, total: length)
+        @bar.progress = index if index <= @bar.total
       end
     end
   end
