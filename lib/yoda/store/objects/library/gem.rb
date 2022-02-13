@@ -3,9 +3,8 @@ module Yoda
     module Objects
       module Library
         class Gem
-          include WithRegistry
           include Serializable
-          
+
           # @return [String]
           attr_reader :name, :version, :source_path, :full_gem_path, :doc_dir
 
@@ -58,7 +57,6 @@ module Yoda
             end
           end
 
-          # @param spec [Bundler::LazySpecification]
           def initialize(name:, version:, source_path:, full_gem_path:, doc_dir:, source_type:)
             @name = name
             @version = version
@@ -76,10 +74,6 @@ module Yoda
             source_path
           end
 
-          def create_patch
-            Actions::ImportGem.run(self)
-          end
-
           def to_h
             {
               name: name,
@@ -91,15 +85,6 @@ module Yoda
             }
           end
 
-          # @note Implementation for {WithRegistry#registry_path}
-          def registry_path
-            if managed_by_rubygems?
-              VersionStore.for_current_version.registry_path_for_gem(name: name, version: version)
-            else
-              nil
-            end
-          end
-
           # @return [Boolean]
           def installed?
             !!full_gem_path
@@ -107,6 +92,47 @@ module Yoda
 
           def managed_by_rubygems?
             source_type == :rubygems
+          end
+
+          # @return [Connected]
+          def with_project_connection(**kwargs)
+            self.class.const_get(:Connected).new(self, **kwargs)
+          end
+
+          class Connected
+            extend ConnectedDelegation
+            include WithRegistry
+
+            delegate_to_object :name, :version, :source_path, :full_gem_path, :doc_dir, :source_type
+            delegate_to_object :id, :local?, :to_h, :installed?, :managed_by_rubygems?, :with_project_connection
+            delegate_to_object :hash, :eql?, :==, :to_json, :derive
+
+            # @return [Gem]
+            attr_reader :object
+
+            # @return [Project]
+            attr_reader :project
+
+            # @param object [Gem]
+            # @param project [Project]
+            def initialize(object, project:)
+              @object = object
+              @project = project
+            end
+
+            # @note Implementation for {WithRegistry#registry_path}
+            def registry_path
+              if managed_by_rubygems?
+                project.library_registry_path(name: name, version: version)
+              else
+                # Do not persist not gems.
+                nil
+              end
+            end
+
+            def create_patch
+              Actions::ImportGem.run(self)
+            end
           end
         end
       end

@@ -13,18 +13,19 @@ module Yoda
 
       delegate %i(get has_key? keys) => :root_store
 
+      attr_reader :project
+
       class << self
         # @param project [Project]
         def for_project(project)
-          path = project.root_path && File.expand_path(project.registry_name, project.cache_dir_path)
-          new(Adapters.for(path))
+          new(project)
         end
       end
 
-      # @param adapter [Adapters::Base]
-      def initialize(adapter)
-        fail TypeError, adapter unless adapter.is_a?(Adapters::Base)
-        @adapter = adapter
+      # @param project [Project]
+      def initialize(project)
+        fail TypeError, project unless project.is_a?(Project)
+        @project = project
       end
 
       def root_store
@@ -37,12 +38,19 @@ module Yoda
 
       # @return [LibraryRegistrySet]
       def libraries
-        @libraries ||= Registry::LibraryRegistrySet.new(adapter, on_change: -> { clear_cache })
+        @libraries ||= Registry::LibraryRegistrySet.new(project: project, adapter: adapter, on_change: -> { clear_cache })
       end
 
       # @return [LocalStore]
       def local_store
         @local_store ||= Registry::LocalStore.new(on_change: -> { clear_cache })
+      end
+
+      # @return [Adapters::Base]
+      def adapter
+        @adapter ||= begin
+          Adapters.for(project.project_registry_path)
+        end
       end
 
       # @param pp [PP]
@@ -55,9 +63,6 @@ module Yoda
       end
 
       private
-
-      # @return [Adapters::Base, nil]
-      attr_reader :adapter
 
       def clear_cache
         root_store.clear_cache

@@ -4,7 +4,7 @@ module Yoda
   module Store
     module Actions
       class ImportGem
-        # @return [Objects::Library::Gem]
+        # @return [Objects::Library::Gem::Connected]
         attr_reader :dep
 
         class << self
@@ -14,7 +14,7 @@ module Yoda
           end
         end
 
-        # @param dep [Objects::Library::Gem]
+        # @param dep [Objects::Library::Gem::Connected]
         def initialize(dep)
           @dep = dep
         end
@@ -30,42 +30,24 @@ module Yoda
         private
 
         def create_dependency_doc
-          if dep.managed_by_rubygems?
-            if yardoc_path
-              Logger.info "Gem docs for #{gem_name} #{gem_version} already exist"
-              return true
-            end
+          if dep.managed_by_rubygems? && readable?(yardoc_path)
+            Logger.info "Gem docs for #{gem_name} #{gem_version} already exist"
+            return
+          end
+
+          if yardoc_path
             Logger.info "Building gem docs for #{gem_name} #{gem_version}"
-            yard_gem_command
-          elsif yardoc_local_path
-            Logger.info "Building gem docs for #{gem_name} #{gem_version}"
-            yard_local_doc_command
+            yard_doc_command
           else
             Logger.info "Cannot build gem docs for #{gem_name} #{gem_version}"
           end
         end
 
-        def yard_local_doc_command
+        def yard_doc_command
           begin
             o, e = Dir.chdir(gem_path) do
-              Open3.capture2e("yard --no-stats -no-output -c")
+              Open3.capture2e("yard --no-stats --no-output -b #{yardoc_path} -c")
             end
-            Logger.debug o unless o.empty?
-            if e.success?
-              Logger.info "Done building gem docs for #{gem_name} #{gem_version}"
-            else
-              Logger.warn "Failed to build #{gem_name} #{gem_version}"
-            end
-          rescue => ex
-            Logger.debug ex
-            Logger.debug ex.backtrace
-            Logger.warn "Failed to build #{gem_name} #{gem_version}"
-          end
-        end
-
-        def yard_gem_command
-          begin
-            o, e = Open3.capture2e("yard gems #{gem_name} #{gem_version}")
             Logger.debug o unless o.empty?
             if e.success?
               Logger.info "Done building gem docs for #{gem_name} #{gem_version}"
@@ -93,31 +75,25 @@ module Yoda
           end
         end
 
+        # @return [String, nil]
         def yardoc_path
+          return nil unless readable?(gem_path)
+
           if dep.managed_by_rubygems?
-            yardoc_gem_path
+            candidate = File.expand_path('.yardoc', dep.doc_dir)
+            if writable?(candidate)
+              candidate
+            else
+              dep.project.library_local_yardoc_path(name: gem_name, version: gem_version)
+            end
           else
-            yardoc_local_path
+            candidate = File.expand_path('.yardoc', gem_path)
+            if writable?(candidate)
+              candidate
+            else
+              dep.project.library_local_yardoc_path(name: gem_name, version: gem_version)
+            end
           end
-        end
-
-        # @return [String, nil]
-        def yardoc_local_path
-          return nil unless gem_path && File.exist?(gem_path)
-
-          candidate = File.expand_path('.yardoc', gem_path)
-          if File.writable?(candidate) || (!File.directory?(candidate) && File.writable?(gem_path))
-            candidate
-          end
-        end
-
-        # @return [String, nil]
-        def yardoc_gem_path
-          YARD::Registry.yardoc_file_for_gem(gem_name, gem_version)
-        rescue Bundler::BundlerError => ex
-          Logger.debug ex
-          Logger.debug ex.backtrace
-          nil
         end
 
         def gem_name
@@ -131,6 +107,22 @@ module Yoda
         # @return [String]
         def gem_path
           dep.full_gem_path
+        end
+
+        # @param path [String]
+        # @return [Boolean]
+        def writable?(path)
+          return true if File.writable?(path)
+          return true if !File.directory?(path) && File.writable?(File.dirname(path))
+          false
+        end
+
+        # @param path [String]
+        # @return [Boolean]
+        def readable?(path)
+          return false unless path
+          return false unless File.readable?(path)
+          true
         end
       end
     end

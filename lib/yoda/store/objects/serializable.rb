@@ -35,6 +35,8 @@ module Yoda
         end
 
         def eql?(another)
+          return object.eql?(another) if respond_to?(:object) && !object.respond_to?(:object)
+          return eql?(another.object) if another.respond_to?(:object) && !another.object.respond_to?(:object)
           return false unless self.class.name == another.class.name
           to_h.eql?(another.to_h)
         end

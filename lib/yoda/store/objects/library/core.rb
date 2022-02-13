@@ -3,7 +3,6 @@ module Yoda
     module Objects
       module Library
         class Core
-          include WithRegistry
           include Serializable
 
           # @return [String]
@@ -35,13 +34,36 @@ module Yoda
             VersionStore.for_current_version.core_yardoc_path
           end
 
-          def create_patch
-            Actions::ImportCoreLibrary.run(self)
+          # @return [Connected]
+          def with_project_connection(**kwargs)
+            self.class.const_get(:Connected).new(self, **kwargs)
           end
 
-          # @note Implementation for {WithRegistry#registry_path}
-          def registry_path
-            VersionStore.for_current_version.registry_path_for_core
+          class Connected
+            extend ConnectedDelegation
+            include WithRegistry
+
+            delegate_to_object :version
+            delegate_to_object :id, :name, :doc_path, :to_h, :with_project_connection
+            delegate_to_object :hash, :eql?, :==, :to_json, :derive
+
+            attr_reader :object, :project
+
+            # @param object [Core]
+            # @param project [Project]
+            def initialize(object, project:)
+              @object = object
+              @project = project
+            end
+
+            def create_patch
+              Actions::ImportCoreLibrary.run(self)
+            end
+
+            # @note Implementation for {WithRegistry#registry_path}
+            def registry_path
+              VersionStore.for_current_version.registry_path_for_core
+            end
           end
         end
       end

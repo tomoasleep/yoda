@@ -8,10 +8,12 @@ module Yoda
         require 'yoda/store/objects/library/gem'
 
         class << self
+          # @return [Core]
           def core
             Core.current_version
           end
 
+          # @return [Std]
           def std
             Std.current_version
           end

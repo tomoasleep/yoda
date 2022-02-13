@@ -15,10 +15,6 @@ module Yoda
       REGISTRY_VERSION = 6
 
       class << self
-        def new(adapter)
-          ProjectRegistry.new(adapter)
-        end
-
         def registry_name
           @registry_name ||= begin
             digest = Digest::SHA256.new
