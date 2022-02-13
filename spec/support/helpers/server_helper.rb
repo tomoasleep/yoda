@@ -2,24 +2,6 @@ require "open3"
 require "stringio"
 
 module ServerHelper
-  def capture_server(command:, fixture_path:)
-    requests = []
-    yield requests
-
-    sio = StringIO.new
-    requests.each { |request| lsp_write(sio, request); sio.write("") }
-    puts sio.string
-
-    Dir.chdir(fixture_path) do 
-      output, error, status = Open3.capture3(command, stdin_data: sio.string)
-      [jsonrpc_to_requests(output), error, status]
-    end
-  end
-
-  def lsp_write(io, response)
-    LanguageServer::Protocol::Transport::Io::Writer.new(io).write(response.to_hash)
-  end
-
   def lsp_request(id:, method:, params:, kind: nil)
     params = begin
       if kind == Hash
@@ -34,7 +16,14 @@ module ServerHelper
   end
 
   def lsp(kind, **kwargs)
-    LanguageServer::Protocol::Interface.const_get(to_constant_name(kind)).new(**kwargs)
+    constant = LanguageServer::Protocol::Interface.const_get(to_constant_name(kind))
+
+    if kwargs.empty?
+      # For Ruby 2.6
+      constant.new
+    else
+      constant.new(**kwargs)
+    end
   end
 
   def to_constant_name(str)
@@ -43,10 +32,84 @@ module ServerHelper
     str.sub(/^[a-z]*/) { |match| match.capitalize }.gsub(/(?:_)([a-z]*)/i) { $1.capitalize }
   end
 
-  def jsonrpc_to_requests(str)
-    sio = StringIO.new(str)
-    requests = []
-    LanguageServer::Protocol::Transport::Io::Reader.new(sio).read { |request| requests << request }
-    requests
+  class Client
+    # @return [String]
+    attr_reader :command
+
+    # @return [IO, nil]
+    attr_reader :stdin, :stdout, :stderr
+
+    # @return [Array<Hash>]
+    attr_reader :messages
+
+    # @yield [client]
+    # @yieldparam client [ServerHelper::Client]
+    def self.run(command, **kwargs, &block)
+      new(command, **kwargs).run(&block)
+    end
+
+    # @param command [String]
+    # @param stream [Boolean]
+    def initialize(command, stream: false)
+      @command = command
+      @stream = stream
+      @messages = []
+    end
+
+    # @return [(Array<Hash>, String, Process::Status)]
+    # @yield [client]
+    # @yieldparam client [ServerHelper::Client]
+    def run
+      @messages = []
+
+      Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+        @stdin = stdin
+        @stdout = stdout
+        @stderr = stderr
+
+        error = ""
+        stderr_th = Thread.new do
+          while line = stderr.gets
+            error << line
+            STDERR.print line if @stream
+          end
+        end
+
+        yield self
+
+        stdin.close
+        wait_thr.join
+        stderr_th.join
+
+        "Read all message" while read
+
+        [messages, error, wait_thr.value]
+      end
+    end
+
+    def read
+      if buffer = stdout.gets("\r\n\r\n")
+        content_length = buffer.match(/Content-Length: (\d+)/i)[1].to_i
+        content = stdout.read(content_length) or raise
+        message = JSON.parse(content, symbolize_names: true)
+
+        @messages << message
+        yield message if block_given?
+
+        message
+      else
+        nil
+      end
+    end
+
+    # @param message [#to_hash]
+    def send(message)
+      LanguageServer::Protocol::Transport::Io::Writer.new(stdin).write(message.to_hash)
+    end
+
+    # @param message [#to_hash]
+    def <<(message)
+      send(message)
+    end
   end
 end

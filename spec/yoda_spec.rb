@@ -12,28 +12,30 @@ RSpec.describe Yoda do
 
     shared_examples "can launch" do
       it "can launch" do
-        messages, error, status = capture_server(command: command, fixture_path: fixture_path) do |requests|
-          requests << lsp_request(
-            id: "test",
+        messages, error, status = ServerHelper::Client.run(command) do |client|
+          client << lsp_request(
+            id: "init",
             method: :initialize,
             params: {
               process_id: nil,
               root_uri: fixture_uri,
               capabilities: lsp(:client_capabilities),
-            }
+            },
           )
+
+          message = client.read until message.nil? || message[:id] == "init"
         end
 
         expect(messages).not_to include(have_key(:error))
-        expect(messages).to include(a_hash_including(id: "test", result: have_key(:capabilities)))
+        expect(messages).to include(a_hash_including(id: "init", result: have_key(:capabilities)))
       end
     end
 
     shared_examples "can open file" do
       it "can open file" do
-        messages, error, status = capture_server(command: command, fixture_path: fixture_path) do |requests|
-          requests << lsp_request(
-            id: "test",
+        messages, error, status = ServerHelper::Client.run(command) do |client|
+          client << lsp_request(
+            id: "init",
             method: :initialize,
             params: {
               process_id: nil,
@@ -42,13 +44,15 @@ RSpec.describe Yoda do
             }
           )
 
-          requests << lsp_request(
+          message = client.read until message.nil? || message[:id] == "init"
+
+          client << lsp_request(
             id: "test-new",
             method: :initialized,
             params: {}
           )
 
-          requests << lsp_request(
+          client << lsp_request(
             id: "test-new",
             method: :'textDocument/didOpen',
             kind: :'did_open_text_document',
@@ -70,9 +74,9 @@ RSpec.describe Yoda do
 
     shared_examples "can complete" do
       it "can complete" do
-        messages, error, status = capture_server(command: command, fixture_path: fixture_path) do |requests|
-          requests << lsp_request(
-            id: "test",
+        messages, error, status = ServerHelper::Client.run(command) do |client|
+          client << lsp_request(
+            id: "init",
             method: :initialize,
             params: {
               process_id: nil,
@@ -81,13 +85,15 @@ RSpec.describe Yoda do
             }
           )
 
-          requests << lsp_request(
+          message = client.read until message.nil? || message[:id] == "init"
+
+          client << lsp_request(
             id: "test-new",
             method: :initialized,
             params: {}
           )
 
-          requests << lsp_request(
+          client << lsp_request(
             id: "test-new",
             method: :'textDocument/didOpen',
             kind: :'did_open_text_document',
@@ -102,7 +108,7 @@ RSpec.describe Yoda do
             }
           )
 
-          requests << lsp_request(
+          client << lsp_request(
             id: "complete",
             method: :'textDocument/completion',
             kind: Hash,
@@ -124,7 +130,7 @@ RSpec.describe Yoda do
             }
           )
 
-          requests << lsp_request(
+          client << lsp_request(
             id: "test-new",
             method: :'textDocument/didOpen',
             kind: :'did_open_text_document',
@@ -158,9 +164,9 @@ RSpec.describe Yoda do
 
     shared_examples "can hover" do
       it "can hover" do
-        messages, error, status = capture_server(command: command, fixture_path: fixture_path) do |requests|
-          requests << lsp_request(
-            id: "test",
+        messages, error, status = ServerHelper::Client.run(command) do |client|
+          client << lsp_request(
+            id: "init",
             method: :initialize,
             params: {
               process_id: nil,
@@ -169,13 +175,15 @@ RSpec.describe Yoda do
             }
           )
 
-          requests << lsp_request(
+          message = client.read until message.nil? || message[:id] == "init"
+
+          client << lsp_request(
             id: "test-new",
             method: :initialized,
             params: {}
           )
 
-          requests << lsp_request(
+          client << lsp_request(
             id: "test-new",
             method: :'textDocument/didOpen',
             kind: :'did_open_text_document',
@@ -190,7 +198,7 @@ RSpec.describe Yoda do
             }
           )
 
-          requests << lsp_request(
+          client << lsp_request(
             id: "hover",
             method: :'textDocument/hover',
             kind: Hash,
@@ -246,6 +254,28 @@ RSpec.describe Yoda do
     context "in a rails project" do
       let(:fixture_path) { File.expand_path("./support/sample_projects/rails_project", __dir__) }
       let(:sample_path) { File.expand_path('./lib/example.rb', fixture_path) }
+
+      def with_unbundled_env(&block)
+        if Bundler.respond_to?(:with_unbundled_env)
+          Bundler.with_unbundled_env(&block)
+        else
+          # For backward compatibility (This method is introduced at bundler 2.1.0: https://github.com/rubygems/bundler/pull/6843)
+          Bundler.with_clean_env(&block)
+        end
+      end
+
+      before(:all) do
+        require 'bundler'
+
+        path = File.expand_path("./support/sample_projects/rails_project", __dir__)
+        Dir.chdir(path) do
+          out, status = with_unbundled_env do
+            Open3.capture2e("bundle check || bundle install")
+          end
+          STDERR.puts out
+          status.success? || fail("bundle install failed")
+        end
+      end
 
       include_examples "can launch"
       include_examples "can open file"
