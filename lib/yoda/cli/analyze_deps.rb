@@ -50,6 +50,9 @@ module Yoda
           @gem_specs ||= begin
             Dir.chdir(root_path) do
               with_unbundled_env do
+                # Suppress bundler outputs to stdout.
+                Bundler.ui = Bundler::UI::Silent.new
+
                 Bundler.reset!
                 spec_set = Bundler.definition.resolve
 
