@@ -10,7 +10,7 @@ module Yoda
         # @param dependency [Project::Dependency]
         # @return [Array<Object::Library::Core, Object::Library::Std, Object::Library::Gem>]
         def self.libraies_from_dependency(dependency)
-          [dependency.core, dependency.std, *dependency.gems]
+          [dependency.core, dependency.std, *dependency.gems.select(&:installed?)]
         end
 
         # @param libraries [Array<Library::Core, Library::Std, Library::Gem>]

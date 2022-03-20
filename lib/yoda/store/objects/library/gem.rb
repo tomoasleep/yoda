@@ -87,7 +87,7 @@ module Yoda
 
           # @return [Boolean]
           def installed?
-            !!full_gem_path
+            full_gem_path && File.exists?(full_gem_path)
           end
 
           def managed_by_rubygems?
