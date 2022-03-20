@@ -1,0 +1,4 @@
+.yoda
+.yardoc
+vendor/bundle
+Gemfile.lock
