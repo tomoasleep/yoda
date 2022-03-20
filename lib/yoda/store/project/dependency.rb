@@ -65,7 +65,7 @@ module Yoda
           # @return [Hash]
           def analyzed_deps
             @analyzed_deps ||= begin
-              return {} if !project.gemfile_lock_path || !File.exists?(project.gemfile_lock_path)
+              return {} unless project.root_path
 
               # Bundler pollutes environment variables in the current process, so analyze in another process.
               stdout, stderr, status = Open3.capture3(Yoda::Cli.yoda_exe, "analyze-deps", project.root_path)
