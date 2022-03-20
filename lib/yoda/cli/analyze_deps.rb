@@ -54,6 +54,9 @@ module Yoda
                 Bundler.ui = Bundler::UI::Silent.new
 
                 Bundler.reset!
+
+                # Resolve dependencies of uninstalled gems and ensure remote sources are available.
+                Bundler.definition.resolve_remotely!
                 spec_set = Bundler.definition.resolve
 
                 if Gem::Version.new(Bundler::VERSION) >= Gem::Version.new('2.2.25')
