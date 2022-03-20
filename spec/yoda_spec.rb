@@ -1,8 +1,10 @@
 require 'spec_helper'
 require 'support/helpers/server_helper'
+require 'support/helpers/executable_helper'
 
 RSpec.describe Yoda do
-  let(:executable) { File.expand_path("../exe/yoda", __dir__) }
+  include ExecutableHelper
+  let(:executable) { yoda_exe_path }
 
   describe "server" do
     include ServerHelper
