@@ -19,6 +19,7 @@ export function configureLanguageServer(): LanguageClient {
     }
 
     const clientOptions : LanguageClientOptions = {
+        progressOnInitialization: true,
         documentSelector: [{ scheme: 'file', language: 'ruby' }],
         synchronize: {
             configurationSection: 'yoda',
