@@ -8,8 +8,10 @@ module Yoda
           namespace = adapter.namespace(library.name)
 
           if namespace.empty?
+            Instrument.instance.build_library_registry(name: library.name, version: library.version, message: "Building registry for #{library.name} (#{library.version})")
             patch = library.create_patch
             patch && compress_and_save(patch: patch, adapter: namespace)
+            Instrument.instance.build_library_registry(name: library.name, version: library.version, message: "Finished to build registry for #{library.name} (#{library.version})")
           end
 
           new(id: library.id, adapter: namespace)

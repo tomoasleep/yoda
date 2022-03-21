@@ -1,9 +1,12 @@
 require 'concurrent'
+require 'yoda/server/providers'
 
 module Yoda
   class Server
     # Handle
     class LifecycleHandler
+      include Providers::ReportableProgress
+
       # @return [Session, nil]
       attr_reader :session
 
@@ -41,83 +44,92 @@ module Yoda
 
       # @param params [LanguageServer::Protocol::Interface::InitializeParams]
       def handle_initialize(params)
-        Instrument.instance.hear(initialization_progress: method(:notify_initialization_progress)) do
-          @session = begin
-            if params[:workspace_folders]
-              workspace_folders = params[:workspace_folders].map { |hash| LanguageServer::Protocol::Interface::WorkspaceFolder.new(name: hash[:name], uri: hash[:uri]) }
-              Session.from_workspace_folders(workspace_folders)
-            elsif params[:root_uri]
-              Session.from_root_uri(params[:root_uri])
-            else
-              Session.new(workspaces: [])
+        in_progress(params, title: "Initializing Yoda") do |progress_reporter|
+          reporter = InitializationProgressReporter.new(progress_reporter)
+
+          subscriptions = {
+            initialization_progress: reporter.public_method(:notify_initialization_progress),
+            build_library_registry: reporter.public_method(:notify_build_library_registry),
+          }
+
+          Instrument.instance.hear(**subscriptions) do
+            @session = begin
+              if params[:workspace_folders]
+                workspace_folders = params[:workspace_folders].map { |hash| LanguageServer::Protocol::Interface::WorkspaceFolder.new(name: hash[:name], uri: hash[:uri]) }
+                Session.from_workspace_folders(workspace_folders)
+              elsif params[:root_uri]
+                Session.from_root_uri(params[:root_uri])
+              else
+                Session.new(workspaces: [])
+              end
             end
+
+            send_warnings(@session.setup || [])
           end
-
-          send_warnings(@session.setup || [])
-
-          LanguageServer::Protocol::Interface::InitializeResult.new(
-            server_info: {
-              name: "yoda",
-              version: Yoda::VERSION,
-            },
-            capabilities: LanguageServer::Protocol::Interface::ServerCapabilities.new(
-              text_document_sync: LanguageServer::Protocol::Interface::TextDocumentSyncOptions.new(
-                open_close: true,
-                change: LanguageServer::Protocol::Constant::TextDocumentSyncKind::FULL,
-                save: LanguageServer::Protocol::Interface::SaveOptions.new(
-                  include_text: true,
-                ),
-              ),
-              completion_provider: LanguageServer::Protocol::Interface::CompletionOptions.new(
-                resolve_provider: false,
-                trigger_characters: ['.', '@', '[', ':', '!', '<'],
-              ),
-              hover_provider: true,
-              definition_provider: true,
-              signature_help_provider: LanguageServer::Protocol::Interface::SignatureHelpOptions.new(
-                trigger_characters: ['(', ','],
-              ),
-              workspace_symbol_provider: LanguageServer::Protocol::Interface::WorkspaceSymbolOptions.new(
-                work_done_progress: true,
-              ),
-              workspace: {
-                workspaceFolders: LanguageServer::Protocol::Interface::WorkspaceFoldersServerCapabilities.new(
-                  supported: true,
-                  change_notifications: true,
-                ),
-                fileOperations: {
-                  didCreate: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
-                    filters: [
-                      LanguageServer::Protocol::Interface::FileOperationFilter.new(
-                        pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
-                          glob: "**/*",
-                        ),
-                      ),
-                    ],
-                  ),
-                  didRename: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
-                    filters: [
-                      LanguageServer::Protocol::Interface::FileOperationFilter.new(
-                        pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
-                          glob: "**/*",
-                        ),
-                      ),
-                    ],
-                  ),
-                  didDelete: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
-                    filters: [
-                      LanguageServer::Protocol::Interface::FileOperationFilter.new(
-                        pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
-                          glob: "**/*",
-                        ),
-                      ),
-                    ],
-                  ),
-                },
-              },
-            ),
-          )
         end
+
+        LanguageServer::Protocol::Interface::InitializeResult.new(
+          server_info: {
+            name: "yoda",
+            version: Yoda::VERSION,
+          },
+          capabilities: LanguageServer::Protocol::Interface::ServerCapabilities.new(
+            text_document_sync: LanguageServer::Protocol::Interface::TextDocumentSyncOptions.new(
+              open_close: true,
+              change: LanguageServer::Protocol::Constant::TextDocumentSyncKind::FULL,
+              save: LanguageServer::Protocol::Interface::SaveOptions.new(
+                include_text: true,
+              ),
+            ),
+            completion_provider: LanguageServer::Protocol::Interface::CompletionOptions.new(
+              resolve_provider: false,
+              trigger_characters: ['.', '@', '[', ':', '!', '<'],
+            ),
+            hover_provider: true,
+            definition_provider: true,
+            signature_help_provider: LanguageServer::Protocol::Interface::SignatureHelpOptions.new(
+              trigger_characters: ['(', ','],
+            ),
+            workspace_symbol_provider: LanguageServer::Protocol::Interface::WorkspaceSymbolOptions.new(
+              work_done_progress: true,
+            ),
+            workspace: {
+              workspaceFolders: LanguageServer::Protocol::Interface::WorkspaceFoldersServerCapabilities.new(
+                supported: true,
+                change_notifications: true,
+              ),
+              fileOperations: {
+                didCreate: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
+                  filters: [
+                    LanguageServer::Protocol::Interface::FileOperationFilter.new(
+                      pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
+                        glob: "**/*",
+                      ),
+                    ),
+                  ],
+                ),
+                didRename: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
+                  filters: [
+                    LanguageServer::Protocol::Interface::FileOperationFilter.new(
+                      pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
+                        glob: "**/*",
+                      ),
+                    ),
+                  ],
+                ),
+                didDelete: LanguageServer::Protocol::Interface::FileOperationRegistrationOptions.new(
+                  filters: [
+                    LanguageServer::Protocol::Interface::FileOperationFilter.new(
+                      pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
+                        glob: "**/*",
+                      ),
+                    ),
+                  ],
+                ),
+              },
+            },
+          ),
+        )
       rescue => e
         Logger.warn e.full_message
         LanguageServer::Protocol::Interface::ResponseError.new(
@@ -206,18 +218,29 @@ module Yoda
         EOS
       end
 
-      def notify_initialization_progress(phase: nil, message: nil, index:, length:)
-        if length && length > 0
-          percentage = (index || 0) * 100 / length
-          if index <= 0
-            notifier.start_progress(id: phase, title: phase, message: message, percentage: percentage)
-          elsif index >= length
-            notifier.done_progress(id: phase)
+      class InitializationProgressReporter
+        # @return [Providers::ReportableProgress::ProgressReporter]
+        attr_reader :progress_reporter
+
+        # @param progress_reporter [Providers::ReportableProgress::ProgressReporter]
+        def initialize(progress_reporter)
+          @progress_reporter = progress_reporter
+        end
+
+        def notify_initialization_progress(phase: nil, message: nil, index:, length:)
+          if length && length > 0
+            percentage = (index || 0) * 100 / length
+
+            progress_reporter.report(message: message, percentage: percentage)
           else
-            notifier.report_progress(id: phase, message: message, percentage: percentage)
+            progress_reporter.report(message: message)
           end
-        else
-          notifier.event(type: :initialization, phase: phase, message: message)
+
+          progress_reporter.notifier.event(type: :initialization, phase: phase, message: message)
+        end
+
+        def notify_build_library_registry(message: nil, name: nil, version: nil)
+          progress_reporter.report(message: message)
         end
       end
     end

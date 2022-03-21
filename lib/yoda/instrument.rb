@@ -130,5 +130,12 @@ module Yoda
     def registry_dump(index: nil, length: nil)
       emit(:registry_dump, index: index, length: length)
     end
+
+    # @param name [String]
+    # @param version [String]
+    # @param message [String]
+    def build_library_registry(message:, name:, version:)
+      emit(:build_library_registry, name: name, version: version, message: message)
+    end
   end
 end
