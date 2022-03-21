@@ -1,5 +1,6 @@
 import { ExtensionContext, Disposable } from 'vscode'
-import { isLanguageServerInstalled, promptForInstallTool } from './install-tools'
+import { isCustomExecutionPathConfigured } from './config'
+import { tryInstallOrUpdate } from './install-tools'
 import { configureLanguageServer } from './language-server'
 
 let disposable: Disposable
@@ -11,8 +12,8 @@ export async function activate(context: ExtensionContext) {
     // This line of code will only be executed once when your extension is activated
     // console.log('Congratulations, your extension "yoda" is now active!');
 
-    if (!isLanguageServerInstalled()) {
-        await promptForInstallTool()
+    if (!isCustomExecutionPathConfigured()) {
+        await tryInstallOrUpdate()
     }
 
     const languageServer = configureLanguageServer()

@@ -1,17 +1,10 @@
 import * as child_process from 'child_process'
 
 import { window } from 'vscode'
+import { checkVersions } from './check-versions'
 import { calcExecutionConfiguration, getTraceConfiguration } from './config'
 import { outputChannel } from './status'
-import { promisify } from 'util'
-
-function execCommand(command: string, onMessage: (stdout: string | null, stderr: string | null) => void, callback: (error: Error) => void) {
-    const process = child_process.exec(command, callback)
-    process.stdout.on('data', (data) => onMessage(data.toString(), null))
-    process.stderr.on('data', (data) => onMessage(null, data.toString()))
-}
-
-const asyncExecCommand = promisify(execCommand)
+import { asyncExec, asyncExecPipeline } from './utils'
 
 export function isLanguageServerInstalled(): boolean {
     const { command } =  calcExecutionConfiguration()
@@ -23,11 +16,41 @@ export function isLanguageServerInstalled(): boolean {
     }
 }
 
-export async function promptForInstallTool() {
-    const choises = ['Install']
-    const selected = await window.showInformationMessage('yoda command is not available. Please install.', ...choises)
+export async function tryInstallOrUpdate() {
+    try {
+        if (!isLanguageServerInstalled()) {
+            outputChannel.appendLine(`Yoda is not installed. Ask to install.`)
+            await promptForInstallTool(false)
+            return
+        }
+
+        const { shouldUpdate, localVersion, remoteVersion } = await checkVersions()
+
+        console.log(`Local version: ${localVersion}`)
+        console.log(`Available version: ${remoteVersion}`)
+        console.log(`shouldUpdate: ${shouldUpdate}`)
+
+        if (shouldUpdate) {
+            await promptForInstallTool(localVersion !== null, remoteVersion)
+        }
+    } catch (e) {
+        outputChannel.appendLine(`An error occured on update: ${e}`)
+    }
+}
+
+export async function promptForInstallTool(update: boolean, newVersion?: string) {
+    const choises = [update ? 'Update' : 'Install']
+
+    const newVersionLabel = newVersion ? ` (${newVersion})` : ''
+
+    const message = update ? 
+    `A newer version of yoda${newVersionLabel} is updatable.` : 
+    'yoda command is not available. Please install.'
+
+    const selected = await window.showInformationMessage(message, ...choises)
     switch (selected) {
         case 'Install':
+        case 'Update':
             await installTool()
             break;
         default:
@@ -41,11 +64,29 @@ async function installTool() {
 
     outputChannel.appendLine('Installing yoda...')
 
+    await installGemFromRubygems()
+
+    outputChannel.appendLine('yoda is installed.')
+}
+
+async function installGemFromRubygems() {
+    outputChannel.appendLine('gem install yoda-language-server')
+    await asyncExecPipeline("yes | gem install yoda-language-server", (stdout, stderr) => {
+        if (stdout) {
+            outputChannel.append(stdout)
+        }
+        if (stderr) {
+            outputChannel.append(stderr)
+        }
+    })
+}
+
+async function installGemFromRepository() {
     try {
-        child_process.execSync("gem list --installed --exact specific_install")
+        await asyncExec("gem list --installed --exact specific_install")
     } catch (e) {
         outputChannel.appendLine('gem install specific_install')
-        await asyncExecCommand("gem install specific_install", (stdout, stderr) => {
+        await asyncExecPipeline("gem install specific_install", (stdout, stderr) => {
             if (stdout) {
                 outputChannel.append(stdout)
             }
@@ -57,7 +98,7 @@ async function installTool() {
     }
 
     outputChannel.appendLine('gem specific_install tomoasleep/yoda')
-    await asyncExecCommand("gem specific_install tomoasleep/yoda", (stdout, stderr) => {
+    await asyncExecPipeline("gem specific_install tomoasleep/yoda", (stdout, stderr) => {
         if (stdout) {
             outputChannel.append(stdout)
         }
@@ -65,5 +106,4 @@ async function installTool() {
             outputChannel.append(stderr)
         }
     })
-    outputChannel.appendLine('yoda is installed.')
 }
