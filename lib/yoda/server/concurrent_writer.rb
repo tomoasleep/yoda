@@ -2,7 +2,7 @@ module Yoda
   class Server
     # Wrapper class for writer to make thread safe
     class ConcurrentWriter
-      # @param [::LanguageServer::Protocol::Transport::Stdio::Writer]
+      # @param channel [::LanguageServer::Protocol::Transport::Stdio::Writer]
       def initialize(channel)
         @channel = channel
         @mutex = Mutex.new
