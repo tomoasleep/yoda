@@ -37,6 +37,10 @@ export function configureLanguageServer(): LanguageClient {
                 outputChannel.appendLine(value);
                 console.log(value);
             },
+            replace(value: string) {
+                outputChannel.replace(value);
+                console.log(value);
+            },
             clear() { outputChannel.clear() },
             show() { outputChannel.show() },
             hide() { outputChannel.hide() },

@@ -7,9 +7,8 @@ export function run(testsRoot: string, callback: (error: any, failures?: number)
   const mocha = new Mocha({
     ui: 'bdd',
     timeout: 600000,
+    color: true,
   });
-
-  mocha.useColors(true);
 
   glob('**/**.test.js', { cwd: testsRoot }, (error, files) => {
     if (error) {
