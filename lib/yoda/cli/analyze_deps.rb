@@ -55,19 +55,23 @@ module Yoda
 
                 Bundler.reset!
 
-                # Resolve dependencies of uninstalled gems and ensure remote sources are available.
-                Bundler.definition.resolve_remotely!
-                spec_set = Bundler.definition.resolve
+                if File.exists?("Gemfile")
+                  # Resolve dependencies of uninstalled gems and ensure remote sources are available.
+                  Bundler.definition.resolve_remotely!
+                  spec_set = Bundler.definition.resolve
 
-                if Gem::Version.new(Bundler::VERSION) >= Gem::Version.new('2.2.25')
-                  deps = Bundler.definition.requested_dependencies
-                  spec_set.materialize(deps).to_a
+                  if Gem::Version.new(Bundler::VERSION) >= Gem::Version.new('2.2.25')
+                    deps = Bundler.definition.requested_dependencies
+                    spec_set.materialize(deps).to_a
+                  else
+                    # For backward compatibility (Ref: https://github.com/rubygems/rubygems/pull/4788)
+                    deps = Bundler.definition.send(:requested_dependencies)
+                    missing = []
+                    materialized = spec_set.materialize(deps, missing)
+                    materialized.to_a + missing
+                  end
                 else
-                  # For backward compatibility (Ref: https://github.com/rubygems/rubygems/pull/4788)
-                  deps = Bundler.definition.send(:requested_dependencies)
-                  missing = []
-                  materialized = spec_set.materialize(deps, missing)
-                  materialized.to_a + missing
+                  []
                 end
               end
             end
