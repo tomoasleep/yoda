@@ -30,6 +30,12 @@
                     ],
                     "default": null,
                     "description": "Specifies the path of yoda."
+                },
+                "yoda.trace.server": {
+                    "type": "string",
+                    "enum": ["off", "messages", "compact", "verbose"],
+                    "default": "off",
+                    "description": "Message level of yoda server."
                 }
             }
         }

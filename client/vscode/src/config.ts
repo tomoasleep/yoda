@@ -15,6 +15,6 @@ export function isCustomExecutionPathConfigured(): boolean {
     return !!(yodaPathEnv || yodaPathConfiguration)
 }
 
-export function getTraceConfiguration (): string | null {
+export function getTraceConfiguration(): string | null {
   return workspace.getConfiguration("yoda").get("trace.server") as (string | null);
 }
