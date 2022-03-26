@@ -8,11 +8,14 @@ module Yoda
           # @return [String]
           attr_reader :name, :version, :source_path, :full_gem_path, :doc_dir
 
+          # @return [Array<String>]
+          attr_reader :require_paths
+
           # @return [Symbol, nil]
           attr_reader :source_type
 
           class << self
-            # @param spec [Bundler::LazySpecification]
+            # @param spec [Bundler::LazySpecification, Gem::Specification]
             def from_gem_spec(spec)
               if spec.respond_to?(:full_gem_path)
                 # Installed
@@ -20,6 +23,7 @@ module Yoda
                   name: spec.name,
                   version: spec.version.version,
                   source_path: spec.source.respond_to?(:path) ? spec.source.path : nil,
+                  require_paths: spec.full_require_paths,
                   full_gem_path: spec.full_gem_path,
                   doc_dir: spec.doc_dir,
                   source_type: source_type_of(spec.source),
@@ -30,6 +34,7 @@ module Yoda
                   name: spec.name,
                   version: spec.version.version,
                   source_path: nil,
+                  require_paths: [],
                   full_gem_path: nil,
                   doc_dir: nil,
                   source_type: nil,
@@ -57,11 +62,12 @@ module Yoda
             end
           end
 
-          def initialize(name:, version:, source_path:, full_gem_path:, doc_dir:, source_type:)
+          def initialize(name:, version:, source_path:, full_gem_path:, require_paths:, doc_dir:, source_type:)
             @name = name
             @version = version
             @source_path = source_path
             @full_gem_path = full_gem_path
+            @require_paths = require_paths
             @doc_dir = doc_dir
             @source_type = source_type&.to_sym
           end
@@ -80,6 +86,7 @@ module Yoda
               version: version,
               source_path: source_path,
               full_gem_path: full_gem_path,
+              require_paths: require_paths,
               doc_dir: doc_dir,
               source_type: source_type,
             }
@@ -94,6 +101,30 @@ module Yoda
             source_type == :rubygems
           end
 
+          # @param relative_path [String]
+          # @return [Boolean]
+          def contain_requirable_file?(relative_path)
+            !!find_requirable_file(relative_path)
+          end
+
+          # @param relative_path [String]
+          # @return [String, nil]
+          def find_requirable_file(relative_path)
+            require_paths.each do |base_path|
+              path = File.join(base_path, relative_path)
+
+              if File.extname(path).empty?
+                paths_with_suffix = Gem.suffixes.map { |suffix| path + suffix }
+                matched_path = paths_with_suffix.find { |path| File.file?(path) }
+                return matched_path if matched_path
+              else
+                return path if File.file?(path)
+              end
+            end
+
+            return nil
+          end
+
           # @return [Connected]
           def with_project_connection(**kwargs)
             self.class.const_get(:Connected).new(self, **kwargs)
@@ -103,7 +134,7 @@ module Yoda
             extend ConnectedDelegation
             include WithRegistry
 
-            delegate_to_object :name, :version, :source_path, :full_gem_path, :doc_dir, :source_type
+            delegate_to_object :name, :version, :source_path, :full_gem_path, :doc_dir, :source_type, :require_paths
             delegate_to_object :id, :local?, :to_h, :installed?, :managed_by_rubygems?, :with_project_connection
             delegate_to_object :hash, :eql?, :==, :to_json, :derive
 
