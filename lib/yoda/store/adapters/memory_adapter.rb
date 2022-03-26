@@ -28,7 +28,7 @@ module Yoda
 
         # @param address [String]
         # @return [any]
-        def get(address)
+        def get(address, **)
           JSON.load(db[address.to_s], symbolize_names: true)
         end
 

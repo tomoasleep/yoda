@@ -19,9 +19,9 @@ module Yoda
           @cache = cache
         end
 
-        def get(key)
+        def get(key, **kwargs)
           @cache.fetch_or_calc(key) do
-            @registry.get(key)
+            @registry.get(key, **kwargs)
           end
         end
 

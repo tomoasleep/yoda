@@ -25,10 +25,11 @@ module Yoda
           @composer = composer
         end
 
-        # @param [String, Symbol]
+        # @param address [String, Symbol]
+        # @param registry_ids [Array<String, Symbol>, nil] if given, search object only from the specified registries.
         # @return [Objects::Addressable]
-        def get(address)
-          composer.get(address, registry_ids: index.get(address))
+        def get(address, registry_ids: nil)
+          composer.get(address, registry_ids: index.get(address, registry_ids: registry_ids))
         end
 
         def add_registry(registry)
@@ -74,17 +75,20 @@ module Yoda
         @registry_ids = Set.new(registry_ids)
       end
 
+      # Return ids of registries which store an object with the address.
       # @param address [String, Symbol]
-      # @return [Set<Symbol>]
-      def get(address)
-        content[address.to_sym] ||= Objects::SerializableSet.new
+      # @param registry_ids [Array<String, Symbol>, IdMask, nil]
+      # @return [IdMask]
+      def get(address, registry_ids: nil)
+        raw_content = (content[address.to_sym] ||= Objects::SerializableSet.new)
+        registry_ids ? (IdMask.build(registry_ids) & raw_content) : raw_content
       end
 
       # @param address [String, Symbol]
       # @param registry_id [String, Symbol]
       def add(address, registry_id)
         content[address.to_sym] ||= Objects::SerializableSet.new
-        content[address.to_sym].add(registry_id)
+        content[address.to_sym].add(registry_id.to_sym)
         content[address.to_sym].select! { |id| registry_ids.member?(id) }
       end
 
@@ -92,7 +96,7 @@ module Yoda
       # @param registry_id [String, Symbol]
       def remove(address, registry_id)
         content[address.to_sym] ||= Objects::SerializableSet.new
-        content[address.to_sym].delete(registry_id)
+        content[address.to_sym].delete(registry_id.to_sym)
       end
 
       def keys
@@ -100,12 +104,12 @@ module Yoda
       end
 
       def add_registry(registry)
-        registry_ids.add(registry.id)
+        registry_ids.add(registry.id.to_sym)
         registry.keys.each { |key| add(key, registry.id) }
       end
 
       def remove_registry(registry)
-        registry_ids.delete(registry.id)
+        registry_ids.delete(registry.id.to_sym)
       end
 
       def wrap(composer)

@@ -17,7 +17,7 @@ module Yoda
 
         # @param address [String, Symbol]
         # @return [Addressable, nil]
-        def find(address)
+        def find(address, **)
           @registry[address.to_sym]
         end
         alias get find

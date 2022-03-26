@@ -20,7 +20,7 @@ module Yoda
 
           # @param address [String, Symbol]
           # @return [Object, nil]
-          def get(address)
+          def get(address, **)
             JSON.load(database[build_key(address)], symbolize_names: true)
           end
 

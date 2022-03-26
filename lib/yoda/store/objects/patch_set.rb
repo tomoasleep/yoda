@@ -13,7 +13,7 @@ module Yoda
 
           # @param address [Symbol]
           # @return [Set<Symbol>]
-          def get(address)
+          def get(address, **)
             index[address] ||= Set.new
           end
 
@@ -73,7 +73,7 @@ module Yoda
 
         # @param address [String, Symbol]
         # @return [Addressable, nil]
-        def find(address)
+        def find(address, **)
           if (patches = get_patches(address)).empty?
             nil
           else

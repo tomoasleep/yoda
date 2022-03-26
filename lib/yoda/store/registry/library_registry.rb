@@ -49,7 +49,7 @@ module Yoda
         @adapter = adapter
       end
 
-      def get(path)
+      def get(path, **)
         adapter.get(path)
       end
 
