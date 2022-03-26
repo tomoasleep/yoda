@@ -8,6 +8,7 @@ module Yoda
   require "yoda/ast"
   require "yoda/cli"
   require "yoda/errors"
+  require "yoda/id_mask"
   require "yoda/services"
   require "yoda/model"
   require "yoda/store"
