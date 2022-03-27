@@ -2,7 +2,8 @@ module Yoda
   module Typing
     module Tree
       class Self < Base
-        def type
+        # @return [Types::Type]
+        def infer_type
           context.receiver
         end
       end

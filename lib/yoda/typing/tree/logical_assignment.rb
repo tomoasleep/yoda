@@ -2,13 +2,13 @@ module Yoda
   module Typing
     module Tree
       class LogicalAssignment < Base
-        def children
-          @children = node.children.map(&method(:build_child))
-        end
+        # @!method node
+        #   @return [AST::AssignmentNode]
 
-        def type
+        # @return [Types::Type]
+        def infer_type
           # TODO
-          infer(node.children.last)
+          infer_child(node.content)
         end
       end
     end

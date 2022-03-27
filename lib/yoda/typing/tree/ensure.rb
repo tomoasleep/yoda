@@ -1,14 +1,15 @@
 module Yoda
   module Typing
     module Tree
-      class MultipleAssignment < Base
+      class Ensure < Base
         # @!method node
-        #   @return [AST::AssignmentNode]
+        #   @return [AST::EnsureNode]
 
         # @return [Types::Type]
         def infer_type
-          # TODO
-          infer_child(node.content)
+          type = infer_child(node.body)
+          infer_child(node.ensure_body)
+          type
         end
       end
     end

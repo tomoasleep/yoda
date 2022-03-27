@@ -3,14 +3,16 @@ require 'yoda/typing/tree/literal_inferable'
 module Yoda
   module Typing
     module Tree
-      class Super < Base
+      class InterpolationText < Base
         include LiteralInferable
 
         # @!method node
-        #   @return [AST::SpecialCallNode]
+        #   @return [AST::InterpolationTextNode]
 
+        # @return [Types::Type]
         def infer_type
-          # TODO
+          node.children.each { |node| infer_child(node) }
+
           infer_literal(node)
         end
       end

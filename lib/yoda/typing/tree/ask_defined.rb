@@ -1,8 +1,9 @@
 module Yoda
   module Typing
     module Tree
-      class Escape < Base
-        def type
+      class AskDefined < Base
+        # @return [Types::Type]
+        def infer_type
           generator.boolean_type
         end
       end

@@ -1,14 +1,13 @@
 module Yoda
   module Typing
     module Tree
-      class MultipleAssignment < Base
+      class ConditionalLoop < Base
         # @!method node
-        #   @return [AST::AssignmentNode]
+        #   @return [AST::ConditionalLoopNode]
 
-        # @return [Types::Type]
         def infer_type
           # TODO
-          infer_child(node.content)
+          infer_child(node.body)
         end
       end
     end

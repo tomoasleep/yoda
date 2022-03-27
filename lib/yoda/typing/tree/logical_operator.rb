@@ -2,12 +2,13 @@ module Yoda
   module Typing
     module Tree
       class LogicalOperator < Base
-        def children
-          @children = node.children.map(&method(:build_child))
-        end
+        # @!method node
+        #   @return [AST::LeftOperatorNode, AST::CenterOperatorNode]
 
-        def type
-          Types::Union.new(node.children.map { |node| infer(node) })
+        # @return [Types::Type]
+        def infer_type
+          # TODO
+          generator.union_type(*node.children.map { |node| infer_child(node) })
         end
       end
     end

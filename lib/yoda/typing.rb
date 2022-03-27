@@ -7,6 +7,7 @@ module Yoda
     require 'yoda/typing/traces'
     require 'yoda/typing/lexical_scope'
     require 'yoda/typing/types'
+    require 'yoda/typing/tree'
     require 'yoda/typing/inferencer'
     require 'yoda/typing/node_info'
   end

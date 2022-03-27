@@ -1,10 +1,17 @@
+require 'yoda/typing/tree/literal_inferable'
+
 module Yoda
   module Typing
     module Tree
       class Yield < Base
-        def type
+        include LiteralInferable
+
+        # @!method node
+        #   @return [AST::SpecialCallNode]
+
+        def infer_type
           # TODO
-          generator.any_type
+          infer_literal(node)
         end
       end
     end

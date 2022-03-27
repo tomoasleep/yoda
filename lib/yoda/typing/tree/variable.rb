@@ -2,17 +2,12 @@ module Yoda
   module Typing
     module Tree
       class Variable < Base
-        def type
-          context.environment.resolve(node.children.first) || generator.any_type
-        end
+        # @!method node
+        #   @return [AST::VariableNode]
 
-        # @param var [Symbol]
-        # @param body_node [::AST::Node]
-        # @return [Store::Types::Base]
-        def process_bind(var, body_node)
-          body_type = infer(body_node)
-          context.environment.bind(var, body_type)
-          body_type
+        # @return [Types::Type]
+        def infer_type
+          context.type_binding.resolve(node.name) || generator.any_type
         end
       end
     end

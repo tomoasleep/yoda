@@ -2,12 +2,12 @@ module Yoda
   module Typing
     module Tree
       class Begin < Base
-        def children
-          @children ||= node.children.map(&method(:build_child))
-        end
+        # @!method node
+        #   @return [AST::BlockNode]
 
-        def type
-          children.map(&:type).last
+        # @return [Types::Type]
+        def infer_type
+          node.children.map { |node| infer_child(node) }.last
         end
       end
     end

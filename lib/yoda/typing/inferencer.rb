@@ -3,7 +3,6 @@ module Yoda
     class Inferencer
       require 'yoda/typing/inferencer/arguments_binder'
       require 'yoda/typing/inferencer/arguments'
-      require 'yoda/typing/inferencer/ast_traverser'
       require 'yoda/typing/inferencer/method_resolver'
       require 'yoda/typing/inferencer/object_resolver'
       require 'yoda/typing/inferencer/parameter_binder'
@@ -33,7 +32,8 @@ module Yoda
       # @param node [AST::Vnode]
       # @return [Store::Types::Base]
       def infer(node)
-        AstTraverser.new(tracer: tracer, context: context).traverse(node)
+        # AstTraverser.new(tracer: tracer, context: context).traverse(node)
+        Tree.build(node, context: context, tracer: tracer).type
       end
 
       # @param pp [PP]

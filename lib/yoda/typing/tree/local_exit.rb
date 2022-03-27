@@ -1,17 +1,13 @@
-require 'yoda/typing/tree/literal_inferable'
-
 module Yoda
   module Typing
     module Tree
-      class Super < Base
-        include LiteralInferable
-
+      class LocalExit < Base
         # @!method node
         #   @return [AST::SpecialCallNode]
 
         def infer_type
           # TODO
-          infer_literal(node)
+          node.arguments[0] ? infer_child(node.arguments[0]) : generator.nil_type
         end
       end
     end

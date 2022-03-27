@@ -1,29 +1,21 @@
+require 'yoda/typing/tree/namespace_inferable'
+
 module Yoda
   module Typing
     module Tree
       class ClassTree < Base
-        def type
-          infer_namespace_node(node)
-        end
+        include NamespaceInferable
 
-        # @param node [::AST::Node]
+        # @!method node
+        #   @return [AST::ClassNode]
+
         # @return [Types::Base]
-        def infer_namespace_node(node)
-          case node.type
-          when :module
-            name_node, block_node = node.children
-          when :class
-            name_node, _, block_node = node.children
-          end
-          constant_resolver = ConstantResolver.new(context: context, node: name_node)
-          type = constant_resolver.resolve_constant_type
-          block_context = NamespaceContext.new(objects: [constant_resolver.constant], parent: context, registry: context.registry, receiver: type)
-
-          if block_node
-            derive(context: block_context).infer(block_node)
+        def infer_type
+          if super_class_node = node.super_class
+            infer_child(super_class_node)
           end
 
-          type
+          infer_namespace
         end
       end
     end

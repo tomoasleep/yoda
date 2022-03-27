@@ -2,26 +2,18 @@ module Yoda
   module Typing
     module Tree
       class Case < Base
-        # @return [[Store::Types::Base, Environment]]
-        def infer_case_node
+        # @!method node
+        #   @return [AST::CaseNode]
+
+
+        # @return [Type::Type]
+        def infer_type
           # TODO
-          Types::Union.new([*when_body_nodes, else_node].map { |node| infer(node) })
-        end
-
-        def children
-          @children ||= [subject, *when_branches, else_branch]
-        end
-
-        def subject
-          @subject ||= build_child(node.children.first)
-        end
-
-        def when_branches
-          @when_branches ||= node.children.slice(1, -2).map(&method(:build_child))
-        end
-
-        def else_branch
-          @else_branch ||= build_child(node.children.last)
+          Types::Union.new([*when_body_nodes, else_node].map { |node| infer_child(node) })
+          # TODO
+          subject_node, *when_nodes, else_node = node.children
+          when_body_nodes = when_nodes.map { |node| node.children.last }
+          generator.union_type(*[*when_body_nodes, else_node].compact.map { |node| infer_child(node) })
         end
       end
     end

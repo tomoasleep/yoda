@@ -4,7 +4,7 @@ module Yoda
       class ConstantAssignment < Base
         def process
           # TODO
-          infer(node.children.last)
+          infer_child(node.content)
         end
       end
     end

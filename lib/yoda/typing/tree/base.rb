@@ -1,44 +1,88 @@
+require 'forwardable'
+require 'pp'
+
 module Yoda
   module Typing
     module Tree
       # @abstract
       class Base
-        # @return [::AST::Node]
+        extend Forwardable
+
+        # @return [AST::Vnode]
         attr_reader :node
 
-        # @return [BaseContext]
+        # @return [Inferencer::Tracer]
+        attr_reader :tracer
+
+        # @return [Contexts::BaseContext]
         attr_reader :context
 
-        # @param node [::AST::Node]
-        # @param context [BaseContext]
+        delegate [:bind_context, :bind_type, :bind_send, :bind_method_definition] => :tracer
+
+        # @return [Types::Generator]
+        delegate [:generator] => :context
+
+        # @param node [AST::Vnode]
+        # @param tracer [Inferencer::Tracer]
+        # @param context [Contexts::BaseContext]
         # @param parent [Base, nil]
-        def initialize(node:, context:, parent: nil)
+        def initialize(node:, tracer:, context:, parent: nil)
           @node = node
+          @tracer = tracer
           @context = context
           @parent = parent
         end
 
-        # @abstract
-        # @return [Array<Base>]
-        def children
-          fail NotImplementedError
-        end
-
-        # @abstract
-        # @return [Types::Base]
+        # @return [Types::Type]
         def type
-          fail NotImplementedError
+          @type ||= begin
+            bind_context(node: node, context: context)
+            Logger.trace("Traversing #{node}")
+            type = infer_type
+            Logger.trace("Traversed #{node} -> #{type.to_s}")
+            bind_type(node: node, type: type, context: context)
+
+            type
+          end
         end
 
-        # @return [Types::Generator]
-        def generator
-          @generator ||= Types::Generator.new(context.registry)
-        end
-
-        # @param node [::AST::Node]
+        # @param node [AST::Vnode]
         # @return [Base]
-        def build_child(node, context: nil)
-          Tree.build(node, context: context, parent: self)
+        def build_child(node, context: self.context)
+          Tree.build(node, context: context, tracer: tracer, parent: self)
+        end
+
+        # @param node [AST::Vnode]
+        # @param (see #build_child)
+        # @return [Types::Type]
+        def infer_child(node, **kwargs)
+          build_child(node, **kwargs).type
+        end
+
+        # @param pp [PP]
+        def pretty_print(pp)
+          pp.object_group(self) do
+            pp.breakable
+            pp.text "@node="
+            pp.pp node
+            pp.text "@context="
+            pp.pp context
+            pp.comma_breakable
+            pp.text "@tracer="
+            pp.pp tracer
+          end
+        end
+
+        def inspect
+          pretty_print_inspect
+        end
+
+        private
+
+        # @abstract
+        # @return [Types::Type]
+        def infer_type
+          fail NotImplementedError
         end
       end
     end
