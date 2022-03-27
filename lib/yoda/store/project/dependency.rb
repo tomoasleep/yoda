@@ -12,8 +12,13 @@ module Yoda
         end
 
         # @return [Array<Objects::Library::Gem>]
-        def gems
-          builder.gems
+        def loadable_gems
+          builder.loadable_gems
+        end
+
+        # @return [Array<Objects::Library::Gem>]
+        def autoload_gems
+          builder.autoload_gems
         end
 
         # @param name [String]
@@ -33,6 +38,7 @@ module Yoda
           @std ||= Objects::Library.std
         end
 
+        # @return [Builder]
         def builder
           @builder ||= Builder.new(project)
         end
@@ -47,11 +53,18 @@ module Yoda
           end
 
           # @return [Array<Objects::Library::Gem>]
-          def gems
-            @gems ||= begin
+          def loadable_gems
+            @loadable_gems ||= begin
               dependencies
                 .map { |attrs| Objects::Library::Gem.new(**attrs) }
                 .reject { |spec| project.config.ignored_gems.include?(spec.name) }
+            end
+          end
+
+          # @return [Array<Objects::Library::Gem>]
+          def autoload_gems
+            @autoload_gems ||= begin
+              loadable_gems.select { |gem| autoload_dependency_ids.include?(gem.id) }
             end
           end
 
@@ -60,6 +73,11 @@ module Yoda
           # @return [Array<Hash>]
           def dependencies
             analyzed_deps[:dependencies] || []
+          end
+
+          # @return [Array<String>]
+          def autoload_dependency_ids
+            analyzed_deps[:autoload_dependency_ids] || []
           end
 
           # @return [Hash]
