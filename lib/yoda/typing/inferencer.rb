@@ -3,6 +3,7 @@ module Yoda
     class Inferencer
       require 'yoda/typing/inferencer/arguments_binder'
       require 'yoda/typing/inferencer/arguments'
+      require 'yoda/typing/inferencer/load_resolver'
       require 'yoda/typing/inferencer/method_resolver'
       require 'yoda/typing/inferencer/object_resolver'
       require 'yoda/typing/inferencer/parameter_binder'

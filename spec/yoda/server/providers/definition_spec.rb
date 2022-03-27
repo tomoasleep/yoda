@@ -67,5 +67,35 @@ RSpec.describe Yoda::Server::Providers::Definition do
         )
       end
     end
+
+    context 'request information on local path' do
+      let(:uri) { file_uri('lib/requires.rb') }
+      let(:position) { { line: 0, character: 11 }}
+
+      it 'returns location of lib/sample2.rb' do
+        expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
+        expect(subject).to contain_exactly(
+          have_attributes(
+            uri: file_uri('lib/sample2.rb'),
+            range: have_attributes(start: { line: 0, character: 0 }, end: { line: 0, character: 0 })
+          ),
+        )
+      end
+    end
+
+    context 'request information on standard library path' do
+      let(:uri) { file_uri('lib/requires.rb') }
+      let(:position) { { line: 1, character: 11 }}
+
+      it 'returns location of set library' do
+        expect(subject).to contain_exactly(be_a(LanguageServer::Protocol::Interface::Location))
+        expect(subject).to contain_exactly(
+          have_attributes(
+            uri: be_end_with('lib/set.rb'),
+            range: have_attributes(start: { line: 0, character: 0 }, end: { line: 0, character: 0 })
+          ),
+        )
+      end
+    end
   end
 end

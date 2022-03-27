@@ -2,21 +2,23 @@ module Yoda
   module Store
     module Actions
       class ReadProjectFiles
+        # @return [Project]
+        attr_reader :project
+
         # @return [Registry]
         attr_reader :registry
-
-        # @return [String]
-        attr_reader :root_path
 
         # @param project [Project]
         # @return [ReadProjectFiles]
         def self.for_project(project)
-          new(project.registry, project.root_path)
+          new(project, project.registry)
         end
 
-        def initialize(registry, root_path)
+        # @param project [Project]
+        # @param registry [Project]
+        def initialize(project, registry)
+          @project = project
           @registry = registry
-          @root_path = root_path
         end
 
         def run
@@ -35,7 +37,7 @@ module Yoda
 
         # @return [Array<String>]
         def project_files
-          Dir.chdir(root_path) { Dir.glob(["{lib,app}/**/*.rb", "ext/**/*.c", ".yoda/*.rb"]).map { |name| File.expand_path(name, root_path) } }
+          project.project_source_paths
         end
       end
     end

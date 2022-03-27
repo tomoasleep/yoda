@@ -41,6 +41,11 @@ module Yoda
         tracer.constants(node)
       end
 
+      # @return [Array<String>]
+      def require_paths
+        tracer.require_paths(node)
+      end
+
       # @return [Types::Type]
       def type
         tracer.type(node)

@@ -6,6 +6,7 @@ module Yoda
         require 'yoda/store/objects/library/core'
         require 'yoda/store/objects/library/std'
         require 'yoda/store/objects/library/gem'
+        require 'yoda/store/objects/library/path_resolvable'
 
         class << self
           # @return [Core]

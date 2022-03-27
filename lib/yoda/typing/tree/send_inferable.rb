@@ -2,13 +2,15 @@ module Yoda
   module Typing
     module Tree
       module SendInferable
+        private
+
         # @param send_node [AST::SendNode]
         # @param block_param_node [AST::ParametersNode, nil]
         # @param block_node [AST::Vnode, nil]
         # @return [Types::Type]
         def infer_send(send_node, block_param_node = nil, block_node = nil)
           receiver_type = send_node.implicit_receiver? ? context.receiver : infer_child(send_node.receiver)
-          argument_types = infer_argument_nodes(send_node.arguments)
+          argument_map = infer_argument_nodes(send_node.arguments)
           value_resolve_context = generator.value_resolve_context(self_type: receiver_type)
 
           visibility = send_node.implicit_receiver? ? %i(private protected public) : %i(public)
@@ -27,6 +29,8 @@ module Yoda
           Logger.trace("receiver_type: #{receiver_type}")
 
           bind_send(node: node, method_candidates: method_candidates, receiver_type: receiver_type)
+          resolve_require(method_candidates, argument_map)
+
           if method_types.empty?
             generator.unknown_type(reason: "method not found")
           else
@@ -34,8 +38,23 @@ module Yoda
           end
         end
 
+        # @param method_candidates [Array<Model::FunctionSignatures::Wrapper>]
+        # @param argument_map [{Symbol => Tree}]
+        def resolve_require(method_candidates, argument_map)
+          return unless method_candidates.any? { |method_candidate| method_candidate.name.to_s == "require" && method_candidate.namespace_path.to_s == "Kernel" }
+
+          first_argument_tree = argument_map[:arguments]&.first
+          return unless first_argument_tree
+
+          first_argument_type = first_argument_tree.type
+          strings = gather_literals(first_argument_type.value).select { |literal| literal.is_a?(String) }
+
+          require_paths = strings.map { |path| Inferencer::LoadResolver.new(context.environment.registry.project).resolve(path) }.compact
+          bind_require_paths(node: first_argument_tree.node, require_paths: require_paths)
+        end
+
         # @param arguments [Array<AST::Vnode>]
-        # @return [{Symbol => Types::Base}]
+        # @return [{Symbol => Tree}]
         def infer_argument_nodes(arguments)
           arguments.each_with_object({}) do |node, obj|
             case node.type
@@ -43,11 +62,25 @@ module Yoda
               # TODO
               infer_child(node)
             when :block_pass
-              obj[:block_argument] = infer_child(node.children.first)
+              obj[:block_argument] = build_child(node.children.first).tap(&:type)
             else
               obj[:arguments] ||= []
-              obj[:arguments].push(infer_child(node))
+              obj[:arguments].push(build_child(node).tap(&:type))
             end
+          end
+        end
+
+        # @param value [Model::Values::Base]
+        # @return [Array<Object>]
+        def gather_literals(value)
+          if value.respond_to?(:literal)
+            [value.literal]
+          elsif value.respond_to?(:values)
+            value.values.flat_map { |v| gather_literals(v) }
+          elsif value.respond_to?(:value)
+            gather_literals(value.value)
+          else
+            []
           end
         end
       end

@@ -11,6 +11,9 @@ module Yoda
         # @return [Base]
         attr_reader :value
 
+        # @return [Object]
+        attr_reader :literal
+
         # @param value [Base]
         # @param literal [Object]
         def initialize(value:, literal:)

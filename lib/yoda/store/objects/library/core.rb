@@ -1,3 +1,5 @@
+require 'yoda/store/objects/library/path_resolvable'
+
 module Yoda
   module Store
     module Objects
@@ -42,6 +44,7 @@ module Yoda
           class Connected
             extend ConnectedDelegation
             include WithRegistry
+            include PathResolvable
 
             delegate_to_object :version
             delegate_to_object :id, :name, :doc_path, :to_h, :with_project_connection
@@ -63,6 +66,11 @@ module Yoda
             # @note Implementation for {WithRegistry#registry_path}
             def registry_path
               VersionStore.for_current_version.registry_path_for_core
+            end
+
+            # @return [Array<String>]
+            def require_paths
+              []
             end
           end
         end

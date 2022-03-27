@@ -49,6 +49,16 @@ module Yoda
           expand_path('.yoda.yml')
         end
 
+        # @return [Array<String>]
+        def project_source_paths
+          glob(["{lib,app}/**/*.rb", "ext/**/*.c", ".yoda/*.rb"])
+        end
+
+        # @return [Array<String>]
+        def project_load_paths
+          ["lib", "app", "ext"].map { |path| expand_path(path) }.compact
+        end
+
         # @return [String, nil]
         def readable_config_file_path
           path = config_file_path
@@ -94,6 +104,16 @@ module Yoda
         # @param dir_path [String]
         def make_dir_at(dir_path)
           dir_path && (File.exist?(dir_path) || FileUtils.mkdir_p(dir_path))
+        end
+
+        # @param pattern [String, Array<String>]
+        # @return [Array<String>]
+        def glob(pattern, base_path = project.root_path)
+          if project.root_path
+            Dir.glob(pattern, base: base_path).map { |path| File.expand_path(path, base_path) }
+          else
+            []
+          end
         end
       end
     end

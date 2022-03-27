@@ -1,9 +1,12 @@
+require 'yoda/store/objects/library/path_resolvable'
+
 module Yoda
   module Store
     module Objects
       module Library
         class Gem
           include Serializable
+          include PathResolvable
 
           # @return [String]
           attr_reader :name, :version, :source_path, :full_gem_path, :doc_dir
@@ -101,30 +104,6 @@ module Yoda
             source_type == :rubygems
           end
 
-          # @param relative_path [String]
-          # @return [Boolean]
-          def contain_requirable_file?(relative_path)
-            !!find_requirable_file(relative_path)
-          end
-
-          # @param relative_path [String]
-          # @return [String, nil]
-          def find_requirable_file(relative_path)
-            require_paths.each do |base_path|
-              path = File.join(base_path, relative_path)
-
-              if File.extname(path).empty?
-                paths_with_suffix = Gem.suffixes.map { |suffix| path + suffix }
-                matched_path = paths_with_suffix.find { |path| File.file?(path) }
-                return matched_path if matched_path
-              else
-                return path if File.file?(path)
-              end
-            end
-
-            return nil
-          end
-
           # @return [Connected]
           def with_project_connection(**kwargs)
             self.class.const_get(:Connected).new(self, **kwargs)
@@ -137,6 +116,7 @@ module Yoda
             delegate_to_object :name, :version, :source_path, :full_gem_path, :doc_dir, :source_type, :require_paths
             delegate_to_object :id, :local?, :to_h, :installed?, :managed_by_rubygems?, :with_project_connection
             delegate_to_object :hash, :eql?, :==, :to_json, :derive
+            delegate_to_object :contain_requirable_file?, :find_requirable_file
 
             # @return [Gem]
             attr_reader :object

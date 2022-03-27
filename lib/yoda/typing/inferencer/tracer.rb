@@ -29,6 +29,9 @@ module Yoda
         # @return [Hash{ AST::Node => Array<Store::Objects::Base> }]
         attr_reader :node_to_constants
 
+        # @return [Hash{ AST::Node => Array<String> }]
+        attr_reader :node_to_require_paths
+
         class MaskedMap
           def initialize
             @content = {}
@@ -68,6 +71,7 @@ module Yoda
           @node_to_method_candidates = MaskedMap.new
           @node_to_receiver_type = MaskedMap.new
           @node_to_constants = MaskedMap.new
+          @node_to_require_paths = MaskedMap.new
         end
 
         # @param node [AST::Node]
@@ -123,6 +127,12 @@ module Yoda
         end
 
         # @param node [AST::Node]
+        # @param require_paths [Array<String>]
+        def bind_require_paths(node:, require_paths:)
+          node_to_require_paths[node.identifier] = require_paths
+        end
+
+        # @param node [AST::Node]
         # @return [Symbol, nil]
         def kind(node)
           node_to_kind[node.identifier]
@@ -168,6 +178,12 @@ module Yoda
         # @return [Array<Store::Objects::Base>]
         def constants(node)
           node_to_constants[node.identifier] || []
+        end
+
+        # @param node [AST::Node]
+        # @return [Array<String>]
+        def require_paths(node)
+          node_to_require_paths[node.identifier] || []
         end
 
         # @param node [AST::Node]

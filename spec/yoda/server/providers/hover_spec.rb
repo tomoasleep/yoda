@@ -124,5 +124,27 @@ RSpec.describe Yoda::Server::Providers::Hover do
         expect(subject.range).to have_attributes(start: { line: 6, character: 21 }, end: { line: 6, character: 27 })
       end
     end
+
+    context 'on local require path' do
+      let(:uri) { file_uri('lib/requires.rb') }
+      let(:position) { { line: 0, character: 11 }}
+
+      it 'returns the path of lib/sample2.rb' do
+        expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
+        expect(subject.contents).to match [have_content(File.expand_path('lib/sample2.rb', fixture_root))]
+        expect(subject.range).to have_attributes(start: { line: 0, character: 8 }, end: { line: 0, character: 17 })
+      end
+    end
+
+    context 'on library require path' do
+      let(:uri) { file_uri('lib/requires.rb') }
+      let(:position) { { line: 1, character: 11 }}
+
+      it 'returns the path of set library' do
+        expect(subject).to be_a(LanguageServer::Protocol::Interface::Hover)
+        expect(subject.contents).to match [have_content(be_end_with('lib/set.rb'))]
+        expect(subject.range).to have_attributes(start: { line: 1, character: 8 }, end: { line: 1, character: 13 })
+      end
+    end
   end
 end

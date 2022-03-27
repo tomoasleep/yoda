@@ -1,4 +1,7 @@
 ## Unreleased
+
+* Support go to definition on path of require clause
+
 ## v0.9.0 - 2022-03-22
 
 * Support progress report of server initialization

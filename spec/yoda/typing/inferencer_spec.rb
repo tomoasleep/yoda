@@ -27,9 +27,20 @@ RSpec.describe Yoda::Typing::Inferencer do
 
   let(:objects) do
     [
+      Yoda::Store::Objects::ClassObject.new(
+        path: 'Object',
+        mixin_addresses: ["Kernel"]
+      ),
       # Inferencer requires metaclass to search constants
       Yoda::Store::Objects::MetaClassObject.new(
         path: 'Object',
+      ),
+      Yoda::Store::Objects::MethodObject.new(
+        path: 'Kernel#require',
+        parameters: [['path', nil]],
+        tag_list: [
+          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'path', yard_types: ['String']),
+        ],
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'Integer',
@@ -759,6 +770,29 @@ RSpec.describe Yoda::Typing::Inferencer do
           subject
           node = node_traverser.query(type: :lvar).node
           expect(inferencer.tracer.type(node)).to have_attributes(to_s: "2")
+        end
+      end
+    end
+
+    describe 'block calls' do
+      context 'in block context of instance method' do
+        let(:source) do
+          <<~RUBY
+          require 'set'
+          RUBY
+        end
+
+        it 'can infer variable defined from outer context' do
+          subject
+          node = node_traverser.query(type: :send).node
+          expect(inferencer.tracer.method_candidates(node)).to including(
+            have_attributes(
+              name: 'require',
+              namespace_path: 'Kernel',
+            )
+          )
+          path_node = node_traverser.query(type: :str).node
+          expect(inferencer.tracer.require_paths(path_node)).to contain_exactly(be_end_with("set.rb"))
         end
       end
     end

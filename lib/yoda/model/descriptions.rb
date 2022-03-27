@@ -7,6 +7,7 @@ module Yoda
       require 'yoda/model/descriptions/value_description'
       require 'yoda/model/descriptions/word_description'
       require 'yoda/model/descriptions/node_description'
+      require 'yoda/model/descriptions/require_path_description'
       require 'yoda/model/descriptions/variable_description'
     end
   end

@@ -17,6 +17,15 @@ module Yoda
         @column = column
       end
 
+      def self.first_row
+        1
+      end
+
+      def self.first_column
+        0
+      end
+
+
       # @param ast_location [Parser::Source::Map, Parser::Source::Range]
       # @return [Location, nil]
       def self.of_ast_location(ast_location)

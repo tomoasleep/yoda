@@ -33,6 +33,8 @@ module Yoda
           :library_registry_dir_path,
           :gemfile_lock_path,
           :config_file_path,
+          :project_source_paths,
+          :project_load_paths,
           :readable_config_file_path,
           :library_local_yardoc_path,
           :library_registry_path,
