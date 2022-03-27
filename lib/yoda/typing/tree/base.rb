@@ -17,7 +17,7 @@ module Yoda
         # @return [Contexts::BaseContext]
         attr_reader :context
 
-        delegate [:bind_context, :bind_type, :bind_send, :bind_method_definition] => :tracer
+        delegate [:bind_tree, :bind_context, :bind_type, :bind_send, :bind_method_definition, :bind_require_paths] => :tracer
 
         # @return [Types::Generator]
         delegate [:generator] => :context
@@ -36,6 +36,7 @@ module Yoda
         # @return [Types::Type]
         def type
           @type ||= begin
+            bind_tree(node: node, tree: self)
             bind_context(node: node, context: context)
             Logger.trace("Traversing #{node}")
             type = infer_type

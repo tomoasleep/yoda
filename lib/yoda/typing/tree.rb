@@ -61,7 +61,7 @@ module Yoda
           when :if
             If
           when :while, :until, :while_post, :until_post
-            While
+            ConditionalLoop
           when :for
             For
           when :case

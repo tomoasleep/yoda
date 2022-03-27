@@ -11,6 +11,9 @@ module Yoda
         # @return [Hash{ AST::Node => Symbol }]
         attr_reader :node_to_kind
 
+        # @return [Hash{ AST::Node => Tree::Base }]
+        attr_reader :node_to_tree
+
         # @return [Hash{ AST::Node => Types::Base }]
         attr_reader :node_to_type
 
@@ -59,11 +62,18 @@ module Yoda
           @generator = generator
 
           @node_to_kind = MaskedMap.new
+          @node_to_tree = MaskedMap.new
           @node_to_type = MaskedMap.new
           @node_to_context = MaskedMap.new
           @node_to_method_candidates = MaskedMap.new
           @node_to_receiver_type = MaskedMap.new
           @node_to_constants = MaskedMap.new
+        end
+
+        # @param node [AST::Node]
+        # @param tree [Tree::Base]
+        def bind_tree(node:, tree:)
+          node_to_tree[node.identifier] = tree
         end
 
         # @param node [AST::Node]
@@ -116,6 +126,12 @@ module Yoda
         # @return [Symbol, nil]
         def kind(node)
           node_to_kind[node.identifier]
+        end
+
+        # @param node [AST::Node]
+        # @return [Tree::Base, nil]
+        def tree(node)
+          node_to_tree[node.identifier]
         end
 
         # @param node [AST::Node]
