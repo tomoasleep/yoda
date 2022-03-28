@@ -246,6 +246,58 @@ RSpec.describe Yoda::Typing::Inferencer do
           )
         end
       end
+
+      context 'with constant code with base prefix' do
+        let(:source) do
+          <<~RUBY
+            ::Integer
+          RUBY
+        end
+
+        it 'returns the type of the class' do
+          expect(subject).to have_attributes(
+            klass: have_attributes(
+              path: 'Integer',
+              kind: :meta_class,
+            )
+          )
+        end
+      end
+
+      context 'with constant code with base prefix' do
+        let(:source) do
+          <<~RUBY
+            ::Integer
+          RUBY
+        end
+
+        it 'returns the type of the class' do
+          expect(subject).to have_attributes(
+            klass: have_attributes(
+              path: 'Integer',
+              kind: :meta_class,
+            )
+          )
+        end
+      end
+
+      context 'with constant code with code prefix' do
+        let(:source) do
+          <<~RUBY
+            obj = Object
+            obj::Integer
+          RUBY
+        end
+
+        it 'returns the type of the class' do
+          expect(subject).to have_attributes(
+            klass: have_attributes(
+              path: 'Integer',
+              kind: :meta_class,
+            )
+          )
+        end
+      end
     end
 
     context 'send sqrt to Integer constant' do

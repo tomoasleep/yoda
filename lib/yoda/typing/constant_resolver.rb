@@ -4,6 +4,7 @@ module Yoda
   module Typing
     class ConstantResolver
       require 'yoda/typing/constant_resolver/cbase_query'
+      require 'yoda/typing/constant_resolver/code_query'
       require 'yoda/typing/constant_resolver/member_query'
       require 'yoda/typing/constant_resolver/node_tracer'
       require 'yoda/typing/constant_resolver/query'
@@ -27,14 +28,6 @@ module Yoda
       # @return [ConstantScope::Query]
       def build_query_for_node(node, tracer:)
         Query.from_node(node, tracer: tracer)
-      end
-
-      # @param node [AST::ConstantNode]
-      # @param tracer [Inferncer::Tracer]
-      # @return [Types::Base]
-      def resolve_node(node, tracer:)
-        query = Query.from_node(node, tracer: tracer)
-        resolve(query)
       end
 
       # @param path [String]
@@ -88,6 +81,18 @@ module Yoda
           end
         when MemberQuery
           base_type = resolve(query.parent)
+
+          # Remember constant candidates
+          paths = base_type.value.select_constant_paths(query.name.to_s)
+          constants = paths.map { |path| context.environment.resolve_constant(path) }.compact
+
+          query.tracer&.bind_constants(constants: constants)
+
+          generator.wrap_rbs_type(base_type.value.select_constant_type(query.name.to_s))
+        when CodeQuery
+          base_type = query.parent.result_type
+
+          fail "Result type is not set" unless base_type
 
           # Remember constant candidates
           paths = base_type.value.select_constant_paths(query.name.to_s)

@@ -12,8 +12,10 @@ module Yoda
               CbaseQuery.new
             when :empty
               RelativeBaseQuery.new
-            else
+            when :const
               MemberQuery.new(parent: from_node(node.base, tracer: tracer), name: node.name.name.to_s, tracer: tracer && NodeTracer.new(node: node, tracer: tracer))
+            else
+              CodeQuery.new(node: node)
             end
           end
 
@@ -52,6 +54,15 @@ module Yoda
         # @return [NodeTracer, nil]
         def tracer
           nil
+        end
+
+        # @return [Query]
+        def base
+          if parent
+            parent.base
+          else
+            self
+          end
         end
       end
     end
