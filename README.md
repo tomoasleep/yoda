@@ -69,28 +69,24 @@ TBW
 Yoda figures structures of your source codes and library codes with YARD.  
 Yoda intepret YARD tags such as `@return` tags and `@param` tags and infer code types from these information.
 
+### Supporting Features
+
+Yoda provides these features by analyzing Ruby code and its dependencies in Gemfile.lock with YARD.
+
+* Code completion (method, constant, variables, etc...)
+* Comment completion (YARD tag, types)
+* Hover code information (method, constant, etc...)
+* Go to definition (method, constant, require file, etc...)
+
+![](https://github.com/tomoasleep/yoda/blob/master/images/method-complete.png)
+
+![](https://github.com/tomoasleep/yoda/blob/master/images/hover-method.png)
+
 ### Indexing
 
 Yoda built index files for fast inference under `<your-project-dir>/.yoda` at startup.  
 These index files contains structures of external sources (gems and standard libraries).  
 Your project codes are parsed at startup but does not stored in indexes.
-
-### Supporting Features
-
-- autocompletion
-  - [x] method completion
-  - [x] constant completion
-  - [x] (local, class, instance) variable completion
-  - comment completion
-    - [x] YARD tag completion
-    - [x] YARD type literal completion
-    - [x] parameter completion
-- [x] jump to definition
-- [x] hover
-- [x] signature help
-- [x] find references
-- [x] workspace symbols
-- [ ] diagnostics
 
 ## Development
 
