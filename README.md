@@ -5,7 +5,7 @@ Yoda infers signatures of your Ruby program and its dependencies from various da
 
 **Note: Yoda is alpha version. Please use with caution. Contributions are welcome!**
 
-### Supporting Features
+## Supporting Features
 
 Yoda provides these features by analyzing Ruby code and its dependencies in Gemfile.lock with YARD.
 
