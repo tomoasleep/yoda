@@ -10,8 +10,11 @@ interface CheckResult {
 }
 
 export async function checkVersions(): Promise<CheckResult> {
-    const { stdout } = await asyncExec("gem list --both --exact yoda-language-server")
-    const [localVersion, remoteVersion] = parseGemList(stdout)
+    const { stdout: localStdout } = await asyncExec("gem list --local --exact yoda-language-server")
+    const localVersion = extractVersion(localStdout)
+
+    const { stdout: remoteStdout } = await asyncExec("gem list --remote --no-prerelease --exact yoda-language-server")
+    const remoteVersion = extractVersion(remoteStdout)
 
     return {
         shouldUpdate: shouldUpdate(localVersion, remoteVersion),
@@ -30,15 +33,6 @@ function shouldUpdate(localVersion: string, remoteVersion: string): boolean {
     }
 
     return cmp(localVersion, "<", remoteVersion)
-}
-
-function parseGemList(stdout: string): [string, string] {
-    const [local, remote] = stdout.split("*** REMOTE GEMS ***")
-
-    const localVersion = extractVersion(local)
-    const remoteVersion = extractVersion(remote)
-
-    return [localVersion, remoteVersion]
 }
 
 function extractVersion(text: string): string {

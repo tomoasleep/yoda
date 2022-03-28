@@ -44,7 +44,7 @@ export async function promptForInstallTool(update: boolean, newVersion?: string)
     const newVersionLabel = newVersion ? ` (${newVersion})` : ''
 
     const message = update ? 
-    `A newer version of yoda${newVersionLabel} is updatable.` : 
+    `A newer version of yoda${newVersionLabel} is available.` : 
     'yoda command is not available. Please install.'
 
     const selected = await window.showInformationMessage(message, ...choises)
