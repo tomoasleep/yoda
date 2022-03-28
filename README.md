@@ -5,16 +5,27 @@ Yoda infers signatures of your Ruby program and its dependencies from various da
 
 **Note: Yoda is alpha version. Please use with caution. Contributions are welcome!**
 
-## Instation and Usage
+### Supporting Features
 
-## Getting Started
+Yoda provides these features by analyzing Ruby code and its dependencies in Gemfile.lock with YARD.
 
-```bash
-rake install # Install language server
-rake vscode:install # Install vscode plugin
-```
+* Code completion (method, constant, variables, etc...)
+* Comment completion (YARD tag, types)
+* Hover code information (method, constant, etc...)
+* Go to definition (method, constant, require file, etc...)
 
-### Install language server
+![](https://github.com/tomoasleep/yoda/blob/master/images/method-complete.png)
+
+![](https://github.com/tomoasleep/yoda/blob/master/images/hover-method.png)
+
+## Install VSCode Extension (Recommended)
+
+Yoda can be available as VSCode extension at: https://marketplace.visualstudio.com/items?itemName=tomoasleep.yoda
+On launch of VSCode, Yoda will be installed automatically.
+
+## Other installation methods
+
+### Install language server gem
 
 Yoda is hosted on RubyGems.
 
@@ -33,7 +44,7 @@ $ yoda infer path-to-your-code:line_num:char_num # Show information of the code 
 $ yoda complete <path-to-your-code>:<line-num>:<char-num> # Show completion at the specified position.
 ```
 
-### Installation of Editor Plugin
+### Install Editor Plugin
 
 #### Atom
 
@@ -41,7 +52,7 @@ $ yoda complete <path-to-your-code>:<line-num>:<char-num> # Show completion at t
 apm install tomoasleep/yoda
 ```
 
-### VSCode
+#### VSCode (from source code)
 
 ```
 rake vscode:install
@@ -69,18 +80,6 @@ TBW
 Yoda figures structures of your source codes and library codes with YARD.  
 Yoda intepret YARD tags such as `@return` tags and `@param` tags and infer code types from these information.
 
-### Supporting Features
-
-Yoda provides these features by analyzing Ruby code and its dependencies in Gemfile.lock with YARD.
-
-* Code completion (method, constant, variables, etc...)
-* Comment completion (YARD tag, types)
-* Hover code information (method, constant, etc...)
-* Go to definition (method, constant, require file, etc...)
-
-![](https://github.com/tomoasleep/yoda/blob/master/images/method-complete.png)
-
-![](https://github.com/tomoasleep/yoda/blob/master/images/hover-method.png)
 
 ### Indexing
 
