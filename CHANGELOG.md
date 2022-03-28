@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Support go to definition on path of require clause
+* Fix inference failure on code with constant node and super node
 
 ## v0.9.0 - 2022-03-22
 
