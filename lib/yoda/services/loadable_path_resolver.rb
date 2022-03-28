@@ -9,7 +9,7 @@ module Yoda
       # @return [String, nil]
       def find_loadable_path(base_paths, pattern)
         # TODO: Support absolute path
-        return nil if File.absolute_path?(pattern)
+        return nil if absolute_path?(pattern)
         return nil if pattern.start_with?("~/")
         return nil if pattern.start_with?("./")
         return nil if pattern.start_with?("../")
@@ -27,6 +27,13 @@ module Yoda
         end
 
         return nil
+      end
+
+      # This is a workaround for Ruby 2.6 (This version does not have `File.absolute_path?`)
+      # @param path [String]
+      # @return [Boolean]
+      def absolute_path?(path)
+        path[0] == "/"
       end
     end
   end
