@@ -1,4 +1,7 @@
 ## Unreleased
+
+* Fix undefine method error on Ruby 2.6
+
 ## v0.10.0 - 2022-03-28
 
 * Support go to definition on path of require clause
