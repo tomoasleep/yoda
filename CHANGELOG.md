@@ -1,4 +1,5 @@
 ## Unreleased
+## v0.10.1 - 2022-03-29
 
 * Fix undefine method error on Ruby 2.6
 
