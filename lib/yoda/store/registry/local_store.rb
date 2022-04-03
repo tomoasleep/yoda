@@ -10,9 +10,14 @@ module Yoda
           @on_change = on_change
         end
 
+        # @return [Symbol]
+        def id
+          :local
+        end
+
         # @return [Registry::Index::ComposerWrapper]
         def registry
-          @registry ||= Registry::Index.new.wrap(Registry::Composer.new(id: :local))
+          @registry ||= Registry::Index.new.wrap(Registry::Composer.new(id: id))
         end
 
         # @param patch [Objects::Patch]

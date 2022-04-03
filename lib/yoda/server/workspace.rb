@@ -31,9 +31,10 @@ module Yoda
         @root_uri = root_uri
       end
 
+      # @param scheduler [Server::Scheduler, nil]
       # @return [Array<Exception>] errors on setup
-      def setup
-        project.setup
+      def setup(scheduler: nil)
+        project.setup(scheduler: scheduler)
       end
 
       # @return [Store::Project, nil]

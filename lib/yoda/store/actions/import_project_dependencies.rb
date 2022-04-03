@@ -38,8 +38,11 @@ module Yoda
           libraries = Objects::LibrariesStatus.libraies_from_dependency(project.dependency)
           Logger.trace 'Requested libraries: ' + libraries.map(&:name).join(', ')
           library_to_add = libraries - libraries_status.libraries
-          library_to_remove = libraries_status.libraries - libraries
-          [library_to_add, library_to_remove]
+
+          library_to_add_names = library_to_add.map(&:name)
+          library_to_reset = (libraries_status.libraries - libraries).select { |library| library_to_add_names.include?(library.name) }
+
+          [library_to_add, library_to_reset]
         end
       end
     end

@@ -28,9 +28,9 @@ module Yoda
         project.registry
       end
 
-      # @return [Array<Exception>] errors on setup
-      def setup
-        workspaces.flat_map(&:setup)
+      # @param scheduler [Server::Scheduler, nil]
+      def setup(scheduler: nil)
+        workspaces.map { |workspace| workspace.setup(scheduler: scheduler) }
       end
 
       # @param new_workspace [Workspace]

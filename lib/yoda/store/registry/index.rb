@@ -81,7 +81,7 @@ module Yoda
       # @return [IdMask]
       def get(address, registry_ids: nil)
         raw_content = (content[address.to_sym] ||= Objects::SerializableSet.new)
-        registry_ids ? (IdMask.build(registry_ids) & raw_content) : raw_content
+        IdMask.build(registry_ids) & raw_content
       end
 
       # @param address [String, Symbol]

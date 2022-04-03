@@ -11,8 +11,9 @@ module Yoda
         @name = name
       end
 
-      def setup
-        project.setup
+      # @param scheduler [Server::Scheduler, nil]
+      def setup(scheduler: nil)
+        project.setup(scheduler: scheduler)
       end
 
       # @return [Store::Project, nil]

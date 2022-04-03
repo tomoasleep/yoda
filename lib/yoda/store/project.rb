@@ -84,9 +84,9 @@ module Yoda
         @environment ||= Model::Environment.from_project(self)
       end
 
-      # @return [Array<BaseError>]
-      def setup(rebuild: false)
-        setuper.run(rebuild: rebuild)
+      # @param scheduler [Server::Scheduler, nil]
+      def setup(rebuild: false, scheduler: nil)
+        setuper.run(rebuild: rebuild, scheduler: scheduler)
       end
 
       # @return [Config]

@@ -11,7 +11,7 @@ module Yoda
       service(:method_finder) { Query::FindMethod.new(self) }
       service(:signature_finder) { Query::FindSignature.new(self) }
 
-      delegate %i(get has_key? keys) => :root_store
+      delegate %i(get has_key? keys) => :view
 
       attr_reader :project
 
@@ -26,14 +26,6 @@ module Yoda
       def initialize(project)
         fail TypeError, project unless project.is_a?(Project)
         @project = project
-      end
-
-      def root_store
-        @root_store ||= begin
-          Registry::Cache::RegistryWrapper.new(
-            Registry::Composer.new(id: :root, registries: [local_store.registry, libraries.registry]),
-          )
-        end
       end
 
       # @return [LibraryRegistrySet]
@@ -62,10 +54,33 @@ module Yoda
         end
       end
 
+      # @return [Registry::View]
+      def view
+        @view ||= Registry::View.new(composer: root_store, mask: registry_mask)
+      end
+
+      # @return [void]
+      def reset_view
+        @view = nil
+      end
+
       private
 
+      # @return [IdMask]
+      def registry_mask
+        IdMask.build({
+          libraries.id => libraries.build_mask([project.dependency.core, project.dependency.std, *project.dependency.autoload_gems.select(&:installed?)]),
+          local_store.id => nil,
+        })
+      end
+
+      # @return [Registry::Composer]
+      def root_store
+        @root_store ||= Registry::Composer.new(id: :root, registries: [local_store.registry, libraries.registry])
+      end
+
       def clear_cache
-        root_store.clear_cache
+        view.clear_cache
       end
     end
   end

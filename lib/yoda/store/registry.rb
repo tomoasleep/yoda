@@ -10,6 +10,7 @@ module Yoda
       require 'yoda/store/registry/library_registry'
       require 'yoda/store/registry/local_store'
       require 'yoda/store/registry/project_registry'
+      require 'yoda/store/registry/view'
 
       # @note This number must be updated when breaking change is added.
       REGISTRY_VERSION = 7

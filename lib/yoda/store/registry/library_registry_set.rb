@@ -25,9 +25,21 @@ module Yoda
           @on_change = on_change
         end
 
+        # @return [Symbol]
+        def id
+          :libraries
+        end
+
+        # @param libraries [Array<Objects::Library::Core, Objects::Library::Std, Objects::Library::Gem>]
+        # @return [IdMask]
+        def build_mask(libraries)
+          library_ids = libraries.map(&:id)
+          IdMask.build(registry.all_registries.map { |child| [child.id, library_ids] }.to_h)
+        end
+
         # @return [Registry::Composer]
         def registry
-          Registry::Composer.new(id: :libraries, registries: [persistable_library_store, volatile_library_store])
+          Registry::Composer.new(id: id, registries: [persistable_library_store, volatile_library_store])
         end
 
         # @param add [Array<Objects::Library::Core, Objects::Library::Gem, Objects::Library::Std>]

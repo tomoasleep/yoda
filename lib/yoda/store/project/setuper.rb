@@ -18,8 +18,8 @@ module Yoda
         end
 
         # @param rebuild [Boolean]
-        # @return [Array<BaseError>]
-        def run(rebuild: false)
+        # @param scheduler [Server::Scheduler, nil]
+        def run(rebuild: false, scheduler: nil)
           build_core_index
 
           if rebuild
@@ -28,11 +28,16 @@ module Yoda
           project.file_finder.make_dir
 
           Logger.info 'Building index for the current project...'
-          dependency_importer.run
-          project.rbs_environment
-          load_project_files
 
-          dependency_importer.errors
+          project.dependency.calculate
+          project.registry.reset_view
+
+          project.rbs_environment
+
+          execute(scheduler) do
+            dependency_importer.run
+            load_project_files
+          end
         end
 
         def clear
@@ -44,6 +49,15 @@ module Yoda
         end
 
         private
+
+        # @param scheduler [Server::Scheduler, nil]
+        def execute(scheduler = nil, &block)
+          if scheduler
+            scheduler.async(id: "setup", &block)
+          else
+            yield
+          end
+        end
 
         def build_core_index
           unless Store::Actions::BuildCoreIndex.exists?

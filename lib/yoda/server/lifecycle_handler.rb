@@ -13,6 +13,9 @@ module Yoda
       # @return [Notifier]
       attr_reader :notifier
 
+      # @return [RootHandler]
+      attr_reader :root_handler
+
       def initialize(root_handler)
         @root_handler = root_handler
         @notifier = root_handler.notifier
@@ -64,7 +67,7 @@ module Yoda
               end
             end
 
-            send_warnings(@session.setup || [])
+            send_warnings(@session.setup(scheduler: root_handler.scheduler) || [])
           end
         end
 

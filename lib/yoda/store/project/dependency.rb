@@ -11,6 +11,13 @@ module Yoda
           @project = project
         end
 
+        # @return [self]
+        def calculate
+          # Calculate all dependencies
+          builder.autoload_gems
+          self
+        end
+
         # @return [Array<Objects::Library::Gem>]
         def loadable_gems
           builder.loadable_gems
