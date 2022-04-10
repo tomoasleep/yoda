@@ -5,8 +5,8 @@ RSpec.describe Yoda::Server::Providers::Hover do
 
   let(:session) { Yoda::Server::Session.from_root_uri(fixture_root_uri) }
   let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
-  let(:notifier) { Yoda::Server::Notifier.new(writer) }
-  let(:provider) { described_class.new(session: session, notifier: notifier) }
+  let(:server_controller) { Yoda::Server::ServerController.new(writer: writer) }
+  let(:provider) { described_class.new(session: session, server_controller: server_controller) }
 
   describe '#provide' do
     before do

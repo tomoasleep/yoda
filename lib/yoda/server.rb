@@ -7,10 +7,12 @@ module Yoda
     require 'yoda/server/concurrent_writer'
     require 'yoda/server/notifier'
     require 'yoda/server/providers'
+    require 'yoda/server/response_callbacks'
     require 'yoda/server/root_handler'
     require 'yoda/server/lifecycle_handler'
     require 'yoda/server/deserializer'
     require 'yoda/server/scheduler'
+    require 'yoda/server/server_controller'
     require 'yoda/server/workspace'
     require 'yoda/server/uri_decoder'
     require 'yoda/server/rootless_workspace'
@@ -27,6 +29,9 @@ module Yoda
     # Use this value as return value for notification handling
     NO_RESPONSE = :no_response
 
+    class NotInitializedError < StandardError; end
+    NotImplementedMethod = Struct.new(:method_name)
+
     def initialize(
       reader: LanguageServer::Protocol::Transport::Stdio::Reader.new,
       writer: LanguageServer::Protocol::Transport::Stdio::Writer.new,
@@ -41,7 +46,7 @@ module Yoda
       Logger.trace "Server initializing..."
       reader.read do |request|
         begin
-          root_handler.handle(id: request[:id], method: request[:method].to_sym, params: deserialize(request[:params]))
+          root_handler.handle(deserialize(request))
         rescue StandardError => ex
           Logger.warn ex
           Logger.warn ex.full_message

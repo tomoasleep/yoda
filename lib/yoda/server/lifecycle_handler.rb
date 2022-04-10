@@ -1,24 +1,30 @@
 require 'concurrent'
+require 'forwardable'
 require 'yoda/server/providers'
 
 module Yoda
   class Server
     # Handle
     class LifecycleHandler
+      extend Forwardable
       include Providers::ReportableProgress
 
       # @return [Session, nil]
       attr_reader :session
 
-      # @return [Notifier]
-      attr_reader :notifier
-
       # @return [RootHandler]
       attr_reader :root_handler
 
+      # @!method notifier
+      #   @return [Notifier]
+      delegate notifier: :root_handler
+
+      # @!method server_controller
+      #   @return [ServerController]
+      delegate server_controller: :root_handler
+
       def initialize(root_handler)
         @root_handler = root_handler
-        @notifier = root_handler.notifier
       end
 
       # @param method [Symbol]
@@ -55,6 +61,8 @@ module Yoda
             build_library_registry: reporter.public_method(:notify_build_library_registry),
           }
 
+          server_controller.receive_client_capability(params[:capabilities])
+
           Instrument.instance.hear(**subscriptions) do
             @session = begin
               if params[:workspace_folders]
@@ -67,7 +75,9 @@ module Yoda
               end
             end
 
-            send_warnings(@session.setup(scheduler: root_handler.scheduler) || [])
+            @session.setup(controller: server_controller)
+
+            send_warnings([])
           end
         end
 
@@ -143,6 +153,8 @@ module Yoda
       end
 
       def handle_initialized(_params)
+        server_controller.unlock!
+
         NO_RESPONSE
       end
 

@@ -5,11 +5,11 @@ RSpec.describe Yoda::Server::Providers::WorkspaceSymbol do
 
   let(:session) { Yoda::Server::Session.from_root_uri(fixture_root_uri) }
   let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
-  let(:notifier) { Yoda::Server::Notifier.new(writer) }
-  let(:provider) { described_class.new(session: session, notifier: notifier) }
+  let(:server_controller) { Yoda::Server::ServerController.new(writer: writer) }
+  let(:provider) { described_class.new(session: session, server_controller: server_controller) }
 
   before do
-    allow(notifier).to receive(:partial_result).and_wrap_original do |original_method, value:, **kwargs|
+    allow(server_controller.notifier).to receive(:partial_result).and_wrap_original do |original_method, value:, **kwargs|
       partial_results.push(value)
       original_method.call(value: value, **kwargs)
     end

@@ -16,16 +16,16 @@ module Yoda
           end
         end
 
-        # @return [Notifier]
-        attr_reader :notifier
-
         # @return [Session]
         attr_reader :session
 
-        # @param notifier [Notifier]
+        # @return [ServerController]
+        attr_reader :server_controller
+
+        # @param server_controller [ServerController]
         # @param session [Notifier]
-        def initialize(notifier:, session:)
-          @notifier = notifier
+        def initialize(server_controller:, session:)
+          @server_controller = server_controller
           @session = session
         end
 
@@ -33,6 +33,11 @@ module Yoda
         # @param params [Hash]
         def provide(params)
           fail NotImplementedError
+        end
+
+        # @return [Notifier]
+        def notifier
+          server_controller.notifier
         end
 
         # @return [Integer, nil] Seconds to timeout the task. if nil, the task does not timeout.

@@ -35,11 +35,11 @@ module Yoda
 
       class << self
         # @param method [Symbol]
-        # @param notifier [Notifier]
+        # @param server_controller [ServerController]
         # @param session [Session]
         # @return [Class<Providers::Base>, nil]
-        def build_provider(method:, notifier:, session:)
-          find_provider_class(method)&.new(notifier: notifier, session: session)
+        def build_provider(method:, server_controller:, session:)
+          find_provider_class(method)&.new(server_controller: server_controller, session: session)
         end
 
         # @param method [Symbol]

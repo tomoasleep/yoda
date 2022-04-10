@@ -28,9 +28,9 @@ module Yoda
         project.registry
       end
 
-      # @param scheduler [Server::Scheduler, nil]
-      def setup(scheduler: nil)
-        workspaces.map { |workspace| workspace.setup(scheduler: scheduler) }
+      # @param controller [Server::ServerController, nil]
+      def setup(controller: nil)
+        workspaces.map { |workspace| workspace.setup(controller: controller) }
       end
 
       # @param new_workspace [Workspace]
