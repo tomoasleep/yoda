@@ -15,9 +15,30 @@ module Yoda
         Logger.warn(e.full_message)
         failed = true
         event(type: type, phage: :failed, id: id)
-        raise e 
+        raise e
       ensure
         event(type: type, phase: :end, id: id)
+      end
+
+      # @param id [Object]
+      # @param result [Object]
+      # @return [void]
+      def write_response(id:, result:)
+        Logger.trace("Response (#{id}): #{result.to_json}")
+        if result.is_a?(LanguageServer::Protocol::Interface::ResponseError)
+          write(id: id, error: result)
+        else
+          write(id: id, result: result)
+        end
+
+        nil
+      end
+
+      # @param id [Object]
+      # @param method [Object]
+      # @param params [Object]
+      def write_request(method:, params:, id: nil)
+        write(id: id, method: method, params: params)
       end
 
       # @param params [Hash]
@@ -83,6 +104,27 @@ module Yoda
         )
       end
 
+      # @param token [String]
+      def create_work_done_progress(id:, token:)
+        write(
+          id: id,
+          method: 'window/workDoneProgress/create',
+          params: LanguageServer::Protocol::Interface::WorkDoneProgressCreateParams.new(
+            token: token,
+          ),
+        )
+      end
+
+      # @param token [String]
+      def cancel_work_done_progress(token:)
+        write(
+          method: 'window/workDoneProgress/cancel',
+          params: LanguageServer::Protocol::Interface::WorkDoneProgressCancelParams.new(
+            token: token,
+          ),
+        )
+      end
+
       # @param token [Integer, String]
       # @param value [Object] The partial result to send. In most cases, the type of this becomes the result type of the request.
       # @see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#partialResults
@@ -118,6 +160,44 @@ module Yoda
             message: message,
           )
         )
+      end
+
+      # @param reason [Exception, Symbol, Struct]
+      # @return [LanguageServer::Protocol::Interface::ResponseError]
+      def build_error_response(reason)
+        case reason
+        when Concurrent::CancelledOperationError
+          LanguageServer::Protocol::Interface::ResponseError.new(
+            code: LanguageServer::Protocol::Constant::ErrorCodes::REQUEST_CANCELLED,
+            message: 'Request is canceled',
+          )
+        when Timeout::Error
+          LanguageServer::Protocol::Interface::ResponseError.new(
+            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
+            message: 'Requiest timeout',
+          )
+        when NotInitializedError
+          LanguageServer::Protocol::Interface::ResponseError.new(
+            code: LanguageServer::Protocol::Constant::ErrorCodes::SERVER_NOT_INITIALIZED,
+            message: "Server is not initialized",
+          )
+        when NotImplementedMethod
+          LanguageServer::Protocol::Interface::ResponseError.new(
+            code: LanguageServer::Protocol::Constant::ErrorCodes::METHOD_NOT_FOUND,
+            message: "Method (#{reason.method_name}) is not implemented",
+          )
+        else
+          LanguageServer::Protocol::Interface::ResponseError.new(
+            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
+            message: reason.respond_to?(:message) ? message : 'Internal error',
+          )
+        end
+      end
+
+      # @param registrations [Array<Registration>]
+      def register_capability(registrations)
+        id = SecureRandom.uuid
+        write_request(id: id, method: 'client/registerCapability', params: registrations)
       end
 
       private

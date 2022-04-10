@@ -18,8 +18,8 @@ module Yoda
         end
 
         # @param rebuild [Boolean]
-        # @param scheduler [Server::Scheduler, nil]
-        def run(rebuild: false, scheduler: nil)
+        # @param controller [Server::ServerController, nil]
+        def run(rebuild: false, controller: nil)
           build_core_index
 
           if rebuild
@@ -34,7 +34,7 @@ module Yoda
 
           project.rbs_environment
 
-          execute(scheduler) do
+          execute(controller) do
             dependency_importer.run
             load_project_files
           end
@@ -50,10 +50,16 @@ module Yoda
 
         private
 
-        # @param scheduler [Server::Scheduler, nil]
-        def execute(scheduler = nil, &block)
-          if scheduler
-            scheduler.async(id: "setup", &block)
+        # @param controller [Server::ServerController, nil]
+        def execute(controller = nil, &block)
+          if controller
+            controller.in_new_workdone_progress(title: "setup") do |reporter|
+              if reporter
+                Server::InitializationProgressReporter.wrap(reporter, &block)
+              else
+                yield
+              end
+            end
           else
             yield
           end

@@ -1,24 +1,30 @@
 require 'concurrent'
+require 'forwardable'
 require 'yoda/server/providers'
 
 module Yoda
   class Server
     # Handle
     class LifecycleHandler
+      extend Forwardable
       include Providers::ReportableProgress
 
       # @return [Session, nil]
       attr_reader :session
 
-      # @return [Notifier]
-      attr_reader :notifier
-
       # @return [RootHandler]
       attr_reader :root_handler
 
+      # @!method notifier
+      #   @return [Notifier]
+      delegate notifier: :root_handler
+
+      # @!method server_controller
+      #   @return [ServerController]
+      delegate server_controller: :root_handler
+
       def initialize(root_handler)
         @root_handler = root_handler
-        @notifier = root_handler.notifier
       end
 
       # @param method [Symbol]
@@ -48,26 +54,27 @@ module Yoda
       # @param params [LanguageServer::Protocol::Interface::InitializeParams]
       def handle_initialize(params)
         in_progress(params, title: "Initializing Yoda") do |progress_reporter|
-          reporter = InitializationProgressReporter.new(progress_reporter)
+          server_controller.receive_client_capability(params[:capabilities])
 
-          subscriptions = {
-            initialization_progress: reporter.public_method(:notify_initialization_progress),
-            build_library_registry: reporter.public_method(:notify_build_library_registry),
-          }
-
-          Instrument.instance.hear(**subscriptions) do
+          InitializationProgressReporter.wrap(progress_reporter) do
             @session = begin
               if params[:workspace_folders]
                 workspace_folders = params[:workspace_folders].map { |hash| LanguageServer::Protocol::Interface::WorkspaceFolder.new(name: hash[:name], uri: hash[:uri]) }
-                Session.from_workspace_folders(workspace_folders)
+                Session.from_workspace_folders(workspace_folders, server_controller: server_controller)
               elsif params[:root_uri]
-                Session.from_root_uri(params[:root_uri])
+                Session.from_root_uri(params[:root_uri], server_controller: server_controller)
               else
-                Session.new(workspaces: [])
+                Session.new(workspaces: [], server_controller: server_controller)
               end
             end
 
-            send_warnings(@session.setup(scheduler: root_handler.scheduler) || [])
+            @session.setup
+
+            server_controller.scheduler&.async_interval(id: :setup, interval: 60 * 4) do
+              @session.setup
+            end
+
+            send_warnings([])
           end
         end
 
@@ -106,7 +113,7 @@ module Yoda
                   filters: [
                     LanguageServer::Protocol::Interface::FileOperationFilter.new(
                       pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
-                        glob: "**/*",
+                        glob: "**/*.rb",
                       ),
                     ),
                   ],
@@ -115,7 +122,7 @@ module Yoda
                   filters: [
                     LanguageServer::Protocol::Interface::FileOperationFilter.new(
                       pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
-                        glob: "**/*",
+                        glob: "**/*.rb",
                       ),
                     ),
                   ],
@@ -124,7 +131,7 @@ module Yoda
                   filters: [
                     LanguageServer::Protocol::Interface::FileOperationFilter.new(
                       pattern: LanguageServer::Protocol::Interface::FileOperationPattern.new(
-                        glob: "**/*",
+                        glob: "**/*.rb",
                       ),
                     ),
                   ],
@@ -143,6 +150,31 @@ module Yoda
       end
 
       def handle_initialized(_params)
+        server_controller.unlock_request!
+
+        server_controller.write_request(
+          id: server_controller.make_id,
+          method: "client/registerCapability",
+          params: LanguageServer::Protocol::Interface::RegistrationParams.new(
+            registrations: [
+              {
+                id: server_controller.make_id,
+                method: "textDocument/didChangeWatchedFiles",
+                registerOptions: LanguageServer::Protocol::Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    LanguageServer::Protocol::Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/Gemfile",
+                    ),
+                    LanguageServer::Protocol::Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/Gemfile.lock",
+                    ),
+                  ],
+                ),
+              }
+            ],
+          ),
+        )
+
         NO_RESPONSE
       end
 
@@ -219,32 +251,6 @@ module Yoda
         Failed to import some core libraries (Ruby version: #{RUBY_VERSION}).
         Please execute `yoda setup` with Ruby version #{RUBY_VERSION}.
         EOS
-      end
-
-      class InitializationProgressReporter
-        # @return [Providers::ReportableProgress::ProgressReporter]
-        attr_reader :progress_reporter
-
-        # @param progress_reporter [Providers::ReportableProgress::ProgressReporter]
-        def initialize(progress_reporter)
-          @progress_reporter = progress_reporter
-        end
-
-        def notify_initialization_progress(phase: nil, message: nil, index:, length:)
-          if length && length > 0
-            percentage = (index || 0) * 100 / length
-
-            progress_reporter.report(message: message, percentage: percentage)
-          else
-            progress_reporter.report(message: message)
-          end
-
-          progress_reporter.notifier.event(type: :initialization, phase: phase, message: message)
-        end
-
-        def notify_build_library_registry(message: nil, name: nil, version: nil)
-          progress_reporter.report(message: message)
-        end
       end
     end
   end

@@ -12,6 +12,7 @@ module Yoda
       require 'yoda/server/providers/text_document_did_change'
       require 'yoda/server/providers/text_document_did_open'
       require 'yoda/server/providers/text_document_did_save'
+      require 'yoda/server/providers/workspace_did_change_watched_files'
       require 'yoda/server/providers/workspace_did_change_workspace_folders'
       require 'yoda/server/providers/workspace_did_create_files'
       require 'yoda/server/providers/workspace_did_delete_files'
@@ -26,6 +27,7 @@ module Yoda
         TextDocumentDidChange,
         TextDocumentDidOpen,
         TextDocumentDidSave,
+        WorkspaceDidChangeWatchedFiles,
         WorkspaceDidChangeWorkspaceFolders,
         WorkspaceDidCreateFiles,
         WorkspaceDidDeleteFiles,
@@ -35,11 +37,10 @@ module Yoda
 
       class << self
         # @param method [Symbol]
-        # @param notifier [Notifier]
         # @param session [Session]
         # @return [Class<Providers::Base>, nil]
-        def build_provider(method:, notifier:, session:)
-          find_provider_class(method)&.new(notifier: notifier, session: session)
+        def build_provider(method:, session:)
+          find_provider_class(method)&.new(session: session)
         end
 
         # @param method [Symbol]

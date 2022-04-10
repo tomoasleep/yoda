@@ -6,21 +6,26 @@ module Yoda
       # @return [Array<Workspace>]
       attr_reader :workspaces
 
-      def self.from_root_uri(root_uri)
+      # @return [ServerController]
+      attr_reader :server_controller
+
+      def self.from_root_uri(root_uri, server_controller:)
         workspaces = [Workspace.new(name: 'root', root_uri: root_uri)]
         Logger.trace("Setting up session for #{root_uri}")
-        new(workspaces: workspaces)
+        new(workspaces: workspaces, server_controller: server_controller)
       end
 
       # @param workspace_folders [Array<LanguageServer::Protocol::Interface::WorkspaceFolder>] an uri expression of project root path
-      def self.from_workspace_folders(workspace_folders)
+      def self.from_workspace_folders(workspace_folders, server_controller:)
         workspaces = workspace_folders.map { |folder| Workspace.from_workspace_folder(folder) }
-        new(workspaces: workspaces)
+        new(workspaces: workspaces, server_controller: server_controller)
       end
 
       # @param workspaces [Array<Workspace>]
-      def initialize(workspaces:)
+      # @param server_controller [ServerController]
+      def initialize(workspaces:, server_controller:)
         @workspaces = workspaces
+        @server_controller = server_controller
       end
 
       # @return [Store::Registry]
@@ -28,9 +33,8 @@ module Yoda
         project.registry
       end
 
-      # @param scheduler [Server::Scheduler, nil]
-      def setup(scheduler: nil)
-        workspaces.map { |workspace| workspace.setup(scheduler: scheduler) }
+      def setup
+        workspaces.map { |workspace| workspace.setup(controller: server_controller) }
       end
 
       # @param new_workspace [Workspace]

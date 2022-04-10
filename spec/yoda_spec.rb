@@ -180,6 +180,12 @@ RSpec.describe Yoda do
           message = client.read until message.nil? || message[:id] == "init"
 
           client << lsp_request(
+            id: "initialized",
+            method: :initialized,
+            params: {}
+          )
+
+          client << lsp_request(
             id: "test-new",
             method: :initialized,
             params: {}

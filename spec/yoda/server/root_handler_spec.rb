@@ -38,8 +38,8 @@ RSpec.describe Yoda::Server::RootHandler do
     end
   end
 
-  describe '#handle' do
-    subject { handler.handle(id: id, method: method, params: params) }
+  describe '#handle_request' do
+    subject { handler.handle_request(id: id, method: method, params: params) }
     let(:id) { SecureRandom.hex(10) }
 
     describe 'with initialize method' do

@@ -5,10 +5,12 @@ module Yoda
   class Server
     class RootHandler
       extend Forwardable
-      NOT_INITIALIZED = :not_initialized
-      NotImplementedMethod = Struct.new(:method_name)
 
       delegate session: :lifecycle_handler
+
+      # @!method notifier
+      #   @return [Notifier]
+      delegate notifier: :server_controller
 
       # @return [ConcurrentWriter]
       attr_reader :writer
@@ -16,27 +18,39 @@ module Yoda
       # @return [Scheduler]
       attr_reader :scheduler
 
+      # @return [ServerController]
+      attr_reader :server_controller
+
       # @param writer [ConcurrentWriter]
       # @param scheduler [Scheduler]
       def initialize(writer:, scheduler: nil)
         @scheduler = scheduler || Scheduler.new
         @writer = writer
-        @future_map = Concurrent::Map.new
+        @server_controller = ServerController.new(writer: writer, scheduler: scheduler)
+      end
+
+      # @param message [Hash]
+      def handle(message)
+        if message[:method]
+          handle_request(id: message[:id], method: message[:method].to_sym, params: message[:params] || {})
+        elsif message[:id] && (message[:result] || message[:error])
+          handle_response(id: message[:id], result: message[:result], error: message[:error])
+        end
       end
 
       # @param id [String]
       # @param method [Symbol]
       # @param params [Hash]
       # @return [Concurrent::Future, nil]
-      def handle(id:, method:, params:)
+      def handle_request(id:, method:, params:)
         Logger.trace("Request (#{id}): #{method}(#{params})")
         if lifecycle_handler.handle?(method)
           return write_response(id, lifecycle_handler.handle(method: method, params: params))
         end
 
-        return write_response(id, build_error_response(NOT_INITIALIZED)) unless session
+        return write_response(id, build_error_response(NotInitializedError.new)) unless session
 
-        if provider = Providers.build_provider(notifier: notifier, session: session, method: method)
+        if provider = Providers.build_provider(session: session, method: method)
           provide_async(provider: provider, id: id, method: method, params: params)
         else
           if id
@@ -47,9 +61,17 @@ module Yoda
         end
       end
 
-      # @return [Notifier]
-      def notifier
-        @notifier ||= Notifier.new(writer)
+      # @param id [String]
+      # @param method [Symbol]
+      # @param params [Hash]
+      def handle_response(id:, result:, error:)
+        callbacks = server_controller.response_callbacks.take_callbacks(id)
+        callbacks.each do |callback|
+          async_id = SecureRandom.uuid
+          scheduler.async(id: async_id) do
+            callback.call(result, error)
+          end
+        end
       end
 
       # Wait pending requests
@@ -66,10 +88,11 @@ module Yoda
         scheduler.cancel_all
       end
 
-      private
+      def send_request(id:, method:, params:, &callback)
+        request_message = LanguageServer::Protocol::Interface::RequestMessage.new(id: id, method: method, params: params)
+      end
 
-      # @return [Concurrent::Map{ String => Future }]
-      attr_reader :future_map
+      private
 
       # @return [LifecycleHandler]
       def lifecycle_handler
@@ -82,7 +105,11 @@ module Yoda
           notifier.busy(type: method, id: id) { provider.provide(params) }
         end
         future.add_observer do |_time, value, reason|
-          reason ? write_response(id, build_error_response(reason)) : write_response(id, value)
+          if reason
+            write_response(id, build_error_response(reason))
+          else
+            write_response(id, value)
+          end
         end
 
         future
@@ -93,45 +120,13 @@ module Yoda
       # @return [nil]
       def write_response(id, result)
         return if result == NO_RESPONSE
-        Logger.trace("Response (#{id}): #{result.to_json}")
-        if result.is_a?(LanguageServer::Protocol::Interface::ResponseError)
-          writer.write(id: id, error: result)
-        else
-          writer.write(id: id, result: result)
-        end
+        server_controller.write_response(id: id, result: result)
 
         nil
       end
 
-      # @param reason [Exception, Symbol, Struct]
       def build_error_response(reason)
-        case reason
-        when Concurrent::CancelledOperationError
-          LanguageServer::Protocol::Interface::ResponseError.new(
-            code: LanguageServer::Protocol::Constant::ErrorCodes::REQUEST_CANCELLED,
-            message: 'Request is canceled',
-          )
-        when Timeout::Error
-          LanguageServer::Protocol::Interface::ResponseError.new(
-            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
-            message: 'Requiest timeout',
-          )
-        when NOT_INITIALIZED
-          LanguageServer::Protocol::Interface::ResponseError.new(
-            code: LanguageServer::Protocol::Constant::ErrorCodes::SERVER_NOT_INITIALIZED,
-            message: "Server is not initialized",
-          )
-        when NotImplementedMethod
-          LanguageServer::Protocol::Interface::ResponseError.new(
-            code: LanguageServer::Protocol::Constant::ErrorCodes::METHOD_NOT_FOUND,
-            message: "Method (#{reason.method_name}) is not implemented",
-          )
-        else
-          LanguageServer::Protocol::Interface::ResponseError.new(
-            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
-            message: reason.respond_to?(:message) ? message : 'Internal error',
-          )
-        end
+        server_controller.build_error_response(reason)
       end
     end
   end

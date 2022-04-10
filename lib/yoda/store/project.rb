@@ -84,9 +84,9 @@ module Yoda
         @environment ||= Model::Environment.from_project(self)
       end
 
-      # @param scheduler [Server::Scheduler, nil]
-      def setup(rebuild: false, scheduler: nil)
-        setuper.run(rebuild: rebuild, scheduler: scheduler)
+      # @param controller [Server::ServerController, nil]
+      def setup(rebuild: false, controller: nil)
+        setuper.run(rebuild: rebuild, controller: controller)
       end
 
       # @return [Config]
@@ -114,11 +114,25 @@ module Yoda
       def register_file_tree_events
         file_tree.on_change do |path:, content:|
           if content
-            Actions::ReadFile.run(registry, path, content: content)
+            handle_file_changed_event(path: path, content: content)
           else
-            unread_source(path)
+            handle_file_deleted_event(path: path)
           end
         end
+      end
+
+      def handle_file_changed_event(path:, content:)
+        if %w(.rb .c).include?(File.extname(path))
+            Actions::ReadFile.run(registry, path, content: content)
+        end
+
+        if %w(Gemfile Gemfile.lock).include?(File.basename(path))
+          setup
+        end
+      end
+
+      def handle_file_deleted_event(path:)
+        unread_source(path)
       end
 
       # @param source_path [String]

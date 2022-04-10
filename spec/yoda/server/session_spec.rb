@@ -3,7 +3,8 @@ require 'spec_helper'
 RSpec.describe Yoda::Server::Session do
   include FileUriHelper
 
-  let(:session) { described_class.from_root_uri(root_uri) }
+  let(:session) { described_class.from_root_uri(root_uri, server_controller: server_controller) }
+  let(:server_controller) { instance_double('Yoda::Server::ServerController').as_null_object }
   let(:root_uri) { fixture_root_uri }
 
   describe '#workspaces_for' do

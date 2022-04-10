@@ -2,6 +2,12 @@ module Yoda
   module Services
     class CodeCompletion
       class MethodProvider < BaseProvider
+        LOW_PRIORITY_NAMESPACES = %w(
+          Kernel
+          Object
+          BasicObject
+        )
+
         # @return [true, false]
         def providable?
           !!current_send
@@ -14,6 +20,7 @@ module Yoda
               description: Model::Descriptions::FunctionDescription.new(method_candidate),
               range: substitution_range,
               kind: :method,
+              priority: priority_for(method_candidate),
             )
           end
         end
@@ -57,6 +64,16 @@ module Yoda
         def index_word
           return nil unless providable?
           @index_word ||= current_send.on_selector?(location) ? current_send.selector_name.slice(0..current_send.offset_in_selector(location)) : ''
+        end
+
+        # @param function_signature [FunctionSignatures::Wrapper]
+        # @return [Model::SortPriority::Base]
+        def priority_for(function_signature)
+          if LOW_PRIORITY_NAMESPACES.include?(function_signature.namespace_path)
+            Model::SortPriority.low
+          else
+            Model::SortPriority.none
+          end
         end
       end
     end

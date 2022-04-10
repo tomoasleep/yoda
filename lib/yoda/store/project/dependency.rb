@@ -14,6 +14,7 @@ module Yoda
         # @return [self]
         def calculate
           # Calculate all dependencies
+          builder.reset
           builder.autoload_gems
           self
         end
@@ -73,6 +74,13 @@ module Yoda
             @autoload_gems ||= begin
               loadable_gems.select { |gem| autoload_dependency_ids.include?(gem.id) }
             end
+          end
+
+          # @return [void]
+          def reset
+            @analyzed_deps = nil
+            @loadable_gems = nil
+            @autoload_gems = nil
           end
 
           private

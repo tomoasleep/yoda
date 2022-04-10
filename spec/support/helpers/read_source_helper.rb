@@ -9,8 +9,8 @@ module ReadSourceHelper
     source_path
   end
 
-  def create_tempfile(source)
-    tempfile = Tempfile.new
+  def create_tempfile(source, prefix: "", suffix: ".rb")
+    tempfile = Tempfile.new([prefix, suffix])
     tempfile.print(source)
     tempfile.close
     tempfile.open

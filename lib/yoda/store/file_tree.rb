@@ -1,5 +1,7 @@
 module Yoda
   module Store
+    # FileTree is a viatural file system which can access real files and editing files on editors.
+    # This can receive file events from language server
     class FileTree
       # @return [String, nil]
       attr_reader :base_path

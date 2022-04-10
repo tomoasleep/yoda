@@ -6,7 +6,7 @@ module Yoda
       # @return [Concurrent::ThreadPoolExecutor]
       attr_reader :thread_pool
 
-      # @return [Concurrent::Map{String => Concurrent::Future}]
+      # @return [Concurrent::Map{String => Concurrent::Future, Concurrent::TimerTask}]
       attr_reader :future_map
 
       # @return [Concurrent::ThreadPoolExecutor]
@@ -31,8 +31,19 @@ module Yoda
       end
 
       # @param id [String]
+      # @param interval [Integer] execution interval in seconds
+      # @return [Concurrent::TimerTask]
+      def async_interval(id:, interval:, &block)
+        timer_task = Concurrent::TimerTask.execute(execution_interval: interval, timeout_interval: interval) do
+          Concurrent::Future.new(executor: thread_pool) { block.call }.execute
+        end
+        future_map.put_if_absent(id, timer_task)
+        timer_task
+      end
+
+      # @param id [String]
       def cancel(id)
-        future_map[id]&.cancel
+        do_cancel(future_map[id])
       end
 
       # @param timeout [Integer] the maximum number of seconds to wait for shutdown to complete.
@@ -42,7 +53,19 @@ module Yoda
       end
 
       def cancel_all
-        future_map.each_value { |future| future&.cancel }
+        future_map.each_value { |future| do_cancel(future) }
+      end
+
+      private
+
+      # @param task [Concurrent::Future, Concurrent::TimerTask, nil]
+      def do_cancel(task)
+        return unless task
+        if task.respond_to?(:shutdown)
+          task.shutdown
+        else
+          task.cancel
+        end
       end
     end
   end

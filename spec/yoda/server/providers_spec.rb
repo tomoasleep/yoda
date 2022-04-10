@@ -5,11 +5,11 @@ RSpec.describe Yoda::Server::Providers do
   let(:providers) { described_class }
 
   describe '.build_provider' do
-    subject { providers.build_provider(method: method, notifier: notifier, session: session) }
+    subject { providers.build_provider(method: method, session: session) }
 
-    let(:session) { Yoda::Server::Session.from_root_uri(fixture_root_uri) }
+    let(:session) { Yoda::Server::Session.from_root_uri(fixture_root_uri, server_controller: server_controller) }
     let(:writer) { instance_double('Yoda::Server::ConcurrentWriter').as_null_object }
-    let(:notifier) { Yoda::Server::Notifier.new(writer) }
+    let(:server_controller) { Yoda::Server::ServerController.new(writer: writer) }
 
     context 'for textDocument/completion method' do
       let(:method) { :'textDocument/completion' }
