@@ -13,6 +13,8 @@ module Yoda
           return unless capability
 
           @work_done_progress = capability.dig(:window, :work_done_progress)
+
+          Logger.instance.debug(self)
         end
 
         # @return [Boolean]

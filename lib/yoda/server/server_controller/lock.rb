@@ -3,17 +3,17 @@ module Yoda
     class ServerController
       class Lock
         def initialize(initial_lock)
-          @lock_request = initial_lock
+          @locked = initial_lock
           @pending_requests = Concurrent::Array.new
         end
 
         def lock!
-          @lock_request = true
+          @locked = true
         end
 
         # @return [void]
         def request(&block)
-          if request_locked?
+          if locked?
             @pending_requests << block
           else
             block.call
@@ -29,7 +29,7 @@ module Yoda
 
         # @return [Boolean]
         def locked?
-          !!@lock_request
+          !!@locked
         end
       end
     end

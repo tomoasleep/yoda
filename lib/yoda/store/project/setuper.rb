@@ -53,7 +53,13 @@ module Yoda
         # @param controller [Server::ServerController, nil]
         def execute(controller = nil, &block)
           if controller
-            controller.in_new_workdone_progress(title: "setup", &block)
+            controller.in_new_workdone_progress(title: "setup") do |reporter|
+              if reporter
+                InitializationProgressReporter.wrap(reporter, &block)
+              else
+                block.call
+              end
+            end
           else
             yield
           end

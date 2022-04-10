@@ -9,6 +9,7 @@ module Yoda
     require 'yoda/server/providers'
     require 'yoda/server/response_callbacks'
     require 'yoda/server/root_handler'
+    require 'yoda/server/initialization_progress_reporter'
     require 'yoda/server/lifecycle_handler'
     require 'yoda/server/deserializer'
     require 'yoda/server/scheduler'
