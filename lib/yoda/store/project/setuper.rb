@@ -55,7 +55,7 @@ module Yoda
           if controller
             controller.in_new_workdone_progress(title: "setup") do |reporter|
               if reporter
-                InitializationProgressReporter.wrap(reporter, &block)
+                Server::InitializationProgressReporter.wrap(reporter, &block)
               else
                 block.call
               end

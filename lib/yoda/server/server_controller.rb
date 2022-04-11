@@ -88,13 +88,14 @@ module Yoda
           id = SecureRandom.uuid
 
           response_callbacks.register_callback(id) do |response, error|
-            in_workdone_progress(work_done_token: work_done_token, title: title) do |reporter|
-              block.call(reporter)
-            end
+            Logger.debug("WorkDoneProgress: #{response} #{error}")
           end
 
           request_lock.request do
-            notifier.create_work_done_progress(token: work_done_token)
+            notifier.create_work_done_progress(id: id, token: work_done_token)
+            in_workdone_progress(work_done_token: work_done_token, title: title) do |reporter|
+              block.call(reporter)
+            end
           end
         else
           block.call

@@ -47,6 +47,7 @@ module Yoda
       Logger.trace "Server initializing..."
       reader.read do |request|
         begin
+          Logger.instance.trace(request)
           root_handler.handle(deserialize(request))
         rescue StandardError => ex
           Logger.warn ex

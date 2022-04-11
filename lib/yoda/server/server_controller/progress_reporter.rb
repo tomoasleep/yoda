@@ -24,6 +24,7 @@ module Yoda
               work_done_token: work_done_token,
               partial_result_token: nil,
               notifier: notifier,
+              title: title,
               &block
             )
           end

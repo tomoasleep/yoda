@@ -105,8 +105,9 @@ module Yoda
       end
 
       # @param token [String]
-      def create_work_done_progress(token:)
+      def create_work_done_progress(id:, token:)
         write(
+          id: id,
           method: 'window/workDoneProgress/create',
           params: LanguageServer::Protocol::Interface::WorkDoneProgressCreateParams.new(
             token: token,
