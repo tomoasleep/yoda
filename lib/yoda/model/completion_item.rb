@@ -15,13 +15,17 @@ module Yoda
       # @return [String]
       attr_reader :prefix
 
-      delegate %i(label title to_markdown sort_text) => :primary_description
+      # @return [SortPriority::Base, nil]
+      attr_reader :priority
+
+      delegate %i(label title to_markdown) => :primary_description
 
       # @param descriptions [Array<Descriptions::Base>]
       # @param range        [Parsing::Range]
       # @param kind         [Symbol, nil]
       # @param prefix       [String, nil]
-      def initialize(description: nil, descriptions: [], range:, kind: nil, prefix: nil)
+      # @param priority     [SortPriority::Base, nil]
+      def initialize(description: nil, descriptions: [], range:, kind: nil, prefix: nil, priority: nil)
         fail ArgumentError, description if description && !description.is_a?(Descriptions::Base)
         fail ArgumentError, descriptions unless descriptions.all? { |description| description.is_a?(Descriptions::Base) }
         fail ArgumentError, range unless range.is_a?(Parsing::Range)
@@ -30,6 +34,7 @@ module Yoda
         @range = range
         @kind = kind
         @prefix = prefix || ''
+        @priority = priority
       end
 
       def primary_description
@@ -39,6 +44,11 @@ module Yoda
       # @return [String]
       def edit_text
         prefix + primary_description.sort_text
+      end
+
+      # @return [String]
+      def sort_text
+        "#{priority&.prefix}#{primary_description.sort_text}"
       end
 
       # @return [Symbol]

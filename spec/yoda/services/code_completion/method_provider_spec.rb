@@ -40,6 +40,12 @@ RSpec.describe Yoda::Services::CodeCompletion::MethodProvider do
             have_attributes(edit_text: 'sample', title: 'Object#sample() -> untyped', range: range([2, 0], [2, 4])),
           )
         end
+
+        it 'marks the method low priority' do
+          expect(subject).to contain_exactly(
+            have_attributes(edit_text: 'sample', sort_text: '~sample'),
+          )
+        end
       end
 
       context 'with instance method definition in a class definition' do
