@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'unparser'
   spec.add_dependency 'language_server-protocol'
   spec.add_dependency 'rbs', "~> 2.0"
-  spec.add_dependency 'gdbm'
+  spec.add_dependency 'sqlite3'
   spec.add_dependency 'ruby-progressbar'
   spec.add_dependency 'concurrent-ruby', '~> 1.1.0'
   spec.add_dependency 'rubyzip', '>= 1.0.0'

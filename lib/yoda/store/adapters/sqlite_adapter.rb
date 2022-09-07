@@ -1,16 +1,12 @@
-begin
-  require 'gdbm'
-rescue LoadError
-end
-
-require 'fileutils'
+require 'sqlite3'
 require 'yoda/store/adapters/base'
 
 module Yoda
   module Store
     module Adapters
-      class GdbmAdapter < Base
-        require 'yoda/store/adapters/gdbm_adapter/namespace_accessor'
+      class SqliteAdapter < Base
+        require 'yoda/store/adapters/sqlite_adapter/database_accessor'
+        require 'yoda/store/adapters/sqlite_adapter/namespace_accessor'
 
         class << self
           def for(path)
@@ -19,34 +15,32 @@ module Yoda
           end
 
           def type
-            :gdbm
+            :sqlite
           end
         end
 
-        # @return [DBM]
-        attr_reader :database
-        private :database
+        # @return [DatabaseAccessor]
+        attr_reader :database_accessor
+        private :database_accessor
 
         extend Forwardable
         delegate [:get, :batch_write, :put, :delete, :exists, :keys, :clear, :empty?, :persistable?] => :root
 
         # @param path [String]
         def initialize(path)
-          dirname = File.dirname(path)
-          FileUtils.mkdir_p(dirname) unless Dir.exist?(dirname)
           @path = path
-          @database = GDBM.open(path, 0666, GDBM::NOLOCK)
+          @database_accessor = DatabaseAccessor.open(path)
         end
 
         def root
-          @root ||= NamespaceAccessor.new(database: database, namespace: nil)
+          @root ||= NamespaceAccessor.new(database_accessor: database_accessor, namespace: nil)
         end
 
         # @param namespace [String, Symbol]
         # @return [NamespaceAccessor]
         def namespace_for(name)
           @namespaces ||= {}
-          @namespaces[name.to_sym] ||= NamespaceAccessor.new(database: database, namespace: name)
+          @namespaces[name.to_sym] ||= NamespaceAccessor.new(database_accessor: database_accessor, namespace: name)
         end
         alias :namespace :namespace_for
 
