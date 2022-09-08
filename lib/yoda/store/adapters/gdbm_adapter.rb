@@ -1,4 +1,8 @@
-require 'gdbm'
+begin
+  require 'gdbm'
+rescue LoadError
+end
+
 require 'fileutils'
 require 'yoda/store/adapters/base'
 
