@@ -42,7 +42,7 @@ module Yoda
           # @param namespace [String, Symbol]
           # @return [Object, nil]
           def find_first(namespace, address)
-            rows = database.execute("SELECT value FROM objects WHERE namespace = ? AND address = ? LIMIT 1", [namespace, address])
+            rows = database.execute("SELECT value FROM objects WHERE namespace = ? AND address = ? LIMIT 1", [namespace.to_s, address.to_s])
             rows.first&.yield_self { |json, _| JSON.load(json) }
           end
 
@@ -50,31 +50,31 @@ module Yoda
           # @param addresses [Array<String, Symbol>]
           # @return [Hash{String, Symbol => Object, nil}]
           def file_multiple(namespace, addresses)
-            rows = database.execute("SELECT address, value FROM objects WHERE namespace = ? AND address in (#{('?' * addresses.length).join(', ')})", [namespace, *addresses])
+            rows = database.execute("SELECT address, value FROM objects WHERE namespace = ? AND address in (#{addresses.length.times.map { '?' }.join(', ')})", [namespace.to_s, *addresses.map(&:to_s)])
             rows.map { |address, json| [address, JSON.load(json)] }.to_h
           end
 
-          # @param address [String, Symbol]
           # @param namespace [String, Symbol]
+          # @param address [String, Symbol]
           # @param value [Object]
           # @return [Object, nil]
           def replace(namespace, address, value)
-            database.execute("REPLACE INTO objects (namespace, address, value) VALUES (?, ?, ?) ", namespace, address, value&.to_json)
+            database.execute("REPLACE INTO objects (namespace, address, value) VALUES (?, ?, ?) ", namespace.to_s, address.to_s, value&.to_json)
           end
 
           # @param namespace [String, Symbol]
-          # @param address_to_values [Hash{String, Symbol => Object}]
+          # @param address_to_values [Enumerator<(Symbol, Object}>]
           # @return [Object, nil]
           def replace_multiple(namespace, address_to_values)
-            full_address_to_values = address_to_values.map { |address, value| [namespace, address, value&.to_json] }
-            database.execute("REPLACE INTO objects (namespace, address, value) VALUES #{('(?, ?, ?)' * address_to_values.length).join(', ')}", full_address_to_values.flatten)
+            full_address_to_values = address_to_values.map { |address, value| [namespace.to_s, address.to_s, value&.to_json] }
+            database.execute("REPLACE INTO objects (namespace, address, value) VALUES #{full_address_to_values.length.times.map { '(?, ?, ?)' }.join(', ')}", full_address_to_values.flatten)
           end
 
           # @param address [String, Symbol]
           # @param namespace [String, Symbol]
           # @return [void]
           def delete_object(namespace, address)
-            database.execute("DELETE FROM objects WHERE namespace = ? AND address = ?", namespace, address)
+            database.execute("DELETE FROM objects WHERE namespace = ? AND address = ?", namespace.to_s, address.to_s)
           end
 
           # @return [Array<String>]
@@ -85,14 +85,14 @@ module Yoda
           # @param namespace [String, Symbol]
           # @return [Array<String>]
           def keys(namespace)
-            database.execute("SELECT address FROM objects WHERE namespace = ?", [namespace]).map(&:first)
+            database.execute("SELECT address FROM objects WHERE namespace = ?", [namespace.to_s]).map(&:first)
           end
 
           # @param namespace [String, Symbol]
           # @param address [String, Symbol]
           # @return [Boolean]
           def has_key?(namespace, address)
-            row = database.execute("SELECT count(*) FROM objects WHERE namespace = ? AND address = ?", [namespace, address])
+            row = database.execute("SELECT count(*) FROM objects WHERE namespace = ? AND address = ?", [namespace.to_s, address.to_s])
             count, _ = row.first
             count > 0
           end
@@ -100,7 +100,7 @@ module Yoda
           # @param namespace [String, Symbol]
           # @return [void]
           def delete_namespace(namespace)
-            database.execute("DELETE FROM objects WHERE namespace = ?", namespace)
+            database.execute("DELETE FROM objects WHERE namespace = ?", [namespace.to_s])
           end
 
           # @return [void]
@@ -111,7 +111,7 @@ module Yoda
           # @param namespace [String, Symbol]
           # @return [Integer]
           def size_of(namespace)
-            row = database.execute("SELECT count(*) FROM objects WHERE namespace = ?", [namespace])
+            row = database.execute("SELECT count(*) FROM objects WHERE namespace = ?", [namespace.to_s])
             count, _ = row.first
             count
           end

@@ -45,7 +45,7 @@ module Yoda
           # @abstract
           # @return [Array<String>]
           def keys
-            database_accessor.key(namespace_key)
+            database_accessor.keys(namespace_key)
           end
 
           # @abstract
@@ -75,9 +75,9 @@ module Yoda
           # @return [Boolean]
           def empty?
             if namespace
-              size_of(namespace) == 0
+              database_accessor.size_of(namespace) == 0
             else
-              all_size == 0
+              database_accessor.all_size == 0
             end
           end
 
@@ -103,7 +103,7 @@ module Yoda
 
           # @return [String]
           def namespace_key
-            namespace || ''
+            namespace&.to_s || ''
           end
         end
       end
