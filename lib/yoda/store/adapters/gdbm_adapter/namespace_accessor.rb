@@ -100,7 +100,7 @@ module Yoda
           # @param data [Enumerator<(String, Object)>]
           # @param bar [#increment, nil]
           # @abstract
-          def batch_write(data, bar)
+          def batch_write(data, bar = nil)
             data.each do |(k, v)|
               put(k, v, modify_keys: false)
               bar&.increment

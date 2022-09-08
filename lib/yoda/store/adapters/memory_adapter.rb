@@ -34,7 +34,7 @@ module Yoda
 
         # @param data [Enumerator<(String, Object)>]
         # @param bar [#increment, nil]
-        def batch_write(data, bar)
+        def batch_write(data, bar = nil)
           data.each do |(k, v)|
             put(k, v)
             bar&.increment
