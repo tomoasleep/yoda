@@ -10,7 +10,6 @@ module Yoda
       attr_reader :location
 
       # @param environment [Model::Environment]
-      # @param registry [Store::Registry]
       # @param source   [String]
       # @param location [Parsing::Location]
       # @return [SignatureDiscovery]

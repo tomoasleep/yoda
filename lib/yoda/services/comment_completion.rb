@@ -19,6 +19,20 @@ module Yoda
       attr_reader :location
 
       # @param environment [Model::Environment]
+      # @param source   [String]
+      # @param location [Parsing::Location]
+      # @return [CommentCompletion]
+      def self.from_source(environment, source, location)
+        ast, comments = Parsing.parse_with_comments(source)
+        new(
+          environment,
+          ast,
+          comments,
+          location,
+        )
+      end
+
+      # @param environment [Model::Environment]
       # @param ast      [::Parser::AST::Node]
       # @param comments [Array<::Parser::Source::Comment>]
       # @param location [Location]
