@@ -15,7 +15,7 @@ module Yoda
         class << self
           def for(path)
             @pool ||= {}
-            @pool[path] || (@pool[path] = new(path))
+            @pool[path_for(path)] || (@pool[path_for(path)] = new(path_for(path)))
           end
 
           def type

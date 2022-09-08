@@ -110,7 +110,7 @@ module Yoda
 
           # @return [String]
           def inspect
-            "#<#{self.class.name}: #{self.class.type}>"
+            "#<#{self.class.name}: gdbm>"
           end
 
           private
