@@ -89,6 +89,11 @@ module Yoda
         setuper.run(rebuild: rebuild, controller: controller)
       end
 
+      # @return [Services::Catalog]
+      def service_catalog
+        Services::Catalog.new(environment: environment)
+      end
+
       # @return [Config]
       def config
         @config ||= begin
