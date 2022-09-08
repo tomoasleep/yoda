@@ -40,9 +40,7 @@ module Yoda
         end
 
         def save
-          updated_keys.each do |key|
-            adapter.put(path_for(key), self[key.to_sym])
-          end
+          adapter.batch_write(updated_keys.map { |key| [path_for(key), self[key.to_sym]] })
         end
 
         def keys
