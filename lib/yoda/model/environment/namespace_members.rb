@@ -19,6 +19,7 @@ module Yoda
 
         # @param name [String, Symbol, Regexp]
         # @param visibility [Array<:private, :public, :protected>]
+        # @param source [Array<:myself, :ancestors>]
         # @return [Enumerator<FunctionSignatures::Base>]
         def select_method(name, visibility:)
           rbs_method_signatures = begin

@@ -5,17 +5,19 @@ module Yoda
         # @param namespace [Objects::NamespaceObject]
         # @param method_name [String, Regexp]
         # @param visibility [Array<Symbol>, nil]
+        # @param source [Array<:myself, :ancestors>, nil]
         # @return [Array<Model::FunctionSignatures::Base>]
-        def select(namespace, method_name, visibility: nil)
-          FindMethod.new(registry).select(namespace, method_name, visibility: visibility).flat_map { |el| build(namespace, el) }
+        def select(namespace, method_name, visibility: nil, source: nil)
+          FindMethod.new(registry).select(namespace, method_name, visibility: visibility, source: source).flat_map { |el| build(namespace, el) }
         end
 
         # @param namespaces [Array<Objects::NamespaceObject>]
         # @param method_name [String, Regexp]
         # @param visibility [Array<Symbol>, nil]
+        # @param source [Array<:myself, :ancestors>, nil]
         # @return [Array<Objects::MethodObject>]
-        def select_on_multiple(namespaces, method_name, visibility: nil)
-          namespaces.flat_map { |namespace| select(namespace, method_name, visibility: visibility) }
+        def select_on_multiple(namespaces, method_name, visibility: nil, source: nil)
+          namespaces.flat_map { |namespace| select(namespace, method_name, visibility: visibility, source: source) }
         end
 
         private
