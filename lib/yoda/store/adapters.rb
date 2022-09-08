@@ -6,17 +6,24 @@ module Yoda
       require 'yoda/store/adapters/sqlite_adapter'
       require 'yoda/store/adapters/memory_adapter'
 
-      # @return [Class<Base>]
-      def self.default_adapter_class
-        GdbmAdapter
-      end
+      class << self
+        # @return [Class<Base>]
+        def default_adapter_class
+          SqliteAdapter
+        end
 
-      # @param path [String, nil]
-      def self.for(path)
-        if path
-          default_adapter_class.for(path + ".#{default_adapter_class.type}")
-        else
-          MemoryAdapter.new
+        # @param path [String, nil]
+        def for(path)
+          if path
+            default_adapter_class.for(path)
+          else
+            MemoryAdapter.new
+          end
+        end
+
+        # @return [Hash{Symbol => Base}]
+        def adapter_classes
+          @adapter_classes ||= [GdbmAdapter, SqliteAdapter, MemoryAdapter].map { |klass| [klass.type.to_sym, klass] }.to_h
         end
       end
     end
