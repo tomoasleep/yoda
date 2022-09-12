@@ -86,6 +86,7 @@ module Yoda
           path: path_to_store(code_object),
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, '') },
+          ref_tag_list: code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, '') },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
@@ -109,6 +110,7 @@ module Yoda
           path: path_to_store(code_object),
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object.namespace)) },
+          ref_tag_list: code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object.namespace)) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           value: code_object.value,
@@ -124,6 +126,7 @@ module Yoda
             path: "Object#{code_object.sep}#{code_object.name}",
             document: code_object.docstring.to_s,
             tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object.namespace)) },
+            ref_tag_list: code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object.namespace)) },
             overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
@@ -140,6 +143,7 @@ module Yoda
             path: path_to_store(code_object),
             document: code_object.docstring.to_s,
             tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object.namespace)) },
+            ref_tag_list: code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object.namespace)) },
             overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
@@ -156,6 +160,7 @@ module Yoda
           path: path_to_store(code_object),
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object)) },
+          ref_tag_list: code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object)) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
@@ -181,6 +186,7 @@ module Yoda
           path: path_to_store(code_object),
           document: code_object.docstring.to_s,
           tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object)) },
+          ref_tag_list: code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object)) },
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
@@ -205,6 +211,18 @@ module Yoda
       # @return [Objects::Tag]
       def convert_tag(tag, namespace)
         Objects::Tag.new(tag_name: tag.tag_name, name: tag.name, yard_types: tag.types, text: tag.text, lexical_scope: convert_to_lexical_scope(namespace))
+      end
+
+      # @param tag [::YARD::Tags::RefTagList]
+      # @param namespace [String]
+      # @return [Objects::ReferenceTag]
+      def convert_ref_tag(tag, namespace)
+        Objects::ReferenceTag.new(
+          tag_name: tag.tag_name,
+          name: tag.name,
+          reference_path: tag.owner.path,
+          lexical_scope: convert_to_lexical_scope(namespace),
+        )
       end
 
       # @param tag [::YARD::Tags::OverloadTag]
@@ -239,6 +257,7 @@ module Yoda
           path: path_to_store(code_object),
           document: '',
           tag_list: [],
+          ref_tag_list: [],
           sources: [],
           primary_source: nil,
           instance_method_addresses: [],

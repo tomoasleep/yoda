@@ -2,12 +2,12 @@ module Yoda
   module Model
     module FunctionSignatures
       class Method < Base
-        # @return [Store::Objects::MethodObject]
+        # @return [Store::Objects::MethodObject::Connected]
         attr_reader :method_object
 
-        # @param method_object [Store::Objects::MethodObject]
+        # @param method_object [Store::Objects::MethodObject::Connected]
         def initialize(method_object)
-          fail ArgumentError, method_object unless method_object.is_a?(Store::Objects::MethodObject)
+          fail ArgumentError, method_object unless method_object.is_a?(Store::Objects::MethodObject::Connected)
           @method_object = method_object
         end
 
@@ -33,7 +33,7 @@ module Yoda
 
         # @return [Array<Store::Objects::Tag>]
         def tags
-          method_object.tag_list
+          method_object.resolved_tag_list
         end
 
         # @return [TypeExpressions::FunctionType]
@@ -75,7 +75,7 @@ module Yoda
 
         # @return [TypeBuilder]
         def type_builder
-          @type_builder ||= TypeBuilder.new(parameters, method_object.tag_list)
+          @type_builder ||= TypeBuilder.new(parameters, method_object.resolved_tag_list)
         end
       end
     end

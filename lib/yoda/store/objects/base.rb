@@ -26,9 +26,9 @@ module Yoda
           # @return [Registry]
           attr_reader :registry
 
-          delegate_to_object :address, :path, :document, :tag_list, :sources, :primary_source, :json_class, :to_json, :derive
-          delegate_to_object :name, :kind, :address, :parent_adderss, :to_h, :hash, :eql?, :==, :namespace?, :meta_class_address
-          
+          delegate_to_object :address, :path, :document, :sources, :primary_source, :tag_list, :json_class, :to_json, :derive
+          delegate_to_object :name, :kind, :address, :parent_address, :to_h, :hash, :eql?, :==, :namespace?, :meta_class_address
+
           # @param object [Base]
           # @param registry [Registry]
           def initialize(object, registry:)
@@ -53,6 +53,21 @@ module Yoda
             registry.get(meta_class_address)&.with_connection(**connection_options)
           end
 
+          # @return [Array<Tag>]
+          def resolved_tag_list
+            tag_list + resolved_ref_tag_list
+          end
+
+          # @return [Array<Tag>]
+          def resolved_ref_tag_list
+            ref_tag_list.map(&:resolve_tags).flatten
+          end
+
+          # @return [Array<ReferenceTag::Connected>]
+          def ref_tag_list
+            @ref_tag_list ||= object.ref_tag_list.map { |ref_tag| ref_tag.with_connection(**connection_options, owner: self) }
+          end
+
           private
 
           # @return [Hash]
@@ -70,6 +85,9 @@ module Yoda
         # @return [Array<Tag>]
         attr_reader :tag_list
 
+        # @return [Array<ReferenceTag>]
+        attr_reader :ref_tag_list
+
         # @return [Array<(String, Integer, Integer)>]
         attr_reader :sources
 
@@ -79,12 +97,14 @@ module Yoda
         # @param path [String]
         # @param document [String]
         # @param tag_list [Array<Tag>, nil]
+        # @param ref_tag_list [Array<ReferenceTag>, nil]
         # @param sources [Array<(String, Integer, Integer)>]
         # @param primary_source [(String, Integer, Integer), nil]
-        def initialize(path:, document: '', tag_list: [], sources: [], primary_source: nil, json_class: nil, kind: nil)
+        def initialize(path:, document: '', tag_list: [], ref_tag_list: [], sources: [], primary_source: nil, json_class: nil, kind: nil)
           @path = path
           @document = document
           @tag_list = tag_list
+          @ref_tag_list = ref_tag_list
           @sources = sources
           @primary_source = primary_source
         end
@@ -165,6 +185,7 @@ module Yoda
             path: path,
             document: document + another.document,
             tag_list: tag_list + another.tag_list,
+            ref_tag_list: ref_tag_list + another.ref_tag_list,
             sources: sources + another.sources,
             primary_source: primary_source || another.primary_source,
           }

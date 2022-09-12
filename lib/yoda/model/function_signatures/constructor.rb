@@ -3,12 +3,18 @@ module Yoda
     module FunctionSignatures
       # Constructor provides a signature of `YourClass.new` from `initialize` method of the class.
       class Constructor < Base
-        # @type Store::Objects::MethodObject
+        # @return [Store::Objects::NamespaceObject::Connected]
+        attr_reader :namespace
+
+        # @return [Store::Objects::MethodObject::Connected]
         attr_reader :initialize_method
 
-        # @param namespace [Store::Objects::NamespaceObject]
-        # @param initialize_method [Store::Objects::MethodObject]
+        # @param namespace [Store::Objects::NamespaceObject::Connected]
+        # @param initialize_method [Store::Objects::MethodObject::Connected]
         def initialize(namespace, initialize_method)
+          fail ArgumentError, namespace unless namespace.is_a?(Store::Objects::NamespaceObject::Connected)
+          fail ArgumentError, initialize_method if initialize_method && !initialize_method.is_a?(Store::Objects::MethodObject::Connected)
+
           @namespace = namespace
           @initialize_method = initialize_method
         end
@@ -51,7 +57,7 @@ module Yoda
 
         # @return [Array<Store::Objects::Tag>]
         def tags
-          initialize_method.tag_list
+          initialize_method.resolved_tag_list
         end
 
         # @return [Array<(String, Integer, Integer)>]
@@ -78,7 +84,7 @@ module Yoda
 
         # @return [TypeBuilder]
         def type_builder
-          @type_builder ||= TypeBuilder.new(parameters, initialize_method.tag_list)
+          @type_builder ||= TypeBuilder.new(parameters, tags)
         end
       end
     end

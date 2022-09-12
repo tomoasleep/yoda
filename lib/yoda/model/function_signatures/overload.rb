@@ -8,10 +8,10 @@ module Yoda
         # @return [Store::Objects::Overload]
         attr_reader :overload
 
-        # @param method_object [Store::Objects::MethodObject]
+        # @param method_object [Store::Objects::MethodObject::Connected]
         # @param overload [Store::Objects::Overload]
         def initialize(method_object, overload)
-          fail ArgumentError, method_object unless method_object.is_a?(Store::Objects::MethodObject)
+          fail ArgumentError, method_object unless method_object.is_a?(Store::Objects::MethodObject::Connected)
           fail ArgumentError, overload unless overload.is_a?(Store::Objects::Overload)
           @method_object = method_object
           @overload = overload
@@ -39,7 +39,7 @@ module Yoda
 
         # @return [Array<Store::Objects::Tag>]
         def tags
-          overload.tag_list || method_object.tag_list
+          overload.tag_list || method_object.resolved_tag_list
         end
 
         # @return [TypeExpressions::FunctionType]
