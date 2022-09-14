@@ -1,6 +1,7 @@
 module Yoda
   module Store
     module Registry
+      # View is a wrapper of composer and it can hide specified registries temporally by id mask.
       class View
         # @return [Registry::Composer]
         attr_reader :composer

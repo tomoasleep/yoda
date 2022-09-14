@@ -20,6 +20,10 @@ module Yoda
         registries.delete(registry.id.to_sym)
       end
 
+      # Get objects with the given address from registries.
+      # If multiple registries have the object, these objects are merged by {Objects::Merger}.
+      # @param address [String, Symbol]
+      # @return [Objects::Base, nil]
       def get(address, registry_ids: nil)
         registry_mask = IdMask.build(registry_ids)
         target_registries = registry_mask.any? ? all_registries : registry_mask.covering_ids.map { |id| get_registry(id) }.compact
