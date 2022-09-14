@@ -53,11 +53,13 @@ module Yoda
               Logger.info "Done building gem docs for #{gem_name} #{gem_version}"
             else
               Logger.warn "Failed to build #{gem_name} #{gem_version}"
+              fail ImportError, "Failed to build #{gem_name} #{gem_version}"
             end
           rescue => ex
             Logger.debug ex
             Logger.debug ex.backtrace
             Logger.warn "Failed to build #{gem_name} #{gem_version}"
+            fail ImportError, "Failed to build #{gem_name} #{gem_version}"
           end
         end
 

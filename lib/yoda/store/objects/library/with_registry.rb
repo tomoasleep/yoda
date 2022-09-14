@@ -21,6 +21,13 @@ module Yoda
               Registry::LibraryRegistry.for_library(self)
             end
           end
+
+          # @return [Registry::LibraryRegistry, nil]
+          def try_registry
+            registry
+          rescue Actions::ImportError => e
+            nil
+          end
         end
       end
     end

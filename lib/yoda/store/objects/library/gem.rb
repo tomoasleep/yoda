@@ -141,6 +141,8 @@ module Yoda
               end
             end
 
+            # @return (see Actions::ImportGem.run)
+            # @raise [Actions::ImportError]
             def create_patch
               Actions::ImportGem.run(self)
             end

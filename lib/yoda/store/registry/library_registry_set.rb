@@ -1,7 +1,11 @@
+require 'forwardable'
+
 module Yoda
   module Store
     module Registry
       class LibraryRegistrySet
+        extend Forwardable
+
         STATUS_KEY = '%library_status'
         PERSISTABLE_LIBRARY_STORE_INDEX_KEY = '%persistable_library_store_index'
 
@@ -14,6 +18,8 @@ module Yoda
 
         # @return [Proc, nil]
         attr_reader :on_change
+
+        delegate [:get_registry, :has_registry] => :registry
 
         # @param project [Project]
         # @param adapter [Adapters::Base]
@@ -49,14 +55,14 @@ module Yoda
           remove = remove.map { |library| library.with_project_connection(project: project) }
 
           remove.each do |library|
-            if registry = library.registry
+            if registry = library.try_registry
               persistable_library_store.remove_registry(registry)
               volatile_library_store.remove_registry(registry)
               status.remove_library(library)
             end
           end
           add.each do |library|
-            if registry = library.registry
+            if registry = library.try_registry
               if registry.persistable?
                 persistable_library_store.add_registry(registry)
               else
