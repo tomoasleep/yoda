@@ -3,7 +3,7 @@ require 'forwardable'
 module Yoda
   module Model
     module FunctionSignatures
-      # Wrap {FunctionSignature::Base} and allow it access to environment.
+      # Wrap {FunctionSignatures::Base} and allow it access to environment.
       # TODO: Merge this with connected store
       class Wrapper
         extend Forwardable
@@ -11,13 +11,13 @@ module Yoda
         # @return [Environment]
         attr_reader :environment
 
-        # @return [FunctionSignature::Base]
+        # @return [FunctionSignatures::Base]
         attr_reader :signature
 
         delegate [:name, :visibility, :sep, :namespace_path, :document, :tags, :sources, :parameters, :primary_source] => :signature
 
         # @param environment [Environment]
-        # @param signature [FunctionSignature::Base]
+        # @param signature [FunctionSignatures::Base]
         def initialize(environment:, signature:)
           @environment = environment
           @signature = signature

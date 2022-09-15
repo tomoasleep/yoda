@@ -91,7 +91,7 @@ module Yoda
             path: attrs[:path],
             document: attrs[:document],
             tag_list: attrs[:tag_list].to_a,
-            ref_tag_list: attrs[:tag_list].to_a,
+            ref_tag_list: attrs[:ref_tag_list].to_a,
             sources: attrs[:sources].to_a,
             primary_source: attrs[:primary_source],
             instance_method_addresses: attrs[:instance_method_addresses].to_a,

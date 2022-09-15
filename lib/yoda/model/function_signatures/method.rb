@@ -64,7 +64,7 @@ module Yoda
 
         # @return [ParameterList]
         def parameters
-          @parameters ||= ParameterList.new(method_object.parameters)
+          method_object.parameters
         end
 
         def parameter_type_of(param)

@@ -12,7 +12,7 @@ module Yoda
         class << self
           # @return [Array<Symbol>]
           def attr_names
-            %i(path document tag_list sources primary_source)
+            %i[path document tag_list ref_tag_list sources primary_source]
           end
         end
 
@@ -22,7 +22,7 @@ module Yoda
 
           # @return [Base]
           attr_reader :object
-          
+
           # @return [Registry]
           attr_reader :registry
 
@@ -47,7 +47,7 @@ module Yoda
           def merge(another)
             object.merge(another).with_connection(**connection_options)
           end
-          
+
           # @return [Objects::MetaClassObject::Connected, nil]
           def meta_class
             registry.get(meta_class_address)&.with_connection(**connection_options)
@@ -100,7 +100,16 @@ module Yoda
         # @param ref_tag_list [Array<ReferenceTag>, nil]
         # @param sources [Array<(String, Integer, Integer)>]
         # @param primary_source [(String, Integer, Integer), nil]
-        def initialize(path:, document: '', tag_list: [], ref_tag_list: [], sources: [], primary_source: nil, json_class: nil, kind: nil)
+        def initialize(
+          path:,
+          document: '',
+          tag_list: [],
+          ref_tag_list: [],
+          sources: [],
+          primary_source: nil,
+          json_class: nil,
+          kind: nil
+        )
           @path = path
           @document = document
           @tag_list = tag_list
@@ -144,6 +153,7 @@ module Yoda
             path: path,
             document: document,
             tag_list: tag_list,
+            ref_tag_list: ref_tag_list,
             sources: sources,
             primary_source: primary_source,
           }

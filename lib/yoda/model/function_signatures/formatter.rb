@@ -35,35 +35,35 @@ module Yoda
         end
 
         def required_parameters
-          signature.parameters.required_parameters.map { |param| triple_to_s(param, type_of(param)) }
+          signature.parameters.required_parameters.map { |param| triple_to_s(param.name, type_of(param.name)) }
         end
 
         def optional_parameters
-          signature.parameters.optional_parameters.map { |(param, value)| triple_to_s(param, type_of(param), value) }
+          signature.parameters.optional_parameters.map { |param| triple_to_s(param.name, type_of(param.name), param.default) }
         end
 
         def post_parameters
-          signature.parameters.post_parameters.map { |param| triple_to_s(param, type_of(param)) }
+          signature.parameters.post_parameters.map { |param| triple_to_s(param.name, type_of(param.name)) }
         end
 
         def required_keyword_parameters
-          signature.parameters.required_keyword_parameters.map { |param| "#{type_of(param)} #{param}:" }
+          signature.parameters.required_keyword_parameters.map { |param| "#{type_of(param.name)} #{param.name}:" }
         end
 
         def optional_keyword_parameters
-          signature.parameters.required_keyword_parameters.map { |(param, value)| "#{type_of(param)} #{param}: #{value}" }
+          signature.parameters.required_keyword_parameters.map { |param| "#{type_of(param.name)} #{param.name}: #{param.default}" }
         end
 
         def rest_parameter
-          signature.parameters.rest_parameter ? "#{type_of(signature.parameters.rest_parameter)} *#{signature.parameters.rest_parameter}"  : nil
+          signature.parameters.rest_parameter ? "#{type_of(signature.parameters.rest_parameter.name)} *#{signature.parameters.rest_parameter.name}" : nil
         end
 
         def keyword_rest_parameter
-          signature.parameters.keyword_rest_parameter ? "#{type_of(signature.parameters.keyword_rest_parameter)} **#{signature.parameters.keyword_rest_parameter}"  : nil
+          signature.parameters.keyword_rest_parameter ? "#{type_of(signature.parameters.keyword_rest_parameter.name)} **#{signature.parameters.keyword_rest_parameter.name}" : nil
         end
 
         def block_parameter
-          signature.parameters.block_parameter ? "#{type_of(signature.parameters.block_parameter)} **#{signature.parameters.block_parameter}"  : nil
+          signature.parameters.block_parameter ? "#{type_of(signature.parameters.block_parameter.name)} **#{signature.parameters.block_parameter.name}" : nil
         end
 
         # @param name [String]

@@ -6,7 +6,7 @@ module Yoda
           delegate_to_object :parameters, :visibility, :overloads, :sep, :namespace_path, :parent_address, :namespace_path
         end
 
-        # @return [Array<(String, String)>]
+        # @return [Model::FunctionSignatures::ParameterList]
         attr_reader :parameters
 
         # @return [Symbol]
@@ -65,7 +65,7 @@ module Yoda
           super(**kwargs)
           fail ArgumentError, visibility unless %i(public private protected)
           @visibility = visibility.to_sym
-          @parameters = parameters
+          @parameters = Model::FunctionSignatures::ParameterList.new(parameters)
           @overloads = overloads
         end
 
@@ -104,7 +104,7 @@ module Yoda
 
         def to_h
           super.merge(
-            parameters: parameters.to_a,
+            parameters: parameters.raw_parameters.to_a,
             visibility: visibility,
             overloads: overloads,
           )
@@ -117,7 +117,7 @@ module Yoda
         def merge_attributes(another)
           super.merge(
             visibility: another.visibility,
-            parameters: another.parameters.to_a,
+            parameters: another.parameters.raw_parameters.to_a,
             overloads: overloads + another.overloads,
           )
         end

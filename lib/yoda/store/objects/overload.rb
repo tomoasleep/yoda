@@ -16,7 +16,7 @@ module Yoda
         # @return [String]
         attr_reader :name
 
-        # @return [Array<(String, String)>]
+        # @return [Model::FunctionSignatures::ParameterList]
         attr_reader :parameters
 
         # @return [String, nil]
@@ -31,14 +31,14 @@ module Yoda
         # @param tag_list [Array<Tag>]
         def initialize(name:, parameters: [], document: '', tag_list: [])
           @name = name
-          @parameters = parameters
+          @parameters = Model::FunctionSignatures::ParameterList.new(parameters)
           @document = document
           @tag_list = tag_list
         end
 
         # @return [Hash]
         def to_h
-          { name: name, parameters: parameters, document: document, tag_list: tag_list }
+          { name: name, parameters: parameters.raw_parameters.to_a, document: document, tag_list: tag_list }
         end
 
         # @return [String]

@@ -35,10 +35,10 @@ module Yoda
           param_type_table[param] || TypeExpressions::UnknownType.new('nodoc')
         end
 
-        # @param param [String]
+        # @param param [ParameterList::Item]
         # @return [TypeExpressions::FunctionType::Parameter]
-        def parameter_of(name)
-          TypeExpressions::FunctionType::Parameter.new(name: name, type: type_of(name))
+        def parameter_of(param)
+          TypeExpressions::FunctionType::Parameter.new(name: param.name, type: type_of(param.name))
         end
 
         private
@@ -54,11 +54,11 @@ module Yoda
         def parameter_options
           @parameter_options ||= {
             required_parameters: parameters.required_parameters.map(&method(:parameter_of)),
-            optional_parameters: parameters.optional_parameters.map(&:first).map(&method(:parameter_of)),
+            optional_parameters: parameters.optional_parameters.map(&method(:parameter_of)),
             rest_parameter: parameters.rest_parameter ? parameter_of(parameters.rest_parameter) : nil,
             post_parameters: parameters.post_parameters.map(&method(:parameter_of)),
             required_keyword_parameters: parameters.required_keyword_parameters.map(&method(:parameter_of)),
-            optional_keyword_parameters: parameters.optional_keyword_parameters.map(&:first).map(&method(:parameter_of)),
+            optional_keyword_parameters: parameters.optional_keyword_parameters.map(&method(:parameter_of)),
             keyword_rest_parameter: parameters.keyword_rest_parameter ? parameter_of(parameters.keyword_rest_parameter) : nil,
             block_parameter: parameters.block_parameter ? parameter_of(parameters.block_parameter) : nil,
           }

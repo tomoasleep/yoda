@@ -1,3 +1,5 @@
+require 'set'
+
 module Yoda
   module Store
     module Objects
@@ -42,11 +44,15 @@ module Yoda
         end
 
         def hash
-          ([self.class.name] + to_h.to_a).hash
+          ([self.kind] + to_h.to_a).hash
+        end
+
+        def kind
+          :reference_tag
         end
 
         def eql?(another)
-          self.class == another.class && to_h == another.to_h
+          another.respond_to?(:kind) && self.kind == another.kind && to_h == another.to_h
         end
 
         def ==(another)

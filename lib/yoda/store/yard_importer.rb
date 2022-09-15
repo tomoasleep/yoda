@@ -210,7 +210,26 @@ module Yoda
       # @param namespace [String]
       # @return [Objects::Tag]
       def convert_tag(tag, namespace)
-        Objects::Tag.new(tag_name: tag.tag_name, name: tag.name, yard_types: tag.types, text: tag.text, lexical_scope: convert_to_lexical_scope(namespace))
+        case tag
+        when YARD::Tags::OptionTag
+          Objects::Tag.new(
+            tag_name: tag.tag_name,
+            name: tag.name,
+            yard_types: tag.pair.types,
+            text: tag.pair.text,
+            lexical_scope: convert_to_lexical_scope(namespace),
+            option_key: tag.pair.name,
+            option_default: tag.pair.defaults,
+          )
+        else
+          Objects::Tag.new(
+            tag_name: tag.tag_name,
+            name: tag.name,
+            yard_types: tag.types,
+            text: tag.text,
+            lexical_scope: convert_to_lexical_scope(namespace),
+          )
+        end
       end
 
       # @param tag [::YARD::Tags::RefTagList]

@@ -76,7 +76,7 @@ module Yoda
 
         # @return [ParameterList]
         def parameters
-          @parameters ||= ParameterList.new(overload.parameters)
+          overload.parameters
         end
 
         def parameter_type_of(param)

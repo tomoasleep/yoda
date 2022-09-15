@@ -22,22 +22,29 @@ module Yoda
         # @return [Array<String>]
         attr_reader :yard_types, :lexical_scope
 
+        # @return [String, nil]
+        attr_reader :option_key, :option_default
+
         # @param tag_name   [String]
         # @param name       [String, nil]
         # @param yard_types [Array<String>]
         # @param text       [String, nil]
         # @param lexical_scope [Array<String>]
-        def initialize(tag_name:, name: nil, yard_types: [], text: nil, lexical_scope: [])
+        # @param option_key [String, nil]
+        # @param option_default [String, nil]
+        def initialize(tag_name:, name: nil, yard_types: [], text: nil, lexical_scope: [], option_key: nil, option_default: nil)
           @tag_name = tag_name
           @name = name
           @yard_types = yard_types
           @text = text
           @lexical_scope = lexical_scope
+          @option_key = option_key
+          @option_default = option_default
         end
 
         # @return [Hash]
         def to_h
-          { name: name, tag_name: tag_name, yard_types: yard_types, text: text, lexical_scope: lexical_scope }
+          { name: name, tag_name: tag_name, yard_types: yard_types, text: text, lexical_scope: lexical_scope, option_key: option_key, option_default: option_default }
         end
 
         def hash

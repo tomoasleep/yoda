@@ -67,7 +67,7 @@ module Yoda
 
         # @return [ParameterList]
         def parameters
-          @parameters ||= ParameterList.new(initialize_method.parameters)
+          initialize_method.parameters
         end
 
         # @return [(String, Integer, Integer), nil]
