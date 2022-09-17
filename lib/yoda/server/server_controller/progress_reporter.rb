@@ -20,7 +20,7 @@ module Yoda
           # @yield [reporter]
           # @yieldparam reporter [ProgressReporter]
           def in_workdone_progress(work_done_token:, title:, notifier:, &block)
-            in_partial_result_progerss(
+            in_partial_result_progress(
               work_done_token: work_done_token,
               partial_result_token: nil,
               notifier: notifier,
@@ -34,7 +34,7 @@ module Yoda
           # @param title [String]
           # @yield [reporter]
           # @yieldparam reporter [ProgressReporter]
-          def in_partial_result_progerss(work_done_token:, partial_result_token:, notifier:, title:)
+          def in_partial_result_progress(work_done_token:, partial_result_token:, notifier:, title:)
             reporter = ProgressReporter.new(
               work_done_token: work_done_token,
               partial_result_token: partial_result_token,

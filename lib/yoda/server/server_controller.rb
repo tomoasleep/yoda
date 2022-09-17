@@ -75,8 +75,8 @@ module Yoda
       end
 
       # @param (see ProgressReporter.in_partial_result_progress)
-      def in_partial_result_progerss(**kwargs, &block)
-        ProgressReporter.in_partial_result_progerss(**kwargs, notifier: notifier, &block)
+      def in_partial_result_progress(**kwargs, &block)
+        ProgressReporter.in_partial_result_progress(**kwargs, notifier: notifier, &block)
       end
 
       # @param title [String]
