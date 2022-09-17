@@ -3,7 +3,7 @@ module Yoda
     module Objects
       class MethodObject < Base
         class Connected < Base::Connected
-          delegate_to_object :parameters, :visibility, :overloads, :sep, :namespace_path, :parent_address, :namespace_path
+          delegate_to_object :parameters, :visibility, :overloads, :name, :separator, :namespace_path, :parent_address, :namespace_path
         end
 
         # @return [Model::FunctionSignatures::ParameterList]
@@ -16,42 +16,9 @@ module Yoda
         attr_reader :overloads
 
         class << self
-          METHOD_SEPARATOR_PATTERN = /[#.]|(::)/
-
-          # @param path [String]
-          # @return [String]
-          def namespace_of_path(path)
-            divide_by_separator(path)&.at(0)
-          end
-
-          # @param path [String]
-          # @return [String]
-          def name_of_path(path)
-            divide_by_separator(path)&.at(2)
-          end
-
-          # @param path [String]
-          # @return [String, nil]
-          def sep_of_path(path)
-            divide_by_separator(path)&.at(1)
-          end
-
           # @return [Array<Symbol>]
           def attr_names
             super + %i(parameters visibility overloads)
-          end
-
-          private
-
-          # @param path [String]
-          # @return [(String, String, String), nil]
-          def divide_by_separator(path)
-            rev_path = path.reverse
-            if match_data = rev_path.match(METHOD_SEPARATOR_PATTERN)
-              [match_data.post_match.reverse, match_data.to_s, match_data.pre_match.reverse]
-            else
-              nil
-            end
           end
         end
 
@@ -71,23 +38,23 @@ module Yoda
 
         # @return [String]
         def name
-          @name ||= MethodObject.name_of_path(path)
+          address.name
         end
 
         # @return [String]
-        def sep
-          @sep ||= MethodObject.sep_of_path(path)
+        def separator
+          address.separator
         end
 
         # @return [String]
         def namespace_path
-          @namespace_path ||= MethodObject.namespace_of_path(path)
+          address.namespace.to_s
         end
 
         # @return [String]
         def parent_address
           @parent_address ||= begin
-            case MethodObject.sep_of_path(path)
+            case separator
             when '#'
               namespace_path
             when '.', '::'

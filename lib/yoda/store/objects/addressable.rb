@@ -3,7 +3,7 @@ module Yoda
     module Objects
       module Addressable
         # @abstract
-        # @return [String]
+        # @return [Address]
         def address
           fail NotImplementedError
         end

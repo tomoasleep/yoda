@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Store::Objects::PatchSet do
+  include AddressHelper
+
   let(:patch_set) do
     Yoda::Store::Objects::PatchSet.new.tap { |patch_set| patches.each { |patch| patch_set.register(patch) } }
   end
@@ -16,7 +18,7 @@ RSpec.describe Yoda::Store::Objects::PatchSet do
             [
               Yoda::Store::Objects::ClassObject.new(
                 path: 'Object',
-                instance_method_addresses: ['Object#to_s'],
+                instance_method_addresses: addresses('Object#to_s'),
               ),
             ],
           ),
@@ -25,7 +27,7 @@ RSpec.describe Yoda::Store::Objects::PatchSet do
             [
               Yoda::Store::Objects::ClassObject.new(
                 path: 'Object',
-                instance_method_addresses: ['Object#id'],
+                instance_method_addresses: addresses('Object#id'),
               ),
             ],
           ),
@@ -34,7 +36,7 @@ RSpec.describe Yoda::Store::Objects::PatchSet do
             [
               Yoda::Store::Objects::ClassObject.new(
                 path: 'Object',
-                instance_method_addresses: ['Object#to_s', 'Object#to_a'],
+                instance_method_addresses: addresses('Object#to_s', 'Object#to_a'),
               ),
             ],
           ),
@@ -46,7 +48,7 @@ RSpec.describe Yoda::Store::Objects::PatchSet do
         expect(subject).to be_a(Yoda::Store::Objects::ClassObject)
         expect(subject.to_h).to include(
           path: 'Object',
-          instance_method_addresses: contain_exactly('Object#to_s', 'Object#id', 'Object#to_a'),
+          instance_method_addresses: contain_exactly(*addresses('Object#to_s', 'Object#id', 'Object#to_a')),
         )
       end
     end

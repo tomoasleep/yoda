@@ -3,6 +3,7 @@ require 'tempfile'
 
 RSpec.describe Yoda::Typing::Inferencer do
   include AST::Sexp
+  include AddressHelper
 
   let(:environment) { Yoda::Model::Environment.build }
   let(:registry) { environment.registry }
@@ -29,7 +30,7 @@ RSpec.describe Yoda::Typing::Inferencer do
     [
       Yoda::Store::Objects::ClassObject.new(
         path: 'Object',
-        mixin_addresses: ["Kernel"]
+        mixin_addresses: addresses("Kernel"),
       ),
       # Inferencer requires metaclass to search constants
       Yoda::Store::Objects::MetaClassObject.new(

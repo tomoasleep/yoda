@@ -110,7 +110,7 @@ module Yoda
           json_class: nil,
           kind: nil
         )
-          @path = path
+          @path = path.to_s
           @document = document
           @tag_list = tag_list
           @ref_tag_list = ref_tag_list
@@ -128,22 +128,19 @@ module Yoda
           fail NotImplementedError
         end
 
-        # @return [String]
+        # @return [Address]
         def address
-          path
+          @address ||= Address.of(path)
         end
 
-        # @return [String]
+        # @return [Address]
         def meta_class_address
           MetaClassObject.address_of(address)
         end
 
         # @return [String]
         def parent_address
-          @parent_address ||= begin
-            sliced_address = address.slice(0, (path.rindex('::') || 0))
-            sliced_address.empty? ? 'Object' : sliced_address
-          end
+          address.namespace
         end
 
         # @return [Hash]

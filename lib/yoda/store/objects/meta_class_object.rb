@@ -17,22 +17,22 @@ module Yoda
           end
         end
 
-        # @param path [String]
-        # @return [String]
+        # @param path [#to_s]
+        # @return [Address]
         def self.address_of(path)
-          "#{path}%class"
+          Address.of("#{path}%class")
         end
 
-        # @param address [String]
+        # @param address [Address]
         # @return [true, false]
         def self.meta_class_address?(address)
-          address.end_with?('%class')
+          address.to_s.end_with?('%class')
         end
 
-        # @param address [String]
+        # @param address [Address]
         # @return [String]
         def self.path_of(address)
-          address.sub(/%class$/, '')
+          address.to_s.sub(/%class$/, '')
         end
 
         # @param path [String]
@@ -60,7 +60,7 @@ module Yoda
 
         # @return [String]
         def base_class_address
-          path
+          Address.of(path)
         end
       end
     end

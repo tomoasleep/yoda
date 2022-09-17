@@ -33,13 +33,13 @@ module Yoda
           end
         end
 
-        # @return [Array<String>]
+        # @return [Array<Address>]
         attr_reader :instance_method_addresses
 
-        # @type Array<String>
+        # @return [Array<Address>]
         attr_reader :mixin_addresses
 
-        # @type Array<String>
+        # @return [Array<Address>]
         attr_reader :constant_addresses
 
         # @return [Enumerable<NamespaceObject>]
@@ -56,14 +56,14 @@ module Yoda
         # @param path [String]
         # @param document [Document, nil]
         # @param tag_list [TagList, nil]
-        # @param instance_method_paths [Array<String>]
-        # @param constant_addresses [Array<String>]
-        # @param mixin_addresses [Array<String>]
+        # @param instance_method_paths [Array<String, Address>]
+        # @param constant_addresses [Array<String, Address>]
+        # @param mixin_addresses [Array<String, Address>]
         def initialize(instance_method_addresses: [], mixin_addresses: [], constant_addresses: [], **kwargs)
           super(**kwargs)
-          @instance_method_addresses = instance_method_addresses
-          @mixin_addresses = mixin_addresses
-          @constant_addresses = constant_addresses
+          @instance_method_addresses = instance_method_addresses.map { |a| Address.of(a) }
+          @mixin_addresses = mixin_addresses.map { |a| Address.of(a) }
+          @constant_addresses = constant_addresses.map { |a| Address.of(a) }
           @ancestors ||= []
         end
 

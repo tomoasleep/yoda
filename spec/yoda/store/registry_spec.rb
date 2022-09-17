@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Yoda::Store::Registry do 
+  include AddressHelper
+
   let(:project) { Yoda::Store::Project.temporal }
   let(:registry) { project.registry }
   
@@ -12,15 +14,15 @@ RSpec.describe Yoda::Store::Registry do
         library_id, [
           Yoda::Store::Objects::ClassObject.new(
             path: 'Hoge',
-            instance_method_addresses: ['Object#to_s'],
+            instance_method_addresses: addresses('Object#to_s'),
           ),
           Yoda::Store::Objects::ClassObject.new(
             path: 'Fuga',
-            instance_method_addresses: ['Object#id'],
+            instance_method_addresses: addresses('Object#id'),
           ),
           Yoda::Store::Objects::ClassObject.new(
             path: 'Piyo',
-            instance_method_addresses: ['Object#to_s', 'Object#to_a'],
+            instance_method_addresses: addresses('Object#to_s', 'Object#to_a'),
           ),
         ]
       )
@@ -33,7 +35,7 @@ RSpec.describe Yoda::Store::Registry do
     it 'get the given objects' do
       expect(registry.get('Hoge')).to have_attributes(
         path: 'Hoge',
-        instance_method_addresses: ['Object#to_s'],
+        instance_method_addresses: addresses('Object#to_s'),
       )
     end
   end

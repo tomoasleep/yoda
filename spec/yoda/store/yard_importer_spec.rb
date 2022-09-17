@@ -2,6 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Yoda::Store::YardImporter do
   include FileUriHelper
+  include AddressHelper
 
   let(:importer) { described_class.new(id, source_path: "source_path") }
   let(:id) { 'test' }
@@ -38,38 +39,50 @@ RSpec.describe Yoda::Store::YardImporter do
       it 'imports module objects correctly' do
         expect(subject.patch.find('BaseModule')).to have_attributes(
           constant_addresses: contain_exactly(
-            "BaseModule::Long",
-            "BaseModule::Nested",
+            *addresses(
+              "BaseModule::Long",
+              "BaseModule::Nested",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Long')).to have_attributes(
           constant_addresses: contain_exactly(
-            "BaseModule::Long::Long2",
+            *addresses(
+              "BaseModule::Long::Long2",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Long::Long2')).to have_attributes(
           constant_addresses: contain_exactly(
-            "BaseModule::Long::Long2::Long3",
+            *addresses(
+              "BaseModule::Long::Long2::Long3",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Long::Long2::Long3')).to have_attributes(
           constant_addresses: be_empty,
           instance_method_addresses: contain_exactly(
-            "BaseModule::Long::Long2::Long3#test_method",
+            *addresses(
+              "BaseModule::Long::Long2::Long3#test_method",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Long::Long2::Long3%class')).to have_attributes(
           constant_addresses: be_empty,
           instance_method_addresses: contain_exactly(
-            "BaseModule::Long::Long2::Long3.test_singleton_method",
-            "BaseModule::Long::Long2::Long3.test_singleton_class_method",
+            *addresses(
+              "BaseModule::Long::Long2::Long3.test_singleton_method",
+              "BaseModule::Long::Long2::Long3.test_singleton_class_method",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Nested')).to have_attributes(
           constant_addresses: contain_exactly(
-            "BaseModule::Nested::Object",
-            "BaseModule::Nested::Nested2",
-            "BaseModule::Nested::ChildClass",
+            *addresses(
+              "BaseModule::Nested::Object",
+              "BaseModule::Nested::Nested2",
+              "BaseModule::Nested::ChildClass",
+            ),
           ),
         )
       end
@@ -79,14 +92,18 @@ RSpec.describe Yoda::Store::YardImporter do
           superclass_path: Yoda::Model::Path.new('Object'),
           constant_addresses: be_empty,
           instance_method_addresses: contain_exactly(
-            "BaseModule::Nested::Nested2#test_method",
+            *addresses(
+              "BaseModule::Nested::Nested2#test_method",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Nested::Nested2%class')).to have_attributes(
           constant_addresses: be_empty,
           instance_method_addresses: contain_exactly(
-            "BaseModule::Nested::Nested2.test_singleton_method",
-            "BaseModule::Nested::Nested2.test_singleton_class_method",
+            *addresses(
+              "BaseModule::Nested::Nested2.test_singleton_method",
+              "BaseModule::Nested::Nested2.test_singleton_class_method",
+            ),
           ),
         )
         expect(subject.patch.find('BaseModule::Nested::ChildClass')).to have_attributes(

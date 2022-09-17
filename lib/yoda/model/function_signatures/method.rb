@@ -18,7 +18,7 @@ module Yoda
 
         # @return [String]
         def sep
-          method_object.sep
+          method_object.separator
         end
 
         # @return [String]

@@ -112,7 +112,7 @@ module Yoda
         def select_child_constants(scope, name)
           Enumerator.new do |yielder|
             if scope.is_a?(Objects::NamespaceObject)
-              scope.constant_addresses.select { |address| match_name?(Model::Path.new(address).basename, name) }.each do |address|
+              scope.constant_addresses.select { |address| match_name?(Model::Path.new(address.to_s).basename, name) }.each do |address|
                 obj = registry.get(address)
                 yielder << obj if obj
               end
@@ -137,7 +137,7 @@ module Yoda
           end
         end
 
-        # @param path [String, Model::Path, Model::ScopedPath]
+        # @param path [#to_s, Model::Path, Model::ScopedPath]
         # @return [Model::Path]
         def path_of(path)
           case path
@@ -145,10 +145,8 @@ module Yoda
             path
           when Model::ScopedPath
             path.path
-          when String
-            Model::Path.new(path == '::' ? '::' : path.gsub(/\A::/, ''))
           else
-            fail ArgumentError, path
+            Model::Path.new(path == '::' ? '::' : path.to_s.gsub(/\A::/, ''))
           end
         end
 

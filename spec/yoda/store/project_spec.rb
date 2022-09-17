@@ -17,17 +17,34 @@ RSpec.describe Yoda::Store::Project do
   end
 
   describe '#setup' do
-    let(:root_path) { sample_project_root('activesupport_project') }
+    context "activesupport_project" do
+      let(:root_path) { sample_project_root('activesupport_project') }
 
-    it "setups project dependencies" do
-      project.setup
-      expect(project.registry.get("ActiveSupport::Executor")).to have_attributes(kind: :class)
+      it "setups project dependencies" do
+        project.setup
+        expect(project.registry.get("ActiveSupport::Executor")).to have_attributes(kind: :class)
+      end
+
+      it "can setup twice" do
+        project.setup
+        project.setup
+        expect(project.registry.get("ActiveSupport::Executor")).to have_attributes(kind: :class)
+      end
     end
 
-    it "can setup twice" do
-      project.setup
-      project.setup
-      expect(project.registry.get("ActiveSupport::Executor")).to have_attributes(kind: :class)
+    context "yard_project" do
+      let(:root_path) { sample_project_root('yard_project') }
+
+      it "setups project dependencies" do
+        project.setup
+        expect(project.registry.get("YARD::CLI::CommandParser")).to have_attributes(kind: :class)
+      end
+
+      it "can setup twice" do
+        project.setup
+        project.setup
+        expect(project.registry.get("YARD::CLI::CommandParser")).to have_attributes(kind: :class)
+      end
     end
   end
 end
