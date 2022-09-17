@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'securerandom'
 
-RSpec.describe Yoda::Store::Adapters::GdbmAdapter do
+RSpec.describe Yoda::Store::Adapters::GdbmAdapter, db: :gdbm do
   include TmpdirHelper
 
   let(:adapter) { described_class.for(adapter_path) }
