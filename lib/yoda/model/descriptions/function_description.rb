@@ -43,13 +43,17 @@ module Yoda
         private
 
         def tag_documents
-          function.tags.map do |tag|
-            str = "@#{tag.tag_name}"
-            str += " `#{tag.name}`" if tag.name
-            str += " [#{tag.yard_types.map { |name| "`#{name}`" }.join(', ')}]" if tag.yard_types && !(tag.yard_types.empty?)
-            str += " #{tag.text.chomp}" if tag.text
-            str
-          end.join("  \n") # Commonmark requires 2 spaces for line breaking
+          function.tags.map { |tag| tag_document(tag) }.join("  \n") # Commonmark requires 2 spaces for line breaking
+        end
+
+        # @param tag [Store::Objects::Tag]
+        def tag_document(tag)
+          str = "@#{tag.tag_name}"
+          str += " `#{tag.name}`" if tag.name
+          str += " [#{tag.yard_types.map { |name| "`#{name}`" }.join(', ')}]" if tag.yard_types && !(tag.yard_types.empty?)
+          str += " :#{tag.option_key}" if tag.option_key
+          str += " (#{tag.option_default})" if tag.option_default
+          str += " #{tag.text.chomp}" if tag.text
         end
       end
     end
