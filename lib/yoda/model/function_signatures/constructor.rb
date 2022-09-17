@@ -6,11 +6,11 @@ module Yoda
         # @return [Store::Objects::NamespaceObject::Connected]
         attr_reader :namespace
 
-        # @return [Store::Objects::MethodObject::Connected]
+        # @return [Store::Objects::MethodObject::Connected, nil]
         attr_reader :initialize_method
 
         # @param namespace [Store::Objects::NamespaceObject::Connected]
-        # @param initialize_method [Store::Objects::MethodObject::Connected]
+        # @param initialize_method [Store::Objects::MethodObject::Connected, nil]
         def initialize(namespace, initialize_method)
           fail ArgumentError, namespace unless namespace.is_a?(Store::Objects::NamespaceObject::Connected)
           fail ArgumentError, initialize_method if initialize_method && !initialize_method.is_a?(Store::Objects::MethodObject::Connected)
@@ -47,32 +47,32 @@ module Yoda
         end
 
         def namespace_path
-          initialize_method.namespace_path
+          namespace.path
         end
 
         # @return [String]
         def document
-          initialize_method.document
+          initialize_method&.document || ''
         end
 
         # @return [Array<Store::Objects::Tag>]
         def tags
-          initialize_method.resolved_tag_list
+          (initialize_method&.resolved_tag_list || []) + [virtual_return_tag]
         end
 
         # @return [Array<(String, Integer, Integer)>]
         def sources
-          initialize_method.sources
+          initialize_method&.sources || []
         end
 
         # @return [ParameterList]
         def parameters
-          initialize_method.parameters
+          initialize_method&.parameters || ParameterList.new([])
         end
 
         # @return [(String, Integer, Integer), nil]
         def primary_source
-          initialize_method.primary_source
+          initialize_method&.primary_source
         end
 
         # @return [TypeExpressions::Base, nil]
@@ -85,6 +85,14 @@ module Yoda
         # @return [TypeBuilder]
         def type_builder
           @type_builder ||= TypeBuilder.new(parameters, tags)
+        end
+
+        # @return [Store::Objects::Tag]
+        def virtual_return_tag
+          Store::Objects::Tag.new(
+            tag_name: "return", 
+            yard_types: [namespace.path],
+          )
         end
       end
     end
