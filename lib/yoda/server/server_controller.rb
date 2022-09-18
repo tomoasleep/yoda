@@ -102,7 +102,7 @@ module Yoda
         end
       end
 
-      # @param id [String]
+      # @param (see Scheduler#async)
       def async(id:, &block)
         scheduler.async(id: id, &block)
       end

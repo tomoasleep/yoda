@@ -13,17 +13,20 @@ module Yoda
     require 'yoda/parsing/traverser'
 
     class << self
-      # @see {Parser#parse}
+      # @param (see Parser#parse)
+      # @return (see Parser#parse)
       def parse(*args)
         Parser.new.parse(*args)
       end
 
-      # @see {Parser#parse_with_comments}
+      # @param (see Parser#parse_with_comments)
+      # @return (see Parser#parse_with_comments)
       def parse_with_comments(*args)
         Parser.new.parse_with_comments(*args)
       end
 
-      # @see {Parser#parse_with_comments_if_valid}
+      # @param (see Parser#parse_with_comments_if_valid)
+      # @return (see Parser#parse_with_comments_if_valid)
       def parse_with_comments_if_valid(*args)
         Parser.new.parse_with_comments_if_valid(*args)
       end
