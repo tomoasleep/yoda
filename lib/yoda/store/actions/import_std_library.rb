@@ -1,15 +1,25 @@
+require 'yoda/store/actions/action_process_runner'
+
 module Yoda
   module Store
     module Actions
       class ImportStdLibrary
+        include ActionProcessRunner::Mixin
+        
         # @return [Project::Dependency::Std]
         attr_reader :dep
 
         class << self
-          # @param dep [Project::Dependency::Std]
-          # @return [Objects::Patch]
+          # @param (see #initialize)
+          # @return (see #run)
           def run(dep)
             new(dep).run
+          end
+
+          # @param (see #initialize)
+          # @return (see #run)
+          def run_process(dep)
+            new(dep).run_process
           end
         end
 
@@ -18,11 +28,16 @@ module Yoda
           @dep = dep
         end
 
-        # @return [Objects::Patch]
+        # @return [Array<Objects::Patch>]
         def run
-          BuildCoreIndex.run unless BuildCoreIndex.exists?
-          return false unless File.exist?(dep.doc_path)
-          YardImporter.import(dep.doc_path)
+          RubySourceDownloader.run unless RubySourceDownloader.downloaded?
+
+          yardoc_runner = YardocRunner.new(
+            source_dir_path: VersionStore.for_current_version.ruby_source_path,
+            database_path: dep.doc_path,
+          )
+
+          yardoc_runner.run
         end
       end
     end

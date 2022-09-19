@@ -59,8 +59,10 @@ module Yoda
               @project = project
             end
 
+            # @return [Objects::PatchSet]
+            # @raise [Actions::ImportError]
             def create_patch
-              Actions::ImportCoreLibrary.run(self)
+              Objects::PatchSet.new(Actions::ImportCoreLibrary.run(self))
             end
 
             # @note Implementation for {WithRegistry#registry_path}

@@ -128,7 +128,7 @@ module Yoda
 
       def handle_file_changed_event(path:, content:)
         if %w(.rb .c).include?(File.extname(path))
-            Actions::ReadFile.run(registry, path, content: content)
+            Actions::ReadFile.new(path, content: content).run_process_and_register(registry)
         end
 
         if %w(Gemfile Gemfile.lock).include?(File.basename(path))

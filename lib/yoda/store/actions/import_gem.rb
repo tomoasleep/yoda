@@ -1,16 +1,26 @@
 require 'open3'
+require 'yoda/store/actions/action_process_runner'
 
 module Yoda
   module Store
     module Actions
       class ImportGem
+        include ActionProcessRunner::Mixin
+        
         # @return [Objects::Library::Gem::Connected]
         attr_reader :dep
 
         class << self
-          # @return [true, false]
-          def run(args = {})
-            new(args).run
+          # @param (see #initialize)
+          # @return (see #run)
+          def run(dep)
+            new(dep).run
+          end
+
+          # @param (see #initialize)
+          # @return (see #run)
+          def run_process(dep)
+            new(dep).run_process
           end
         end
 
@@ -19,42 +29,10 @@ module Yoda
           @dep = dep
         end
 
-        # @return [Objects::Patch]
+        # @return [Array<Objects::Patch>]
         def run
-          create_dependency_doc
-          if yardoc_file = yardoc_path
-            load_yardoc(yardoc_file, gem_path)
-          end
-        end
-
-        private
-
-        def create_dependency_doc
-          if dep.managed_by_rubygems? && readable?(yardoc_path)
-            Logger.info "Gem docs for #{gem_name} #{gem_version} already exist"
-            return
-          end
-
-          if yardoc_path
-            Logger.info "Building gem docs for #{gem_name} #{gem_version}"
-            yard_doc_command
-          else
-            Logger.info "Cannot build gem docs for #{gem_name} #{gem_version}"
-          end
-        end
-
-        def yard_doc_command
           begin
-            o, e = Dir.chdir(gem_path) do
-              Open3.capture2e("yard --no-stats --no-output -b #{yardoc_path} -c")
-            end
-            Logger.debug o unless o.empty?
-            if e.success?
-              Logger.info "Done building gem docs for #{gem_name} #{gem_version}"
-            else
-              Logger.warn "Failed to build #{gem_name} #{gem_version}"
-              fail ImportError, "Failed to build #{gem_name} #{gem_version}"
-            end
+            yardoc_runner.run
           rescue => ex
             Logger.debug ex
             Logger.debug ex.backtrace
@@ -63,18 +41,11 @@ module Yoda
           end
         end
 
-        # @param yardoc_file [String]
-        # @param gem_source_path [String]
-        # @return [Objects::Patch, nil]
-        def load_yardoc(yardoc_file, gem_source_path)
-          begin
-            YardImporter.import(yardoc_file, root_path: gem_source_path)
-          rescue => ex
-            Logger.debug ex
-            Logger.debug ex.backtrace
-            Logger.warn "Failed to load #{yardoc_file}"
-            nil
-          end
+        private
+
+        # @return [YardocRunner]
+        def yardoc_runner
+          @yardoc_runner ||= YardocRunner.new(source_dir_path: gem_path, database_path: yardoc_path, id: YardImporter.patch_id_for_file(yardoc_path))
         end
 
         # @return [String, nil]

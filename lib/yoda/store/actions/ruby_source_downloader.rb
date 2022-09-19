@@ -5,18 +5,16 @@ require 'fileutils'
 module Yoda
   module Store
     module Actions
-      class BuildCoreIndex
+      class RubySourceDownloader
         class << self
           # @return [true, false]
           def run
             new.run
           end
 
-          def exists?
-            [
-              VersionStore.for_current_version.core_yardoc_path,
-              VersionStore.for_current_version.stdlib_yardoc_path,
-            ].all? { |path| File.exists?(path) }
+          # @return [true, false]
+          def downloaded?
+            File.exists?(VersionStore.for_current_version.ruby_source_path)
           end
         end
 
@@ -24,8 +22,6 @@ module Yoda
         def run
           Logger.info "Downloading ruby source"
           download_core_index_file
-          Logger.info "Building ruby core and stdlib index"
-          build_core_index
         end
 
         private
@@ -46,25 +42,6 @@ module Yoda
                 zip_file.extract(entry, extracted_entry_path) { true }
               end
             end
-          end
-        end
-
-        def build_core_index
-          Dir.chdir(VersionStore.for_current_version.ruby_source_path) do
-            exec_yardoc("yard doc -n *.c") || return
-            exec_yardoc("yard doc -b .yardoc-stdlib -o doc-stdlib -n") || return
-          end
-          Logger.info "Success to build yard index"
-        end
-
-        def exec_yardoc(cmdline)
-          o, e = Open3.capture2e(cmdline)
-          Logger.debug o unless o.empty?
-          if e.success?
-            true
-          else
-            Logger.warn "Failed to build core index"
-            false
           end
         end
       end

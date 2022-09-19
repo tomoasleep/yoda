@@ -28,6 +28,26 @@ RSpec.configure do |config|
     Yoda::Instrument.clean
     Yoda::Store::Adapters.clean
   end
+
+  config.around(:each) do |example|
+    if example.metadata[:fork]
+      begin
+        current_setting = Yoda.inline_process?
+        Yoda.inline_process = false
+        example.run
+      ensure
+        Yoda.inline_process = current_setting
+      end
+    else
+      begin
+        current_setting = Yoda.inline_process?
+        Yoda.inline_process = true
+        example.run
+      ensure
+        Yoda.inline_process = current_setting
+      end
+    end
+  end
 end
 
 YARD::Logger.instance(File.open(File::Constants::NULL, 'w'))

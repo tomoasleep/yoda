@@ -16,6 +16,26 @@ module Yoda
   require "yoda/parsing"
   require "yoda/typing"
   require "yoda/yard_extensions"
+
+  class << self
+    # @return [Boolean]
+    attr_accessor :inline_process
+
+    def fork_process
+      if inline_process?
+        yield
+      else
+        Process.fork do
+          Yoda::Instrument.clean
+          yield
+        end
+      end
+    end
+
+    def inline_process?
+      inline_process
+    end
+  end
 end
 
 YARD::Logger.instance.io = Yoda::Logger.instance.pipeline(tag: 'YARD')

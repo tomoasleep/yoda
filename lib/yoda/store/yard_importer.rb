@@ -29,6 +29,8 @@ module Yoda
       end
 
       # @param id [String]
+      # @param root_path [String, nil]
+      # @param source_path [String, nil] if given overwrite the source path of objects.
       def initialize(id, root_path: nil, source_path: nil)
         @patch = Objects::Patch.new(id)
         @root_path = root_path

@@ -1,9 +1,10 @@
+require 'yoda/store/actions/action_process_runner'
+
 module Yoda
   module Store
     module Actions
       class ReadFile
-        # @return [Registry]
-        attr_reader :registry
+        include ActionProcessRunner::Mixin
 
         # @return [String]
         attr_reader :file
@@ -11,11 +12,19 @@ module Yoda
         # @return [String, nil]
         attr_reader :content
 
-        # @param registry [Registry]
-        # @param file [String]
-        # @return [void]
-        def self.run(registry, file, content: nil, root_path: nil)
-          self.new(registry, file, content: content, root_path: root_path).run
+        # @return [String, nil]
+        attr_reader :root_path
+
+        # @param (see #initialize)
+        # @return (see #run)
+        def self.run(file, **kwargs)
+          self.new(file, **kwargs).run
+        end
+
+        # @param (see #initialize)
+        # @return (see #run)
+        def self.run_process(file, **kwargs)
+          self.new(dep, **kwargs).run_process
         end
 
         # @param file [String]
@@ -24,26 +33,39 @@ module Yoda
           YardImporter.patch_id_for_file(file)
         end
 
-        # @param registry [Registry]
         # @param file [String]
         # @param content [String, nil]
-        def initialize(registry, file, content: nil, root_path: nil)
-          @registry = registry
+        # @param root_path [String, nil]
+        def initialize(file, content: nil, root_path: nil)
           @file = file
           @content = content
           @root_path = root_path
         end
 
-        # @return [void]
+        # @return [Array<Objects::Patch>]
         def run
-          YARD::Registry.clear
-          if content
-            YARD.parse_string(content) if Yoda::Parsing.parse_with_comments(content)
+          yardoc_runner.run(import_each: true)
+        end
+
+        # @param registry [Registry::ProjectRegistry]
+        # @return [void]
+        def run_and_register(registry)
+          run.each { |patch| registry.local_store.add_file_patch(patch) }
+        end
+
+        # @param registry [Registry::ProjectRegistry]
+        # @return [void]
+        def run_process_and_register(registry)
+          run_process.each { |patch| registry.local_store.add_file_patch(patch) }
+        end
+
+        # @return [YardocRunner]
+        def yardoc_runner
+          @yardoc_runner ||= if content
+            YardocRunner.new(source_dir_path: root_path || Dir.pwd, contents: { file => content })
           else
-            YARD.parse([file])
+            YardocRunner.new(source_dir_path: root_path || Dir.pwd, file_paths: [file])
           end
-          patch = YardImporter.new(file, source_path: file).import(YARD::Registry.all + [YARD::Registry.root]).patch
-          registry.local_store.add_file_patch(patch)
         end
       end
     end

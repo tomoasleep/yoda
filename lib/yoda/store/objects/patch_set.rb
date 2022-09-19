@@ -44,9 +44,11 @@ module Yoda
           attr_reader :index
         end
 
-        def initialize
+        # @param init_patches [Array<Patch>]
+        def initialize(init_patches = [])
           @patches = Hash.new
           @address_index = AddressIndex.new
+          init_patches.each { |patch| register(patch) }
         end
 
         # @param patch [Patch]
@@ -80,6 +82,7 @@ module Yoda
             Merger.new(patches).merged_instance
           end
         end
+        alias get find
 
         # @return [Array<Symbol>]
         def keys

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Yoda::Store::Project do
+RSpec.describe Yoda::Store::Project, fork: true do
   include SampleProjectsHelper
 
   let(:project) { described_class.for_path(root_path) }

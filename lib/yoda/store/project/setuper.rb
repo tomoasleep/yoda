@@ -20,8 +20,6 @@ module Yoda
         # @param rebuild [Boolean]
         # @param controller [Server::ServerController, nil]
         def run(rebuild: false, controller: nil)
-          build_core_index
-
           if rebuild
             clear
           end
@@ -62,13 +60,6 @@ module Yoda
             end
           else
             yield
-          end
-        end
-
-        def build_core_index
-          unless Store::Actions::BuildCoreIndex.exists?
-            Instrument.instance.initialization_progress(phase: :core, message: 'Downloading and building core index')
-            Store::Actions::BuildCoreIndex.run
           end
         end
 

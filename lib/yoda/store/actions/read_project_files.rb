@@ -27,8 +27,13 @@ module Yoda
             Instrument.instance.initialization_progress(phase: :load_project_files, message: "Loading current project files (#{index} / #{length})", index: index, length: length)
           end
 
-          files.each do |file|
-            ReadFile.run(registry, file)
+          patches = ActionProcessRunner.new.run do
+            yardoc_runner = YardocRunner.new(source_dir_path: project.root_path, file_paths: files)
+            yardoc_runner.run(import_each: true)
+          end
+          
+          patches.each do |patch|
+            registry.local_store.add_file_patch(patch)
             progress.increment
           end
         end

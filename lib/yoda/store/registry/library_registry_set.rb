@@ -55,21 +55,23 @@ module Yoda
           remove = remove.map { |library| library.with_project_connection(project: project) }
 
           remove.each do |library|
-            if registry = library.try_registry
-              persistable_library_store.remove_registry(registry)
-              volatile_library_store.remove_registry(registry)
-              status.remove_library(library)
-            end
+            registry = library.registry
+            persistable_library_store.remove_registry(registry)
+            volatile_library_store.remove_registry(registry)
+            status.remove_library(library)
+          rescue => e
+            Logger.warn("Failed to remove library #{library.inspect}")
           end
           add.each do |library|
-            if registry = library.try_registry
-              if registry.persistable?
-                persistable_library_store.add_registry(registry)
-              else
-                volatile_library_store.add_registry(registry)
-              end
-              status.add_library(library)
+            registry = library.registry
+            if registry.persistable?
+              persistable_library_store.add_registry(registry)
+            else
+              volatile_library_store.add_registry(registry)
             end
+            status.add_library(library)
+          rescue => e
+            Logger.warn("Failed to add library #{library.inspect}")
           end
           on_change&.call
           save

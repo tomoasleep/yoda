@@ -9,7 +9,7 @@ module Yoda
         attr_reader :registry
 
         # @param id [String]
-        # @param  [Array[Addressable], nil]
+        # @param contents [Array[Addressable], nil]
         def initialize(id, contents = nil)
           @id = id
           @registry = (contents || []).map { |content| [content.address.to_sym, content] }.to_h

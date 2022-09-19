@@ -22,7 +22,7 @@ RSpec.describe Yoda::Typing::Inferencer do
     Tempfile.create do |file|
       file.write(source)
       file.close
-      Yoda::Store::Actions::ReadFile.run(registry, file.path)
+      Yoda::Store::Actions::ReadFile.new(file.path).run_and_register(registry)
     end
   end
 
