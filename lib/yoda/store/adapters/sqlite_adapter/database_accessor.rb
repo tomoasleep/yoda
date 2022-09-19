@@ -38,6 +38,11 @@ module Yoda
             @database = database
           end
 
+          # @return [void]
+          def close
+            database.close
+          end
+
           # @param address [String, Symbol]
           # @param namespace [String, Symbol]
           # @return [Object, nil]

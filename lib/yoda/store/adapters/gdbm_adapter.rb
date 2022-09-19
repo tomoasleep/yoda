@@ -21,6 +21,11 @@ module Yoda
           def type
             :gdbm
           end
+
+          def clean
+            @pool&.each { |db| db.close }
+            @pool = nil
+          end
         end
 
         # @return [DBM]
@@ -40,6 +45,10 @@ module Yoda
 
         def root
           @root ||= NamespaceAccessor.new(database: database, namespace: nil)
+        end
+
+        def close
+          database.close
         end
 
         # @param namespace [String, Symbol]

@@ -17,6 +17,11 @@ module Yoda
           def type
             :sqlite
           end
+
+          def clean
+            @pool&.each { |(_, db)| db.close }
+            @pool = nil
+          end
         end
 
         # @return [DatabaseAccessor]
@@ -34,6 +39,10 @@ module Yoda
 
         def root
           @root ||= NamespaceAccessor.new(database_accessor: database_accessor, namespace: nil)
+        end
+
+        def close
+          database_accessor.close
         end
 
         # @param namespace [String, Symbol]

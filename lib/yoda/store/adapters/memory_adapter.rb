@@ -15,6 +15,10 @@ module Yoda
           def type
             :memory
           end
+
+          def clean
+            @pool = nil
+          end
         end
 
         # @return [Hash{String => String}]

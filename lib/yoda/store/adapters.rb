@@ -21,6 +21,11 @@ module Yoda
           end
         end
 
+        # @return [void]
+        def clean
+          default_adapter_class.clean
+        end
+
         # @return [Hash{Symbol => Base}]
         def adapter_classes
           @adapter_classes ||= [GdbmAdapter, SqliteAdapter, MemoryAdapter].map { |klass| [klass.type.to_sym, klass] }.to_h

@@ -13,6 +13,11 @@ module Yoda
           fail NotImplementedError
         end
 
+        # @abstract
+        def self.clean
+          fail NotImplementedError
+        end
+
         # @param path [String, nil]
         def self.path_for(path)
           path ? "#{path}.#{type}" : nil

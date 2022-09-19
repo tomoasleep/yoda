@@ -26,6 +26,7 @@ RSpec.configure do |config|
 
   config.after(:each) do
     Yoda::Instrument.clean
+    Yoda::Store::Adapters.clean
   end
 end
 
