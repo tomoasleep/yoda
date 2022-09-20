@@ -76,7 +76,7 @@ module Yoda
 
         # @param parameters [Array<(String, String)>]
         def initialize(raw_parameters)
-          fail ArgumentError, raw_parameters unless raw_parameters.all? { |param| param.is_a?(Array) }
+          fail ArgumentError, raw_parameters unless raw_parameters&.all? { |param| param.is_a?(Array) }
           @raw_parameters = raw_parameters
         end
 

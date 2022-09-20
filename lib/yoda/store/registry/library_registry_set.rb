@@ -60,7 +60,7 @@ module Yoda
             volatile_library_store.remove_registry(registry)
             status.remove_library(library)
           rescue => e
-            Logger.warn("Failed to remove library #{library.inspect}")
+            Logger.warn("Failed to remove library #{library.name}")
           end
           add.each do |library|
             registry = library.registry
@@ -71,7 +71,7 @@ module Yoda
             end
             status.add_library(library)
           rescue => e
-            Logger.warn("Failed to add library #{library.inspect}")
+            Logger.warn("Failed to add library #{library.name}")
           end
           on_change&.call
           save
