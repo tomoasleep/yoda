@@ -47,6 +47,8 @@ module Yoda
         @parser ||= ::Parser::CurrentRuby.new.tap do |parser|
           parser.diagnostics.all_errors_are_fatal = true
           parser.diagnostics.ignore_warnings = true
+
+          ::Parser::Builders::Default.emit_forward_arg = true
         end
       end
 

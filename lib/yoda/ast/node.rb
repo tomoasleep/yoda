@@ -42,6 +42,11 @@ module Yoda
         node.type
       end
 
+      # @return (see Unparser.unparse)
+      def unparse
+        Unparser.unparse(node)
+      end
+
       private
 
       def source_map_expression

@@ -9,7 +9,7 @@ module Yoda
         children[0]
       end
 
-      # @return [ParmetersNode]
+      # @return [ParametersNode]
       def parameters
         children[1]
       end

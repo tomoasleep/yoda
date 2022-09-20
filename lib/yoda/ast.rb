@@ -34,6 +34,7 @@ module Yoda
     require 'yoda/ast/name_vnode'
     require 'yoda/ast/optional_parameter_node'
     require 'yoda/ast/pair_node'
+    require 'yoda/ast/parameter_kind_predicates'
     require 'yoda/ast/parameter_node'
     require 'yoda/ast/parameters_node'
     require 'yoda/ast/rescue_node'
@@ -105,7 +106,7 @@ module Yoda
           InterpolationTextNode
         when :args
           ParametersNode
-        when :arg, :shadowarg, :restarg, :blockarg, :kwarg, :kwrestarg
+        when :arg, :shadowarg, :restarg, :blockarg, :kwarg, :kwrestarg, :forward_arg
           ParameterNode
         when :optarg, :kwoptarg
           OptionalParameterNode

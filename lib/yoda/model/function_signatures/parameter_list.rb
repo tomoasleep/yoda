@@ -5,7 +5,7 @@ module Yoda
     module FunctionSignatures
       class ParameterList
         class Item
-          # @return [:required, :optional, :rest, :post, :required_keyword, :optional_keyword, :keyword_rest, :block]
+          # @return [:required, :optional, :rest, :post, :required_keyword, :optional_keyword, :keyword_rest, :block, :forward]
           attr_reader :kind
 
           # @return [String]
@@ -14,9 +14,9 @@ module Yoda
           # @return [String, nil]
           attr_reader :default
 
-          VALID_KINDS = %i(required optional rest post required_keyword optional_keyword keyword_rest block).freeze
+          VALID_KINDS = %i(required optional rest post required_keyword optional_keyword keyword_rest block forward).freeze
 
-          # @param kind [:required, :optional, :rest, :post, :required_keyword, :optional_keyword, :keyword_rest, :block]
+          # @param kind [:required, :optional, :rest, :post, :required_keyword, :optional_keyword, :keyword_rest, :block, :forward]
           # @param name [String]
           # @param default [String, nil]
           def initialize(kind:, name:, default: nil)
@@ -151,7 +151,9 @@ module Yoda
             found_rest = false
 
             raw_parameters.map do |(name, default)|
-              if name.to_s.start_with?('**')
+              if name.to_s == '...'
+                Item.new(kind: :forward, name: '')
+              elsif name.to_s.start_with?('**')
                 Item.new(kind: :keyword_rest, name: name.to_s.gsub(/\A\*\*/, ''))
               elsif name.to_s.start_with?('*')
                 found_rest = true

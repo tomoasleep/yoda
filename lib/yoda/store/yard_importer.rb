@@ -132,7 +132,7 @@ module Yoda
             overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-            parameters: code_object.parameters || [],
+            parameters: convert_parameters(code_object),
             visibility: :private,
           )
           object_object = Objects::ClassObject.new(
@@ -149,7 +149,7 @@ module Yoda
             overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-            parameters: code_object.parameters || [],
+            parameters: convert_parameters(code_object),
             visibility: code_object.visibility,
           )
         end
@@ -246,11 +246,20 @@ module Yoda
         )
       end
 
+      # @param object [::YARD::CodeObjects::MethodObject, ::YARD::Tags::OverloadTag]
+      # @return [Array<(String, String)>]
+      def convert_parameters(object)
+        Model::YardSignatureParser.new(object.signature).to_a
+      rescue Model::YardSignatureParser::ParseError => e
+        Logger.warn "Failed to parse signature: #{object.signature}"
+        object.parameters || []
+      end
+
       # @param tag [::YARD::Tags::OverloadTag]
       # @param namespace [String]
       # @return [Objects::Tag]
       def convert_overload_tag(tag, namespace)
-        Objects::Overload.new(name: tag.name.to_s, tag_list: tag.tags.map { |tag| convert_tag(tag, namespace) }, document: tag.docstring.to_s, parameters: tag.parameters || [])
+        Objects::Overload.new(name: tag.name.to_s, tag_list: tag.tags.map { |tag| convert_tag(tag, namespace) }, document: tag.docstring.to_s, parameters: convert_parameters(tag))
       end
 
       # @param namespace [String]

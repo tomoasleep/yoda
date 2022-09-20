@@ -1,9 +1,18 @@
+require 'yoda/ast/parameter_kind_predicates'
+
 module Yoda
   module AST
     class ParameterNode < Node
+      include ParameterKindPredicates
+
       # @return [NameVnode, EmptyNode, nil]
       def content
         children[0]
+      end
+
+      # @return [nil]
+      def optional_value
+        nil
       end
 
       # @return [Model::Parameters::Base]

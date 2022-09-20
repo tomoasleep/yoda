@@ -1,6 +1,10 @@
+require 'yoda/ast/parameter_kind_predicates'
+
 module Yoda
   module AST
     class OptionalParameterNode < Node
+      include ParameterKindPredicates
+
       # @return [Node]
       def content
         children[0]
