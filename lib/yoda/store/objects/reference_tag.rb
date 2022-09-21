@@ -78,6 +78,21 @@ module Yoda
         class Resolver
           class CyclicError < StandardError; end
 
+          class ResolveResult
+            # @return [Array<Tag>]
+            attr_reader :tags
+
+            # @return [Array<Overload>]
+            attr_reader :overloads
+
+            # @param tags [Array<Tag>]
+            # @param overloads [Array<Overload>]
+            def initialize(tags:, overloads:)
+              @tags = tags
+              @overloads = overloads
+            end
+          end
+
           # @return [Registry::View]
           attr_reader :registry
 
@@ -88,36 +103,72 @@ module Yoda
 
           # @param reference_tag [ReferenceTag::Connected]
           # @return [Array<Tag>]
-          def resolve(reference_tag)
-            do_resolve_tags(reference_tag)
+          def resolve_tags(reference_tag)
+            do_resolve(reference_tag).tags
+          end
+
+          # @param reference_tag [ReferenceTag::Connected]
+          # @return [Array<Overload>]
+          def resolve_overloads(reference_tag)
+            do_resolve(reference_tag).overloads
           end
 
           private
 
           # @param reference_tag [ReferenceTag::Connected]
           # @param visited [Set<ReferenceTag>]
-          def do_resolve_tags(reference_tag, visited = [])
-            fail CyclicError, "#{reference} is " if visited.include?(reference_tag)
+          # @return [ResolveResult]
+          def do_resolve(reference_tag, visited = [])
+            fail CyclicError, "#{reference_tag} has cyclic" if visited.include?(reference_tag)
             visited += [reference_tag]
-
             if object = reference_tag.referring_object
-              tag_list = object.tag_list + object.ref_tag_list do |ref_tag|
-                do_resolve_tags(ref_tag, visited)
-              end
+              nested_reference_results = object.ref_tag_list.map { |ref_tag| do_resolve_tags(ref_tag, visited) }
 
-              filter_tags(reference_tag, object, tag_list)
+              referring_object_overloads = object.kind == :method ? object.overloads + nested_reference_results.flat_map(&:overloads) : []
+              referring_object_tag_list = object.tag_list + nested_reference_results.flat_map(&:tags) + referring_object_overloads.flat_map(&:tags)
+
+              ResolveResult.new(
+                tags: filter_tags(reference_tag, object, referring_object_tag_list),
+                overloads: filter_overloads(reference_tag, object, object.tag_list + nested_reference_results.flat_map(&:tags), referring_object_overloads),
+              )
             else
-              []
+              ResolveResult.new(
+                tags: [],
+                overloads: [],
+              )
             end
           end
 
-          # @param reference_tag [ReferenceTag]
+          # @param reference_tag [ReferenceTag::Connected]
           # @param object [Base::Connected]
           # @param tag_list [Array<Tag>]
           # @return [Array<Tag>]
           def filter_tags(reference_tag, object, tag_list)
             matched_tags = tag_list.select { |tag| match_tag?(reference_tag, tag) }
             normalize_referring_tags(reference_tag, object, matched_tags)
+          end
+
+          # @param reference_tag [ReferenceTag::Connected]
+          # @param object [Base::Connected]
+          # @param tag_list [Array<Tag>]
+          # @return [Array<Tag>]
+          # @param overloads [Array<Overload>]
+          # @return [Array<Overload>]
+          def filter_overloads(reference_tag, object, tag_list, overloads)
+            if object.kind == :method && reference_tag.owner.kind == :method && reference_tag.tag_name.to_sym == :param
+              if reference_tag.owner.parameters.forward_parameter && reference_tag.owner.parameters.items.length == 1
+                method_interface = Overload.new(
+                  name: object.name,
+                  parameters: object.parameters.raw_parameters,
+                  document: object.document,
+                  tag_list: tag_list
+                )
+
+                return [method_interface] + overloads
+              end
+            end
+
+            return []
           end
 
           # @param reference_tag [ReferenceTag]
@@ -250,7 +301,12 @@ module Yoda
 
           # @return [Array<Tag>]
           def resolve_tags
-            Resolver.new(registry).resolve(self)
+            Resolver.new(registry).resolve_tags(self)
+          end
+
+          # @return [Array<Overload>]
+          def resolve_overloads
+            Resolver.new(registry).resolve_overloads(self)
           end
 
           # @return [Objects::Base, nil]

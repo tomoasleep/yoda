@@ -4,6 +4,11 @@ module Yoda
       class MethodObject < Base
         class Connected < Base::Connected
           delegate_to_object :parameters, :visibility, :overloads, :name, :separator, :namespace_path, :parent_address, :namespace_path
+
+          # @return [Array<Overload>]
+          def resolved_overloads
+            overloads + ref_tag_list.map(&:resolve_overloads).flatten
+          end
         end
 
         # @return [Model::FunctionSignatures::ParameterList]

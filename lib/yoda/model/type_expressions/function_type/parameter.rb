@@ -70,7 +70,7 @@ module Yoda
           end
 
           # @return [String]
-          def positional_expression(optioanl: false, rest: false, block: false)
+          def positional_expression(optional: false, rest: false, block: false)
             prefix = begin
               if optional
                 "?" 

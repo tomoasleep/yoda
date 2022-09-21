@@ -98,5 +98,26 @@ RSpec.describe Yoda::Store::Query::FindSignature do
         end
       end
     end
+
+    context 'when the given method has reference tags' do
+      let(:scope) { Yoda::Store::Query::FindConstant.new(registry).find(scope_address) }
+
+      context 'and the method has forward arg' do
+        let(:scope_address) { 'YodaFixture::ReferenceTagExamples' }
+        let(:name) { 'method_with_forward_arg' }
+
+        it 'returns the signature of the specified module' do
+          expect(subject).to contain_exactly(
+            have_attributes(
+              namespace_path: 'YodaFixture::ReferenceTagExamples',
+              sep: '#',
+              name: 'method_with_forward_arg',
+              parameters: have_attributes(raw_parameters: [['x', nil], ['y:', nil]]),
+              type: have_attributes(to_s: '(String x, y: Integer) -> String'),
+            ).and(be_a(Yoda::Model::FunctionSignatures::Overload)),
+          )
+        end
+      end
+    end
   end
 end

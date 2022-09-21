@@ -30,10 +30,10 @@ module Yoda
 
           if constructor = try_to_build_constructor(receiver, method_object)
             [constructor]
-          elsif method_object.overloads.empty?
+          elsif method_object.resolved_overloads.empty?
             [Model::FunctionSignatures::Method.new(method_object)]
           else
-            method_object.overloads.map { |overload| Model::FunctionSignatures::Overload.new(method_object.with_connection(registry: registry), overload) }
+            method_object.resolved_overloads.map { |overload| Model::FunctionSignatures::Overload.new(method_object.with_connection(registry: registry), overload) }
           end
         end
 

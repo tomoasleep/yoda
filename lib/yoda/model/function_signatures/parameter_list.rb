@@ -135,6 +135,11 @@ module Yoda
           items.find { |item| item.kind?(:block) }
         end
 
+        # @return [Item, nil]
+        def forward_parameter
+          items.find { |item| item.kind?(:forward) }
+        end
+
         # @param name [String]
         # @return [Item, nil]
         def find_by_name(name)

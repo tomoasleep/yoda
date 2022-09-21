@@ -2,7 +2,7 @@ module Yoda
   module Model
     module FunctionSignatures
       class Overload < Base
-        # @return [Store::Objects::MethodObject]
+        # @return [Store::Objects::MethodObject::Connected]
         attr_reader :method_object
 
         # @return [Store::Objects::Overload]
