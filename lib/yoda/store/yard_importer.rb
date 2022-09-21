@@ -251,7 +251,8 @@ module Yoda
       def convert_parameters(object)
         Model::YardSignatureParser.new(object.signature).to_a
       rescue Model::YardSignatureParser::ParseError => e
-        Logger.warn "Failed to parse signature: #{object.signature}"
+        # Cannot parse signature if the method is defined in C.
+        Logger.debug "Failed to parse signature: #{object.signature}"
         object.parameters || []
       end
 
@@ -266,7 +267,7 @@ module Yoda
       # @return [Array<String>]
       def convert_to_lexical_scope(namespace)
         path = Model::Path.new(namespace)
-        ((path.to_s.empty? ? [] : [path]) + path.parent_paths).map(&:to_s)
+        ((path.to_s.empty? ? [] : [path]) + path.parent_paths + ["Object"]).map(&:to_s)
       end
 
       # @param symbol [Symbol]

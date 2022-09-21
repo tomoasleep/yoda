@@ -149,11 +149,11 @@ module Yoda
 
         def all_parameters_to_s
           [
-            *required_parameters.map(&:positonal_expression),
+            *required_parameters.map(&:positional_expression),
             *optional_parameters.map(&:optional_expression),
             rest_parameter&.rest_expression,
             *post_parameters.map(&:positional_expression),
-            *keyword_parameters.map(&:keyword_expression),
+            *required_keyword_parameters.map(&:keyword_expression),
             *optional_keyword_parameters.map(&:optional_keyword_expression),
             keyword_rest_parameter&.keyword_rest_expression,
             block_parameter&.block_expression,
