@@ -7,7 +7,7 @@ module Yoda
 
           # @return [Array<Overload>]
           def resolved_overloads
-            overloads + ref_tag_list.map(&:resolve_overloads).flatten
+            TagReferenceResolver.new(self).resolve_overloads(self)
           end
         end
 
@@ -54,6 +54,16 @@ module Yoda
         # @return [String]
         def namespace_path
           address.namespace.to_s
+        end
+
+        # @return [Overload]
+        def self_overload
+          Overload.new(
+            name: name,
+            parameters: parameters.raw_parameters,
+            document: document,
+            tag_list: tag_list,
+          )
         end
 
         # @return [String]

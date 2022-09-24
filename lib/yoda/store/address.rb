@@ -107,6 +107,10 @@ module Yoda
             end
           end
 
+          if parts.last.start_with?('#', '.')
+            parts = parts[..-3] + ["#{parts[-2]}#{parts[-1]}"]
+          end
+
           # Remove redundunt `Object`.
           parts = parts.drop_while { |part| part == 'Object' }
           if parts.empty?

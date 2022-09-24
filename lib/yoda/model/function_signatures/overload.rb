@@ -71,7 +71,7 @@ module Yoda
 
         # @return [(String, Integer, Integer), nil]
         def primary_source
-          overload.primary_source || method_object.primary_source
+          method_object.primary_source
         end
 
         # @return [ParameterList]

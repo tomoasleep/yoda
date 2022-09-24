@@ -20,10 +20,10 @@ module Yoda
       require 'yoda/store/objects/patch'
       require 'yoda/store/objects/patch_set'
       require 'yoda/store/objects/tag'
-      require 'yoda/store/objects/reference_tag'
       require 'yoda/store/objects/libraries_status'
       require 'yoda/store/objects/library'
       require 'yoda/store/objects/serializable_set'
+      require 'yoda/store/objects/tag_reference_resolver'
       require 'yoda/store/objects/map'
 
       class << self
