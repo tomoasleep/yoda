@@ -20,6 +20,16 @@ module Yoda
           new(slice.to_s, range: range)
         end
 
+        # @param slices [Array<Parslet::Slice>]
+        # @param space [String]
+        # @return [String]
+        def self.join(slices, space = " ")
+          slices.each_cons(2).reduce(slices.first&.to_s || "") do |str, (prev_token, token)|
+            spaces = space * (token.offset - (prev_token.offset + prev_token.length))
+            str + spaces + token.to_s
+          end
+        end
+
         # @return [String]
         attr_reader :content
 
@@ -37,6 +47,11 @@ module Yoda
         # @return [Boolean]
         def include?(location)
           range&.include?(location)
+        end
+
+        # @return [String]
+        def to_s
+          content
         end
       end
     end

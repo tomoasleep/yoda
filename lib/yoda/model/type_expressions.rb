@@ -35,6 +35,12 @@ module Yoda
       def self.parse_type_strings(strings)
         TypeExpressions::UnionType.new(strings.map { |string| parse(string) })
       end
+
+      # @param tag [Store::Objects::Tag]
+      # @return 
+      def self.from_tag(tag)
+        Model::TypeExpressions.parse_type_strings(tag.yard_types).change_root(tag.lexical_scope.map { |literal| Model::Path.new(literal) } + [Model::Path.new('Object')])
+      end
     end
   end
 end

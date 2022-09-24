@@ -2,6 +2,7 @@ require 'parslet'
 
 module Yoda
   module Parsing
+    # Tokenize tag parts in the given comment text.
     class CommentTokenizer
       # @return [Array<Sequence, String>]
       def parse(str)

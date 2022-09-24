@@ -1,6 +1,13 @@
 module Yoda
   module AST
     class CommentBlock
+      # Return the type part of the tag.
+      #
+      # @example
+      #   @param var_name [Type] description
+      #                    ~~~~
+      #                    ^ here
+      #
       class TagTextTypePart < BasePart
         # @return [BasePart]
         attr_reader :parent
@@ -39,6 +46,11 @@ module Yoda
         # @return [Token, nil]
         def nearest_token(location)
           type_tokens.find { |token| token.include?(location) }
+        end
+
+        # @return [String]
+        def to_s
+          Token.join(tokens)
         end
 
         private

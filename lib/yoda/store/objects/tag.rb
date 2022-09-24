@@ -92,6 +92,11 @@ module Yoda
           self.class.const_get(:Connected).new(self, **kwargs)
         end
 
+        # @return (see Model::TypeExpressions.from_tag)
+        def type_expression
+          Model::TypeExpressions.from_tag(self)
+        end
+
         # A wrapper class of {Objects::Tag} to allow access to registry.
         class Connected
           extend ConnectedDelegation
@@ -105,6 +110,7 @@ module Yoda
                              :option_default,
                              :reference_path,
                              :reference_address_candidates,
+                             :type_expression,
                              :kind,
                              :to_h,
                              :to_json,

@@ -48,6 +48,11 @@ module Yoda
         end
       end
 
+      # @return [Array<TagPart>]
+      def tag_parts
+        parts.select { |part| part.is_a?(TagPart) }
+      end
+
       # @param location [Parsing::Location]
       # @return [BasePart, nil]
       def nearest_part(location)
@@ -110,7 +115,7 @@ module Yoda
 
       private
 
-      # @return [Array<String, Parsing::CommentTokenizer::Sequence>]
+      # @return [Array<Parsing::CommentTokenizer::Text, Parsing::CommentTokenizer::Sequence>]
       def parsed_tokens
         @parsed_tokens ||= Parsing::CommentTokenizer.new.parse(text)
       end

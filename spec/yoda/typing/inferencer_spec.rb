@@ -849,5 +849,23 @@ RSpec.describe Yoda::Typing::Inferencer do
         end
       end
     end
+
+    describe 'type annotation' do
+      context 'when type annotation is prepended to variable assignment' do
+        let(:source) do
+          <<~RUBY
+          # @type a [Integer]
+          a = nil
+          a.div(2)
+          RUBY
+        end
+
+        it 'can infer variable defined from outer context' do
+          subject
+          node = node_traverser.query(type: :send).node
+          expect(inferencer.tracer.type(node.receiver)).to have_attributes(to_s: "::Integer")
+        end
+      end
+    end
   end
 end

@@ -8,6 +8,7 @@ module Yoda
       require 'yoda/typing/tree/block_call'
       require 'yoda/typing/tree/case'
       require 'yoda/typing/tree/class_tree'
+      require 'yoda/typing/tree/comment'
       require 'yoda/typing/tree/conditional_loop'
       require 'yoda/typing/tree/constant_assignment'
       require 'yoda/typing/tree/constant'

@@ -40,11 +40,16 @@ module Yoda
             bind_context(node: node, context: context)
             Logger.trace("Traversing #{node}")
             type = infer_type
+            comment.process
             Logger.trace("Traversed #{node} -> #{type.to_s}")
             bind_type(node: node, type: type, context: context)
 
             type
           end
+        end
+
+        def comment
+          @comment ||= Comment.new(comment: node.comment_block, tracer: tracer, context: context)
         end
 
         # @param node [AST::Vnode]

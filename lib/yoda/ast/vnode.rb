@@ -97,9 +97,9 @@ module Yoda
           [self, *children].lazy.flat_map { |el| self == el ? self : el.all_nodes_lazy }
         end
 
-        # @param comment_by_node [Array<Parser::Source::Comment>]
-        def comments
-          @comments ||= comments_by_node[node] || []
+        # @return [CommentBlock]
+        def comment_block
+          @comment_block ||= comments_by_vnode[self] || CommentBlock.new([], node: self)
         end
       end
       include CommentAssociation

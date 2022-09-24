@@ -1,6 +1,13 @@
 module Yoda
   module AST
     class CommentBlock
+      # The name part of the tag's text.
+      #
+      # @example
+      #   @param var_name [Type] description
+      #          ~~~~~~~~
+      #          ^ here
+      #
       class TagTextNamePart < BasePart
         # @return [BasePart]
         attr_reader :parent
@@ -28,6 +35,11 @@ module Yoda
         # @return [Integer]
         def end_index
           tokens.last.offset + tokens.last.length
+        end
+
+        # @return [String]
+        def to_s
+          Token.join(tokens)
         end
       end
     end

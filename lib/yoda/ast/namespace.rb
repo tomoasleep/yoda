@@ -26,11 +26,6 @@ module Yoda
       def namespace?
         true
       end
-
-      # @return [String]
-      def path
-        fail NotImplementedError
-      end
     end
   end
 end
