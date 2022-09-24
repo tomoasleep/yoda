@@ -96,7 +96,19 @@ module Yoda
 
           # @return [String]
           def inspect
-            "#<#{self.class.name}: #{self.class.type}>"
+            "#<#{self.class.name}: #{namespace}>"
+          end
+
+          # @param pp [PP]
+          def pretty_print(pp)
+            pp.object_group(self) do
+              pp.breakable
+              pp.text "@database_accessor="
+              pp.pp adapter
+              pp.breakable
+              pp.text "@namespace="
+              pp.pp namespace
+            end
           end
 
           private

@@ -14,7 +14,7 @@ module Yoda
       rescue => e
         Logger.warn(e.full_message)
         failed = true
-        event(type: type, phage: :failed, id: id)
+        event(type: type, phage: :failed, id: id, reason: e.message, detailed_reason: e.full_message)
         raise e
       ensure
         event(type: type, phase: :end, id: id)
