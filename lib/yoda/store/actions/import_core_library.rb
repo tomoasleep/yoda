@@ -38,8 +38,8 @@ module Yoda
             file_paths: ["*.c"]
           )
 
-          patch = yardoc_runner.run
-          Transformers::CoreVisibility.transform(patch)
+          patches = yardoc_runner.run
+          patches.map { |patch| Transformers::CoreVisibility.transform(patch) }
         end
       end
     end
