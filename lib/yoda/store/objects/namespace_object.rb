@@ -76,9 +76,9 @@ module Yoda
         # @note Override of {Base#to_h}
         def to_h
           super.merge(
-            instance_method_addresses: instance_method_addresses,
-            mixin_addresses: mixin_addresses,
-            constant_addresses: constant_addresses,
+            instance_method_addresses: instance_method_addresses.map(&:to_s),
+            mixin_addresses: mixin_addresses.map(&:to_s),
+            constant_addresses: constant_addresses.map(&:to_s),
           )
         end
 

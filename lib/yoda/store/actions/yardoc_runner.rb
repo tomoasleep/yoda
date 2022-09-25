@@ -34,6 +34,8 @@ module Yoda
         def run(import_each: false)
           patches = []
 
+          YARD::Logger.instance.io = Yoda::Logger.instance.pipeline(tag: 'YARD')
+
           Dir.chdir(source_dir_path) do
             prepare_dummy_file do |dummy_paths|
               YARD::Registry.clear

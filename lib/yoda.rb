@@ -26,6 +26,9 @@ module Yoda
         yield
       else
         Process.fork do
+          require 'tempfile'
+          $stdout = Tempfile.new('yoda-stdout')
+
           Yoda::Instrument.clean
           yield
         end
@@ -37,5 +40,3 @@ module Yoda
     end
   end
 end
-
-YARD::Logger.instance.io = Yoda::Logger.instance.pipeline(tag: 'YARD')

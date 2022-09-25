@@ -96,18 +96,24 @@ module Yoda
       value
     end
 
-    # @param name [String, Symbol]
+    # @param name [String, Symbol, nil]
     # @param callback [#call]
     # @return [Subsctiption]
     def subscribe(name, &callback)
       Subscription.new(instrument: self, name: name, callback: callback).tap { |subscription| subscriptions.push(subscription) }
     end
 
+    # @param callback [#call]
+    # @return [Subsctiption]
+    def subscribe_all(&callback)
+      subscribe(nil, &callback)
+    end
+
     # @param name [String]
     # @param params [Hash]
     def emit(name, **params)
       Logger.trace("#{name}: #{params}")
-      subscriptions.select { |subscription| subscription.name === name }.each { |subscription| subscription.call(**params) }
+      subscriptions.select { |subscription| subscription.name.nil? || subscription.name === name }.each { |subscription| subscription.call(**params) }
     end
 
     # @param subscription [Subscription]

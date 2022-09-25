@@ -246,7 +246,7 @@ module Yoda
         Model::YardSignatureParser.new(object.signature).to_a
       rescue Model::YardSignatureParser::ParseError => e
         # Cannot parse signature if the method is defined in C.
-        Logger.debug "Failed to parse signature: #{object.signature}"
+        Logger.trace "Failed to parse signature: #{object.signature}"
         object.parameters || []
       end
 

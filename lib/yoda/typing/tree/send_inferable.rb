@@ -4,6 +4,19 @@ module Yoda
       module SendInferable
         private
 
+        # @!method infer_child(node)
+        #   @abstract
+        #   @param node [AST::Vnode]
+        #   @return [Types::Type]
+
+        # @!method context
+        #   @abstract
+        #   @return [Contexts::BaseContext]
+
+        # @!method generator 
+        #   @abstract
+        #   @return [Types::Generator]
+
         # @param send_node [AST::SendNode]
         # @param block_param_node [AST::ParametersNode, nil]
         # @param block_node [AST::Vnode, nil]

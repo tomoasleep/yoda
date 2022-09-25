@@ -8,10 +8,10 @@ module Yoda
           namespace = adapter.namespace(library.name)
 
           if namespace.empty?
-            Instrument.instance.build_library_registry(name: library.name, version: library.version, message: "Building registry for #{library.name} (#{library.version})")
+            Instrument.instance.build_library_registry(name: library.name, version: library.version, message: "Building database for #{library.name} (#{library.version})")
             patch = library.create_patch
-            patch && compress_and_save(patch: patch, adapter: namespace)
-            Instrument.instance.build_library_registry(name: library.name, version: library.version, message: "Finished to build registry for #{library.name} (#{library.version})")
+            patch && compress_and_save(library: library, patch: patch, adapter: namespace)
+            Instrument.instance.build_library_registry(name: library.name, version: library.version, message: "Finished to build database for #{library.name} (#{library.version})")
           end
 
           new(id: library.id, adapter: namespace)
@@ -21,9 +21,10 @@ module Yoda
 
         # Store patch set data to the database.
         # old data in the database are discarded.
+        # @param library [Objects::Library]
         # @param patch [Objects::Patch]
         # @param adapter [Adapters::Base]
-        def compress_and_save(patch:, adapter:)
+        def compress_and_save(library:, patch:, adapter:)
           el_keys = patch.keys
           progress = Instrument::Progress.new(el_keys.length) { |length:, index:| Instrument.instance.registry_dump(index: index, length: length) }
 
@@ -32,7 +33,7 @@ module Yoda
           end
 
           adapter.batch_write(data, progress)
-          Logger.info "saved #{el_keys.length} keys."
+          Logger.info "Created the database for #{library.id} (#{el_keys.length} keys)"
         end
       end
 
