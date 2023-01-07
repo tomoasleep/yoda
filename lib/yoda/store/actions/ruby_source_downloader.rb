@@ -14,7 +14,7 @@ module Yoda
 
           # @return [true, false]
           def downloaded?
-            File.exists?(VersionStore.for_current_version.ruby_source_path)
+            File.exist?(VersionStore.for_current_version.ruby_source_path)
           end
         end
 

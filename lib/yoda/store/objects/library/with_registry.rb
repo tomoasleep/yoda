@@ -5,7 +5,7 @@ module Yoda
         module WithRegistry
           # @return [Boolean]
           def registry_exists?
-            registry_path && File.exists?(registry_path)
+            registry_path && File.exist?(registry_path)
           end
 
           # Return the path of registry for the library.
