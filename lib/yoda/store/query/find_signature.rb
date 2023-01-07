@@ -8,6 +8,7 @@ module Yoda
         # @param source [Array<:myself, :ancestors>, nil]
         # @return [Array<Model::FunctionSignatures::Base>]
         def select(namespace, method_name, visibility: nil, source: nil)
+          Logger.trace("FindSignature.select(#{namespace.path}, #{method_name})")
           FindMethod.new(registry).select(namespace, method_name, visibility: visibility, source: source).flat_map { |el| build(namespace, el) }
         end
 
@@ -17,6 +18,7 @@ module Yoda
         # @param source [Array<:myself, :ancestors>, nil]
         # @return [Array<Model::FunctionSignatures::Base>]
         def select_on_multiple(namespaces, method_name, visibility: nil, source: nil)
+          Logger.trace("FindSignature.select_on_multiple(#{namespace.path}, #{method_name})")
           namespaces.flat_map { |namespace| select(namespace, method_name, visibility: visibility, source: source) }
         end
 

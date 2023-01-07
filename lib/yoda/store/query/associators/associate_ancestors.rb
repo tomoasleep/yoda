@@ -15,10 +15,12 @@ module Yoda
           end
 
           # @param obj [Objects::Base]
+          # @param visitor [Visitor]
           # @return [Enumerator<Objects::NamespaceObject>]
-          def associate(obj)
+          def associate(obj, visitor: Visitor.new)
+            Logger.trace("AssociateAncestors.associate(#{obj.address})")
             if obj.is_a?(Objects::NamespaceObject)
-              AncestorTree.new(registry: registry, object: obj).ancestors
+              AncestorTree.new(registry: registry, object: obj, visitor: visitor).ancestors
             else
               []
             end

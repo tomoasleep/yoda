@@ -9,6 +9,7 @@ module Yoda
         # @param visibility [Array<Symbol>, nil]
         # @return [Objects::MethodObject, nil]
         def find(namespace, method_name, **kwargs)
+          Logger.trace("FindMethod.find(#{namespace.path}, #{method_name})")
           lazy_select(namespace, method_name, **kwargs).first
         end
 
@@ -17,6 +18,7 @@ module Yoda
         # @param visibility [Array<Symbol>, nil]
         # @return [Array<Objects::MethodObject>]
         def select(namespace, method_name, visibility: nil, source: nil)
+          Logger.trace("FindMethod.select(#{namespace.path}, #{method_name})")
           lazy_select(namespace, method_name, visibility: visibility, source: source).to_a
         end
 
@@ -24,6 +26,7 @@ module Yoda
         # @param visibility [Array<Symbol>, nil]
         # @return [Enumerator<Objects::MethodObject>]
         def all(namespace, visibility: nil, source: nil)
+          Logger.trace("FindMethod.all(#{namespace.path})")
           lazy_select(namespace, //, visibility: visibility, source: source)
         end
 

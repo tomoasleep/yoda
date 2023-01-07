@@ -11,6 +11,7 @@ module Yoda
       require 'yoda/store/query/ancestor_tree'
       require 'yoda/store/query/constant_member_set'
       require 'yoda/store/query/method_member_set'
+      require 'yoda/store/query/visitor'
     end
   end
 end

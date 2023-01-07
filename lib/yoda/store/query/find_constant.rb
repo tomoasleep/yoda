@@ -3,20 +3,22 @@ module Yoda
     module Query
       class FindConstant < Base
         # @param path [String, Model::Path, Model::ScopedPath]
+        # @param visitor [Visitor]
         # @return [Objects::Base, nil]
-        def find(path)
+        def find(path, visitor: Visitor.new)
+          visitor.visit("FindConstant.find(#{path})")
           lexical_scope_paths = lexical_scopes_of(path)
           base_name, *constant_names = path_of(path).split
           # if path start with '::', base_name becomes ''.
           base_namespace_key = base_name == '' ? 'Object' : base_name
-          base_namespace = select_base_namespace(base_namespace_key, lexical_scope_paths).first
+          base_namespace = select_base_namespace(base_namespace_key, lexical_scope_paths, visitor: visitor.fork).first
 
           if constant_names.empty?
             # When the path does not contain separator (`::`)
             base_namespace
           else
             if base_namespace
-              find_constant(constant_names.join('::'), base_namespace)
+              find_constant(constant_names.join('::'), base_namespace, visitor: visitor.fork)
             else
               nil
             end
@@ -24,26 +26,30 @@ module Yoda
         end
 
         # @param base [Store::Object]
+        # @param visitor [Visitor]
         # @param pattern [RegExp]
         # @return [Enumerator<Objects::Base>]
-        def select_by_base_and_pattern(base:, pattern:)
-          select_constants_from_ancestors(base, pattern)
+        def select_by_base_and_pattern(base:, pattern:, visitor: Visitor.new)
+          visitor.visit("FindConstant.select_by_base_and_pattern(#{base.path}, #{pattern})")
+          select_constants_from_ancestors(base, pattern, visitor: visitor)
         end
 
         # @param path [String, Model::Path, Model::ScopedPath]
+        # @param visitor [Visitor]
         # @return [Array<Objects::Base>]
-        def select_with_prefix(path)
+        def select_with_prefix(path, visitor: Visitor.new)
+          visitor.visit("FindConstant.select_with_prefix(#{path})")
           lexical_scope_paths = lexical_scopes_of(path)
           base_name, *constant_names, bottom_name = path_of(path).split
 
           if constant_names.empty? && !bottom_name
             # When the path does not contain separator (`::`)
-            select_base_namespace(/\A#{Regexp.escape(base_name || '')}/, lexical_scope_paths).to_a.uniq
+            select_base_namespace(/\A#{Regexp.escape(base_name || '')}/, lexical_scope_paths, visitor: visitor).to_a.uniq
           else
-            base_namespace = select_base_namespace(base_name, lexical_scope_paths).first
-            scope = find_constant(constant_names.join('::'), base_namespace)
+            base_namespace = select_base_namespace(base_name, lexical_scope_paths, visitor: visitor.fork).first
+            scope = find_constant(constant_names.join('::'), base_namespace, visitor: visitor.fork)
             return [] unless scope
-            select_constants_from_ancestors(scope, /\A#{bottom_name}/).to_a
+            select_constants_from_ancestors(scope, /\A#{bottom_name}/, visitor: visitor.fork).to_a
           end
         end
 
@@ -53,11 +59,12 @@ module Yoda
         #
         # @param base_name [String, Regexp] is an unnested constant name or a pattern of unnested constant name.
         # @param lexical_scope_paths [Array<String>]
+        # @param visitor [Visitor]
         # @return [Enumerator<Objects::Base>]
-        def select_base_namespace(base_name, lexical_scope_paths)
+        def select_base_namespace(base_name, lexical_scope_paths, visitor:)
           Enumerator.new do |yielder|
             lexical_scope_paths.each do |path|
-              scope = find_constant(path.to_s)
+              scope = find_constant(path.to_s, visitor: visitor.fork)
               next if !scope || !scope.is_a?(Objects::NamespaceObject)
               select_child_constants(scope, base_name).each do |obj|
                 yielder << obj
@@ -65,8 +72,8 @@ module Yoda
             end
 
             nearest_scope_path = lexical_scope_paths.first
-            if nearest_scope_path && nearest_scope = find_constant(nearest_scope_path) && nearest_scope.is_a?(Objects::NamespaceObject)
-              select_constants_from_ancestors(nearest_scope, base_name).each do |obj|
+            if nearest_scope_path && nearest_scope = find_constant(nearest_scope_path, visitor: visitor.fork) && nearest_scope.is_a?(Objects::NamespaceObject)
+              select_constants_from_ancestors(nearest_scope, base_name, visitor: visitor.fork).each do |obj|
                 yielder << obj
               end
             end
@@ -75,14 +82,15 @@ module Yoda
 
         # @param name [String, Model::Path]
         # @param namespace [Objects::Base, nil]
+        # @param visitor [Visitor]
         # @return [Objects::Base, nil]
-        def find_constant(name, namespace = nil)
+        def find_constant(name, namespace = nil, visitor:)
           constant_names = path_of(name).split
           namespace = registry.get('Object') unless namespace
           constant_names.reduce(namespace) do |namespace, name|
             # @todo resolve its value if namespace is ValueObject
             if namespace && namespace.is_a?(Objects::NamespaceObject)
-              select_constants_from_ancestors(namespace, name).first
+              select_constants_from_ancestors(namespace, name, visitor: visitor).first
             else
               return nil
             end
@@ -91,12 +99,13 @@ module Yoda
 
         # @param scope [Objects::NamespaceObject]
         # @param name [String, Regexp]
+        # @param visitor [Visitor]
         # @return [Enumerator<Objects::Base>]
-        def select_constants_from_ancestors(scope, name)
+        def select_constants_from_ancestors(scope, name, visitor:)
           Enumerator.new do |yielder|
             met = Set.new
 
-            Associators::AssociateAncestors.new(registry).associate(scope).each do |ancestor|
+            Associators::AssociateAncestors.new(registry).associate(scope, visitor: visitor.fork).each do |ancestor|
               select_child_constants(ancestor, name).each do |obj|
                 next if met.include?(obj.name)
                 met.add(obj.name)
@@ -108,6 +117,7 @@ module Yoda
 
         # @param scope [Objects::Base]
         # @param name [String, Regexp]
+        # @param visitor [Visitor]
         # @return [Enumerator<Objects::Base>]
         def select_child_constants(scope, name)
           Enumerator.new do |yielder|

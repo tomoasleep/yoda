@@ -12,13 +12,15 @@ module Yoda
           end
 
           # @param obj [Object::Base]
+          # @param visitor [Visitor]
           # @return [Enumerator<Objects::MethodObject>]
-          def associate(obj)
+          def associate(obj, visitor: Visitor.new)
+            visitor.visit("AssociateMethods.associate(#{obj.address})")
             if obj.namespace?
               Enumerator.new do |yielder|
                 name_set = Set.new
 
-                AssociateAncestors.new(registry).associate(obj).each do |ancestor|
+                AssociateAncestors.new(registry).associate(obj, visitor: visitor).each do |ancestor|
                   ancestor.instance_method_addresses.each do |method_address|
                     method_name = Address.of(method_address).name
                     if !name_set.member?(method_name)

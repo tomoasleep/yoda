@@ -33,6 +33,10 @@ module Yoda
         [self.class.name, scopes, path].hash
       end
 
+      def to_s
+        "(#{scopes.map(&:to_s).join(',')})::#{path}}"
+      end
+
       def ==(another)
         eql?(another)
       end
