@@ -64,6 +64,10 @@ module Yoda
 
             found_object&.namespace? ? found_object : nil
           end
+        rescue Visitor::CircularReferenceError => e
+          Logger.warn("cannot find superclass of #{object.address} because of circular reference")
+          Logger.warn(e)
+          nil
         end
 
         protected
