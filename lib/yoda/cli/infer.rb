@@ -23,9 +23,10 @@ module Yoda
       end
 
       def worker
-        @worker ||= Services::CurrentNodeExplain.from_source(registry: project.registry, source: File.read(filename), location: position)
+        @worker ||= Services::CurrentNodeExplain.from_source(environment: project.environment, source: File.read(filename), location: position)
       end
 
+      # @return [Store::Project]
       def project
         @project ||= Store::Project.for_path(Dir.pwd)
       end
