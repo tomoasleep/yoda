@@ -103,6 +103,9 @@ module Yoda
       def provide_async(provider:, id:, method:, params:)
         future = scheduler.async(id: id) do
           notifier.busy(type: method, id: id) { provider.provide(params) }
+        rescue StandardError => e
+          Yoda::ErrorReporter.instance.report(e)
+          raise e
         end
         future.add_observer do |_time, value, reason|
           if reason

@@ -16,6 +16,7 @@ module Yoda
   require "yoda/parsing"
   require "yoda/typing"
   require "yoda/yard_extensions"
+  require "yoda/error_reporter"
 
   class << self
     # @return [Boolean]
@@ -26,8 +27,8 @@ module Yoda
         yield
       else
         Process.fork do
-          require 'tempfile'
-          $stdout = Tempfile.new('yoda-stdout')
+          require "tempfile"
+          $stdout = Tempfile.new("yoda-stdout")
 
           Yoda::Instrument.clean
           yield

@@ -52,6 +52,7 @@ module Yoda
         rescue StandardError => ex
           Logger.warn ex
           Logger.warn ex.full_message
+          Yoda::ErrorReporter.instance.report(ex)
         end
       end
       Logger.trace "Waiting to finish all pending tasks..."

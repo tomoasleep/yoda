@@ -147,6 +147,7 @@ module Yoda
           code: LanguageServer::Protocol::Constant::ErrorCodes::SERVER_ERROR_START,
           data: LanguageServer::Protocol::Interface::InitializeError.new(retry: false),
         )
+        Yoda::ErrorReporter.instance.report(e)
       end
 
       def handle_initialized(_params)
