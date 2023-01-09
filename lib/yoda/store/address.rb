@@ -103,12 +103,12 @@ module Yoda
             if parts.length == 1
               parts = ["Object.#{parts[-1]}"]
             else
-              parts = parts[..-3] + ["#{parts[-2]}.#{parts[-1]}"]
+              parts = parts[0..-3] + ["#{parts[-2]}.#{parts[-1]}"]
             end
           end
 
           if parts.last.start_with?('#', '.')
-            parts = parts[..-3] + ["#{parts[-2]}#{parts[-1]}"]
+            parts = parts[0..-3] + ["#{parts[-2]}#{parts[-1]}"]
           end
 
           # Remove redundunt `Object`.
