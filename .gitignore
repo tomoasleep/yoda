@@ -15,3 +15,6 @@
 
 /core/
 /Gemfile.lock
+
+/vendor
+.gem_rbs_collection
