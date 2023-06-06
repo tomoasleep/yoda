@@ -62,6 +62,15 @@ module Yoda
       end
 
       # @return [Parsing::Range]
+      def range_without_arguments
+        @range_without_arguments ||=
+          Parsing::Range.new(
+            Parsing::Location.of_ast_location(source_map.expression.begin),
+            Parsing::Location.of_ast_location(source_map.selector.end),
+          )
+      end
+
+      # @return [Parsing::Range]
       def arguments_range
         @arguments_range ||=
           Parsing::Range.new(

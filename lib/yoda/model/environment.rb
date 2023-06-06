@@ -106,6 +106,10 @@ module Yoda
         end
       end
 
+      def inspect
+        pretty_print_inspect
+      end
+
       private
 
       # @param scoped_path [ScopedPath]

@@ -17,7 +17,7 @@ module Yoda
         # @return [Contexts::BaseContext]
         attr_reader :context
 
-        delegate [:bind_tree, :bind_context, :bind_type, :bind_send, :bind_method_definition, :bind_require_paths] => :tracer
+        delegate [:bind_tree, :bind_context, :bind_type, :bind_send, :bind_method_definition, :bind_require_paths, :bind_diagnostics] => :tracer
 
         # @return [Types::Generator]
         delegate [:generator] => :context

@@ -1,8 +1,12 @@
+require 'forwardable'
+
 module Yoda
   class Server
     module Providers
       # @abstract
       class Base
+        extend Forwardable
+
         class << self
           # @abstract
           # @return [Symbol]
@@ -39,6 +43,8 @@ module Yoda
         def server_controller
           session.server_controller
         end
+
+        delegate async: :server_controller
 
         # @return [Integer, nil] Seconds to timeout the task. if nil, the task does not timeout.
         def timeout

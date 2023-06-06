@@ -105,9 +105,27 @@ module Yoda
         end
       end
 
+      attr_writer :config
+
       # @return [FileFinder]
       def file_finder
         @file_finder ||= FileFinder.new(self)
+      end
+
+      # @param pp [PP]
+      def pretty_print(pp)
+        pp.object_group(self) do
+          pp.breakable
+          pp.text "@name="
+          pp.pp name
+          pp.comma_breakable
+          pp.text "@file_tree="
+          pp.pp file_tree
+        end
+      end
+
+      def inspect
+        pretty_print_inspect
       end
 
       private

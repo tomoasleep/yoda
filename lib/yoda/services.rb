@@ -4,6 +4,7 @@ module Yoda
     require 'yoda/services/current_node_explain'
     require 'yoda/services/comment_completion'
     require 'yoda/services/code_completion'
+    require 'yoda/services/diagnose'
     require 'yoda/services/loadable_path_resolver'
     require 'yoda/services/signature_discovery'
 
@@ -41,6 +42,12 @@ module Yoda
       # @return [CommentCompletion]
       def comment_completion(source:, location:)
         CommentCompletion.from_source(environment, source, location)
+      end
+
+      # @param source   [String]
+      # @return [Diagnose]
+      def diagnose(source:)
+        Diagnose.from_source(environment, source)
       end
 
       # @param environment [Model::Environment]

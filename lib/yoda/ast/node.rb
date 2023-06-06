@@ -13,7 +13,7 @@ module Yoda
 
       # @return [String]
       delegate to_s: :node
-      
+
       # @param node [Parser::AST::Node]
       # @param parent [Vnode]
       # @param comment_by_node [Hash{Parser::AST::Node => Array<Parser::Source::Comment>}]
@@ -31,7 +31,7 @@ module Yoda
       def identifier
         "#{type}:#{source_map&.expression ? source_map_expression : object_id}"
       end
-      
+
       # @return [Parser::Source::Map, nil]
       def source_map
         node.location
@@ -45,6 +45,11 @@ module Yoda
       # @return (see Unparser.unparse)
       def unparse
         Unparser.unparse(node)
+      end
+
+      # @return [Range]
+      def range
+        Parsing::Range.of_ast_location(node.location)
       end
 
       private

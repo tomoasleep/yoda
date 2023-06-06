@@ -1,5 +1,7 @@
 require "open3"
 require "stringio"
+require "timeout"
+require "io/wait"
 
 module ServerHelper
   def lsp_request(id:, method:, params:, kind: nil)
@@ -87,7 +89,8 @@ module ServerHelper
       end
     end
 
-    def read
+    def read(timeout: nil)
+      stdout.wait_readable(timeout) if timeout
       if buffer = stdout.gets("\r\n\r\n")
         content_length = buffer.match(/Content-Length: (\d+)/i)[1].to_i
         content = stdout.read(content_length) or raise
@@ -99,6 +102,15 @@ module ServerHelper
         message
       else
         nil
+      end
+    end
+
+    def read_until(timeout:, &block)
+      Timeout.timeout(timeout) do
+        loop do
+          message = read(timeout: timeout)
+          break if block.call(message)
+        end
       end
     end
 

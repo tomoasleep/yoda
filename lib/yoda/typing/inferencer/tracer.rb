@@ -32,6 +32,9 @@ module Yoda
         # @return [Hash{ AST::Node => Array<String> }]
         attr_reader :node_to_require_paths
 
+        # @return [Hash{ AST::Node => Array<Diagnostics::Base> }]
+        attr_reader :node_to_diagnostics
+
         class MaskedMap
           def initialize
             @content = {}
@@ -53,6 +56,10 @@ module Yoda
             @content
           end
 
+          def values
+            @content.values
+          end
+
           def inspect
             "(#{@content.length} items)"
           end
@@ -72,6 +79,7 @@ module Yoda
           @node_to_receiver_type = MaskedMap.new
           @node_to_constants = MaskedMap.new
           @node_to_require_paths = MaskedMap.new
+          @node_to_diagnostics = MaskedMap.new
         end
 
         # @param node [AST::Node]
@@ -133,6 +141,13 @@ module Yoda
         end
 
         # @param node [AST::Node]
+        # @param diagnostics [Array<Diagnostics::Base>]
+        def bind_diagnostics(node:, diagnostics:)
+          node_to_diagnostics[node.identifier] ||= []
+          node_to_diagnostics[node.identifier].push(*diagnostics)
+        end
+
+        # @param node [AST::Node]
         # @return [Symbol, nil]
         def kind(node)
           node_to_kind[node.identifier]
@@ -190,6 +205,18 @@ module Yoda
         # @return [Contexts::BaseContext, nil]
         def context(node)
           node_to_context[node.identifier]
+        end
+
+        # @param node [AST::Node]
+        # @return [Array<Diagnostics::Base>]
+        def diagnostics(node)
+          node_to_diagnostics[node.identifier] || []
+        end
+
+        # @param node [AST::Node]
+        # @return [Array<Diagnostics::Base>]
+        def all_diagnostics
+          node_to_diagnostics.values.flatten.compact
         end
 
         # @param node [AST::Node]

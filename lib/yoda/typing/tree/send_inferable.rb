@@ -13,7 +13,7 @@ module Yoda
         #   @abstract
         #   @return [Contexts::BaseContext]
 
-        # @!method generator 
+        # @!method generator
         #   @abstract
         #   @return [Types::Generator]
 
@@ -45,6 +45,7 @@ module Yoda
           resolve_require(method_candidates, argument_map)
 
           if method_types.empty?
+            bind_diagnostics(node: node, diagnostics: [Diagnostics::MethodNotFound.new(node: node, receiver_type: receiver_type, method_name: send_node.selector_name)])
             generator.unknown_type(reason: "method not found")
           else
             generator.union_type(*method_types.map { |method_type| value_resolve_context.wrap(method_type.type.return_type) })

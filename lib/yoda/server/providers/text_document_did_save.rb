@@ -1,7 +1,11 @@
+require_relative 'diagnosable'
+
 module Yoda
   class Server
     module Providers
       class TextDocumentDidSave < Base
+        include Diagnosable
+
         def self.provider_method
           :'textDocument/didSave'
         end
@@ -10,6 +14,8 @@ module Yoda
           uri = params[:text_document][:uri]
 
           session.reparse_doc(uri)
+
+          diagnose_async(uri)
 
           NO_RESPONSE
         end

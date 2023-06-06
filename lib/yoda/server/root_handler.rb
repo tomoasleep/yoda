@@ -26,7 +26,7 @@ module Yoda
       def initialize(writer:, scheduler: nil)
         @scheduler = scheduler || Scheduler.new
         @writer = writer
-        @server_controller = ServerController.new(writer: writer, scheduler: scheduler)
+        @server_controller = ServerController.new(writer: writer, scheduler: @scheduler)
       end
 
       # @param message [Hash]

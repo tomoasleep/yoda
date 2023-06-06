@@ -14,7 +14,7 @@ module Yoda
       rescue => e
         Logger.warn(e.full_message)
         failed = true
-        event(type: type, phage: :failed, id: id, reason: e.message, detailed_reason: e.full_message)
+        event(type: type, phase: :failed, id: id, reason: e.message, detailed_reason: e.full_message)
         raise e
       ensure
         event(type: type, phase: :end, id: id)
@@ -147,6 +147,14 @@ module Yoda
             type: message_type(type),
             message: message,
           )
+        )
+      end
+
+      # @param params [LanguageServer::Protocol::Interface::PublishDiagnosticsParams]
+      def publish_diagnostics(params)
+        write(
+          method: 'textDocument/publishDiagnostics',
+          params: params,
         )
       end
 

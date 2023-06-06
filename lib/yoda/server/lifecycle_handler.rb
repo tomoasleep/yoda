@@ -97,6 +97,10 @@ module Yoda
             ),
             hover_provider: true,
             definition_provider: true,
+            diagnostic_provider: LanguageServer::Protocol::Interface::DiagnosticOptions.new(
+              inter_file_dependencies: true,
+              workspace_diagnostics: false,
+            ),
             signature_help_provider: LanguageServer::Protocol::Interface::SignatureHelpOptions.new(
               trigger_characters: ['(', ','],
             ),
