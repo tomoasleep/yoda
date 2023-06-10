@@ -9,13 +9,13 @@ module Yoda
       # @return [Model::Environment]
       attr_reader :environment
 
-      # @type ::Parser::AST::Node
+      # @type () -> ::Parser::AST::Node
       attr_reader :ast
 
-      # @type Array<::Parser::Source::Comment>
+      # @type () -> Array[::Parser::Source::Comment]
       attr_reader :comments
 
-      # @type Location
+      # @type () -> Location
       attr_reader :location
 
       # @param environment [Model::Environment]

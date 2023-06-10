@@ -66,10 +66,10 @@ module Yoda
         end
 
         class InputtingLine
-          # @type CommentTokenizer::Sequence
+          # @type () -> CommentTokenizer::Sequence
           attr_reader :token_sequence
 
-          # @type Integer
+          # @type () -> Integer
           attr_reader :column
 
           # @param token_sequence [CommentTokenizer::Sequence]

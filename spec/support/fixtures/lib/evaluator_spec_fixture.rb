@@ -1,9 +1,9 @@
 module YodaFixture
   class EvaluatorSpecFixture
-    # @type String
+    # @type () -> String
     attr_reader :content
 
-    # @type Array<String>
+    # @type () -> Array[String]
     attr_reader :contents
 
     # @param content [String]
