@@ -20,11 +20,11 @@ module Yoda
         new.convert_to_string(store.root)
       end
 
-      # @param values [Array<YARD::CodeObjects::Base>]
+      # @param value [Array<RBS::AST::Declarations::Class>]
       # @return [String]
-      def self.write_to_string(values)
+      def self.write_to_string(value)
         string = StringIO.new
-        RBS::Writer.new(out: string).write([convert(values)])
+        RBS::Writer.new(out: string).write([value])
         string.string
       end
 
@@ -37,12 +37,12 @@ module Yoda
       # @param root [Array<YARD::CodeObjects::NamespaceObject>]
       # @return [String]
       def convert_to_string(root)
-        self.class.write_to_string(convert_root_object(root))
+        self.class.write_to_string(convert(root))
       end
 
       private
 
-      # @type (::YARD::CodeObjects::Base) -> RBS::AST::Members::t | RBS::AST::Declarations::t | nil
+      # @type (::YARD::CodeObjects::Base) -> (RBS::AST::Members::t | RBS::AST::Declarations::t | nil)
       def convert_member_object(code_object)
         case code_object.type
         when :class
@@ -177,10 +177,11 @@ module Yoda
 
       # @type (::YARD::CodeObjects::MethodObject) -> RBS::MethodType
       def convert_to_method_type(code_object)
-        type_tag = code_object.tags.find { |tag| tag.tag_name == 'type' }&.first
+        type_tag = code_object.tags.find { |tag| tag.tag_name == 'type' }
+        parsed_type = type_tag && try_parse_method_type_tag(type_tag)
 
-        if type_tag
-          RBS::Parser.parse_method_type(type_tag.text)
+        if parsed_type
+          parsed_type
         else
           raw_parameters = convert_parameters(code_object)
           params = Model::FunctionSignatures::ParameterList.new(raw_parameters)
@@ -208,6 +209,13 @@ module Yoda
             location: nil,
           )
         end
+      end
+
+      # @type (::YARD::Tags::Tag) -> RBS::Types::t
+      def try_parse_method_type_tag(type_tag)
+        RBS::Parser.parse_method_type(type_tag.text)
+      rescue RBS::ParsingError => e
+        STDERR.puts "Failed to parse type: #{type_tag.text} (#{e.message})"
       end
 
       # @param object [::YARD::CodeObjects::MethodObject, ::YARD::Tags::OverloadTag]
