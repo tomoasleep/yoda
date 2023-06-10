@@ -83,6 +83,19 @@ module Yoda
             @autoload_gems = nil
           end
 
+          # @param pp [PP]
+          def pretty_print(pp)
+            pp.object_group(self) do
+              pp.breakable
+              pp.text "@project="
+              pp.pp project
+            end
+          end
+
+          def inspect
+            pretty_print_inspect
+          end
+
           private
 
           # @return [Array<Hash>]

@@ -1,13 +1,18 @@
 require 'uri'
+require 'forwardable'
 
 module Yoda
   class Server
     class Session
+      extend Forwardable
+
       # @return [Array<Workspace>]
       attr_reader :workspaces
 
       # @return [ServerController]
       attr_reader :server_controller
+
+      delegate async: :server_controller
 
       def self.from_root_uri(root_uri, server_controller:)
         workspaces = [Workspace.new(name: 'root', root_uri: root_uri)]
@@ -32,6 +37,8 @@ module Yoda
       def registry
         project.registry
       end
+
+      delegate services: :registry
 
       def setup
         workspaces.map { |workspace| workspace.setup(controller: server_controller) }

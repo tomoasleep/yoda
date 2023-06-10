@@ -9,9 +9,11 @@ module Yoda
       require 'yoda/server/providers/signature'
       require 'yoda/server/providers/hover'
       require 'yoda/server/providers/definition'
+      require 'yoda/server/providers/diagnosable'
       require 'yoda/server/providers/text_document_did_change'
       require 'yoda/server/providers/text_document_did_open'
       require 'yoda/server/providers/text_document_did_save'
+      require 'yoda/server/providers/workspace_did_change_configuration'
       require 'yoda/server/providers/workspace_did_change_watched_files'
       require 'yoda/server/providers/workspace_did_change_workspace_folders'
       require 'yoda/server/providers/workspace_did_create_files'
@@ -27,6 +29,7 @@ module Yoda
         TextDocumentDidChange,
         TextDocumentDidOpen,
         TextDocumentDidSave,
+        WorkspaceDidChangeConfiguration,
         WorkspaceDidChangeWatchedFiles,
         WorkspaceDidChangeWorkspaceFolders,
         WorkspaceDidCreateFiles,

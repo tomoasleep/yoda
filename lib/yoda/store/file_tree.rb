@@ -91,6 +91,19 @@ module Yoda
         changed_events.listen(&handler)
       end
 
+      # @param pp [PP]
+      def pretty_print(pp)
+        pp.object_group(self) do
+          pp.breakable
+          pp.text "@base_path="
+          pp.pp base_path
+        end
+      end
+
+      def inspect
+        pretty_print_inspect
+      end
+
       private
 
       # @param path [String]

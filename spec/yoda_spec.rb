@@ -244,6 +244,74 @@ RSpec.describe Yoda do
       end
     end
 
+    shared_examples "can diagnose" do
+      let(:diagnostics_to_expect) { {} }
+
+      it "receives diagnostics" do
+        messages, error, status = ServerHelper::Client.run(command) do |client|
+          client << lsp_request(
+            id: "init",
+            method: :initialize,
+            params: {
+              process_id: nil,
+              root_uri: fixture_uri,
+              capabilities: lsp(:client_capabilities),
+            }
+          )
+
+          message = client.read until message.nil? || message[:id] == "init"
+
+          client << lsp_request(
+            id: "initialized",
+            method: :initialized,
+            params: {}
+          )
+
+          client << lsp_request(
+            id: "test-new",
+            method: :'workspace/didChangeConfiguration',
+            params: {
+              settings: {
+                yoda: {
+                  diagnostics: {
+                    enable: true,
+                  },
+                }
+              }
+            }
+          )
+
+          client << lsp_request(
+            id: "test-new",
+            method: :'textDocument/didOpen',
+            kind: :'did_open_text_document',
+            params: {
+              text_document: lsp(
+                :text_document_item,
+                uri: "file://#{sample_path}",
+                language_id: "ruby",
+                version: 1,
+                text: File.read(sample_path),
+              ),
+            }
+          )
+
+          client.read_until(timeout: 5) { |message| message && message[:method] != :'textDocument/publishDiagnostics' }
+        end
+
+        expect(messages).not_to include(have_key(:error))
+        expect(messages).to include(
+          a_hash_including(
+            method: :'textDocument/publishDiagnostics',
+            params: {
+              uri: "file://#{sample_path}",
+              diagnostics: diagnostics_to_expect,
+            },
+          ),
+        )
+      end
+    end
+
     context "in a project without Gemfile.lock" do
       let(:fixture_path) { File.expand_path("./support/fixtures", __dir__) }
       let(:sample_path) { File.expand_path('./lib/object.rb', fixture_path) }
@@ -256,6 +324,9 @@ RSpec.describe Yoda do
       include_examples "can hover" do
         let(:location) { Yoda::Parsing::Location.new(row: 0, column: 2) }
         let(:label) { "**Object**" }
+      end
+      it_behaves_like "can diagnose" do
+        let(:sample_path) { File.expand_path('./lib/unknown_method.rb', fixture_path) }
       end
     end
 

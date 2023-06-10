@@ -36,6 +36,11 @@
                     "enum": ["off", "messages", "compact", "verbose"],
                     "default": "off",
                     "description": "Message level of yoda server."
+                },
+                "yoda.diagnostics.types": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show diagnostics for types."
                 }
             }
         }
