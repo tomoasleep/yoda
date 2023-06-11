@@ -9,7 +9,6 @@ module Yoda
     require 'yoda/parsing/source_cutter'
     require 'yoda/parsing/range'
     require 'yoda/parsing/query'
-    require 'yoda/parsing/type_parser'
     require 'yoda/parsing/traverser'
 
     class << self

@@ -20,12 +20,7 @@ module Yoda
         # @return [TypeExpressions::FunctionType]
         def type
           @type ||= begin
-            if !type_tags.empty?
-              parsed_type = parse_type_tag(type_tags.first)
-              parsed_type.is_a?(TypeExpressions::FunctionType) ? parsed_type : TypeExpressions::FunctionType.new(return_type: parsed_type)
-            else
-              TypeExpressions::FunctionType.new(return_type: return_types.first || TypeExpressions::UnknownType.new('nodoc'), **parameter_options)
-            end
+            TypeExpressions::FunctionType.new(return_type: return_types.first || TypeExpressions::UnknownType.new('nodoc'), **parameter_options)
           end
         end
 
@@ -42,13 +37,6 @@ module Yoda
         end
 
         private
-
-        # @param type_tag [Store::Objects::Tag]
-        # @return [TypeExpressions::FunctionType]
-        def parse_type_tag(tag)
-          parsed_type = TypeParser.new(tag).type_of_type_tag
-          parsed_type.is_a?(TypeExpressions::FunctionType) ? parsed_type : TypeExpressions::FunctionType.new(return_type: parsed_type)
-        end
 
         # @return [Hash]
         def parameter_options
@@ -108,15 +96,10 @@ module Yoda
           def type
             # yard tag may not have any type literals.
             if (tag.yard_types || []).empty?
-              TypeExpressions::UnknownType.new('nodoc') 
+              TypeExpressions::UnknownType.new('nodoc')
             else
               TypeExpressions.from_tag(tag)
             end
-          end
-
-          # @return [TypeExpressions::Base]
-          def type_of_type_tag
-            Parsing::TypeParser.new.safe_parse(tag.text).change_root(convert_lexical_scope_literals(tag.lexical_scope))
           end
 
           private
