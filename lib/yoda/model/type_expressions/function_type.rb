@@ -127,6 +127,23 @@ module Yoda
           )
         end
 
+        def to_rbs_type_expression
+          make_param = -> (param) { param&.to_rbs_param(env) }
+          make_key_and_param = -> (param) { [param.name.to_sym, make_param.call(param)] }
+
+          RBS::Types::Function.new(
+            required_positionals: required_parameters.map(&make_param),
+            optional_positionals: optional_parameters.map(&make_param),
+            rest_positionals: make_param.call(rest_parameter),
+            trailing_positionals: post_parameters.map(&make_param),
+            # Not include keyword name to parameter object because if its string expression becomes redundunt.
+            required_keywords: required_keyword_parameters.map(&make_key_and_param).to_h,
+            optional_keywords: optional_keyword_parameters.map(&make_key_and_param).to_h,
+            rest_keywords: make_param.call(keyword_rest_parameter),
+            return_type: return_type&.to_rbs_type_expression,
+          )
+        end
+
         # @return [self]
         def map(&block)
           call_map_type = -> (param) { param&.map_type(&block) }

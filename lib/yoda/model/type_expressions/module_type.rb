@@ -38,6 +38,11 @@ module Yoda
           name ? RBS::Types::Interface.new(name: name, args: [], location: nil) : RBS::Types::Bases::Any.new(location: nil)
         end
 
+        # @param env [Environment]
+        def to_rbs_type_expression
+          RBS::Types::Interface.new(name: TypeName(path.path.to_s), args: [], location: nil)
+        end
+
         # @return [String]
         def to_s
           "#{path.path.to_s}.module"

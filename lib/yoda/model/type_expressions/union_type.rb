@@ -50,6 +50,10 @@ module Yoda
           RBS::Types::Union.new(types: types.map { |t| t.to_rbs_type(env) }, location: nil)
         end
 
+        def to_rbs_type_expression
+          RBS::Types::Union.new(types: types.map { |t| t.to_rbs_type_expression }, location: nil)
+        end
+
         # @return [self]
         def map(&block)
           self.class.new(types.map(&block))

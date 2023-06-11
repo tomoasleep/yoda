@@ -149,7 +149,7 @@ module Yoda
       # @return [Array<Objects::ClassObject, Objects::MetaClassObject>]
       def convert_class_object(code_object)
         super_class =
-          if code_object.superclass
+          if code_object.superclass && code_object.superclass.path != "Object"
             RBS::AST::Declarations::Class::Super.new(name: type_name(code_object.superclass.name), args: [], location: nil)
           else
             nil
@@ -169,10 +169,19 @@ module Yoda
 
       # @type (::YARD::CodeObjects::Base) -> RBS::Types::t
       def try_convert_to_type(code_object)
-        type_tag = code_object.tags.find { |tag| tag.tag_name == 'type' }&.first
+        type_tag = code_object.tags.find { |tag| tag.tag_name == 'type' }
         return nil unless type_tag
 
         RBS::Parser.parse_type(type_tag.text)
+      end
+
+      # @type (Array[String]) -> RBS::Types::t
+      def try_convert_yard_type_to_type(yard_types)
+        type_expression = Model::TypeExpressions.parse_type_strings(yard_types || [])
+        type_expression.to_rbs_type_expression
+      rescue Parslet::ParseFailed => e
+        STDERR.puts "Failed to parse type: #{yard_type}"
+        untyped
       end
 
       # @type (::YARD::CodeObjects::MethodObject) -> RBS::MethodType
@@ -186,9 +195,13 @@ module Yoda
           raw_parameters = convert_parameters(code_object)
           params = Model::FunctionSignatures::ParameterList.new(raw_parameters)
 
+          param_types = code_object.tags(:param).map { |tag| [tag.name.to_s, try_convert_yard_type_to_type(tag.types)] }.to_h
+          return_type = code_object.tags(:return).first&.yield_self { |tag| try_convert_yard_type_to_type(tag.types) } || untyped
+
           # @type (Model::FunctionSignatures::Parameter) -> RBS::Types::t
           item_to_parameter = ->(item) do
-            RBS::Types::Function::Param.new(type: untyped, name: item.name.to_sym)
+            type = param_types[item.name.to_s] || untyped
+            RBS::Types::Function::Param.new(type: type, name: item.name.to_sym)
           end
 
           function_type = RBS::Types::Function.new(
@@ -199,7 +212,7 @@ module Yoda
             required_keywords: params.required_keyword_parameters.map { |item| [item.name.to_sym, item_to_parameter.call(item)] }.to_h,
             optional_keywords: params.optional_keyword_parameters.map { |item| [item.name.to_sym, item_to_parameter.call(item)] }.to_h,
             rest_keywords: params.keyword_rest_parameter&.yield_self(&item_to_parameter),
-            return_type: untyped,
+            return_type: return_type,
           )
 
           RBS::MethodType.new(

@@ -71,6 +71,19 @@ module Yoda
           end
         end
 
+        # @param env [Environment]
+        def to_rbs_type_expression
+          type_args = type_arguments.map { |t| t.to_rbs_type_expression }
+          case base_type
+          when InstanceType
+            RBS::Types::ClassInstance.new(name: TypeName(base_type.path.path.to_s), args: type_args, location: nil)
+          when ModuleType
+            RBS::Types::Interface.new(name: TypeName(base_type.path.path.to_s), args: type_args, location: nil)
+          else
+            base_type.to_rbs_type_expression
+          end
+        end
+
         # @return [self]
         def map(&block)
           self.class.new(base_type.map(&block), type_arguments.map(&block))

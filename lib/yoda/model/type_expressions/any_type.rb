@@ -26,6 +26,11 @@ module Yoda
           RBS::Types::Bases::Any.new(location: nil)
         end
 
+        # @type () -> RBS::Types::t
+        def to_rbs_type_expression
+          RBS::Types::Bases::Any.new(location: nil)
+        end
+
         # @return [String]
         def to_s
           'untyped'

@@ -2,6 +2,7 @@ module Yoda
   module Model
     module TypeExpressions
       class ValueType < Base
+        # @return [String]
         attr_reader :value
 
         VALUE_REGEXP = /\A[0-9a-z]/
@@ -43,6 +44,8 @@ module Yoda
             '::NilClass'
           when /\A\d+\Z/
             '::Numeric'
+          when /\A\:/
+            '::Symbol'
           else
             nil
           end
@@ -50,7 +53,14 @@ module Yoda
 
         # @param env [Environment]
         def to_rbs_type(env)
+          to_rbs_type_expression
+        end
+
+        # @type () -> RBS::Types::t
+        def to_rbs_type_expression
           case value_class
+          when '::NilClass'
+            RBS::Types::Bases::Nil.new(location: nil)
           when '::TrueClass'
             RBS::Types::Literal.new(literal: true, location: nil)
           when '::FalseClass'
@@ -59,6 +69,8 @@ module Yoda
             RBS::Types::Bases::Nil.new(location: nil)
           when '::Numeric'
             RBS::Types::Literal.new(literal: value.to_i, location: nil)
+          when '::Symbol'
+            RBS::Types::Literal.new(literal: value.to_sym, location: nil)
           else
             RBS::Types::Literal.new(literal: value, location: nil)
           end

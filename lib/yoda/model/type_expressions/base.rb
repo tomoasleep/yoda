@@ -34,6 +34,12 @@ module Yoda
           fail NotImplementedError
         end
 
+        # @abstract
+        # @type () -> RBS::Types::t
+        def to_rbs_type_expression
+          fail NotImplementedError
+        end
+
         # @return [Base]
         def map
           yield self

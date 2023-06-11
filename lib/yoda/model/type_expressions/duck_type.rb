@@ -37,6 +37,12 @@ module Yoda
           RBS::Types::Bases::Any.new(location: nil)
         end
 
+        # @param env [Environment]
+        def to_rbs_type_expression
+          # TODO: Implement as interface type
+          RBS::Types::Bases::Any.new(location: nil)
+        end
+
         # @return [String]
         def to_s
           "##{method_name}"

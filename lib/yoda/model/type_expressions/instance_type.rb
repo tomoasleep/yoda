@@ -44,6 +44,16 @@ module Yoda
           name = env.resolve_rbs_type_name(path)
           name ? RBS::Types::ClassInstance.new(name: name, args: [], location: nil) : RBS::Types::Bases::Any.new(location: nil)
         end
+
+        # @type () -> RBS::Types::t
+        def to_rbs_type_expression
+          case path.path
+          when 'Boolean'
+            RBS::Types::Bases::Bool.new(location: nil)
+          else
+            RBS::Types::ClassInstance.new(name: TypeName(path.path.to_s), args: [], location: nil)
+          end
+        end
       end
     end
   end
