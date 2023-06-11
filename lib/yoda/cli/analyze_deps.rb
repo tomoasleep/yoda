@@ -84,7 +84,7 @@ module Yoda
 
         # @return [Boolean]
         def has_gemfile?
-          File.exists?(File.expand_path("Gemfile", root_path))
+          File.exist?(File.expand_path("Gemfile", root_path))
         end
 
         # @param [Gem::Specification]
