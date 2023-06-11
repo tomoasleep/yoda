@@ -118,7 +118,7 @@ module Yoda
       end
 
       def rbs_type_name_resolver
-        @rbs_type_name_resolver ||= RBS::TypeNameResolver.from_env(rbs_environment)
+        @rbs_type_name_resolver ||= RBS::Resolver::TypeNameResolver.new(rbs_environment)
       end
 
     end
