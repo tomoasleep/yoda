@@ -72,14 +72,21 @@ module Yoda
       # @param code_object [::YARD::CodeObjects::MethodObject]
       # @return [RBS::AST::Members::MethodDefinition]
       def convert_method_object(code_object)
+        overloads = [
+          RBS::AST::Members::MethodDefinition::Overload.new(
+            method_type: convert_to_method_type(code_object),
+            annotations: [],
+          )
+        ]
+
         RBS::AST::Members::MethodDefinition.new(
           name: code_object.name.to_sym,
           kind: code_object.scope == :class ? :singleton : :instance,
-          overload: false,
+          overloads: overloads,
+          overloading: false,
           comment: comment(code_object.docstring.to_s),
           visibility: code_object.visibility == :public ? :public : :private,
           location: nil,
-          types: [convert_to_method_type(code_object)],
           annotations: [],
         )
       end
