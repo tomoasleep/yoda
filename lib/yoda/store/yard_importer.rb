@@ -91,7 +91,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
-          mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
+          include_accesses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
           constant_addresses: (code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path } + ['Object']).uniq,
         )
         object_meta_class = Objects::MetaClassObject.new(
@@ -99,7 +99,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map { |meth| path_to_store(meth) },
-          mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
+          include_accesses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
         )
         [object_class, object_meta_class]
       end
@@ -120,16 +120,26 @@ module Yoda
       # @param code_object [::YARD::CodeObjects::MethodObject]
       # @return [Objects::MethodObject, (Objects::MethodObject, Object::ClassObject)]
       def convert_method_object(code_object)
+        tag_list = code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object.namespace)) } + code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object.namespace)) }
+        overloads = [
+          Objects::Overload.new(
+            name: code_object.name.to_s,
+            parameters: convert_parameters(code_object),
+            tag_list: tag_list,
+            document: code_object.docstring.to_s,
+          ),
+          *code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
+        ]
+
         if code_object.namespace.root?
           # @todo Remove root oriented method path from Object namespace
           method_object = Objects::MethodObject.new(
             path: "Object#{code_object.sep}#{code_object.name}",
             document: code_object.docstring.to_s,
-            tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object.namespace)) } + code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object.namespace)) },
-            overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
+            tag_list: tag_list,
+            overloads: overloads,
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-            parameters: convert_parameters(code_object),
             visibility: :private,
           )
           object_object = Objects::ClassObject.new(
@@ -141,11 +151,10 @@ module Yoda
           Objects::MethodObject.new(
             path: path_to_store(code_object),
             document: code_object.docstring.to_s,
-            tag_list: code_object.tags.map { |tag| convert_tag(tag, path_to_store(code_object.namespace)) } + code_object.docstring.ref_tags.map { |tag| convert_ref_tag(tag, path_to_store(code_object.namespace)) },
-            overloads: code_object.tags(:overload).map { |tag| convert_overload_tag(tag, path_to_store(code_object.namespace)) },
+            tag_list: tag_list,
+            overloads: overloads,
             sources: code_object.files.map(&method(:convert_source)),
             primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
-            parameters: convert_parameters(code_object),
             visibility: code_object.visibility,
           )
         end
@@ -161,7 +170,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
-          mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
+          include_accesses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| constant.path },
         )
 
@@ -170,7 +179,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map { |meth| path_to_store(meth) },
-          mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
+          include_accesses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
         )
 
         [module_object, meta_class_object]
@@ -186,9 +195,9 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :instance).map { |meth| path_to_store(meth) },
-          mixin_addresses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
+          include_accesses: code_object.instance_mixins.map { |mixin| path_to_store(mixin) },
           constant_addresses: code_object.children.select{ |child| %i(constant module class).include?(child.type) }.map { |constant| path_to_store(constant) },
-          superclass_path: !code_object.superclass || code_object.superclass&.path == 'Qnil' ? nil : path_to_store(code_object.superclass),
+          superclass_access: !code_object.superclass || code_object.superclass&.path == 'Qnil' ? nil : path_to_store(code_object.superclass),
         )
 
         meta_class_object = Objects::MetaClassObject.new(
@@ -196,7 +205,7 @@ module Yoda
           sources: code_object.files.map(&method(:convert_source)),
           primary_source: code_object[:current_file_has_comments] ? convert_source(code_object.files.first) : nil,
           instance_method_addresses: code_object.meths(included: false, scope: :class).map { |meth| path_to_store(meth) },
-          mixin_addresses: code_object.class_mixins.map { |mixin| path_to_store(mixin) },
+          include_accesses: code_object.class_mixins.map { |mixin| path_to_store(mixin) },
         )
 
         [class_object, meta_class_object]
@@ -285,7 +294,7 @@ module Yoda
           sources: [],
           primary_source: nil,
           instance_method_addresses: [],
-          mixin_addresses: [],
+          include_accesses: [],
           constant_addresses: [],
         )
 
@@ -294,7 +303,7 @@ module Yoda
           sources: [],
           primary_source: nil,
           instance_method_addresses: [],
-          mixin_addresses: [],
+          include_accesses: [],
         )
 
         [module_object, meta_class_object]

@@ -19,6 +19,7 @@ module Yoda
       require 'yoda/store/objects/module_object'
       require 'yoda/store/objects/patch'
       require 'yoda/store/objects/patch_set'
+      require 'yoda/store/objects/rbs_types'
       require 'yoda/store/objects/tag'
       require 'yoda/store/objects/libraries_status'
       require 'yoda/store/objects/library'

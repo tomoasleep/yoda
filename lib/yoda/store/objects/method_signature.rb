@@ -4,18 +4,6 @@ module Yoda
       class MethodSignature
         class << self
           # @param method_object [MethodObject]
-          # @return [MethodSignature]
-          def from_method_object(method_object)
-            new(
-              owner: method_object,
-              name: method_object.name,
-              parameters: method_object.parameters,
-              document: method_object.document,
-              tag_list: method_object.tag_list,
-            )
-          end
-
-          # @param method_object [MethodObject]
           # @param overload [Overload]
           # @return [MethodSignature]
           def from_overload(method_object, overload)
@@ -23,6 +11,7 @@ module Yoda
               owner: method_object,
               name: overload.name,
               parameters: overload.parameters,
+              rbs_function_overload: overload.rbs_function_overload,
               document: overload.document,
               tag_list: overload.tag_list,
             )
@@ -39,6 +28,9 @@ module Yoda
         # @return [Model::FunctionSignatures::ParameterList]
         attr_reader :parameters
 
+        # @return [RbsTypes::FunctionOverload, nil]
+        attr_reader :rbs_function_overload
+
         # @return [String, nil]
         attr_reader :document
 
@@ -48,18 +40,20 @@ module Yoda
         # @param owner [MethodObject]
         # @param name [String]
         # @param parameters [Model::FunctionSignature::ParameterList]
+        # @param rbs_function_overload [RbsTypes::FunctionOverload, Hash, nil]
         # @param document [String]
         # @param tag_list [Array<Tag>]
-        def initialize(owner:, name:, parameters: [], document: '', tag_list: [])
+        def initialize(owner:, name:, parameters: [], document: '', tag_list: [], rbs_function_overload: nil)
           @name = name
           @parameters = parameters
           @document = document
           @tag_list = tag_list
+          @rbs_function_overload = rbs_function_overload&.yield_self(&RbsTypes::FunctionOverload.method(:build))
         end
 
         # @return [Hash]
         def to_h
-          { name: name, parameters: parameters.raw_parameters.to_a, document: document, tag_list: tag_list }
+          { name: name, parameters: parameters.raw_parameters.to_a, document: document, tag_list: tag_list, rbs_function_overload: rbs_function_overload&.to_h }
         end
 
         # @return [String]

@@ -53,13 +53,15 @@ module Yoda
             sources: PendingSet.merge(one[:sources], another[:sources]),
             primary_source: one[:primary_source] || another[:primary_source],
             instance_method_addresses: PendingSet.merge(one[:instance_method_addresses], another[:instance_method_addresses]),
-            mixin_addresses: PendingSet.merge(one[:mixin_addresses], another[:mixin_addresses]),
+            include_accesses: PendingSet.merge(one[:include_accesses], another[:include_accesses]),
+            prepend_accesses: PendingSet.merge(one[:prepend_accesses], another[:prepend_accesses]),
             constant_addresses: PendingSet.merge(one[:constant_addresses], another[:constant_addresses]),
             visibility: one[:visibility] || another[:visibility],
             parameters: one[:parameters].empty? ? another[:parameters] : one[:parameters],
             overloads: PendingArray.append(one[:overloads], another[:overloads]),
-            superclass_path: select_superclass(one, another),
+            superclass_access: select_superclass(one, another),
             value: one[:value] || another[:value],
+            rbs_type: one[:rbs_type] || another[:rbs_type],
           }
         end
 
@@ -72,13 +74,15 @@ module Yoda
             sources: [],
             primary_source: nil,
             instance_method_addresses: [],
-            mixin_addresses: [],
+            include_accesses: [],
+            prepend_accesses: [],
             constant_addresses: [],
             visibility: nil,
             parameters: [],
             overloads: [],
-            superclass_path: nil,
+            superclass_access: nil,
             value: nil,
+            rbs_type: nil,
           }
         end
 
@@ -92,13 +96,15 @@ module Yoda
             sources: attrs[:sources].to_a,
             primary_source: attrs[:primary_source],
             instance_method_addresses: attrs[:instance_method_addresses].to_a,
-            mixin_addresses: attrs[:mixin_addresses].to_a,
+            prepend_accesses: attrs[:prepend_accesses].to_a,
+            include_accesses: attrs[:include_accesses].to_a,
             constant_addresses: attrs[:constant_addresses].to_a,
             visibility: attrs[:visibility],
             parameters: attrs[:parameters].to_a,
             overloads: attrs[:overloads].to_a,
-            superclass_path: attrs[:superclass_path],
+            superclass_access: attrs[:superclass_access],
             value: attrs[:value],
+            rbs_type: attrs[:rbs_type],
           }
         end
 
@@ -107,9 +113,13 @@ module Yoda
         # @return [ScopedPath]
         def select_superclass(one, another)
           if %w(Object Exception).include?(another[:path].to_s)
-            one[:superclass_path] || another[:superclass_path]
+            one[:superclass_access] || another[:superclass_access]
           else
-            another[:superclass_path] || one[:superclass_path]
+            if one[:superclass_access] && another[:superclass_access]
+              one[:superclass_access].merge(another[:superclass_access])
+            else
+              another[:superclass_access] || one[:superclass_access]
+            end
           end
         end
 

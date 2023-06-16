@@ -10,6 +10,7 @@ module Yoda
     require 'yoda/store/file_tree'
     require 'yoda/store/project'
     require 'yoda/store/objects'
+    require 'yoda/store/rbs_importer'
     require 'yoda/store/registry'
     require 'yoda/store/query'
     require 'yoda/store/transformers'

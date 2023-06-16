@@ -36,8 +36,11 @@ module Yoda
         # @return [Array<Address>]
         attr_reader :instance_method_addresses
 
-        # @return [Array<Address>]
-        attr_reader :mixin_addresses
+        # @return [Array<NamespaceAccess>]
+        attr_reader :include_accesses
+
+        # @return [Array<NamespaceAccess>]
+        attr_reader :prepend_accesses
 
         # @return [Array<Address>]
         attr_reader :constant_addresses
@@ -50,7 +53,7 @@ module Yoda
 
         # @return [Array<Symbol>]
         def self.attr_names
-          super + %i(instance_method_addresses mixin_addresses constant_addresses)
+          super + %i(instance_method_addresses include_accesses prepend_accesses constant_addresses)
         end
 
         # @param path [String]
@@ -58,11 +61,12 @@ module Yoda
         # @param tag_list [TagList, nil]
         # @param instance_method_paths [Array<String, Address>]
         # @param constant_addresses [Array<String, Address>]
-        # @param mixin_addresses [Array<String, Address>]
-        def initialize(instance_method_addresses: [], mixin_addresses: [], constant_addresses: [], **kwargs)
+        # @param include_accesses [Array<String, Address>]
+        def initialize(instance_method_addresses: [], include_accesses: [], prepend_accesses: [], constant_addresses: [], **kwargs)
           super(**kwargs)
           @instance_method_addresses = instance_method_addresses.map { |a| Address.of(a) }
-          @mixin_addresses = mixin_addresses.map { |a| Address.of(a) }
+          @include_accesses = include_accesses.map { |a| RbsTypes::NamespaceAccess.of(a) }
+          @prepend_accesses = prepend_accesses.map { |a| RbsTypes::NamespaceAccess.of(a) }
           @constant_addresses = constant_addresses.map { |a| Address.of(a) }
           @ancestors ||= []
         end
@@ -77,7 +81,8 @@ module Yoda
         def to_h
           super.merge(
             instance_method_addresses: instance_method_addresses.map(&:to_s),
-            mixin_addresses: mixin_addresses.map(&:to_s),
+            include_accesses: include_accesses.map(&:to_h),
+            prepend_accesses: prepend_accesses.map(&:to_h),
             constant_addresses: constant_addresses.map(&:to_s),
           )
         end
@@ -95,6 +100,8 @@ module Yoda
           super.merge(
             instance_method_addresses: (instance_method_addresses + another.instance_method_addresses).uniq,
             mixin_addresses: (mixin_addresses + another.mixin_addresses).uniq,
+            include_accesses: (include_accesses + another.include_accesses).uniq,
+            prepend_accesses: (prepend_accesses + another.prepend_accesses).uniq,
             constant_addresses: (constant_addresses + another.constant_addresses).uniq,
           )
         end

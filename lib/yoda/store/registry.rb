@@ -13,7 +13,7 @@ module Yoda
       require 'yoda/store/registry/view'
 
       # @note This number must be updated when breaking change is added.
-      REGISTRY_VERSION = 7
+      REGISTRY_VERSION = 8
 
       class << self
         def registry_name

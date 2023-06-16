@@ -11,6 +11,11 @@ module Yoda
           def json_create(params)
             new(**params.reject { |k, _v| k.to_sym == :json_class }.map { |k, v| [k.to_sym, v] }.to_h)
           end
+
+          def build(object)
+            return object if object.is_a?(self)
+            json_create(object)
+          end
         end
 
         def self.included(klass)
@@ -25,7 +30,12 @@ module Yoda
 
         # @return [String]
         def to_json(*options)
-          to_h.merge(json_class: self.class.name).to_json
+          as_json.to_json
+        end
+
+        # @return [Hash]
+        def as_json(*options)
+          to_h.merge(json_class: self.class.name)
         end
 
         # Create a new instance which has the original parameters and overrided parameters.
