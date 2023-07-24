@@ -100,6 +100,14 @@ module Yoda
             full_gem_path && File.exist?(full_gem_path)
           end
 
+          # @return [String, nil]
+          def sig_path
+            return nil unless installed?
+
+            path = File.join(full_gem_path, "sig")
+            File.directory?(path) ? path : nil
+          end
+
           def managed_by_rubygems?
             source_type == :rubygems
           end
@@ -113,7 +121,7 @@ module Yoda
             extend ConnectedDelegation
             include WithRegistry
 
-            delegate_to_object :name, :version, :source_path, :full_gem_path, :doc_dir, :source_type, :require_paths
+            delegate_to_object :name, :version, :source_path, :full_gem_path, :doc_dir, :source_type, :require_paths, :sig_path
             delegate_to_object :id, :local?, :to_h, :installed?, :managed_by_rubygems?, :with_project_connection
             delegate_to_object :hash, :eql?, :==, :to_json, :derive
             delegate_to_object :contain_requirable_file?, :find_requirable_file

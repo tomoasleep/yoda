@@ -45,7 +45,8 @@ module Yoda
         end
 
         # @param init_patches [Array<Patch>]
-        def initialize(init_patches = [])
+        def initialize(init_patches = [], id: nil)
+          @id = id
           @patches = Hash.new
           @address_index = AddressIndex.new
           init_patches.each { |patch| register(patch) }

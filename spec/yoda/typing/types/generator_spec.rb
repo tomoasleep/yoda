@@ -19,7 +19,7 @@ RSpec.describe Yoda::Typing::Types::Generator do
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'Integer',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
     ]
   end

@@ -5,7 +5,7 @@ module Yoda
     module Actions
       class ImportCoreLibrary
         include ActionProcessRunner::Mixin
-        
+
         # @return [Project::Dependency::Core]
         attr_reader :dep
 
@@ -30,6 +30,14 @@ module Yoda
 
         # @return [Array<Objects::Patch>]
         def run
+          [
+            *(run_yardoc || []),
+            run_rbs,
+          ]
+        end
+
+        # @return [Array<Objects::Patch>]
+        def run_yardoc
           RubySourceDownloader.run unless RubySourceDownloader.downloaded?
 
           yardoc_runner = YardocRunner.new(
@@ -40,6 +48,11 @@ module Yoda
 
           patches = yardoc_runner.run
           patches.map { |patch| Transformers::CoreVisibility.transform(patch) }
+        end
+
+        # @return [Array<Objects::Patch>]
+        def run_rbs
+          ImportRbs.for_core.run
         end
       end
     end

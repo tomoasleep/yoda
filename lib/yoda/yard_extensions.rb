@@ -2,8 +2,7 @@ require 'yard'
 
 module Yoda
   module YARDExtensions
-    require 'yoda/yard_extensions/rbs_directive'
-    require 'yoda/yard_extensions/rbs_exporter'
+    require_relative 'yard_extensions/rbs_directive'
 
     YARD::Tags::Library.define_directive(:rbs, RbsDirective)
     YARD::Tags::Library.define_tag('Type', :type)

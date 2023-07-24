@@ -89,7 +89,7 @@ RSpec.describe Yoda::Store::YardImporter do
 
       it 'imports class object correctly' do
         expect(subject.patch.find('BaseModule::Nested::Nested2')).to have_attributes(
-          superclass_path: Yoda::Model::Path.new('Object'),
+          superclass_access: Yoda::Model::Path.new('Object'),
           constant_addresses: be_empty,
           instance_method_addresses: contain_exactly(
             *addresses(
@@ -107,7 +107,7 @@ RSpec.describe Yoda::Store::YardImporter do
           ),
         )
         expect(subject.patch.find('BaseModule::Nested::ChildClass')).to have_attributes(
-          superclass_path: Yoda::Model::Path.new('BaseModule::Nested::Nested2'),
+          superclass_access: Yoda::Model::Path.new('BaseModule::Nested::Nested2'),
           constant_addresses: be_empty,
           instance_method_addresses: be_empty,
         )

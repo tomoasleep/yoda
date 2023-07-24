@@ -93,7 +93,7 @@ module Yoda
         def convert(path)
           RbsFile.new(
             path: path,
-            content: YARDExtensions::RbsExporter.new.convert_to_string(YARD::Registry.root),
+            content: RbsExporter.new.convert_to_string(YARD::Registry.root),
           )
         end
 

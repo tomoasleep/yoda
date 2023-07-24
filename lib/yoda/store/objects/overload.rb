@@ -13,7 +13,7 @@ module Yoda
           end
         end
 
-        # @return [String]
+        # @return [String, nil]
         attr_reader :name
 
         # @return [Model::FunctionSignatures::ParameterList]
@@ -28,12 +28,12 @@ module Yoda
         # @return [Array<Tag>]
         attr_reader :tag_list
 
-        # @param name [String]
+        # @param name [String, nil]
         # @param parameters [Array<(String, String)>]
         # @param document [String]
         # @param tag_list [Array<Tag>]
         # @param rbs_function_overload [RbsTypes::FunctionOverload, Hash, nil]
-        def initialize(name:, parameters: [], document: '', tag_list: [], rbs_function_overload: nil)
+        def initialize(name: nil, parameters: [], document: '', tag_list: [], rbs_function_overload: nil)
           @name = name
           @parameters = Model::FunctionSignatures::ParameterList.new(parameters)
           @document = document

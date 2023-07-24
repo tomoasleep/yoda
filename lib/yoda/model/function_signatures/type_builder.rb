@@ -58,11 +58,6 @@ module Yoda
         end
 
         # @return [Array<Store::Objects::Tag>]
-        def type_tags
-          @type_tag ||= tag_list.select { |tag| tag.tag_name == 'type' }
-        end
-
-        # @return [Array<Store::Objects::Tag>]
         def param_tags
           @param_tags ||= tag_list.select { |tag| tag.tag_name == 'param' }
         end

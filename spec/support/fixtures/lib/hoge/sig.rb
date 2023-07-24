@@ -22,5 +22,5 @@ module YodaFixture
 end
 
 class String
-  # @!sig piyo Integer
+  # @!rbs piyo: Integer
 end

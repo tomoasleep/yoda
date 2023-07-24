@@ -7,26 +7,26 @@ module Yoda
         class FunctionOverload
           include Serializable
 
-          # @return [MethodTypeLiteral]
+          # @return [MethodTypeContainer]
           attr_reader :type
 
           # @return [RbsTypes::TypeParam]
           attr_reader :type_params
 
-          # @param type [MethodTypeLiteral, String]
+          # @param type [MethodTypeContainer, String]
           # @param type_params [RbsTypes::TypeParam]
           def initialize(
             type:,
             type_params:
           )
-            @type = MethodTypeLiteral.of(type)
+            @type = MethodTypeContainer.of(type)
             @type_params = type_params.map(&RbsTypes::TypeParam.method(:build))
           end
 
           # @return [Hash]
           def to_h
             {
-              type: type.to_s,
+              type: type.to_h,
               type_params: type_params.map(&:to_h),
             }
           end

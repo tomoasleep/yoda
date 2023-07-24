@@ -8,12 +8,20 @@ module Yoda
         # @return [Objects::NamespaceObject]
         attr_reader :object
 
+        # @return [Objects::RbsTypes::TypeAssignments]
+        attr_reader :type_assignments
+
         # @param object [Objects::NamespaceObject]
         # @param registry [Registry]
-        # @param origin [AncestorTree]
-        def initialize(registry:, object:)
+        # @param type_assignments [Objects::RbsTypes::TypeAssignments]
+        def initialize(registry:, object:, type_assignments: Objects::RbsTypes::TypeAssignments.new)
           @registry = registry
           @object = object
+          @type_assignments = type_assignments
+        end
+
+        def with_type_assignments(another_type_assigments)
+          self.class.new(registry: registry, object: object, type_assignments: type_assignments.merge(another_type_assigments))
         end
 
         # @return [Enumerator<Objects::MethodObject>]

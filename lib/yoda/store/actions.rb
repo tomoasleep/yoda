@@ -6,6 +6,7 @@ module Yoda
       require 'yoda/store/actions/import_core_library'
       require 'yoda/store/actions/import_std_library'
       require 'yoda/store/actions/import_gem'
+      require 'yoda/store/actions/import_rbs'
       require 'yoda/store/actions/import_project_dependencies'
       require 'yoda/store/actions/rbs_generator'
       require 'yoda/store/actions/read_file'

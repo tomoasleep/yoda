@@ -30,7 +30,7 @@ RSpec.describe Yoda::Typing::Inferencer do
     [
       Yoda::Store::Objects::ClassObject.new(
         path: 'Object',
-        mixin_addresses: addresses("Kernel"),
+        include_accesses: addresses("Kernel"),
       ),
       # Inferencer requires metaclass to search constants
       Yoda::Store::Objects::MetaClassObject.new(
@@ -38,14 +38,18 @@ RSpec.describe Yoda::Typing::Inferencer do
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Kernel#require',
-        parameters: [['path', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'path', yard_types: ['String']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['path', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'path', yard_types: ['String']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'Integer',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       # Inferencer requires metaclass to search constants
       Yoda::Store::Objects::MetaClassObject.new(
@@ -53,80 +57,117 @@ RSpec.describe Yoda::Typing::Inferencer do
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#+',
-        parameters: [['another', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['another', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#-',
-        parameters: [['another', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['another', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#*',
-        parameters: [['another', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['another', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#modulo',
-        parameters: [['another', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            name: "modulo",
+            parameters: [['another', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#div',
-        parameters: [['another', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['another', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer#<',
-        parameters: [['another', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Boolean']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['another', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Boolean']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'another', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Integer.sqrt',
-        parameters: [['n', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'n', yard_types: ['Integer']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['n', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Integer']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'n', yard_types: ['Integer']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Object#tap',
-        parameters: [['&block', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['self']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'yield', yard_types: ['object']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'yieldparam', name: 'object', yard_types: ['self']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['&block', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['self']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'yield', yard_types: ['object']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'yieldparam', name: 'object', yard_types: ['self']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::MethodObject.new(
         path: 'Object#is_a?',
-        parameters: [['mod', nil]],
-        tag_list: [
-          Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Boolean']),
-          Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'mod', yard_types: ['Module']),
+        overloads: [
+          Yoda::Store::Objects::Overload.new(
+            parameters: [['mod', nil]],
+            tag_list: [
+              Yoda::Store::Objects::Tag.new(tag_name: 'return', yard_types: ['Boolean']),
+              Yoda::Store::Objects::Tag.new(tag_name: 'param', name: 'mod', yard_types: ['Module']),
+            ],
+          ),
         ],
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'NilClass',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       # Inferencer requires metaclass to search constants
       Yoda::Store::Objects::MetaClassObject.new(
@@ -134,27 +175,27 @@ RSpec.describe Yoda::Typing::Inferencer do
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'String',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'Module',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'TrueClass',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'FalseClass',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'Exception',
-        superclass_path: 'Object',
+        superclass_access: 'Object',
       ),
       Yoda::Store::Objects::ClassObject.new(
         path: 'StandardError',
-        superclass_path: 'Exception',
+        superclass_access: 'Exception',
       ),
     ]
   end

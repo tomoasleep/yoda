@@ -27,7 +27,7 @@ module Yoda
             add_met(object)
             self << object
           end
-          
+
           private
 
           def add_met(object)
@@ -56,11 +56,16 @@ module Yoda
           end
         end
 
-        # @return [Enumerator<Objects::NamespaceObject>]
+        # @return [Enumerator<Objects::RbsTypes::NamespaceWithTypeAssignments>]
         def mixins
           Enumerator.new do |yielder|
-            object.mixin_addresses.each do |address|
-              if el = registry.get(address.to_s)
+            object.prepend_accesses.each do |access|
+              if el = find_namespace(access)
+                yielder << el
+              end
+            end
+            object.include_accesses.each do |access|
+              if el = find_namespace(access)
                 yielder << el
               end
             end
@@ -77,11 +82,12 @@ module Yoda
           return @superclass if instance_variable_defined?(:@superclass)
           @superclass = begin
             found_object = begin
-              if object.respond_to?(:base_class_address)
+              case object.kind
+              when :meta_class
                 base_class_superclass
-              elsif object.respond_to?(:superclass_path)
-                if object.superclass_path
-                  FindConstant.new(registry).find(object.superclass_path)
+              when :class
+                if object.superclass_access
+                  find_namespace(object.superclass_access)
                 else
                   nil
                 end
@@ -109,11 +115,26 @@ module Yoda
 
         private
 
+        # @param namespace [Objects::NamespaceObject]
+        # @param namespace_access [Objects::RbsTypes::NamespaceAccess]
+        # @return [Objects::RbsTypes::NamespaceWithTypeAssignments, nil]
+        def find_namespace(namespace_access)
+          object = FindConstant.new(registry).find(namespace_access.address)
+          object&.namespace? ? wrap_namespace(object, namespace_access) : nil
+        end
+
+        # @param namespace [Objects::NamespaceObject]
+        # @param namespace_access [Objects::RbsTypes::NamespaceAccess]
+        # @return [Objects::RbsTypes::NamespaceWithTypeAssignments]
+        def wrap_namespace(namespace, namespace_access)
+          namespace_access.wrap_namespace(namespace)
+        end
+
         # @return [Objects::NamespaceObject, nil]
         def base_class_superclass
           base_class = registry.get(object.base_class_address)
-          if base_class && base_class.respond_to?(:superclass_path) && base_class.superclass_path
-            FindMetaClass.new(registry).find(base_class.superclass_path)
+          if base_class && base_class.respond_to?(:superclass_access) && base_class.superclass_access
+            meta_class = FindMetaClass.new(registry).find(base_class.superclass_access.address)
           elsif base_class
             registry.get('Class')
           else

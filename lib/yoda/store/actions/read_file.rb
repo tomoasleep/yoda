@@ -42,9 +42,9 @@ module Yoda
           @root_path = root_path
         end
 
-        # @return [Array<Objects::Patch>]
+        # @return [Array<Patch>]
         def run
-          yardoc_runner.run(import_each: true)
+          [Objects::Patch.merge(self.class.patch_id_for_file(file), [*run_yardoc, *run_rbs])]
         end
 
         # @param registry [Registry::ProjectRegistry]
@@ -57,6 +57,29 @@ module Yoda
         # @return [void]
         def run_process_and_register(registry)
           run_process.each { |patch| registry.local_store.add_file_patch(patch) }
+        end
+
+        private
+
+        # @return [Array<Objects::Patch>]
+        def run_yardoc
+          yardoc_runner.run(import_each: true)
+        end
+
+        # @return [Array<Objects::Patch>]
+        def run_rbs
+          rbs_generator.run(import_each: true).map do |rbs_file|
+            ImportRbs.for_file_content(file_name: nil, content: rbs_file.content).run
+          end
+        end
+
+        # @return [RbsGenerator]
+        def rbs_generator
+          @rbs_generator ||= if content
+            RbsGenerator.new(source_dir_path: root_path || Dir.pwd, contents: { file => content })
+          else
+            RbsGenerator.new(source_dir_path: root_path || Dir.pwd, file_paths: [file])
+          end
         end
 
         # @return [YardocRunner]

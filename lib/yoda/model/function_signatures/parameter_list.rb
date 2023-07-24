@@ -64,12 +64,12 @@ module Yoda
           parameters = []
           parameters += func.required_positionals.map { |param| [param.name, ""] }
           parameters += func.optional_positionals.map { |param| [param.name, ""] }
-          parameters += ["*#{type.rest_positionals.name}", ""] if func.rest_positionals
+          parameters << ["*#{func.rest_positionals.name}", ""] if func.rest_positionals
           parameters += func.trailing_positionals.map { |param| [param.name, ""] }
-          parameters += func.required_keywords.map { |param| ["#{param.name}:", ""] }
-          parameters += func.optional_keywords.map { |param| ["#{param.name}:", ""] }
-          parameters += ["**#{func.rest_keywords.name}", ""] if func.rest_keywords
-          parameters += ["&block", ""] if type.block
+          parameters += func.required_keywords.map { |name, param| ["#{name}:", ""] }
+          parameters += func.optional_keywords.map { |name, param| ["#{name}:", ""] }
+          parameters << ["**#{func.rest_keywords.name}", ""] if func.rest_keywords
+          parameters << ["&block", ""] if type.block
 
           new(parameters)
         end

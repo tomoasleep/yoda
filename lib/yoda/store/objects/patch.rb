@@ -45,6 +45,20 @@ module Yoda
           end
         end
 
+        # @param patches [Array<Patch>]
+        def self.merge(id, patches)
+          new_patch = Patch.new(id)
+
+          patches.each do |patch|
+            patch.keys.each do |key|
+              content = patch.find(key)
+              new_patch.register(content) if content
+            end
+          end
+
+          new_patch
+        end
+
         private
 
         def parent_modifier

@@ -6,7 +6,7 @@ module Yoda
     module Actions
       class ImportGem
         include ActionProcessRunner::Mixin
-        
+
         # @return [Objects::Library::Gem::Connected]
         attr_reader :dep
 
@@ -31,6 +31,27 @@ module Yoda
 
         # @return [Array<Objects::Patch>]
         def run
+          [
+            *(run_yardoc || []),
+            *(run_rbs || []),
+          ]
+        end
+
+        private
+
+        # @return [Array<Objects::Patch>, nil]
+        def run_rbs
+          patch = ImportRbs.for_gem_library(dep)&.run
+          patch ? [patch] : []
+        rescue => ex
+          Logger.debug ex
+          Logger.debug ex.backtrace
+          Logger.warn "Failed to build #{gem_name} #{gem_version}"
+          fail ImportError, "Failed to build #{gem_name} #{gem_version}"
+        end
+
+        # @return [Array<Objects::Patch>, nil]
+        def run_yardoc
           begin
             yardoc_runner.run
           rescue => ex
@@ -40,8 +61,6 @@ module Yoda
             fail ImportError, "Failed to build #{gem_name} #{gem_version}"
           end
         end
-
-        private
 
         # @return [YardocRunner]
         def yardoc_runner

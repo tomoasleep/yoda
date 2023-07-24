@@ -26,7 +26,7 @@ module Yoda
           # @return [Registry]
           attr_reader :registry
 
-          delegate_to_object :address, :path, :document, :sources, :primary_source, :tag_list, :json_class, :to_json, :derive, :self_overload
+          delegate_to_object :address, :path, :document, :sources, :primary_source, :tag_list, :json_class, :to_json, :derive
           delegate_to_object :name, :kind, :address, :parent_address, :to_h, :hash, :eql?, :==, :namespace?, :meta_class_address
 
           # @param object [Base]
@@ -62,7 +62,7 @@ module Yoda
           def tag_list
             @tag_list ||= object.tag_list.map { |tag| tag.with_connection(**connection_options) }
           end
-          
+
           # @param pp [PP]
           def pretty_print(pp)
             pp.object_group(self) do
@@ -115,7 +115,7 @@ module Yoda
           json_class: nil,
           kind: nil
         )
-          @path = path.to_s
+          @path = Address.of(path).to_s
           @document = document
           @tag_list = tag_list
           @sources = sources

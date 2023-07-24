@@ -86,7 +86,7 @@ module Yoda
 
         # Prepare dummy file for yardoc command not to parse any file.
         # @yield [files]
-        # @yieldparam files [Array<String>] 
+        # @yieldparam files [Array<String>]
         def prepare_dummy_file
           if file_specified?
             Tempfile.create(["yard-tmp", ".rb"]) do |file|

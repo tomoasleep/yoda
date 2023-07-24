@@ -47,7 +47,10 @@ module Yoda
         attr_reader :instance_method_addresses
 
         # @return [Array<Address>]
-        attr_reader :mixin_addresses
+        attr_reader :include_accesses
+
+        # @return [Array<Address>]
+        attr_reader :prepend_accesses
 
         # @return [Array<Address>]
         attr_reader :constant_addresses
@@ -60,7 +63,7 @@ module Yoda
 
         # @return [Array<Symbol>]
         def self.attr_names
-          super + %i(instance_method_addresses mixin_addresses constant_addresses)
+          super + %i(instance_method_addresses include_accesses constant_addresses)
         end
 
         # @param path [String]

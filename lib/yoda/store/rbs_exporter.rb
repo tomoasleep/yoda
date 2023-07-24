@@ -1,7 +1,7 @@
 require 'rbs'
 
 module Yoda
-  module YARDExtensions
+  module Store
     class RbsExporter
       # @param file [String]
       # @return [RBS::AST::Declarations::Class]
@@ -24,12 +24,12 @@ module Yoda
       # @return [String]
       def self.write_to_string(value)
         string = StringIO.new
-        RBS::Writer.new(out: string).write([value])
+        RBS::Writer.new(out: string).write(value)
         string.string
       end
 
       # @param root [Array<YARD::CodeObjects::NamespaceObject>]
-      # @return [RBS::AST::Declarations::Class]
+      # @return [Array<RBS::AST::Declarations::Base>]
       def convert(root)
         convert_root_object(root)
       end
@@ -124,9 +124,9 @@ module Yoda
       end
 
       # @param code_object [::YARD::CodeObjects::NamespaceObject]
-      # @return [RBS::AST::Declarations::Class]
+      # @return [Array<RBS::AST::Declarations::Base>]
       def convert_root_object(code_object)
-        RBS::AST::Declarations::Class.new(
+        class_decl = RBS::AST::Declarations::Class.new(
           name: RBS::TypeName.new(name: :Object, namespace: RBS::Namespace.empty),
           super_class: nil,
           members: convert_member_objects(code_object),
@@ -135,6 +135,22 @@ module Yoda
           location: nil,
           type_params: [],
         )
+
+        [
+          RBS::AST::Declarations::Class.new(
+            name: RBS::TypeName.new(name: :Object, namespace: RBS::Namespace.empty),
+            super_class: nil,
+            members: class_decl.each_member.to_a,
+            annotations: [],
+            comment: nil,
+            location: nil,
+            type_params: [],
+          ),
+          *class_decl.each_decl.to_a,
+        ]
+
+
+
       end
 
       # @param code_object [::YARD::CodeObjects::ModuleObject]

@@ -19,6 +19,27 @@ module Yoda
           # @return [NamespaceAccess, nil]
           attr_reader :upper_bound
 
+          # @param params [Array<TypeParam, Hash>]
+          # @return [Array<TypeParam>]
+          def self.multiple_of(params)
+            params.map { |param| of(param) }
+          end
+
+          # @param param [TypeParam, Hash, RBS::AST::TypeParam]
+          def self.of(param)
+            return param if param.is_a?(self)
+            if param.is_a?(RBS::AST::TypeParam)
+              return new(
+                name: param.name,
+                variance: param.variance,
+                upper_bound: param.upper_bound&.name,
+                unchecked: param.unchecked?,
+              )
+            end
+
+            new(**param)
+          end
+
           # @param name [Symbol]
           # @param unchecked [Boolean]
           # @param variance [:invariant, :covariant, :contravariant]
@@ -32,7 +53,23 @@ module Yoda
             @name = name.to_sym
             @unchecked = unchecked
             @variance = variance
-            @upper_bound = upper_bound&.yield_self(&NamespaceAccess.method(:build))
+            @upper_bound = upper_bound&.yield_self(&NamespaceAccess.method(:of))
+          end
+
+          # @param name [Symbol]
+          # @param new_name [Symbol]
+          # @return [self]
+          def rename_variable(name, new_name)
+            if self.name == name
+              TypeParam.new(
+                name: new_name,
+                unchecked: unchecked,
+                upper_bound: upper_bound,
+                variance: variance,
+              )
+            else
+              self
+            end
           end
 
           # @return [Hash]

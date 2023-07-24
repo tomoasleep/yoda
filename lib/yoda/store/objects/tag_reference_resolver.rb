@@ -3,6 +3,8 @@ require 'set'
 module Yoda
   module Store
     module Objects
+      # Resolve tags like this.
+      #   @param (see #clean)
       class TagReferenceResolver
         class CyclicError < StandardError; end
 
@@ -80,17 +82,9 @@ module Yoda
             joined_result = ResolveResult.join(results)
 
             if object.kind == :method
-              original_self_overload = object.self_overload
-              self_overload = Overload.new(
-                name: original_self_overload.name,
-                parameters: original_self_overload.parameters.raw_parameters,
-                document: original_self_overload.document,
-                tag_list: joined_result.tags.map(&:object),
-              )
-
               overload_result = ResolveResult.new(
-                tags: [], 
-                overloads: [self_overload] + object.overloads,
+                tags: [],
+                overloads: object.overloads,
               )
 
               ResolveResult.join([joined_result, overload_result])
@@ -136,6 +130,14 @@ module Yoda
           matched_taggings.map(&:tag) + additional_tags
         end
 
+        # Generate overloads for reference tags like this.
+        #
+        # > # @param (see #fuga)
+        # > def hoge(...); fuga(...) end
+        # >
+        # > # @param x [Integer]
+        # > def fuga(x); end
+        #
         # @param reference_tagging [Tagging]
         # @param referring_object [Base::Connected]
         # @param overloads [Array<Overload>]
@@ -175,7 +177,7 @@ module Yoda
         def additional_rest_param_tags(reference_tagging, tagging)
           case reference_tagging.tag.tag_name.to_sym
           when :param
-            parameter_item = tagging.owner.parameters.find_by_name(tagging.tag.name)
+            parameter_item = tagging.owner.overloads.filter_map { |o| o.parameters.find_by_name(tagging.tag.name) }.first
             return [] unless parameter_item&.keyword?
 
             if keyword_rest_parameter = reference_tagging.owner.parameters.keyword_rest_parameter
@@ -195,7 +197,8 @@ module Yoda
             end
           when :option
             if parameter_item.kind?(:keyword_rest)
-              if keyword_parameter = reference_tagging.owner.parameters.find_by_name(tag.option_key)
+              keyword_parameter = reference_tagging.owner.overloads.filter_map { |o| o.parameters.find_by_name(tag.option_key) }.first
+              if keyword_parameter
                 [
                   Tag.new(
                     tag_name: "param",
@@ -205,7 +208,7 @@ module Yoda
                     lexical_scope: tagging.tag.lexical_scope,
                   ).with_connection(registry: registry),
                 ]
-              elsif keyword_rest_parameter = reference_tagging.owner.keyword_rest_parameter
+              elsif keyword_rest_parameter = reference_tagging.owner.overloads.filter_map { |o| o.keyword_rest_parameter }.first
                 [
                   Tag.new(
                     tag_name: "option",

@@ -9,7 +9,7 @@ module Yoda
         # @return [String]
         attr_reader :value
 
-        # @return [RbsTypes::TypeLiteral, nil]
+        # @return [RbsTypes::TypeContainer, nil]
         attr_reader :rbs_type
 
         # @return [Array<Symbol>]
@@ -19,10 +19,11 @@ module Yoda
 
         # @param path [String]
         # @param value [String]
+        # @param rbs_type [String, Hash, RbsTypes::TypeContainer, nil]
         def initialize(value: nil, rbs_type: nil, **kwargs)
           super(**kwargs)
           @value = value
-          @rbs_type = rbs_type && RbsTypes::TypeLiteral.of(rbs_type)
+          @rbs_type = rbs_type && RbsTypes::TypeContainer.of(rbs_type)
         end
 
         # @return [String]
@@ -35,7 +36,7 @@ module Yoda
         end
 
         def to_h
-          super.merge(value: value, rbs_type: rbs_type.to_s)
+          super.merge(value: value, rbs_type: rbs_type&.to_h)
         end
 
         private

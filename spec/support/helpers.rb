@@ -1,4 +1,5 @@
 require_relative './helpers/address_helper'
+require_relative './helpers/debug_helper'
 require_relative './helpers/executable_helper'
 require_relative './helpers/type_helper'
 require_relative './helpers/read_source_helper'
